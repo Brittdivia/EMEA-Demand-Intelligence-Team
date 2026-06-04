@@ -247,21 +247,18 @@ var MFLDS=[
   {k:"Campaign/WBS Code",l:"WBS Code"}
 ];
 
-document.addEventListener("DOMContentLoaded",function(){
-  function tryInit(){
-    if(window.CAMP_DATA&&window.PIPE_DATA&&window.OUT_DATA){
-      campData=window.CAMP_DATA;
-      pipeData=window.PIPE_DATA;
-      outData=window.OUT_DATA;
-      FD.forEach(function(f){filters[f.k]=new Set();});
-      document.getElementById("hcount").textContent=campData.length.toLocaleString()+" campaigns";
-      buildFbar();applyFilters();renderOvw();
-      document.addEventListener("click",function(e){if(!e.target.closest(".fbi"))closeAllDD();});
-    } else { setTimeout(tryInit,50); }
-  }
-  tryInit();
-  return;
-});
+function tryInit(){
+  if(window.CAMP_DATA&&window.PIPE_DATA&&window.OUT_DATA){
+    campData=window.CAMP_DATA;
+    pipeData=window.PIPE_DATA;
+    outData=window.OUT_DATA;
+    FD.forEach(function(f){filters[f.k]=new Set();});
+    document.getElementById("hcount").textContent=campData.length.toLocaleString()+" campaigns";
+    buildFbar();applyFilters();renderOvw();
+    document.addEventListener("click",function(e){if(!e.target.closest(".fbi"))closeAllDD();});
+  } else { setTimeout(tryInit,100); }
+}
+window.addEventListener("load",tryInit);
 
 function switchTab(t){
   activeTab=t;
@@ -1222,6 +1219,7 @@ function renderOutInner(page){
 
 </body>
 </html>
+
 
 
 
