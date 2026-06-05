@@ -200,7 +200,7 @@ tbody td.wc{white-space:normal;word-break:break-word;max-width:260px;line-height
   </div>
 </div>
 <script>
-var SPLIT_KEYS=new Set(["IAC","SoD","Sales Bag","Starting Quarter","Executor"]);
+var SPLIT_KEYS=new Set(["IAC","SoD","Sales Bag","Sub Sales Bag","Starting Quarter","Executor"]);
 var drmFilters=new Set();var eurMinFilter=null;var regSummaryCache={};var TOTAL_2026_PIPELINE=1935778.13;
 var campData=[],pipeData=[],outData=[],filtered=[];
 var filters={},srchQ="",sCol=null,sDir=1,pg=1,pgSz=50,activeTab="ovw",charts={};
@@ -1161,7 +1161,34 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     }}});
   var dmc=countBy("Demand Manager");mkC(pfx+"-dmc",hBar(dmc.map(function(r){return r[0];}),dmc.map(function(r){return r[1];}),false),"Demand Manager","Demand Manager","Demand Manager","Demand Manager");
   var iac=countBy("IAC");mkC(pfx+"-iac",donut(iac.map(function(r){return r[0];}),iac.map(function(r){return r[1];})));
-  var sb=countBy("Sales Bag").slice(0,12);mkC(pfx+"-sb",hBar(sb.map(function(r){return r[0];}),sb.map(function(r){return r[1];}),false),"Sales Bag","Sales Bag","Sales Bag","Sales Bag");
+  // Sales Bag chart with drill-down to Sub Sales Bag
+  if(!window.sbDrill)window.sbDrill={};
+  var sbDrillKey=pfx+"-sb-drill";
+  var sbTitle=window.sbDrill[sbDrillKey]?"Sub Sales Bag: "+window.sbDrill[sbDrillKey]:"Campaigns by Sales Bag";
+  var sbData=window.sbDrill[sbDrillKey]
+    ?countBy("Sub Sales Bag").filter(function(r){var mainSBs=String(data.find(function(d){return(String(d["Sub Sales Bag"]||"").indexOf(r[0])>-1);})?data.find(function(d){return String(d["Sub Sales Bag"]||"").indexOf(r[0])>-1;})["Sales Bag"]||"":"");return mainSBs.split(",").map(function(s){return s.trim();}).indexOf(window.sbDrill[sbDrillKey])>-1;}).slice(0,12)
+    :countBy("Sales Bag").slice(0,12);
+  // For drill: filter data to selected Sales Bag then count Sub Sales Bag
+  if(window.sbDrill[sbDrillKey]){
+    var drillSB=window.sbDrill[sbDrillKey];
+    var drillData=data.filter(function(r){return String(r["Sales Bag"]||"").split(",").map(function(s){return s.trim();}).indexOf(drillSB)>-1;});
+    var subMap={};
+    drillData.forEach(function(r){String(r["Sub Sales Bag"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean).forEach(function(s){subMap[s]=(subMap[s]||0)+1;});});
+    sbData=Object.entries(subMap).sort(function(a,b){return b[1]-a[1];}).slice(0,15);
+  }
+  var sbChartTitle=window.sbDrill[sbDrillKey]?"◀ "+window.sbDrill[sbDrillKey]+" › Sub Sales Bag":"Campaigns by Sales Bag (click to drill)";
+  // Update card header with title
+  var sbCard=document.getElementById("card-"+pfx+"-sb");
+  if(sbCard){var sbCh=sbCard.querySelector(".ch");if(sbCh)sbCh.innerHTML=sbChartTitle+(window.sbDrill[sbDrillKey]?"<button onclick=\"window.sbDrill['"+sbDrillKey+"']=null;if(typeof renderAna==='function')renderAna();else renderOvw();\" style=\"margin-left:8px;font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px;background:#fff\">← Back</button>":"");}
+  if(window.sbDrill[sbDrillKey]){
+    mkC(pfx+"-sb",hBar(sbData.map(function(r){return r[0];}),sbData.map(function(r){return r[1];}),false),"Sub Sales Bag","Sub Sales Bag","Sub Sales Bag","Sub Sales Bag");
+  } else {
+    var sbCfg=hBar(sbData.map(function(r){return r[0];}),sbData.map(function(r){return r[1];}),false);
+    if(!sbCfg.options)sbCfg.options={};
+    sbCfg.options.onClick=function(evt,elements){if(!elements||!elements.length)return;var label=this.data.labels[elements[0].index];if(!label)return;window.sbDrill[sbDrillKey]=label;if(typeof renderAna==="function")renderAna();else renderOvw();};
+    sbCfg.options.onHover=function(evt,elements){evt.native.target.style.cursor=elements.length?"pointer":"default";};
+    mkC(pfx+"-sb",sbCfg);
+  }
   if(pageId!=="ovwPage"){
     var oppSBCount={};var seenOppSB={};
     pr.forEach(function(p){var oid=String(p["Opportunity ID"]||"");if(!oid||seenOppSB[oid])return;seenOppSB[oid]=true;var wbs=String(p["Opp Campaign ID"]||"").trim();var camp=data.find(function(r){return String(r["Campaign/WBS Code"]||"").trim()===wbs;});if(!camp)return;String(camp["Sales Bag"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean).forEach(function(s){oppSBCount[s]=(oppSBCount[s]||0)+1;});});
