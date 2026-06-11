@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 148 70" width="148" height="70">
+  <defs>
+    <linearGradient id="sapgrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#59B8E6"/>
+      <stop offset="100%" style="stop-color:#0070F2"/>
+    </linearGradient>
+  </defs>
+  <polygon points="0,0 108,0 148,70 40,70" fill="url(#sapgrad)"/>
+  <text x="12" y="50" font-family="Arial Black,Arial,Helvetica,sans-serif" font-weight="900" font-size="44" fill="white" letter-spacing="-1">SAP</text>
+</svg>
