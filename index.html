@@ -237,6 +237,7 @@ var SPLIT_KEYS=new Set(["IAC","SoD","Sales Bag","Sub Sales Bag","Starting Quarte
 var drmFilters=new Set();var eurMinFilter=1;var regSummaryCache={};var TOTAL_2026_PIPELINE=1935778.13;
 var campData=[],pipeData=[],outData=[],filtered=[];
 var filters={},srchQ="",sCol=null,sDir=1,pg=1,pgSz=50,activeTab="exe",charts={};
+var anaFilter={};var accFilter={};
 var orCol="Prospects - Total",orDir=-1;
 var PAL=["#0070F2","#1B90FF","#89D1FF","#D1EFFF","#002A86","#00144A","#07838F","#049F9A","#2CE0BF","#C2FCEE","#02414C","#012931"];
 var PALA=PAL.map(function(c){return c+"CC";});
@@ -254,7 +255,8 @@ var FD=[
   {k:"Status",l:"Status"},
   {k:"Campaign/WBS Code",l:"WBS Code"},
   {k:"Executor",l:"Executor"},
-  {k:"Digital Assets team support",l:"DAT Support"}
+  {k:"Digital Assets team support",l:"DAT Support"},
+  {k:"DG Program",l:"DG Program"}
 ];
 var TCOLS=[
   {k:"Campaign Name",l:"Campaign Name",w:true},
@@ -768,20 +770,33 @@ function renderExe(){try{
   var hodOpps=new Set(pr.filter(function(r){return r["SDE Handover Date"]&&r["SDE Handover Date"]!=="";}).map(function(r){return String(r["Opportunity ID"]||"");})).size;
   var hodEur=pr.filter(function(r){return r["SDE Handover Date"]&&r["SDE Handover Date"]!=="";}).reduce(function(a,r){return a+(parseFloat(r["Eur"]||0)||0);},0);
   var hoRate=totOpps>0?(hodOpps/totOpps*100).toFixed(0)+"%":"0%";
-  var activeCamps=new Set(filtered.map(function(r){return String(r["Campaign Name"]||"");})).size;
+  var camp2026Eur=pr.filter(function(p){return String(p["Create Quarter"]||"").indexOf("2026")===0;}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
+  var camp2026Pct=TOTAL_2026_PIPELINE>0?(camp2026Eur/TOTAL_2026_PIPELINE*100).toFixed(0)+"%":"0%";
+  var activeCamps=filtered.filter(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).length;
   var cfCounts={};filtered.forEach(function(r){var v=String(r["IAC"]||"").trim();if(v)cfCounts[v]=(cfCounts[v]||0)+1;});
   var cfTop=Object.entries(cfCounts).sort(function(a,b){return b[1]-a[1];})[0];
-  var cfPct=cfTop&&filtered.length>0?(cfTop[1]/filtered.length*100).toFixed(1)+"%":"0%";
+  var cfPct=cfTop&&filtered.length>0?(cfTop[1]/filtered.length*100).toFixed(0)+"%":"0%";
   var cfName=cfTop?cfTop[0]:"";
   // Outreach
-  var outF=outData.filter(function(r){if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size>0&&!filters["Region Name (level 2)"].has(String(r["Region Name (level 2)"]||"")))return false;return true;});
-  var acctTouched=outF.reduce(function(a,r){return a+(parseInt(r["Prospects - Total"]||0)||0);},0);
-  var prospContacted=outF.reduce(function(a,r){return a+(parseInt(r["Prospects - Active"]||0)||0);},0);
-  var emailsDel=outF.reduce(function(a,r){return a+(parseInt(r["Emails - Deliveries"]||0)||0);},0);
+  var _exeWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
+  var outF=outData.filter(function(r){
+    if(_exeWBS.size>0&&!_exeWBS.has(String(r["Campaign/WBS Code"]||"").trim()))return false;
+    if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size>0&&!filters["Region Name (level 2)"].has(String(r["Region Name (level 2)"]||"")))return false;
+    return true;
+  });
+  var _exeSeqIds=new Set(outF.map(function(r){return String(r["Sequence ID"]||"").trim();}).filter(Boolean));
+  var _exeSeqProspects=(window.SEQ_PROSPECT_DATA||[]).filter(function(p){return _exeSeqIds.has(String(p.sid||"").trim());});
+  var acctTouched=new Set(_exeSeqProspects.map(function(p){return p.co;}).filter(Boolean)).size;
+  var prospContacted=new Set(_exeSeqProspects.map(function(p){return p.pid;})).size;
+  var emailsDel=new Set(_exeSeqProspects.filter(function(p){return p.em==="Yes";}).map(function(p){return p.pid;})).size;
   var emailsOpen=outF.reduce(function(a,r){return a+(parseInt(r["Emails - Opens"]||0)||0);},0);
   var emailsReply=outF.reduce(function(a,r){return a+(parseInt(r["Emails - Replies"]||0)||0);},0);
-  var avgOpen=emailsDel>0?(emailsOpen/emailsDel*100).toFixed(1)+"%":"0%";
-  var avgReply=emailsDel>0?(emailsReply/emailsDel*100).toFixed(1)+"%":"0%";
+  var emailsDelTotal=outF.reduce(function(a,r){return a+(parseInt(r["Emails - Deliveries"]||0)||0);},0);
+  var _uniqEmailed=new Set(_exeSeqProspects.filter(function(p){return p.em==="Yes";}).map(function(p){return p.pid;}));
+  var _uniqOpened =new Set(_exeSeqProspects.filter(function(p){return p.op==="Yes";}).map(function(p){return p.pid;}));
+  var _uniqReplied=new Set(_exeSeqProspects.filter(function(p){return p.re==="Yes";}).map(function(p){return p.pid;}));
+  var avgOpen=_uniqEmailed.size>0?(_uniqOpened.size/_uniqEmailed.size*100).toFixed(0)+"%":"0%";
+  var avgReply=_uniqOpened.size>0?(_uniqReplied.size/_uniqOpened.size*100).toFixed(0)+"%":"0%";
   var seqCount=outF.length;
   var fnote=filtered.length<campData.length?buildFilterBanner(filtered.length,null):"";
   var SL='<div '+'style="display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px">';
@@ -792,39 +807,40 @@ function renderExe(){try{
   html+='<div class="krow">';
   html+=SL+'PIPELINE</div>';
   html+='<div class="kpi kb"><div class="kl">Total Pipeline</div><div class="kv">&euro;'+fmtE(totEur)+'</div><div class="ks">'+totOpps.toLocaleString()+' opportunities<br>all sources</div></div>';
-  html+='<div class="kpi kg"><div class="kl">Booked / Won</div><div class="kv">&euro;'+fmtE(wonEur)+'</div><div class="ks">'+wonOpps+' opps</div></div>';
   html+='<div class="kpi ko"><div class="kl">Probable</div><div class="kv">&euro;'+fmtE(probEur)+'</div><div class="ks">'+probOpps+' opps</div></div>';
+  html+='<div class="kpi kg"><div class="kl">Booked / Won</div><div class="kv">&euro;'+fmtE(wonEur)+'</div><div class="ks">'+wonOpps+' opps</div></div>';
   html+='<div class="kpi kb"><div class="kl">HO Rate</div><div class="kv">'+hoRate+'</div><div class="ks">'+hodOpps.toLocaleString()+' handed over &middot; &euro;'+fmtE(hodEur)+'</div></div>';
-  html+='<div class="kpi kb"><div class="kl">Campaigns</div><div class="kv">'+activeCamps.toLocaleString()+'</div><div class="ks">Active campaigns (MS List)</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Campaigns</div><div class="kv">'+activeCamps.toLocaleString()+'</div><div class="ks">Trackable via WBS code</div></div>';
   html+=cfName?'<div class="kpi kb"><div class="kl">C-Field</div><div class="kv">'+cfPct+'</div><div class="ks">'+cfName+': '+cfPct+'<br>% of # opportunities</div></div>':'';
+  html+='<div class="kpi kb"><div class="kl">2026 Pipeline Share</div><div class="kv">'+camp2026Pct+'</div><div class="ks">campaign-linked vs all 2026</div></div>';
   html+='</div>';
   // Outreach row
   html+='<div class="krow" style="margin-top:6px">';
   html+=SL+'OUTREACH</div>';
-  html+='<div class="kpi kb"><div class="kl">Accounts Touched</div><div class="kv">'+acctTouched.toLocaleString()+'</div><div class="ks">Total across all SDEs</div></div>';
-  html+='<div class="kpi kb"><div class="kl">Prospects Contacted</div><div class="kv">'+prospContacted.toLocaleString()+'</div><div class="ks">Via sequences</div></div>';
-  html+='<div class="kpi kb"><div class="kl">Emails Delivered</div><div class="kv">'+emailsDel.toLocaleString()+'</div><div class="ks">All SDEs combined</div></div>';
-  html+='<div class="kpi kb"><div class="kl">Avg Open Rate</div><div class="kv">'+avgOpen+'</div><div class="ks">Across '+seqCount+' sequences</div></div>';
-  html+='<div class="kpi kb"><div class="kl">Avg Reply Rate</div><div class="kv">'+avgReply+'</div><div class="ks">Across '+seqCount+' sequences<br><span style="color:#0f9d58">= '+emailsReply.toLocaleString()+' effective replies</span></div></div>';
+  html+='<div class="kpi kb"><div class="kl">Unique Accounts Touched</div><div class="kv">'+acctTouched.toLocaleString()+'</div><div class="ks">Distinct companies across sequences</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Unique Prospects Contacted</div><div class="kv">'+prospContacted.toLocaleString()+'</div><div class="ks">Distinct prospects across sequences</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Unique Prospects Emailed</div><div class="kv">'+emailsDel.toLocaleString()+'</div><div class="ks">Distinct prospects with Emailed = Yes</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Avg Open Rate</div><div class="kv">'+avgOpen+'</div><div class="ks">'+_uniqOpened.size.toLocaleString()+' opened / '+_uniqEmailed.size.toLocaleString()+' emailed</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Avg Reply Rate</div><div class="kv">'+avgReply+'</div><div class="ks">'+_uniqReplied.size.toLocaleString()+' replied / '+_uniqOpened.size.toLocaleString()+' opened</div></div>';
   html+='</div>';
   html+='</div>';
   p.innerHTML=html;
   // Charts: build canvases in html, then render after DOM update
   html+='<div style="display:flex;gap:16px;flex-wrap:wrap">';
   // Chart 2: Product breakdown by region  
-  html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch">Product Breakdown &mdash; by Market Unit<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) by Sub Sales Bag &middot; product family stacked</span></div><div style="padding:8px;height:260px"><canvas id="exe-prod-mu"></canvas></div></div>';
+  html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch">Product Breakdown &mdash; by Sales Bag<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) by Sub Sales Bag &middot; product family stacked</span></div><div style="padding:8px;height:260px"><canvas id="exe-prod-mu"></canvas></div></div>';
   html+='</div>';
   html+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px">';
   html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch">IAC &mdash; by Market Unit<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) by IAC classification per MU</span></div><div style="padding:8px;height:260px"><canvas id="exe-iac-mu"></canvas></div></div>';
-  html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch">Handovers per Market Unit<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Handed over vs pending HO pipeline (k&euro;)</span></div><div style="padding:8px;height:260px"><canvas id="exe-hod-mu"></canvas></div></div>';
+  html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch">Handovers - by Market Unit<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Handed over vs pending HO pipeline (k&euro;)</span></div><div style="padding:8px;height:260px"><canvas id="exe-hod-mu"></canvas></div></div>';
   html+='</div>';
   html+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px">';
-  html+='<div class="cc" style="flex:2;min-width:400px"><div class="ch">HO Rate per Market Unit<br><span style="font-size:10px;font-weight:400;color:var(--mu)">% of opportunities handed over to AEs</span></div><div style="padding:8px;height:280px"><canvas id="exe-ho-rate"></canvas></div></div>';
-  html+='<div class="cc" style="flex:1;min-width:280px"><div class="ch">SDE Engagement Type<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline ACV by engagement type &mdash; all stages (k&euro;)</span></div><div style="padding:8px;height:280px"><canvas id="exe-tcp-pie"></canvas></div></div>';
+  html+='<div class="cc" style="flex:2;min-width:400px"><div class="ch">HO Rate - by Market Unit<br><span style="font-size:10px;font-weight:400;color:var(--mu)">% of opportunities handed over to AEs</span></div><div style="padding:8px;height:280px"><canvas id="exe-ho-rate"></canvas></div></div>';
+  html+='<div class="cc" style="flex:1;min-width:280px"><div class="ch">ACV € - by SDE Engagement Type<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline ACV by engagement type &mdash; all stages (k&euro;)</span></div><div style="padding:8px;height:280px"><canvas id="exe-tcp-pie"></canvas></div></div>';
   html+='</div>';
   html+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px">';
-  html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch">DRM by Market Unit<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline breakdown by DRM stage per MU</span></div><div style="padding:8px;height:280px"><canvas id="exe-drm-mu"></canvas></div></div>';
-  html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch">Pipeline by Closing Quarter<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Total EMEA pipeline across closing quarters</span></div><div style="padding:8px;height:280px"><canvas id="exe-closingqtr"></canvas></div></div>';
+  html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch">ACV € & DRM - by Market Unit<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline breakdown by DRM stage per MU</span></div><div style="padding:8px;height:280px"><canvas id="exe-drm-mu"></canvas></div></div>';
+  html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch">ACV € - by Closing Quarter<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Total EMEA pipeline across closing quarters</span></div><div style="padding:8px;height:280px"><canvas id="exe-closingqtr"></canvas></div></div>';
   html+='</div>';
   p.innerHTML=html;
   // Now render charts
@@ -847,12 +863,12 @@ function renderExe(){try{
       var reg=wbsToReg[w]; if(!reg)return;
       var subSB=filtered.reduce(function(found,r){return found||(String(r["Campaign/WBS Code"]||"").trim()===w?r["Sub Sales Bag"]||"":found);},"");
       var eur=parseFloat(p["Eur"]||0)||0;
-      if(!subSB)return;
-      var prods=subSB.split(",").map(function(s){
-        s=s.trim();
+      var prods=subSB?subSB.split(",").map(function(s){
+        s=s.trim().replace(/â€"/g,"–").replace(/â€™/g,"'").replace(/Ã©/g,"é").replace(/[^\x00-\x7F]/g,"");
         var idx=s.indexOf(" - ");
         return idx>-1?s.substring(idx+3).trim():s;
-      }).filter(Boolean);
+      }).filter(Boolean):["Other"];
+      if(!prods.length)prods=["Other"];
       prods.forEach(function(prod){
         allProds.add(prod);
         if(!prodRegs[reg])prodRegs[reg]={};
@@ -920,7 +936,7 @@ function renderExe(){try{
         options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
-    // Chart 4: Handovers per Market Unit
+    // Chart 4: Handovers - by Market Unit
     var hodRegHO={},hodRegNo={};
     pr2.forEach(function(p){
       var w=String(p["Opp Campaign ID"]||"").trim();
@@ -948,7 +964,7 @@ function renderExe(){try{
         options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
-    // Chart 5: HO Rate per Market Unit (horizontal bar — % opps HO'd)
+    // Chart 5: HO Rate - by Market Unit (horizontal bar — % opps HO'd)
     var hoRegTotal={}, hoRegHOd={};
     pr2.forEach(function(p){
       var w=String(p["Opp Campaign ID"]||"").trim();
@@ -988,7 +1004,7 @@ function renderExe(){try{
           scales:{x:{min:0,max:100,ticks:{callback:function(v){return v+"%";}},grid:{color:"#f0f0f0"}},y:{grid:{display:false},ticks:{font:{size:11}}}}}
       });
     }
-    // Chart 6: SDE Engagement Type pie — pipeline EUR by TCP source
+    // Chart 6: ACV € - by SDE Engagement Type pie — pipeline EUR by TCP source
     var tcpMap={"Digital Hub":"SDE Sourced","Marketing":"Marketing Nurtured","Partner":"Partner Nurtured","Sales":"Sales Nurtured"};
     var tcpEur={};
     pr2.forEach(function(p){
@@ -1013,7 +1029,7 @@ function renderExe(){try{
           plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:true}}}
       });
     }
-    // Chart 7: DRM by Market Unit — stacked bar EUR by DRM stage per region
+    // Chart 7: ACV € & DRM - by Market Unit — stacked bar EUR by DRM stage per region
     var drmOrder=["Booked/Won","Probable","Upside","Excluded from Pipeline","Disc/Lost"];
     var drmColors={"Booked/Won":PAL[6],"Probable":PAL[0],"Upside":PAL[2],"Excluded from Pipeline":"#CFD8DC","Disc/Lost":"#C62828"};
     var drmRegData={};
@@ -1044,7 +1060,7 @@ function renderExe(){try{
         options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
-    // Chart 8: Pipeline by Closing Quarter — stacked bar Booked/Won + Probable + Upside
+    // Chart 8: ACV € - by Closing Quarter — stacked bar Booked/Won + Probable + Upside
     var cqtrDRM=["Booked/Won","Probable","Upside"];
     var cqtrColors={"Booked/Won":PAL[6],"Probable":PAL[0],"Upside":PAL[2]};
     var cqtrData={};
@@ -1079,6 +1095,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
   var thS2="background:#012931;color:#fff;padding:5px 6px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;white-space:normal;position:sticky;top:0;border-right:1px solid #1B4F5A;max-width:70px;line-height:1.3";
   var thR2="background:#012931;color:#fff;padding:5px 6px;text-align:right;font-size:9px;font-weight:700;text-transform:uppercase;white-space:normal;position:sticky;top:0;border-right:1px solid #1B4F5A;max-width:70px;line-height:1.3";
   var data=filtered;
+  if(anaFilter.reg)data=data.filter(function(r){return(r["Region Name (level 2)"]||"")=== anaFilter.reg;});
   var pr=getPipeRows(data);
   var totEur=pr.reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
   var totOpps=new Set(pr.map(function(p){return String(p["Opportunity ID"]||"");}).filter(Boolean)).size;
@@ -1118,10 +1135,13 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
   var pdet=pr.map(function(p){
     var wbs=String(p["Opp Campaign ID"]||"").trim();
     var camp=data.find(function(r){return String(r["Campaign/WBS Code"]||"").trim()===wbs;});
-    return{cn:camp?camp["Campaign Name"]:"",reg:camp?camp["Region Name (level 2)"]:"",wbs:wbs,oid:String(p["Opportunity ID"]||""),eur:parseFloat(p["Eur"]||0)||0,drm:String(p["DRM Category"]||""),tcp:String(p["TCP Pipeline Source Desc"]||""),hod:String(p["SDE Handover Date"]||""),cqtr:String(p["Create Quarter"]||""),mmid:String(p["MM Identifier"]||""),clqtr:String(p["Closing Qtr"]||""),seqid:camp?String(camp["Sequence ID"]||""):"",dm:camp?String(camp["Demand Manager"]||""):""};
+    return{cn:camp?camp["Campaign Name"]:"",reg:camp?camp["Region Name (level 2)"]:"",sb:camp?String(camp["Sales Bag"]||"").trim():"",wbs:wbs,oid:String(p["Opportunity ID"]||""),acct:String(p["Account Name"]||""),desc:String(p["Opp Description"]||""),eur:parseFloat(p["Eur"]||0)||0,drm:String(p["DRM Category"]||""),tcp:String(p["TCP Pipeline Source Desc"]||""),hod:String(p["SDE Handover Date"]||""),cqtr:String(p["Create Quarter"]||""),mmid:String(p["MM Identifier"]||""),clqtr:String(p["Closing Qtr"]||""),seqid:camp?String(camp["Sequence ID"]||""):"",dm:camp?String(camp["Demand Manager"]||""):""};
   }).sort(function(a,b){return b.eur-a.eur;});
+  if(anaFilter.wbs)pdet=pdet.filter(function(r){return r.wbs===anaFilter.wbs;});
 
   var fnote=filtered.length<campData.length?buildFilterBanner(data.length,null):"";
+  if(anaFilter.reg)fnote+="<div style=\"margin-bottom:8px;display:flex;align-items:center;gap:8px\"><span style=\"background:#D1EFFF;padding:3px 10px;border-radius:var(--r);font-size:11px;font-weight:600\">Region: "+fmtReg(anaFilter.reg)+"</span><button onclick=\"anaFilter.reg=null;if('"+pageId+"'==='ovwPage')renderOvw();else renderAna()\" style=\"padding:3px 10px;background:#C62828;color:#fff;border:none;border-radius:var(--r);font-size:11px;cursor:pointer\">Clear</button></div>";
+  if(anaFilter.wbs)fnote+="<div style=\"margin-bottom:8px;display:flex;align-items:center;gap:8px\"><span style=\"background:#D1EFFF;padding:3px 10px;border-radius:var(--r);font-size:11px;font-weight:600\">WBS: "+anaFilter.wbs+"</span><button onclick=\"anaFilter.wbs=null;if('"+pageId+"'==='ovwPage')renderOvw();else renderAna()\" style=\"padding:3px 10px;background:#C62828;color:#fff;border:none;border-radius:var(--r);font-size:11px;cursor:pointer\">Clear</button></div>";
   var thS="background:#00144A;color:#fff;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;white-space:nowrap;position:sticky;top:0;border-right:1px solid #3D5166";
   var thR="background:#00144A;color:#fff;padding:8px 10px;text-align:right;font-size:11px;text-transform:uppercase;white-space:nowrap;position:sticky;top:0";
 
@@ -1194,9 +1214,9 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     var thS2="background:#012931;color:#fff;padding:5px 6px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;white-space:normal;position:sticky;top:0;border-right:1px solid #1B4F5A;max-width:70px;line-height:1.3";
     var thR2="background:#012931;color:#fff;padding:5px 6px;text-align:right;font-size:9px;font-weight:700;text-transform:uppercase;white-space:normal;position:sticky;top:0;border-right:1px solid #1B4F5A;max-width:70px;line-height:1.3";
     html3+="<div class=\"krow\"><div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px\">Planning</div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Campaigns</div><div class=\"kv\">"+data.length.toLocaleString()+"</div><div class=\"ks\">tracked in EMEA DCM Calendar</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Campaigns</div><div class=\"kv\">"+(new Set(data.filter(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean))).size.toLocaleString()+"</div><div class=\"ks\">tracked in EMEA Campaign Calendar via WBS Code</div></div>";
     
-    html3+="<div class=\"kpi kr\"><div class=\"kl\">Demand Managers</div><div class=\"kv\">"+uniqMgr+"</div><div class=\"ks\">tracked in EMEA DCM Calendar</div></div>";
+    html3+="<div class=\"kpi kr\"><div class=\"kl\">Demand Managers</div><div class=\"kv\">"+uniqMgr+"</div><div class=\"ks\">tracked in EMEA Campaign Calendar via WBS Code</div></div>";
     
     
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">"+fmtCal(targetPipe)+"</div><div class=\"ks\">from campaign calendar</div></div>";
@@ -1258,13 +1278,13 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     }
     var trSB=topOppPct(oppSBMap),trInd=topOppPct(oppIndMap),trRBC=topOppPct(oppRBCMap),trIAC=topOppPct(oppIACMap);
     html3+="<div class=\"krow\"><div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px\">Campaigns</div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Campaigns</div><div class=\"kv\">"+data.length.toLocaleString()+"</div><div class=\"ks\">tracked in EMEA DCM Calendar</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Campaigns</div><div class=\"kv\">"+(new Set(data.filter(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean))).size.toLocaleString()+"</div><div class=\"ks\">tracked in EMEA Campaign Calendar via WBS Code</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Campaigns w/ Pipeline</div><div class=\"kv\">"+matchCamps+"</div><div class=\"ks\">of "+data.length.toLocaleString()+"</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">"+fmtCal(targetPipe)+"</div><div class=\"ks\">from campaign calendar</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
     html3+="<div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px;margin-left:8px\">Results</div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline &#8364;</div><div class=\"kv\">"+fmtE(totEur)+"</div><div class=\"ks\">Week 24 &middot; 16 Jun 2026</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Distinct Opps</div><div class=\"kv\">"+totOpps.toLocaleString()+"</div><div class=\"ks\">connected to WBS/Campaign code</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Distinct Opps Created</div><div class=\"kv\">"+totOpps.toLocaleString()+"</div><div class=\"ks\">connected to WBS/Campaign code</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\"># Opp Win Rate</div><div class=\"kv\">"+oppWinRate+"</div><div class=\"ks\">Won / Total opps</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Qualified Pipeline</div><div class=\"kv\">"+qualOppRate+"</div><div class=\"ks\">Won+Live / Total</div></div>";
     var hodEur=pr.filter(function(p){return p["SDE Handover Date"]&&p["SDE Handover Date"]!=="";}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);var hodPct=totEur>0?(hodEur/totEur*100).toFixed(0)+"%":"0%";
@@ -1390,17 +1410,18 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     html3+="<div style=\"display:flex;gap:20px;margin-bottom:8px;align-items:flex-start\">";
     html3+="<div class=\"cc\" style=\"margin-bottom:0;flex:0 0 40%;min-width:0\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between\">Campaigns vs Distinct Opps by Region<select id=\"scatter-x\" onchange=\"updateScatterX()\" style=\"font-size:11px;padding:3px 6px;border:1px solid var(--bd);border-radius:var(--r)\"><option value=\"camps\">No. Campaigns</option><option value=\"prospects\">Prospects</option><option value=\"pipeEur\">Pipeline EUR</option></select></div><div style=\"height:350px;width:100%;padding:8px;position:relative\"><canvas id=\""+pfx+"-scatter\"></canvas></div></div>";
     html3+="<div class=\"cc\" style=\"margin-bottom:0;flex:0 0 30%;min-width:0;overflow:hidden\"><div class=\"ch\">Execution Strategy</div><div style=\"height:350px;padding:8px;width:100%;overflow:hidden\"><canvas id=\""+pfx+"-execbubble\"></canvas></div></div>";html3+=(pageId==="ovwPage"?"<div class=\"cc\" style=\"margin-bottom:0;flex:1;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between\">Business Impact<select id=\"biz-filter\" onchange=\"updateBizImpact()\" style=\"font-size:11px;padding:3px 6px;border:1px solid var(--bd);border-radius:var(--r)\"><option value=\"won\">Won</option><option value=\"committed\">Committed &amp; Probable</option><option value=\"upside\">Upside</option><option value=\"all\">Won + Committed + Probable + Upside</option></select></div><div style=\"height:350px;padding:8px;width:100%;overflow:hidden\"><canvas id=\""+pfx+"-bizimpact\"></canvas></div></div>":"");
-    html3+="</div>";html3+="<div style=\"display:flex;gap:20px;margin-bottom:8px\">";html3+="<div class=\"cc\" style=\"flex:1;min-width:0;overflow:hidden\"><div class=\"ch\">Region Summary</div><div style=\"overflow:auto\"><table style=\"width:100%;border-collapse:collapse;font-size:10px\"><thead><tr>";
+    html3+="</div>";html3+="<div style=\"display:flex;gap:20px;margin-bottom:8px\"><div style=\"max-width:60%;min-width:0;flex:1\"><div class=\"cc\" style=\"flex:1;min-width:0;overflow:hidden\"><div class=\"ch\">Region Summary</div><div style=\"overflow:auto\"><table style=\"width:100%;border-collapse:collapse;font-size:10px\"><thead><tr>";
         html3+="<th style=\""+thS2+"\">Region</th><th style=\""+thR2+"\"># Campaigns</th><th style=\""+thR2+"\">Campaigns w/ Pipeline</th><th style=\""+thR2+"\">Prospects Contacted</th><th style=\""+thR2+"\">Pipeline</th><th style=\""+thR2.replace("border-right:1px solid #1a3a7a","")+"\"># Opps</th><th style=\""+thR2.replace("border-right:1px solid #1a3a7a","")+"\"># Campaign to Opp</th><th style=\""+thR2.replace("border-right:1px solid #1a3a7a","")+"\"># Opps / Prospects %</th><th style=\""+thR2.replace("border-right:1px solid #1a3a7a","")+"\"># Seq.</th></tr></thead><tbody>";
+    window._anaClickReg=function(reg){anaFilter.reg=(anaFilter.reg===reg)?null:reg;if(pageId==="ovwPage")renderOvw();else renderAna();};
     html3+=regs.map(function(reg){
       var s=regSummary[reg];
       var cpipe=s.campsPipeSet?s.campsPipeSet.size:0;
       var conv=s.camps>0?(cpipe/s.camps*100).toFixed(0)+"%":"0%";
-      return "<tr style=\"border-bottom:1px solid #EBEBEB\">"
+      var isSel=anaFilter.reg===reg;
+      return "<tr style=\"border-bottom:1px solid #EBEBEB;cursor:pointer;background:"+(isSel?"#D1EFFF":"")+"\" onclick=\"window._anaClickReg('"+reg.replace(/'/g,"\\'")+"')\">"
         +"<td style=\"padding:4px 6px;font-weight:600;border-right:1px solid #F0F0F0\">"+fmtReg(reg)+"</td>"
         +"<td style=\"padding:4px 6px;text-align:right;border-right:1px solid #F0F0F0;"+hl(s.camps||0,maxCamps)+"\">"+(s.camps||0)+"</td>"
         +"<td style=\"padding:4px 6px;text-align:right;border-right:1px solid #F0F0F0;"+hl(cpipe,maxCpipe)+"\">" + cpipe + "</td>"
-        
         +"<td style=\"padding:4px 6px;text-align:right;border-right:1px solid #F0F0F0;"+hl(s.prospects||0,maxProsp)+"\">"+(s.prospects||0).toLocaleString()+"</td>"
         +"<td style=\"padding:4px 6px;text-align:right;border-right:1px solid #F0F0F0;"+hl(s.pipeEur||0,maxEur)+"\">"+fmtE(s.pipeEur||0)+"</td>"
         +"<td style=\"padding:4px 6px;text-align:right;border-right:1px solid #F0F0F0;"+hl(s.opps?s.opps.size:0,maxOpps)+"\">"+(s.opps?s.opps.size:0)+"</td>"
@@ -1418,7 +1439,13 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     +"<td style=\"padding:4px 6px;text-align:right;border-right:1px solid #F0F0F0\">"+(function(){var tp=regs.reduce(function(a,r){return a+(regSummary[r].prospects||0);},0);var op=new Set(pr.map(function(p){return String(p["Opportunity ID"]||"");})).size;return tp>0?(op/tp*100).toFixed(0)+"%":"0%";})()+""+"</td>"
     +"<td style=\"padding:4px 6px;text-align:right\">"+regs.reduce(function(a,r){return a+(regSummary[r].seqs?regSummary[r].seqs.size:0);},0)+"</td>"
     +"</tr>"
-    +"</tbody></table></div></div>";
+    +"</tbody></table></div></div></div>"
+    +"<div class=\"cc\" style=\"flex:1;min-width:0;overflow:hidden\"><div class=\"ch\">DG Program Strategy</div><div style=\"height:320px;padding:8px;width:100%;overflow:hidden\"><canvas id=\""+pfx+"-dgbubble\"></canvas></div></div>";
+    html3+="</div>";
+    var sbOpts='<option value="">All Sales Bags</option>';
+    countBy("Sales Bag").forEach(function(e){sbOpts+='<option value="'+e[0].replace(/"/g,"&quot;")+'">'+e[0]+'</option>';});
+    html3+="<div style=\"display:flex;gap:20px;margin-bottom:8px\">";
+    html3+="<div class=\"cc\" style=\"flex:1;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between\">2026 Pipeline Share by Region<select id=\"pipe2026-sb\" onchange=\"updatePipe2026()\" style=\"font-size:11px;padding:3px 6px;border:1px solid var(--bd);border-radius:var(--r)\">"+sbOpts+"</select></div><div style=\"height:300px;padding:8px\"><canvas id=\""+pfx+"-pipe2026reg\"></canvas></div></div>";
     html3+="</div>";
   }
   
@@ -1480,12 +1507,17 @@ if(pageId!=="ovwPage"){html3+="<div class=\"cc\" style=\"margin-bottom:28px;widt
   html3+="<input type=\"text\" id=\"pds\" placeholder=\"Search...\" oninput=\"filterPD()\" style=\"border:1px solid var(--bd);border-radius:var(--r);padding:4px 8px;font-size:12px;outline:none;width:200px\"/>"+"<button onclick=\"exportPdet()\" style=\"margin-left:8px;padding:5px 12px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:12px;cursor:pointer\">&#11015; Export CSV</button>";
   html3+="</div><div style=\"max-height:400px;overflow:auto\">";
   html3+="<table style=\"width:100%;border-collapse:collapse;font-size:12px\"><thead><tr>";
-  html3+="<th style=\""+thS+"\">Campaign Name</th><th style=\""+thS+"\">Demand Manager</th><th style=\""+thS+"\">Region</th><th style=\""+thS+"\">Campaign/WBS Code</th><th style=\""+thS+"\">Sequence ID</th><th style=\""+thS+"\">Opportunity ID</th><th style=\""+thS+"\">DRM Category</th><th style=\""+thS+"\">TCP Source</th><th style=\""+thS+"\">Handover Date</th><th style=\""+thS+"\">Create Quarter</th><th style=\""+thS+"\">Closing Quarter</th><th style=\""+thS+"\">MM Identifier</th><th style=\""+thR+"\">EUR</th>";
+  html3+="<th style=\""+thS+"\">Campaign Name</th><th style=\""+thS+"\">Demand Manager</th><th style=\""+thS+"\">Region</th><th style=\""+thS+"\">Account Name</th><th style=\""+thS+"\">Opp Description</th><th style=\""+thS+"\">Campaign/WBS Code</th><th style=\""+thS+"\">Sequence ID</th><th style=\""+thS+"\">Opportunity ID</th><th style=\""+thS+"\">DRM Category</th><th style=\""+thS+"\">TCP Source</th><th style=\""+thS+"\">Handover Date</th><th style=\""+thS+"\">Create Quarter</th><th style=\""+thS+"\">Closing Quarter</th><th style=\""+thS+"\">MM Identifier</th><th style=\""+thR+"\">EUR</th>";
   html3+="</tr></thead><tbody id=\"pdb\">";
+  window._anaClickWbs=function(wbs){anaFilter.wbs=(anaFilter.wbs===wbs)?null:wbs;if(pageId==="ovwPage")renderOvw();else renderAna();};
   html3+=pdet.map(function(r){
-    return "<tr style=\"border-bottom:1px solid #EBEBEB\">"
+    var isSel=anaFilter.wbs===r.wbs;
+    var ew=(r.wbs||"").replace(/"/g,"&quot;");
+    return "<tr style=\"border-bottom:1px solid #EBEBEB;cursor:pointer;background:"+(isSel?"#D1EFFF":"")+"\" data-wbs=\""+ew+"\" onclick=\"window._anaClickWbs(this.dataset.wbs)\">"
       +"<td style=\"padding:6px 10px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-right:1px solid #F0F0F0\" title=\""+r.cn.replace(/"/g,"&quot;")+"\">"+r.cn+"</td>"+"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+r.dm+"</td>"
       +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+fmtReg(r.reg)+"</td>"
+      +"<td style=\"padding:6px 10px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-right:1px solid #F0F0F0\" title=\""+(r.acct||"").replace(/"/g,"&quot;")+"\">"+(r.acct||"")+"</td>"
+      +"<td style=\"padding:6px 10px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-right:1px solid #F0F0F0\" title=\""+(r.desc||"").replace(/"/g,"&quot;")+"\">"+(r.desc||"")+"</td>"
       +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+r.wbs+"</td>"
       +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+r.seqid+"</td>"
       +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+r.oid+"</td>"
@@ -1904,6 +1936,69 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
       }
     });}catch(e){var eb=document.getElementById(pfx+"-execbubble");if(eb)eb.parentElement.innerHTML="<div style=\"padding:10px;color:red\">Error: "+e.message+"</div>";}
   }
+  if(pageId==="ovwPage"){
+    try{
+      var dgList2=[];var dgSeen2={};
+      data.forEach(function(r){var v=String(r["DG Program"]||"").trim();if(v&&!dgSeen2[v]){dgSeen2[v]=true;dgList2.push(v);}});
+      dgList2=dgList2.slice(0,8);
+      var sodList3=["Digital Hub","Marketing","Partner","Sales","Services"];
+      var dgBubMap={};
+      data.forEach(function(r){
+        var sods=String(r["SoD"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);
+        var dg=String(r["DG Program"]||"").trim();
+        var ibnn=String(r["IB/NNN"]||"").trim()||"Cross";
+        var accts=parseInt(r["# Accounts"])||0;
+        if(!dg||dgList2.indexOf(dg)<0)return;
+        sods.forEach(function(sod){
+          var key=dg+"|||"+sod+"|||"+ibnn;
+          if(!dgBubMap[key])dgBubMap[key]={camps:0,accts:0,dg:dg,sod:sod,ibnn:ibnn};
+          dgBubMap[key].camps++;
+          dgBubMap[key].accts+=accts;
+        });
+      });
+      var ibColors3={"IB":"#0070F2","NNN":"#1B90FF","Cross":"#07838F"};
+      var offsets3={"IB":-0.15,"NNN":0,"Cross":0.15};
+      var dgPts={"IB":[],"NNN":[],"Cross":[]};
+      Object.values(dgBubMap).forEach(function(v){
+        var xi=dgList2.indexOf(v.dg);
+        var yi=sodList3.indexOf(v.sod);
+        if(xi<0||yi<0)return;
+        var r3=Math.max(6,Math.round(Math.sqrt(v.camps)*3));
+        if(!dgPts[v.ibnn])dgPts[v.ibnn]=[];
+        dgPts[v.ibnn].push({x:xi+(offsets3[v.ibnn]||0),y:v.accts,r:r3,camps:v.camps,accts:v.accts,dg:v.dg,sod:v.sod});
+      });
+      var dgDatasets=["IB","NNN","Cross"].map(function(ibnn){
+        return{label:ibnn,data:dgPts[ibnn]||[],backgroundColor:ibColors3[ibnn]+"AA",borderColor:ibColors3[ibnn],borderWidth:1,
+          datalabels:{display:function(ctx){return ctx.dataset.data[ctx.dataIndex].camps>30;},formatter:function(v,ctx){return ctx.dataset.data[ctx.dataIndex].sod;},color:"#fff",font:{size:10,weight:"bold"},anchor:"center",align:"center"}};
+      });
+      mkC(pfx+"-dgbubble",{type:"bubble",data:{datasets:dgDatasets},
+        options:{responsive:true,maintainAspectRatio:false,layout:{padding:10},
+          plugins:{legend:{display:true,position:"top",labels:{font:{size:11},boxWidth:12}},datalabels:{display:true},
+            tooltip:{callbacks:{label:function(ctx){var d=ctx.raw;return[ctx.dataset.label+" dominant","DG Program: "+d.dg,"SoD: "+d.sod,"Campaigns: "+d.camps,"Accounts: "+(d.accts||0).toLocaleString()];}}}},
+          scales:{
+            x:{type:"linear",min:-0.5,max:dgList2.length-0.5,ticks:{color:"#32363A",font:{size:10},stepSize:1,callback:function(v){var i=Math.round(v-0.5);return(Math.abs((v%1)-0.5)<0.01)&&i>=0&&i<dgList2.length?dgList2[i]:"";},maxRotation:30,autoSkip:false},grid:{color:"rgba(0,0,0,.05)"},title:{display:true,text:"DG Program",font:{size:11}}},
+            y:{type:"linear",ticks:{color:"#6A6D70",font:{size:11},callback:function(v){return v.toLocaleString();}},grid:{color:"rgba(0,0,0,.05)"},title:{display:true,text:"# Accounts Targeted",font:{size:11}}}
+          }
+        }
+      });
+    }catch(e){var dgb=document.getElementById(pfx+"-dgbubble");if(dgb)dgb.parentElement.innerHTML="<div style=\"padding:10px;color:red\">Error: "+e.message+"</div>";}
+  }
+  if(pageId==="ovwPage"){
+    try{
+      var _sb2026=document.getElementById("pipe2026-sb")?document.getElementById("pipe2026-sb").value:"";
+      var _pr2026=pdet.filter(function(r){return String(r.cqtr||"").indexOf("2026")===0&&(_sb2026===""||r.sb===_sb2026);});
+      var regEur2026={};
+      _pr2026.forEach(function(r){var reg=r.reg||"";if(!reg||reg==="(No Region)")return;regEur2026[reg]=(regEur2026[reg]||0)+r.eur;});
+      var reg2026Entries=Object.entries(regEur2026).sort(function(a,b){return b[1]-a[1];});
+      if(reg2026Entries.length){
+        var reg2026Pcts=reg2026Entries.map(function(e){return TOTAL_2026_PIPELINE>0?(e[1]/TOTAL_2026_PIPELINE*100):0;});
+        var yW2026=Math.min(Math.max(reg2026Entries.reduce(function(a,e){return Math.max(a,fmtReg(e[0]).length);},0)*6,80),180);
+        mkC(pfx+"-pipe2026reg",{type:"bar",data:{labels:reg2026Entries.map(function(e){return fmtReg(e[0]);}),datasets:[{data:reg2026Pcts,backgroundColor:PALA,borderColor:PAL,borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toFixed(0)+"%";},font:{size:10},color:"#32363A"}}]},
+          options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:true},tooltip:{callbacks:{label:function(ctx){var eur=reg2026Entries[ctx.dataIndex][1];return ctx.formattedValue+"% ("+fmtE(eur)+" kEUR)";}}}},layout:{padding:{right:50}},
+            scales:{x:{display:false},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:11},autoSkip:false},afterFit:function(s){s.width=yW2026;}}}}});
+      }
+    }catch(e){var p2r=document.getElementById(pfx+"-pipe2026reg");if(p2r)p2r.parentElement.innerHTML="<div style=\"padding:10px;color:red\">Error: "+e.message+"</div>";}
+  }
   if(isDynamic)setTimeout(function(){dynamicHideCharts(page);},0);
 
   if(pageId!=="ovwPage"){
@@ -1983,7 +2078,7 @@ function renderAcc(){
 function renderAccInner(page){
   var data=filtered;
   var _wbsSetAcc=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
-  var pr=(window.PIPE_DATA||[]).filter(function(p){return _wbsSetAcc.size===0||_wbsSetAcc.has(String(p["Opp Campaign ID"]||"").trim());});
+  var pr=getPipeRows(data);
   var od=(window.OUT_DATA||[]).filter(function(r){
     if(_wbsSetAcc.size>0&&!_wbsSetAcc.has(String(r["Campaign/WBS Code"]||"").trim()))return false;
     if(window.outFilter&&window.outFilter.tag){
@@ -2002,7 +2097,8 @@ function renderAccInner(page){
   // --- KPI totals ---
   var totalAccounts=0,totalValidated=0,totalProspects=0,totalNewProsp=0,totalExistProsp=0,totalEnriched=0;
   data.forEach(function(r){
-    totalAccounts+=parseInt(r["# Accounts"]||0)||0;
+    var hasWBS=String(r["Campaign/WBS Code"]||"").trim()!=="";
+    if(hasWBS)totalAccounts+=parseInt(r["# Accounts"]||0)||0;
     totalValidated+=parseInt(r["Total Account (Validated)"]||0)||0;
     totalProspects+=parseInt(r["Prospects"]||0)||0;
     totalNewProsp+=parseInt(r["# new prospects"]||0)||0;
@@ -2024,7 +2120,9 @@ function renderAccInner(page){
   });
   var totAdded=0,totMeetings=0,totReplied=0,totDelivered=0;
   Object.values(outWBS).forEach(function(v){totAdded+=v.added;totMeetings+=v.meetings;totReplied+=v.replied;totDelivered+=v.delivered;});
-  var totContacted=od.reduce(function(a,r){return a+(parseInt(r["Accounts Contacted"]||0)||0);},0);
+  var totContacted=od.reduce(function(a,r){return a+(parseInt(r["Companies_Contacted"]||0)||0);},0);
+  var _accSeqIds=new Set(od.map(function(r){return String(r["Sequence ID"]||"").trim();}).filter(Boolean));
+  var totUniqCo=new Set((window.SEQ_PROSPECT_DATA||[]).filter(function(p){return _accSeqIds.has(String(p.sid||"").trim());}).map(function(p){return p.co;}).filter(Boolean)).size;
 
   // --- By Region ---
   var byReg={};var seenWBSReg=new Set();
@@ -2130,12 +2228,12 @@ function renderAccInner(page){
   html+="</div>";
   html+="<div class=\"sec\">Account Overview</div>";
   html+="<div class=\"krow\">";
-  html+="<div class=\"kpi kb\"><div class=\"kl\"># Accounts</div><div class=\"kv\">"+totalAccounts.toLocaleString()+"</div><div class=\"ks\">from campaign calendar</div></div>";
+  html+="<div class=\"kpi kb\"><div class=\"kl\"># Accounts</div><div class=\"kv\">"+totalAccounts.toLocaleString()+"</div><div class=\"ks\">per manual input on Campaign Calendar, with WBS code</div></div>";
   
   html+="<div class=\"kpi kb\"><div class=\"kl\">Accounts Added</div><div class=\"kv\">"+totAdded.toLocaleString()+"</div><div class=\"ks\">added to outreach sequences</div></div>";
-  html+="<div class=\"kpi kb\"><div class=\"kl\">Contacted</div><div class=\"kv\">"+totContacted.toLocaleString()+"</div><div class=\"ks\">companies contacted via outreach</div></div>";
+  html+="<div class=\"kpi kb\"><div class=\"kl\">Unique Accounts Contacted</div><div class=\"kv\">"+totUniqCo.toLocaleString()+"</div><div class=\"ks\">distinct companies across sequences</div></div>";
   html+="<div class=\"kpi kb\"><div class=\"kl\">Meetings Booked</div><div class=\"kv\">"+totMeetings.toLocaleString()+"</div><div class=\"ks\">from outreach sequences</div></div>";
-  html+="<div class=\"kpi kb\"><div class=\"kl\">Opps Created</div><div class=\"kv\">"+seenOpps.size.toLocaleString()+"</div><div class=\"ks\">pipeline opportunities</div></div>";
+  html+="<div class=\"kpi kb\"><div class=\"kl\">Distinct Opps Created</div><div class=\"kv\">"+seenOpps.size.toLocaleString()+"</div><div class=\"ks\">pipeline opportunities</div></div>";
   html+="</div>";
   html+="<div style=\"display:flex;gap:14px;margin-bottom:14px\">";
   html+="<div class=\"cc\" style=\"flex:1;min-width:0\"><div class=\"ch\">Accounts Added by Region</div><div style=\"height:240px;padding:8px\"><canvas id=\"acc-reg\"></canvas></div></div>";
@@ -2192,6 +2290,7 @@ function renderAccInner(page){
       if(!p.tg) return false;
       var pTags=p.tg.split(",").map(function(t){return t.trim();});
       if(!pTags.some(function(t){return activeTags.has(t);})) return false;
+      if(accFilter.tag&&pTags.indexOf(accFilter.tag)<0) return false;
       if(addedFrom&&p.added&&p.added<addedFrom) return false;
       if(addedTo&&p.added&&p.added>addedTo) return false;
       if(blankTouched){if(p.touched&&p.touched!=="1970-01-01") return false;}
@@ -2222,8 +2321,10 @@ function renderAccInner(page){
         +'<th style="'+thS+';text-align:right">Unique Prospects</th>'
         +'<th style="'+thS+';text-align:right">Unique Companies</th>'
         +'</tr></thead><tbody>';
+      window._accClickTag=function(tag){accFilter.tag=(accFilter.tag===tag)?null:tag;renderAcc();};
       sumEntries.forEach(function(e,idx){
-        sumTbl+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(idx%2===0?"#fff":"#F8FBFF")+'">'
+        var isSel=accFilter.tag===e[0];
+        sumTbl+='<tr style="border-bottom:1px solid #EBEBEB;cursor:pointer;background:'+(isSel?'#D1EFFF':(idx%2===0?"#fff":"#F8FBFF"))+'" onclick="window._accClickTag(\''+e[0].replace(/'/g,"\\'")+'\')">'
           +'<td style="padding:5px 10px;color:#07838F;font-weight:600">'+e[0]+'</td>'
           +'<td style="padding:5px 10px;text-align:right;font-weight:700">'+e[1].pids.size.toLocaleString()+'</td>'
           +'<td style="padding:5px 10px;text-align:right">'+e[1].cos.size.toLocaleString()+'</td>'
@@ -2319,7 +2420,7 @@ function renderOut(){
 
 
 function exportPdet(){
-  var rows=[["Campaign Name","Region","Campaign/WBS Code","Opportunity ID","DRM Category","TCP Source","Handover Date","Create Quarter","Closing Quarter","MM Identifier","EUR"]];
+  var rows=[["Campaign Name","Demand Manager","Region","Account Name","Opp Description","Campaign/WBS Code","Opportunity ID","DRM Category","TCP Source","Handover Date","Create Quarter","Closing Quarter","MM Identifier","EUR"]];
   var body=document.getElementById("pdb");
   if(!body)return;
   body.querySelectorAll("tr").forEach(function(tr){
@@ -2337,7 +2438,8 @@ function exportPdet(){
   a.href=URL.createObjectURL(blob);
   a.download="pipeline_detail.csv";
   a.click();
-}function updateBizImpact(){
+}function updatePipe2026(){if(activeTab==="ovw")renderOvw();else if(activeTab==="ana")renderAna();}
+function updateBizImpact(){
   var grp=document.getElementById("biz-filter")?document.getElementById("biz-filter").value:"won";
   var map=window.bizMapCache&&window.bizMapCache[grp]?window.bizMapCache[grp]:{};
   var maxO=Math.max.apply(null,Object.values(map).map(function(v){return v.opps.size;})||[1]);
@@ -2393,6 +2495,7 @@ function renderOutInner(page){
     if(window.outFilter.owner){if(String(r["Owner"]||"").trim()!==window.outFilter.owner)return false;}
     if(window.outFilter.owner){if(String(r["Owner"]||"").trim()!==window.outFilter.owner)return false;}
     if(window.outFilter.owner){if(String(r["Owner"]||"").trim()!==window.outFilter.owner)return false;}
+    if(window.outFilter.wbs){if(String(r["Campaign/WBS Code"]||"").trim()!==window.outFilter.wbs)return false;}
     // Apply main filter bar region/salesbag/iac/sod filters
     if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size>0){if(!filters["Region Name (level 2)"].has(String(r["Region Name (level 2)"]||"")))return false;}
     if(filters["Sales Bag"]&&filters["Sales Bag"].size>0){var rSB=String(r["Sales Bag"]||"").trim();if(!filters["Sales Bag"].has(rSB))return false;}
@@ -2421,6 +2524,15 @@ function renderOutInner(page){
     totDelivered+=parseInt(r["Prospects - Delivered"])||0;
   });
   var totAcctAdded=data.reduce(function(a,r){return a+(parseInt(r["Accounts Added"])||0);},0);var totCompanies=data.reduce(function(a,r){return a+(parseInt(r["Companies_Contacted"])||0);},0);
+  var _outSeqIds=new Set(data.map(function(r){return String(r["Sequence ID"]||"").trim();}).filter(Boolean));
+  var _outSeqProspects=(window.SEQ_PROSPECT_DATA||[]).filter(function(p){return _outSeqIds.has(String(p.sid||"").trim());});
+  var totUniqP=new Set(_outSeqProspects.map(function(p){return p.pid;})).size;
+  var totUniqCo=new Set(_outSeqProspects.map(function(p){return p.co;}).filter(Boolean)).size;
+  var _outUniqEmailed=new Set(_outSeqProspects.filter(function(p){return p.em==="Yes";}).map(function(p){return p.pid;}));
+  var _outUniqOpened =new Set(_outSeqProspects.filter(function(p){return p.op==="Yes";}).map(function(p){return p.pid;}));
+  var _outUniqReplied=new Set(_outSeqProspects.filter(function(p){return p.re==="Yes";}).map(function(p){return p.pid;}));
+  var avgOpenOut=_outUniqEmailed.size>0?(_outUniqOpened.size/_outUniqEmailed.size*100).toFixed(0)+"%":"0%";
+  var avgReplyOut=_outUniqOpened.size>0?(_outUniqReplied.size/_outUniqOpened.size*100).toFixed(0)+"%":"0%";
   var openPct=totD>0?(totO/totD*100).toFixed(0)+"%" : "0%";
   var repPct =totD>0?(totR/totD*100).toFixed(0)+"%" : "0%";
 
@@ -2461,13 +2573,17 @@ function renderOutInner(page){
   var html3=filterBanner;
   html3+="<div class=\"krow\" style=\"flex-wrap:wrap\">";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Sequences</div><div class=\"kv\">"+data.length.toLocaleString()+"</div><div class=\"ks\">matched to calendar</div></div>";
-  html3+="<div class=\"kpi kg\"><div class=\"kl\">Prospects</div><div class=\"kv\">"+totP.toLocaleString()+"</div><div class=\"ks\">&nbsp;</div></div>";
+  html3+="<div class=\"kpi kg\"><div class=\"kl\">Unique Prospects Contacted</div><div class=\"kv\">"+totUniqP.toLocaleString()+"</div><div class=\"ks\">distinct across sequences</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Prospects Contacted</div><div class=\"kv\">"+totP.toLocaleString()+"</div><div class=\"ks\">sum across tracked sequences</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Companies Contacted</div><div class=\"kv\">"+totUniqCo.toLocaleString()+"</div><div class=\"ks\">distinct companies across sequences</div></div>";
   html3+="<div class=\"kpi ko\"><div class=\"kl\">Prospects Delivered</div><div class=\"kv\">"+totDelivered.toLocaleString()+"</div><div class=\"ks\">&nbsp;</div></div>";
   html3+="<div class=\"kpi kp\"><div class=\"kl\">Open Rate</div><div class=\"kv\">"+openPct+"</div><div class=\"ks\">"+totO.toLocaleString()+" opens / "+totD.toLocaleString()+" delivered</div></div>";
   html3+="<div class=\"kpi kr\"><div class=\"kl\">Reply Rate</div><div class=\"kv\">"+repPct+"</div><div class=\"ks\">"+totR.toLocaleString()+" replies / "+totD.toLocaleString()+" delivered</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Bounce Rate</div><div class=\"kv\">"+( totP>0?(totB/totP*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">"+totB.toLocaleString()+" bounces / "+totP.toLocaleString()+" prospects</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Accounts Added</div><div class=\"kv\">"+totAcctAdded.toLocaleString()+"</div><div class=\"ks\">from export reports</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Prospects / Account</div><div class=\"kv\">"+(totAcctAdded>0?(totP/totAcctAdded).toFixed(0):"0")+"</div><div class=\"ks\">avg prospects per account</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Avg Open Rate</div><div class=\"kv\">"+avgOpenOut+"</div><div class=\"ks\">"+_outUniqOpened.size.toLocaleString()+" opened / "+_outUniqEmailed.size.toLocaleString()+" emailed</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Avg Reply Rate</div><div class=\"kv\">"+avgReplyOut+"</div><div class=\"ks\">"+_outUniqReplied.size.toLocaleString()+" replied / "+_outUniqOpened.size.toLocaleString()+" opened</div></div>";
 
   html3+="</div>";
   html3+="<div class=\"sec\" style=\"margin-top:18px\">Outreach User Summary</div>";
@@ -2533,8 +2649,12 @@ function renderOutInner(page){
     html3+="<th onclick=\"orSort('"+col.k+"')\" style=\""+st+"\">"+col.l+" <span class=\"si\">"+ic+"</span></th>";
   });
   html3+="</tr></thead><tbody>";
+  window._outClickWbs=function(wbs){window.outFilter.wbs=(window.outFilter.wbs===wbs)?null:wbs;renderOut();};
   rows.forEach(function(r){
-    html3+="<tr style=\"border-bottom:1px solid #EBEBEB\">";
+    var wbs=String(r["Campaign/WBS Code"]||"").trim();
+    var isSel=window.outFilter.wbs&&window.outFilter.wbs===wbs;
+    var ew=wbs.replace(/"/g,"&quot;");
+    html3+="<tr style=\"border-bottom:1px solid #EBEBEB;cursor:pointer;background:"+(isSel?"#D1EFFF":"")+"\" data-wbs=\""+ew+"\" onclick=\"window._outClickWbs(this.dataset.wbs)\">";
     cols.forEach(function(col){
       var v=r[col.k];
       if(col.pct){
@@ -2962,6 +3082,9 @@ function renderPro(){
   if(!page)return;
   var profMap=window.CAMP_PROF_TAGS||{};
   var profMeta=window.CAMP_PROF_META||{};
+  var profMetaVals=Object.values(profMeta);
+  var tagToMeta={};profMetaVals.forEach(function(m){if(m.tag&&!tagToMeta[m.tag])tagToMeta[m.tag]=m;});
+  var titleToTags={};profMetaVals.forEach(function(m){if(m.title&&m.tag){if(!titleToTags[m.title])titleToTags[m.title]=new Set();titleToTags[m.title].add(m.tag);}});
   var activeDMs=new Set(filtered.map(function(r){return String(r["Demand Manager"]||"").trim();}).filter(Boolean));
   var activeDMsLower=new Set(Array.from(activeDMs).map(function(d){return d.toLowerCase();}));
   var activeWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}));
@@ -2970,25 +3093,25 @@ function renderPro(){
   Object.entries(profMeta).forEach(function(e){var meta=e[1];var byDM=meta.ddm1&&activeDMsLower.has(meta.ddm1.toLowerCase());var byWBS=meta.camp&&activeWBS.has(meta.camp);if((byDM||byWBS)&&meta.tag)activeTags.add(meta.tag);});
   var _selTitle=window.proFilter&&window.proFilter.proTitle||"";
   if(_selTitle){
-    var _titleTags=new Set(Object.values(profMeta).filter(function(m){return m.title===_selTitle;}).map(function(m){return m.tag;}));
+    var _titleTags=titleToTags[_selTitle]||new Set();
     activeTags=new Set(Array.from(activeTags).filter(function(t){return _titleTags.has(t);}));
   }
 
   // If a title is selected, narrow activeTags to only that title's tags
   var _selTitle=window.proFilter&&window.proFilter.proTitle||"";
   if(_selTitle){
-    var _titleTags=new Set(Object.values(profMeta).filter(function(m){return m.title===_selTitle;}).map(function(m){return m.tag;}));
+    var _titleTags=titleToTags[_selTitle]||new Set();
     activeTags=new Set(Array.from(activeTags).filter(function(t){return _titleTags.has(t);}));
   }
   var uniqueTitles=new Set();var uniqueDDM1=new Set();
-  Object.values(profMeta).forEach(function(meta){var dmMatch=meta.ddm1&&activeDMsLower.has(meta.ddm1.toLowerCase());if(dmMatch){if(meta.title)uniqueTitles.add(meta.title);if(meta.ddm1)uniqueDDM1.add(meta.ddm1);}});
+  profMetaVals.forEach(function(meta){if(meta.title)uniqueTitles.add(meta.title);if(meta.ddm1&&activeDMsLower.has(meta.ddm1.toLowerCase()))uniqueDDM1.add(meta.ddm1);});
   var fnote=filtered.length<campData.length?buildFilterBanner(filtered.length,null):"";
   if(!activeTags.size){page.innerHTML=fnote+"<div class=\"nr\"><p>No profiling tags linked to current filtered campaigns.</p></div>";return;}
   var html=fnote;
   html+="<div class=\"krow\">";
   html+="<div class=\"kpi kb\"><div class=\"kl\">Profiling Requests</div><div class=\"kv\">"+uniqueTitles.size.toLocaleString()+"</div><div class=\"ks\">unique titles</div></div>";
   html+="<div class=\"kpi kb\"><div class=\"kl\">Linked Campaigns</div><div class=\"kv\">"+(function(){var n=new Set();filtered.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();if(profMap[w])n.add(w);});return n.size;})().toLocaleString()+"</div><div class=\"ks\">linked to Campaign Calendar via WBS</div></div>";
-  html+="<div class=\"kpi kb\"><div class=\"kl\">Linked by Tag</div><div class=\"kv\">"+(function(){var proTags=new Set();(window.PROSPECT_DATA||[]).forEach(function(p){String(p.tg||"").split(",").forEach(function(t){t=t.trim();if(t)proTags.add(t);});});var tagDDMs2={};Object.values(profMeta).forEach(function(m){if(m.tag&&m.ddm1){if(!tagDDMs2[m.tag])tagDDMs2[m.tag]=new Set();tagDDMs2[m.tag].add(m.ddm1.toLowerCase());}});return Array.from(activeTags).filter(function(t){if(!proTags.has(t)) return false;var owners=tagDDMs2[t]||new Set();return Array.from(owners).some(function(d){return activeDMsLower.has(d);});}).length;})().toLocaleString()+"</div><div class=\"ks\">profiling tags matched to outreach tags</div></div>";
+  html+="<div class=\"kpi kb\"><div class=\"kl\">Linked by Tag</div><div class=\"kv\">"+(function(){var proTags=new Set();(window.PROSPECT_DATA||[]).forEach(function(p){String(p.tg||"").split(",").forEach(function(t){t=t.trim();if(t)proTags.add(t);});});var tagDDMs2={};profMetaVals.forEach(function(m){if(m.tag&&m.ddm1){if(!tagDDMs2[m.tag])tagDDMs2[m.tag]=new Set();tagDDMs2[m.tag].add(m.ddm1.toLowerCase());}});return Array.from(activeTags).filter(function(t){if(!proTags.has(t)) return false;var owners=tagDDMs2[t]||new Set();return Array.from(owners).some(function(d){return activeDMsLower.has(d);});}).length;})().toLocaleString()+"</div><div class=\"ks\">profiling tags matched to outreach tags</div></div>";
   html+="<div class=\"kpi kb\"><div class=\"kl\">Demand Managers</div><div class=\"kv\">"+uniqueDDM1.size.toLocaleString()+"</div><div class=\"ks\">unique DDM1 from profiling</div></div>";
   html+="</div>";
   var _pTitleF2=window.proFilter&&window.proFilter.proTitle||"";
@@ -3012,25 +3135,27 @@ function renderPro(){
     var prospects=(window.PROSPECT_DATA||[]).filter(function(p){
       if(!p.tg) return false;
       if(!p.tg.split(",").map(function(t){return t.trim();}).some(function(t){return activeTags.has(t);})) return false;
-      if(_proTouched==="yes"&&(!p.touched||p.touched===""||p.touched==="1970-01-01")) return false;
-      if(_proTouched==="no"&&p.touched&&p.touched!==""&&p.touched!=="1970-01-01") return false;
-      if(_pTiF){var ht=p.tg.split(",").map(function(t){return t.trim();}).filter(function(t){return activeTags.has(t);}).some(function(t){return Object.values(profMeta).some(function(m){return m.tag===t&&m.title===_pTiF;});});if(!ht)return false;}
+      if(_proTouched==="yes"&&(!p.touched||p.touched===""||p.touched==="1970-01-01")&&(!p.sc||p.sc===""||p.sc==="1970-01-01")) return false;
+      if(_proTouched==="no"&&((p.touched&&p.touched!==""&&p.touched!=="1970-01-01")||(p.sc&&p.sc!==""&&p.sc!=="1970-01-01"))) return false;
+      if(_pTiF){var _pTiTags=titleToTags[_pTiF]||new Set();var ht=p.tg.split(",").map(function(t){return t.trim();}).filter(function(t){return activeTags.has(t);}).some(function(t){return _pTiTags.has(t);});if(!ht)return false;}
       return true;
     });
-    tagSummary={};
+    var tagMetaSet=new Set();profMetaVals.forEach(function(m){if(m.tag)tagMetaSet.add(m.tag);});
     var tagDDMs={};
-    Object.values(profMeta).forEach(function(m){if(m.tag&&m.ddm1){if(!tagDDMs[m.tag])tagDDMs[m.tag]=new Set();tagDDMs[m.tag].add(m.ddm1.toLowerCase());}});
+    profMetaVals.forEach(function(m){if(m.tag&&m.ddm1){if(!tagDDMs[m.tag])tagDDMs[m.tag]=new Set();tagDDMs[m.tag].add(m.ddm1.toLowerCase());}});
+    var tagSummary={};
     var tagSummary={};
     prospects.forEach(function(p){
       p.tg.split(",").map(function(t){return t.trim();}).filter(function(t){return activeTags.has(t);}).forEach(function(tag){
-        var hasMeta=Object.values(profMeta).some(function(m){return m.tag===tag;});
+        var hasMeta=tagMetaSet.has(tag);
         if(!hasMeta) return;
         var tagOwners=tagDDMs[tag]||new Set();
         var ownedByActiveDM=Array.from(tagOwners).some(function(d){return activeDMsLower.has(d);});
         if(!ownedByActiveDM) return;
-        if(!tagSummary[tag])tagSummary[tag]={pids:new Set(),cos:new Set(),minAdded:"",maxAdded:"",owners:new Set()};
+        if(!tagSummary[tag])tagSummary[tag]={pids:new Set(),cos:new Set(),cosAdded:new Set(),minAdded:"",maxAdded:"",owners:new Set()};
         if(p.id) tagSummary[tag].pids.add(p.id);
         if(p.co) tagSummary[tag].cos.add(p.co);
+        if(p.co&&p.added&&p.added!=="") tagSummary[tag].cosAdded.add(p.co);
         if(p.owner) tagSummary[tag].owners.add(p.owner);
         if(p.created){if(!tagSummary[tag].minAdded||p.created<tagSummary[tag].minAdded)tagSummary[tag].minAdded=p.created;if(!tagSummary[tag].maxAdded||p.created>tagSummary[tag].maxAdded)tagSummary[tag].maxAdded=p.created;}
       });
@@ -3044,20 +3169,21 @@ function renderPro(){
         var av,bv;
         if(sumSortCol==="pids"){return(a[1].pids.size-b[1].pids.size)*sumSortDir;}
         if(sumSortCol==="cos"){return(a[1].cos.size-b[1].cos.size)*sumSortDir;}
+        if(sumSortCol==="cosAdded"){return(a[1].cosAdded.size-b[1].cosAdded.size)*sumSortDir;}
         if(sumSortCol==="minAdded"){av=a[1].minAdded||"";bv=b[1].minAdded||"";return av.localeCompare(bv)*sumSortDir;}
         if(sumSortCol==="maxAdded"){av=a[1].maxAdded||"";bv=b[1].maxAdded||"";return av.localeCompare(bv)*sumSortDir;}
         return a[0].localeCompare(b[0])*sumSortDir;
       });
-      var totPids=new Set();var totCos=new Set();
-      sumEntries.forEach(function(e){e[1].pids.forEach(function(p){totPids.add(p);});e[1].cos.forEach(function(c){totCos.add(c);});});
-      var uniqueSumTitles=new Set(sumEntries.map(function(e){var m2=Object.values(profMeta).find(function(m){return m.tag===e[0];});return m2?m2.title:"";}).filter(Boolean));
+      var totPids=new Set();var totCos=new Set();var totCosAdded=new Set();
+      sumEntries.forEach(function(e){e[1].pids.forEach(function(p){totPids.add(p);});e[1].cos.forEach(function(c){totCos.add(c);});e[1].cosAdded.forEach(function(c){totCosAdded.add(c);});});
+      var uniqueSumTitles=new Set(sumEntries.map(function(e){var m2=tagToMeta[e[0]];return m2?m2.title:"";}).filter(Boolean));
       var countLine="<div style=\"font-size:11px;color:var(--mu);padding:4px 0 6px\">"+sumEntries.length+" tags &middot; "+uniqueSumTitles.size+" unique titles</div>";
       var thS="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0;cursor:pointer";
       function mkThS(col,label,right){var ic=sumSortCol===col?(sumSortDir===-1?"&#8595;":"&#8593;"):"&#8597;";return "<th style=\""+thS+(right?";text-align:right":"")+"\" onclick=\"window._sumSort('"+col+"')\">"+label+" "+ic+"</th>";}
       var tbl="<div style=\"overflow:auto;max-height:300px\"><table style=\"width:100%;border-collapse:collapse;font-size:12px\">"
         +"<thead><tr>"+mkThS("tag","Campaign Title",false)+mkThS("ddm1","DDM1",false)+mkThS("tag2","Tag",false)+mkThS("pids","# Prospects",true)+mkThS("cos","# Companies",true)+"</tr></thead><tbody>";
       sumEntries.forEach(function(e,idx){
-        var proTitle=Object.values(profMeta).find(function(m){return m.tag===e[0];});
+        var proTitle=tagToMeta[e[0]];
         var titleStr=proTitle?proTitle.title:"";var ddm1Str=proTitle?proTitle.ddm1||"":"";
         var isProSel=(window.proFilter&&window.proFilter.proTitle===titleStr);
         tbl+="<tr style=\"border-bottom:1px solid #EBEBEB;background:"+(isProSel?"#D1EFFF":(idx%2===0?"#fff":"#F8FBFF"))+"\">"
@@ -3066,46 +3192,49 @@ function renderPro(){
           +"<td style=\"padding:5px 10px;color:#07838F;font-weight:600;font-size:11px\">"+e[0]+"</td>"
           +"<td style=\"padding:5px 10px;text-align:right;font-weight:700;font-size:11px\">"+e[1].pids.size.toLocaleString()+"</td>"
           +"<td style=\"padding:5px 10px;text-align:right;font-size:11px\">"+e[1].cos.size.toLocaleString()+"</td>"
-          
           +"</tr>";
       });
-      tbl+="<tfoot><tr style=\"background:#F0F4FF;font-weight:700;border-top:2px solid #00144A\"><td style=\"padding:5px 10px;font-size:11px\">TOTAL</td><td></td><td></td><td style=\"padding:5px 10px;text-align:right;font-size:11px\">"+totPids.size.toLocaleString()+"</td><td style=\"padding:5px 10px;text-align:right;font-size:11px\">"+totCos.size.toLocaleString()+"</td><td></td><td></td><td></td></tr></tfoot>";
+      tbl+="<tfoot><tr style=\"background:#F0F4FF;font-weight:700;border-top:2px solid #00144A\"><td style=\"padding:5px 10px;font-size:11px\">TOTAL</td><td></td><td></td><td style=\"padding:5px 10px;text-align:right;font-size:11px\">"+totPids.size.toLocaleString()+"</td><td style=\"padding:5px 10px;text-align:right;font-size:11px\">"+totCos.size.toLocaleString()+"</td></tr></tfoot>";
       summaryEl.innerHTML=countLine+tbl+"</tbody></table></div>";
     }
     var el=document.getElementById("pro-prospect-tbl");
     if(el){
+      var wbsExec={};campData.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var ex=String(r["Executor"]||"").trim();if(w&&ex)wbsExec[w]=ex;});
       prospects.forEach(function(p){
         var pTags=p.tg.split(",").map(function(t){return t.trim();}).filter(function(t){return activeTags.has(t);});
-        var tag=pTags.find(function(t){return Object.values(profMeta).some(function(m){return m.tag===t;});})||"";
+        var tag=pTags.find(function(t){return tagMetaSet.has(t);})||"";
         var campCode="";
         Object.entries(profMap).forEach(function(e){if(e[1]===tag)campCode=e[0];});
-        var proTitle2=Object.values(profMeta).find(function(m){return m.tag===tag;});
+        var proTitle2=tagToMeta[tag];
         p.title=proTitle2?proTitle2.title:"";p.ddm1=proTitle2?proTitle2.ddm1||"":"";p.tag=tag;p.code=campCode;
+        p.executor=wbsExec[campCode]||"";
         p.days=p.created?Math.floor((Date.now()-new Date(p.created).getTime())/(1000*60*60*24)):"";
       });
       var proSortCol=window.proSortCol||"created";var proSortDir=window.proSortDir||-1;
       window._proSort=function(col){if(proSortCol===col)proSortDir*=-1;else{proSortCol=col;proSortDir=-1;}window.proSortCol=proSortCol;window.proSortDir=proSortDir;renderPro();};
-      prospects.sort(function(a,b){var av=a[proSortCol]||"";var bv=b[proSortCol]||"";return av.localeCompare(bv)*proSortDir;});
+      prospects.sort(function(a,b){var av=a[proSortCol];var bv=b[proSortCol];if(proSortCol==="days"){return((av||0)-(bv||0))*proSortDir;}av=av||"";bv=bv||"";return av.localeCompare(bv)*proSortDir;});
       var thD="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0;cursor:pointer";
       function mkThP(col,label){var ic=proSortCol===col?(proSortDir===-1?"&#8595;":"&#8593;"):"&#8597;";return "<th style=\""+thD+"\" onclick=\"window._proSort('"+col+"')\">"+label+" "+ic+"</th>";}
       var header=prospects.length>50?"<div style=\"font-size:11px;color:var(--mu);padding:4px 0 6px\">Showing 50 of "+prospects.length.toLocaleString()+"</div>":"";
       var tbl2="<div style=\"overflow-x:hidden;overflow-y:auto;max-height:400px;width:100%\"><table style=\"width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed\">"
-        +"<colgroup><col style=\"width:12%\"><col style=\"width:8%\"><col style=\"width:10%\"><col style=\"width:12%\"><col style=\"width:7%\"><col style=\"width:6%\"><col style=\"width:5%\"><col style=\"width:9%\"><col style=\"width:6%\"><col style=\"width:6%\"><col style=\"width:5%\"></colgroup>"
-        +"<thead><tr>"+mkThP("title","Campaign Title")+mkThP("ddm1","DDM1")+mkThP("tag","Tag")+mkThP("co","Company")+mkThP("id","Prospect ID")+mkThP("created","Created At")+mkThP("touched","Touched")+mkThP("owner","Owner")+mkThP("stage","Stage")+mkThP("email","Email")+mkThP("days","Age (days)")+"</tr></thead><tbody>";
+        +"<colgroup><col style=\"width:11%\"><col style=\"width:5%\"><col style=\"width:9%\"><col style=\"width:11%\"><col style=\"width:6%\"><col style=\"width:6%\"><col style=\"width:4%\"><col style=\"width:5%\"><col style=\"width:7%\"><col style=\"width:8%\"><col style=\"width:8%\"><col style=\"width:5%\"></colgroup>"
+        +"<thead><tr>"+mkThP("title","Campaign Title")+mkThP("tag","Tag")+mkThP("co","Company")+mkThP("id","Prospect ID")+mkThP("ddm1","DDM1")+mkThP("created","Created At")+mkThP("touched","Touched")+mkThP("executor","Executor")+mkThP("au","Assigned Users")+mkThP("stage","Stage")+mkThP("email","Email")+mkThP("days","Age (days)")+"</tr></thead><tbody>";
       prospects.slice(0,50).forEach(function(p,idx){
-        var touchedDisplay=p.touched&&p.touched!=="1970-01-01"&&p.touched!==""?p.touched:"";
-        tbl2+="<tr style=\"border-bottom:1px solid #EBEBEB;background:"+(idx%2===0?"#fff":"#F8FBFF")+"\">"
+        var touchedDisplay=(p.touched&&p.touched!=="1970-01-01"&&p.touched!=="")?p.touched:((p.sc&&p.sc!=="1970-01-01"&&p.sc!=="")?p.sc:"");
+        var isSel=window.proFilter&&window.proFilter.proTitle===p.title;
+        tbl2+="<tr style=\"border-bottom:1px solid #EBEBEB;cursor:pointer;background:"+(isSel?"#D1EFFF":(idx%2===0?"#fff":"#F8FBFF"))+"\" onclick=\"window.proFilter=window.proFilter||{};window.proFilter.proTitle=(window.proFilter.proTitle===this.dataset.title?null:this.dataset.title);renderPro();\" data-title=\""+(p.title||"").replace(/"/g,"&quot;")+"\">"
           +"<td style=\"padding:5px 10px;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap\" title=\""+p.title+"\">"+p.title+"</td>"
-          +"<td style=\"padding:5px 10px;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap\">"+p.ddm1+"</td>"
           +"<td style=\"padding:5px 10px;font-size:11px;color:#07838F;font-weight:600\">"+p.tag+"</td>"
           +"<td style=\"padding:5px 10px;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap\">"+p.co+"</td>"
           +"<td style=\"padding:5px 10px;font-size:11px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap\">"+p.id+"</td>"
+          +"<td style=\"padding:5px 10px;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap\">"+p.ddm1+"</td>"
           +"<td style=\"padding:5px 10px;font-size:11px\">"+(p.created||"")+"</td>"
           +"<td style=\"padding:5px 10px;font-size:11px\">"+touchedDisplay+"</td>"
-          +"<td style=\"padding:5px 10px;font-size:11px\">"+(p.owner||"")+"</td>"
+          +"<td style=\"padding:5px 10px;font-size:11px\">"+(p.executor||"")+"</td>"
+          +"<td style=\"padding:5px 10px;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap\">"+(p.au||"")+"</td>"
           +"<td style=\"padding:5px 10px;font-size:11px\">"+(p.stage||"")+"</td>"
           +"<td style=\"padding:5px 10px;font-size:11px\">"+(p.email||"")+"</td>"
-          +"<td style=\"padding:5px 10px;font-size:11px;text-align:right;white-space:nowrap\">"+(p.created?(Math.floor((Date.now()-new Date(p.created).getTime())/(1000*60*60*24))):"")+"</td>"
+          +"<td style=\"padding:5px 10px;font-size:11px;text-align:right;white-space:nowrap"+(p.created&&(Math.floor((Date.now()-new Date(p.created).getTime())/(1000*60*60*24)))>20&&(!p.touched||p.touched===""||p.touched==="1970-01-01")&&(!p.sc||p.sc===""||p.sc==="1970-01-01")?";background:#FFF9C4":"")+"\">"+(p.created?(Math.floor((Date.now()-new Date(p.created).getTime())/(1000*60*60*24))):"")+"</td>"
           +"</tr>";
       });
       el.innerHTML=header+tbl2+"</tbody></table></div>";
@@ -3114,10 +3243,10 @@ function renderPro(){
 }
 
 function exportProSummary(){
-  var rows=[["Campaign Title","DDM1","Tag","# Prospects","# Companies","First Created","Last Created"]];
+  var rows=[["Campaign Title","DDM1","Tag","# Prospects","# Companies","Accounts Added","First Created","Last Created"]];
   document.querySelectorAll("#pro-tag-summary tbody tr").forEach(function(tr){
     var cells=tr.querySelectorAll("td");
-    if(cells.length>=7) rows.push([cells[0].textContent,cells[1].textContent,cells[2].textContent,cells[3].textContent,cells[4].textContent,cells[5].textContent,cells[6].textContent]);
+    if(cells.length>=8) rows.push([cells[0].textContent,cells[1].textContent,cells[2].textContent,cells[3].textContent,cells[4].textContent,cells[5].textContent,cells[6].textContent,cells[7].textContent]);
   });
   var csv=rows.map(function(r){return r.map(function(v){v=String(v);if(v.indexOf(",")>-1||v.indexOf('"')>-1)v='"'+v.replace(/"/g,'""')+'"';return v;}).join(",");}).join("\n");
   var a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"}));
