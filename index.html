@@ -130,7 +130,7 @@ tbody td.wc{white-space:normal;word-break:break-word;max-width:260px;line-height
 .mft{padding:12px 20px;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;}
 .btn{padding:7px 18px;border-radius:var(--r);font-size:13px;cursor:pointer;border:1px solid var(--bd);background:var(--wh);color:var(--tx);}
 .btn:hover{background:#ffffff;}
-.ap{padding:8px;overflow-y:auto;overflow-x:hidden;flex:1;min-height:0;}
+.ap{padding:20px 24px;overflow-y:auto;overflow-x:hidden;flex:1;min-height:0;}
 .krow{display:flex;gap:2px;flex-wrap:nowrap;margin-bottom:6px;max-width:100%;overflow:hidden;}
 .kpi{background:var(--wh);border:1px solid #000;border-radius:var(--r);padding:5px 6px;min-width:0;flex:1 1 0%;max-width:11%;height:110px;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden;}
 .kpi.kb{border-top:3px solid #000;}.kpi.kg{border-top:3px solid #000;}
@@ -197,7 +197,7 @@ window.addEventListener('beforeprint',function(){
   });
 });
 window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});</script>
-<script src="data-camp.js?v=20260620"></script>
+<script src="data-camp.js?v=20260620b"></script>
 <script src="data-pipe.js?v=20260619"></script>
 <script src="data-out.js?v=20260619"></script>
 <script src="data-seqco.js?v=20260619"></script>
@@ -861,7 +861,7 @@ function renderExe(){try{
   var seqCount=outF.length;
   var fnote=filtered.length<campData.length?buildFilterBanner(filtered.length,null):"";
   var SL='<div '+'style="display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px">';
-  var html='<div class="ap" style="padding:20px 24px">';
+  var html='<div class="ap">';
   html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Executive Summary</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
   html+='<p style="font-size:12px;color:var(--mu);margin-bottom:14px">Shows ACV € Contribution from Campaigns executed using EMEA Campaign Calendar, connected via WBS/Marketing Code</p>';
   html+=fnote;
@@ -1418,6 +1418,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     html3+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><h2 style="color:var(--dk);margin:0">Campaign and Pipeline Details</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
     html3+="<div class=\"krow\"><div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px\">Campaigns</div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Campaigns</div><div class=\"kv\">"+(new Set(data.filter(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean))).size.toLocaleString()+"</div><div class=\"ks\">tracked in EMEA Campaign Calendar via WBS Code</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Campaigns</div><div class=\"kv\">"+(new Set(data.map(function(r){return String(r["ID"]||"").trim();}).filter(Boolean))).size.toLocaleString()+"</div><div class=\"ks\">by campaign index ID</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Campaigns w/ Pipeline</div><div class=\"kv\">"+matchCamps+"</div><div class=\"ks\">of "+data.length.toLocaleString()+"</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">"+fmtCal(targetPipe)+"</div><div class=\"ks\">from campaign calendar</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
