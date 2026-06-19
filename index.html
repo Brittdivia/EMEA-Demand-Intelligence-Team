@@ -634,12 +634,16 @@ function fmtCal(n){return n>=1000000?(n/1000000).toFixed(1)+"M":n>=1000?(n/1000)
 function getPipeRows(data){
   var wbsSet=new Set(data.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
   var REGION_FILTER_DMS=new Set(["camille sercu","cesare osuji","cyril stutzmann","daniele uggeri","egemen anil","frida wallsargard","javier prieto","natalie raic","sophie baeyens"]);
+  // Calendar regions that are stored as L3 in the pipeline (under Southern Europe L2)
+  // Normalize both sides by replacing ü/replacement-char variants so Türkiye matches
+  function normReg(s){return s.replace(/ü|�/g,"u");}
+  var CAL_L2_TO_PIPE_L3_NORM={"turkiye":"turkiye","turkey":"turkiye","israel":"israel","portugal":"portugal","greece & cyprus":"greece & cyprus","greece and cyprus":"greece & cyprus"};
   var wbsDM={},wbsReg={};
   data.forEach(function(r){
     var wbs=String(r["Campaign/WBS Code"]||"").trim();
     if(!wbs)return;
     wbsDM[wbs]=String(r["Demand Manager"]||"").trim().toLowerCase();
-    wbsReg[wbs]=String(r["Region Name (level 2)"]||"").replace(/^CS /,"");
+    wbsReg[wbs]=String(r["Region Name (level 2)"]||"").replace(/^CS /,"").trim();
   });
   return pipeData.filter(function(p){
     if(!wbsSet.has(String(p["Opp Campaign ID"]||"").trim()))return false;
@@ -648,8 +652,17 @@ function getPipeRows(data){
     var wbs=String(p["Opp Campaign ID"]||"").trim();
     if(REGION_FILTER_DMS.has(wbsDM[wbs]||"")){
       var calReg=wbsReg[wbs]||"";
-      var oppReg=String(p["Region Lvl 2"]||"").trim();
-      if(calReg&&oppReg&&calReg!==oppReg)return false;
+      if(calReg){
+        var oppL2=String(p["Region Lvl 2"]||"").trim();
+        var oppL3=String(p["Region Lvl 3"]||"").trim();
+        // For calendar regions that appear as L3 in pipeline, match on Southern Europe L2 + correct L3
+        var pipeL3key=CAL_L2_TO_PIPE_L3_NORM[normReg(calReg).toLowerCase()];
+        if(pipeL3key){
+          if(oppL2!=="Southern Europe"||normReg(oppL3).toLowerCase()!==pipeL3key)return false;
+        } else {
+          if(oppL2&&oppL2!==calReg)return false;
+        }
+      }
     }
     return true;
   });
@@ -1177,7 +1190,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
   var pdet=pr.map(function(p){
     var wbs=String(p["Opp Campaign ID"]||"").trim();
     var camp=data.find(function(r){return String(r["Campaign/WBS Code"]||"").trim()===wbs;});
-    return{cn:camp?camp["Campaign Name"]:"",reg:camp?camp["Region Name (level 2)"]:"",preg:String(p["Region Lvl 2"]||""),sb:camp?String(camp["Sales Bag"]||"").trim():"",wbs:wbs,oid:String(p["Opportunity ID"]||""),acct:String(p["Account Name"]||""),desc:String(p["Opp Description"]||""),eur:parseFloat(p["Eur"]||0)||0,drm:String(p["DRM Category"]||""),tcp:String(p["TCP Pipeline Source Desc"]||""),hod:String(p["SDE Handover Date"]||""),cqtr:String(p["Create Quarter"]||""),mmid:String(p["MM Identifier"]||""),clqtr:String(p["Closing Qtr"]||""),seqid:camp?String(camp["Sequence ID"]||""):"",dm:camp?String(camp["Demand Manager"]||""):""};
+    return{cn:camp?camp["Campaign Name"]:"",reg:camp?camp["Region Name (level 2)"]:"",preg:String(p["Region Lvl 2"]||"")+(p["Region Lvl 3"]?(" / "+String(p["Region Lvl 3"])):""),sb:camp?String(camp["Sales Bag"]||"").trim():"",wbs:wbs,oid:String(p["Opportunity ID"]||""),acct:String(p["Account Name"]||""),desc:String(p["Opp Description"]||""),eur:parseFloat(p["Eur"]||0)||0,drm:String(p["DRM Category"]||""),tcp:String(p["TCP Pipeline Source Desc"]||""),hod:String(p["SDE Handover Date"]||""),cqtr:String(p["Create Quarter"]||""),mmid:String(p["MM Identifier"]||""),clqtr:String(p["Closing Qtr"]||""),seqid:camp?String(camp["Sequence ID"]||""):"",dm:camp?String(camp["Demand Manager"]||""):""};
   }).sort(function(a,b){return b.eur-a.eur;});
   if(anaFilter.wbs)pdet=pdet.filter(function(r){return r.wbs===anaFilter.wbs;});
 
