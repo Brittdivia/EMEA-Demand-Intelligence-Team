@@ -18,7 +18,7 @@ $includeCol = $csv[0].PSObject.Properties.Name | Where-Object { $_ -match 'Inclu
 $tpColName  = $csv[0].PSObject.Properties.Name | Where-Object { $_ -match 'Target Pipeline - value' }
 Write-Host "Include col: [$includeCol]  TP col: [$tpColName]"
 
-$keep = @("Campaign Name","Campaign No","Campaign Origin","Campaign Priority","Campaign Type","Campaign/WBS Code","Demand Manager","Execution End Date","Execution Start Date","Executor","IAC","IB/NNN","Industry (MC)","Number of Accounts","Region Name (level 2)","Region Name (level 3)","Sales Bag","Sequence ID","SoD","Solution Area L1","Solution Area L2","Starting Quarter","Status","Sub Sales Bag","Activity Sub-Type","Campaign Objective","DG PROGRAM","ID")
+$keep = @("Campaign Name","Campaign No","Campaign Origin","Campaign Priority","Campaign Type","Campaign/WBS Code","Demand Manager","Execution End Date","Execution Start Date","Executor","IAC","IB/NNN","Industry (MC)","Number of Accounts","Region Name (level 2)","Region Name (level 3)","Sales Bag","Sequence ID","SoD","Solution Area L1","Solution Area L2","Starting Quarter","Status","Sub Sales Bag","Activity Sub-Type","Campaign Objective","DG PROGRAM","ID","Index")
 
 $records = $csv | Where-Object { $_.$includeCol -eq 'TRUE' } | ForEach-Object {
     $obj = [ordered]@{}
@@ -37,6 +37,7 @@ Write-Host "Records: $($records.Count)"
 $tpSum = ($records | Measure-Object -Property "Target Pipeline - value kEUR" -Sum).Sum
 Write-Host "TP sum: $([Math]::Round($tpSum/1000,1))M"
 $json = $records | ConvertTo-Json -Compress -Depth 2
-"window.CAMP_DATA=$json;" | Set-Content $tmpOut -Encoding UTF8
+$enc = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText($tmpOut, "window.CAMP_DATA=$json;", $enc)
 Move-Item $tmpOut $outFile -Force
 Write-Host "Done: $([Math]::Round((Get-Item $outFile).Length/1MB,1)) MB"
