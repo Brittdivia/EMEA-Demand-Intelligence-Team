@@ -46,7 +46,7 @@ header{background:#012931;color:#fff;padding:0 24px;height:52px;display:flex;ali
 .hu{font-size:11px;color:#A0AEB8;}
 .hc{font-size:11px;color:#2CE0BF;font-weight:600;}
 .tbar{background:var(--dk);border-top:1px solid rgba(255,255,255,.08);display:flex;padding:0 24px;position:sticky;top:52px;z-index:200;}
-.tbar-sub{background:#012931;display:none;padding:0 24px;position:sticky;top:96px;z-index:195;border-top:1px solid rgba(255,255,255,.08);}
+.tbar-sub{background:#012931;display:none;padding:0 24px;position:sticky;top:96px;z-index:195;border-top:1px solid rgba(255,255,255,.08);border-bottom:2px solid #000;}
 .tbar-sub.on{display:flex;}
 .tbtn{background:none;border:none;color:#fff;font-size:13px;font-weight:500;padding:10px 20px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
 .tbtn:hover{color:#fff;}
@@ -149,6 +149,10 @@ tbody td.wc{white-space:normal;word-break:break-word;max-width:260px;line-height
 .cb{padding:8px 8px 4px 8px;}.cb canvas{max-height:none;}
 .pnote{font-size:11px;color:var(--mu);margin-bottom:16px;padding:8px 12px;background:#F7F9FF;border:1px solid #D0E4FF;border-radius:var(--r);}
 #anaPage .kpi{flex:1 1 0%;min-width:0;max-width:11%;}
+#anaPage .kpi .kv{font-size:22px;}
+#anaPage .kpi .ks{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#anaPage .krow:nth-of-type(2) .kpi{flex:0 0 8%;max-width:8%;}
+#anaPage .krow:nth-of-type(2){justify-content:flex-start;}
 #ovwPage .kpi{padding:12px 10px;height:110px;min-width:0;flex:1 1 0%;max-width:160px;}
 #ovwPage .kl{font-size:13px;letter-spacing:0;margin-bottom:3px;white-space:normal;line-height:1.2;}
 #ovwPage .kv{font-size:34px;line-height:1;margin-bottom:3px;}
@@ -1463,10 +1467,6 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Campaigns w/ Pipeline</div><div class=\"kv\">"+matchCamps+"</div><div class=\"ks\">of "+data.length.toLocaleString()+"</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">"+fmtCal(targetPipe)+"</div><div class=\"ks\">from campaign calendar</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Top Sales Bag</div><div class=\"kv\">"+topSBPct+"</div><div class=\"ks\" style=\"white-space:normal;font-size:10px;line-height:1.3\">"+topSBName+"</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Top Industry</div><div class=\"kv\">"+topIndPct+"</div><div class=\"ks\" style=\"white-space:normal;font-size:10px;line-height:1.3\">"+topInd[0]+"</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Top IB/NNN</div><div class=\"kv\">"+topIBNNPct+"</div><div class=\"ks\" style=\"white-space:normal;font-size:10px;line-height:1.3\">"+topIBNN[0]+"</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Top IAC</div><div class=\"kv\">"+topIACPct+"</div><div class=\"ks\" style=\"white-space:normal;font-size:10px;line-height:1.3\">"+topIAC[0]+"</div></div>";
     html3+="<div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px;margin-left:8px\">Results</div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline &#8364;</div><div class=\"kv\">"+fmtE(totEur)+"</div><div class=\"ks\">Week 24 &middot; 16 Jun 2026</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Distinct Opps Created</div><div class=\"kv\">"+totOpps.toLocaleString()+"</div><div class=\"ks\">connected to WBS/Campaign code</div></div>";
@@ -1480,41 +1480,43 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     var notHodOpps=notHodOppsSet.size;
     var notHodEur=pr.filter(function(p){return !p["SDE Handover Date"]||p["SDE Handover Date"]==="";}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
     html3+="</div>";
-    // Status count table inline with KPI rows
+    var ibnnMap2={};data.forEach(function(r){var v=String(r["IB/NNN"]||"").trim();if(!v)return;v.split(",").map(function(s){return s.trim();}).filter(Boolean).forEach(function(s){ibnnMap2[s]=(ibnnMap2[s]||0)+1;});});var topIBNN=topOppPct?topOppPct(ibnnMap2):{pct:"0%",name:"N/A"};
+    html3+="<div class=\"krow\" style=\"margin-bottom:20px\"><div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px\">Targeting</div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Top IB/NNN (Campaigns)</div><div class=\"kv\">"+topIBNN.pct+"</div><div class=\"ks\" style=\"white-space:normal;font-size:10px;line-height:1.3\">"+topIBNN.name+"</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Top Sales Bag</div><div class=\"kv\">"+topSBPct+"</div><div class=\"ks\" style=\"white-space:normal;font-size:10px;line-height:1.3\">"+topSBName+"</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Top Industry</div><div class=\"kv\">"+topIndPct+"</div><div class=\"ks\" style=\"white-space:normal;font-size:10px;line-height:1.3\">"+topInd[0]+"</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Top IAC</div><div class=\"kv\">"+topIACPct+"</div><div class=\"ks\" style=\"white-space:normal;font-size:10px;line-height:1.3\">"+fmtVal(topIAC[0])+"</div></div>";
+
+
+
+
+
+
+
+
+    html3+="<div style=\"flex:1 1 0%;max-width:11%;visibility:hidden\"></div>";
+    html3+="<div style=\"flex:1 1 0%;max-width:11%;visibility:hidden\"></div>";
+    html3+="<div style=\"flex:1 1 0%;max-width:11%;visibility:hidden\"></div>";
+    html3+="</div>";
+    // Status count table — below last krow
     var staCounts={};data.forEach(function(r){var s=String(r["Status"]||"").trim();s=s==="RunningExecuted"?"Executed":s==="Canceled"?"Cancelled":s;if(s)staCounts[s]=(staCounts[s]||0)+1;});
     var staEntries=Object.entries(staCounts).sort(function(a,b){return b[1]-a[1];});
-    html3+="<div style=\"margin-bottom:10px;margin-top:4px;display:inline-block;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;font-size:12px\">";
-    html3+="<div style=\"padding:4px 14px;background:#f5f5f5;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--mu);border-bottom:1px solid var(--bd)\">Campaign Status</div>";
+    html3+="<div style=\"display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;margin-top:4px\">";
+    html3+="<div style=\"display:inline-block;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;font-size:12px\">";
+    html3+="<div style=\"padding:4px 14px;background:var(--bl);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#fff;border-bottom:1px solid var(--bd)\">Campaign Status</div>";
     html3+="<table style=\"border-collapse:collapse\"><thead><tr>";
     staEntries.forEach(function(e){html3+="<th style=\"padding:5px 14px;background:#00144A;color:#fff;font-size:11px;font-weight:600;border-right:1px solid #2a3a5a;white-space:nowrap\">"+e[0]+"</th>";});
     html3+="</tr></thead><tbody><tr>";
     staEntries.forEach(function(e){html3+="<td style=\"padding:6px 14px;text-align:center;font-size:14px;font-weight:700;color:var(--dk);border-right:1px solid var(--bd)\">"+e[1].toLocaleString()+"</td>";});
     html3+="</tr></tbody></table></div>";
-    // Starting Quarter table
-    var qtrInline=countBy("Starting Quarter").sort(function(a,b){return String(a[0]).localeCompare(String(b[0]));});
-    html3+="<div style=\"margin-bottom:10px;margin-top:4px;display:inline-block;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;font-size:12px\">";
-    html3+="<div style=\"padding:4px 12px;background:#f5f5f5;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--mu);border-bottom:1px solid var(--bd)\">Starting Quarter</div>";
+    var qtrInline2=countBy("Starting Quarter").sort(function(a,b){return String(a[0]).localeCompare(String(b[0]));});
+    html3+="<div style=\"display:inline-block;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;font-size:12px\">";
+    html3+="<div style=\"padding:4px 12px;background:var(--bl);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#fff;border-bottom:1px solid var(--bd)\">Starting Quarter</div>";
     html3+="<table style=\"border-collapse:collapse\"><thead><tr>";
-    qtrInline.forEach(function(r){html3+="<th style=\"padding:5px 12px;background:#00144A;color:#fff;font-size:11px;font-weight:600;border-right:1px solid #2a3a5a;white-space:nowrap\">"+(r[0]||"(none)")+"</th>";});
+    qtrInline2.forEach(function(r){html3+="<th style=\"padding:5px 12px;background:#00144A;color:#fff;font-size:11px;font-weight:600;border-right:1px solid #2a3a5a;white-space:nowrap\">"+(r[0]||"(none)")+"</th>";});
     html3+="</tr></thead><tbody><tr>";
-    qtrInline.forEach(function(r){html3+="<td style=\"padding:6px 12px;text-align:center;font-size:14px;font-weight:700;color:var(--dk);border-right:1px solid var(--bd)\">"+r[1].toLocaleString()+"</td>";});
+    qtrInline2.forEach(function(r){html3+="<td style=\"padding:6px 12px;text-align:center;font-size:14px;font-weight:700;color:var(--dk);border-right:1px solid var(--bd)\">"+r[1].toLocaleString()+"</td>";});
     html3+="</tr></tbody></table></div>";
-    var ibnnMap2={};data.forEach(function(r){var v=String(r["IB/NNN"]||"").trim();if(!v)return;v.split(",").map(function(s){return s.trim();}).filter(Boolean).forEach(function(s){ibnnMap2[s]=(ibnnMap2[s]||0)+1;});});var topIBNN=topOppPct?topOppPct(ibnnMap2):{pct:"0%",name:"N/A"};
-    html3+="<div class=\"krow\" style=\"margin-bottom:20px\"><div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px\">Targeting</div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Top IB/NNN (Campaigns)</div><div class=\"kv\">"+topIBNN.pct+"</div><div class=\"ks\" style=\"white-space:normal;font-size:10px;line-height:1.3\">"+topIBNN.name+"</div></div>";
-
-
-
-
-
-
-
-
-    html3+="<div style=\"flex:1 1 0%;max-width:11%;visibility:hidden\"></div>";
-    html3+="<div style=\"flex:1 1 0%;max-width:11%;visibility:hidden\"></div>";
-    html3+="<div style=\"flex:1 1 0%;max-width:11%;visibility:hidden\"></div>";
-    html3+="<div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px;margin-left:8px\">Targeting Results</div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Top RBC (Opps)</div><div class=\"kv\">"+trRBC.pct+"</div><div class=\"ks\" style=\"white-space:normal;font-size:10px;line-height:1.3\">"+trRBC.name+"</div></div>";
     html3+="</div>";
 
   }
@@ -1588,34 +1590,28 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     });
     
   }
-  html3+=(pageId!=="ovwPage"?"<div class=\"sec\">Campaign Overview</div>":"");
+  html3+=(pageId!=="ovwPage"?"<div class=\"sec\">Campaign and Pipeline Details</div>":"");
   html3+=(pageId!=="ovwPage"?"<div style=\"display:flex;gap:12px;margin-bottom:20px;align-items:flex-start;overflow:hidden;max-width:100%\">"
-    +"<div class=\"cc\" style=\"flex:0 0 45%;min-width:0\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between;padding:6px 16px;font-size:13px;line-height:1.2\"><span>Top 10 Campaign Profiles (Sales Bag / Industry / IB-NNN / IAC / Region)</span><div style=\"display:flex;gap:3px\"><button id=\""+pfx+"-combo-sort-camps\" onclick=\"window.comboSort=&apos;camps&apos;;if(activeTab===&apos;ana&apos;)renderAna();\" style=\"font-size:10px;padding:2px 7px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Campaigns</button><button id=\""+pfx+"-combo-sort-acv\" onclick=\"window.comboSort=&apos;acv&apos;;if(activeTab===&apos;ana&apos;)renderAna();\" style=\"font-size:10px;padding:2px 7px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By ACV</button><button id=\""+pfx+"-combo-sort-opps\" onclick=\"window.comboSort=&apos;opps&apos;;if(activeTab===&apos;ana&apos;)renderAna();\" style=\"font-size:10px;padding:2px 7px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Opps</button></div></div><div class=\"cb\" style=\"height:400px;padding:2px\"><canvas id=\""+pfx+"-combo\"></canvas></div></div>"
+    +"<div class=\"cc\" style=\"flex:0 0 45%;min-width:0\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between;padding:6px 16px;font-size:13px;line-height:1.2\"><span>Top 13 Campaign Profiles (Sales Bag / Industry / IB-NNN / IAC / Region)</span><div style=\"display:flex;gap:3px\"><button id=\""+pfx+"-combo-sort-camps\" onclick=\"window.comboSort=&apos;camps&apos;;if(activeTab===&apos;ana&apos;)renderAna();\" style=\"font-size:10px;padding:2px 7px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Campaigns</button><button id=\""+pfx+"-combo-sort-acv\" onclick=\"window.comboSort=&apos;acv&apos;;if(activeTab===&apos;ana&apos;)renderAna();\" style=\"font-size:10px;padding:2px 7px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By ACV</button><button id=\""+pfx+"-combo-sort-opps\" onclick=\"window.comboSort=&apos;opps&apos;;if(activeTab===&apos;ana&apos;)renderAna();\" style=\"font-size:10px;padding:2px 7px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Opps</button></div></div><div class=\"cb\" style=\"height:500px;padding:2px\"><canvas id=\""+pfx+"-combo\"></canvas></div></div>"
     +"<div style=\"display:flex;flex-direction:column;gap:8px;flex:1;min-width:0\">"
     +"<div style=\"display:flex;gap:8px\">"
-    +"<div class=\"cc\" style=\"flex:1\"><div class=\"ch\" style=\"padding:6px 8px;font-size:11px;display:flex;align-items:center;justify-content:space-between\"># Campaigns by Type<span style=\"display:flex;gap:8px;font-size:9px;font-weight:400;color:var(--mu)\"><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#00144A;border-radius:2px\"></span># Camps</span><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#07838F88;border-radius:2px\"></span>ACV €</span></span></div><div class=\"cb\" style=\"height:280px\"><canvas id=\""+pfx+"-typ\"></canvas></div></div>"
-    +"<div class=\"cc\" style=\"flex:1\"><div class=\"ch\" style=\"padding:6px 8px;font-size:11px;display:flex;align-items:center;justify-content:space-between\"># Campaigns by IAC<span style=\"display:flex;gap:8px;font-size:9px;font-weight:400;color:var(--mu)\"><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#00144A;border-radius:2px\"></span># Camps</span><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#07838F88;border-radius:2px\"></span>ACV €</span></span></div><div class=\"cb\" style=\"height:280px\"><canvas id=\""+pfx+"-iac\"></canvas></div></div>"
+    +"<div class=\"cc\" style=\"flex:1\"><div class=\"ch\" style=\"padding:6px 8px;font-size:11px;display:flex;align-items:center;justify-content:space-between\"><span id=\""+pfx+"-typ-title\"># Campaigns by Type</span><div style=\"display:flex;align-items:center;gap:4px\"><span style=\"display:flex;gap:8px;font-size:9px;font-weight:400;color:var(--mu)\"><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#00144A;border-radius:2px\"></span># Camps</span><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#07838F88;border-radius:2px\"></span>ACV €</span></span><button id=\""+pfx+"-typ-btn-type\" onclick=\"window.typMode=&apos;type&apos;;renderAna();\" style=\"font-size:9px;padding:1px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Type</button><button id=\""+pfx+"-typ-btn-dat\" onclick=\"window.typMode=&apos;dat&apos;;renderAna();\" style=\"font-size:9px;padding:1px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DAT Support</button></div></div><div class=\"cb\" style=\"height:280px\"><canvas id=\""+pfx+"-typ\"></canvas></div></div>"
+    +"<div class=\"cc\" style=\"flex:1\"><div class=\"ch\" style=\"padding:6px 8px;font-size:11px;display:flex;align-items:center;justify-content:space-between\"># Campaigns by DG Program<span style=\"display:flex;gap:8px;font-size:9px;font-weight:400;color:var(--mu)\"><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#00144A;border-radius:2px\"></span># Camps</span><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#07838F88;border-radius:2px\"></span>ACV €</span></span></div><div class=\"cb\" style=\"height:280px\"><canvas id=\""+pfx+"-dgprog\"></canvas></div></div>"
     +"</div>"
     +"<div style=\"display:flex;gap:8px\">"
     +"<div class=\"cc\" style=\"flex:1;overflow:hidden\"><div class=\"ch\" style=\"padding:2px 8px;font-size:10px;display:flex;align-items:center;justify-content:space-between\"># Campaigns by SoD<span style=\"display:flex;gap:8px;font-size:9px;font-weight:400;color:var(--mu)\"><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#00144A;border-radius:2px\"></span># Camps</span><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#07838F88;border-radius:2px\"></span>ACV €</span></span></div><div class=\"cb\" style=\"height:200px\"><canvas id=\""+pfx+"-sod\"></canvas></div></div>"
+    +"<div class=\"cc\" style=\"flex:1;overflow:hidden\"><div class=\"ch\" style=\"padding:6px 8px;font-size:11px;display:flex;align-items:center;justify-content:space-between\"># Campaigns by IAC<span style=\"display:flex;gap:8px;font-size:9px;font-weight:400;color:var(--mu)\"><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#00144A;border-radius:2px\"></span># Camps</span><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#07838F88;border-radius:2px\"></span>ACV €</span></span></div><div class=\"cb\" style=\"height:200px\"><canvas id=\""+pfx+"-iac\"></canvas></div></div>"
     +"</div>"
     +"</div>"
     +"</div>":"");
-  if(pageId!=="ovwPage"){html3+="<div style=\"display:flex;gap:14px;margin-bottom:20px;overflow:hidden;max-width:100%\">";
-  html3+="<div class=\"cc\" id=\"card-"+pfx+"-combo\" style=\"flex:1;min-width:0;height:410px;overflow:hidden\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between\"><span id=\"cv-title-"+pfx+"\">Campaigns by Region</span><div style=\"display:flex;gap:4px\"><button id=\"cv-reg-"+pfx+"\" onclick=\"window.campView=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 8px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Region</button><button id=\"cv-sb-"+pfx+"\" onclick=\"window.campView=&apos;sb&apos;;window.sbDrill={};renderAna();\" style=\"font-size:10px;padding:2px 8px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Sales Bag</button><button id=\"cv-sort-"+pfx+"\" onclick=\"window.campSort=(window.campSort===&apos;opps&apos;?&apos;camps&apos;:&apos;opps&apos;);renderAna();\" style=\"font-size:10px;padding:2px 8px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by #</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-regorsb\"></canvas></div></div>";
-
-  html3+="<div class=\"cc\" style=\"flex:1;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"padding:6px 8px;font-size:11px;display:flex;align-items:center;justify-content:space-between\"># Campaigns by DG Program<span style=\"display:flex;gap:8px;font-size:9px;font-weight:400;color:var(--mu)\"><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#00144A;border-radius:2px\"></span># Camps</span><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#07838F88;border-radius:2px\"></span>ACV €</span></span></div><div class=\"cb\" style=\"height:320px\"><canvas id=\""+pfx+"-dgprog\"></canvas></div></div>";
-  html3+="<div class=\"cc\" style=\"flex:1;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"padding:6px 8px;font-size:11px;display:flex;align-items:center;justify-content:space-between\"># Campaigns by DAT Support<span style=\"display:flex;gap:8px;font-size:9px;font-weight:400;color:var(--mu)\"><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#00144A;border-radius:2px\"></span># Camps</span><span style=\"display:flex;align-items:center;gap:3px\"><span style=\"display:inline-block;width:10px;height:10px;background:#07838F88;border-radius:2px\"></span>ACV €</span></span></div><div class=\"cb\" style=\"height:320px\"><canvas id=\""+pfx+"-datsupp\"></canvas></div></div>";
-  html3+="</div>";}
+  // DAT Support chart removed - accessible via Type chart toggle
   // All 5 charts only on anaPage
-  html3+=(pageId!=="ovwPage"?"<div class=\"sec\">Pipeline Overview</div>":"");
+  html3+=(pageId!=="ovwPage"?"":"");
   html3+=(pageId!=="ovwPage"?"<div style=\"display:flex;gap:12px;margin-bottom:20px;align-items:stretch\">"
-    +"<div class=\"cc\" style=\"flex:1;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"padding:4px 8px;font-size:10px\">Campaign Results - by Handover Status</div><div class=\"cb\" style=\"height:320px;padding:2px\"><canvas id=\""+pfx+"-hod\"></canvas></div></div>"
-    +"</div>":"");
-  html3+=(pageId!=="ovwPage"?"<div style=\"display:flex;gap:14px;margin-bottom:28px;overflow:hidden\">"
-    +"<div class=\"cc\" id=\"card-"+pfx+"-re2\" style=\"flex:1;min-width:0;height:410px;overflow:hidden\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span style=\"font-size:12px;font-weight:600;white-space:nowrap\">Pipeline Results - by Region</span><div style=\"display:flex;gap:3px;flex-shrink:0\"><button onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Region</button><button onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Sales Bag</button><button onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Mastercode</button><button id=\"re2-sort-eur\" onclick=\"window.re2Sort=&apos;eur&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by &euro;</button><button id=\"re2-sort-opps\" onclick=\"window.re2Sort=&apos;opps&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by Opps</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2\"></canvas></div></div>"
-    +"<div class=\"cc\" id=\"card-"+pfx+"-re2SB\" style=\"display:none;flex:1;min-width:0;height:410px;overflow:hidden\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between\">Pipeline Results - by Sales Bag<div style=\"display:flex;gap:4px\"><button onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 8px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Region</button><button onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 8px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Sales Bag</button><button onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 8px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Mastercode</button></div><div style=\"display:flex;gap:4px\"><button id=\"re2SB-sort-eur\" onclick=\"window.re2SBSort='eur';renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by &euro;</button><button id=\"re2SB-sort-opps\" onclick=\"window.re2SBSort='opps';renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by Opps</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2SB\"></canvas></div></div>"
-    +"<div class=\"cc\" id=\"card-"+pfx+"-re2MC\" style=\"display:none;flex:1;min-width:0;height:410px;overflow:hidden\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span style=\"font-size:12px;font-weight:600;white-space:nowrap\">Pipeline Results - by Mastercode</span><div style=\"display:flex;gap:3px;flex-shrink:0\"><button onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Region</button><button onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Sales Bag</button><button onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Mastercode</button><button id=\"re2MC-sort-eur\" onclick=\"window.re2MCSort=&apos;eur&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by &euro;</button><button id=\"re2MC-sort-opps\" onclick=\"window.re2MCSort=&apos;opps&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by Opps</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2MC\"></canvas></div></div>"
+    +"<div class=\"cc\" style=\"flex:0 0 25%;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"padding:4px 8px;font-size:10px\">Campaign Results - by Handover Status</div><div class=\"cb\" style=\"height:370px;padding:2px\"><canvas id=\""+pfx+"-hod\"></canvas></div></div>"
+    +"<div class=\"cc\" id=\"card-"+pfx+"-re2\" style=\"flex:1;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span style=\"font-size:12px;font-weight:600;white-space:nowrap\">Pipeline Results - by Region</span><div style=\"display:flex;gap:3px;flex-shrink:0\"><button onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Region</button><button onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Sales Bag</button><button onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Mastercode</button><button id=\"re2-sort-eur\" onclick=\"window.re2Sort=&apos;eur&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by &euro;</button><button id=\"re2-sort-opps\" onclick=\"window.re2Sort=&apos;opps&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by Opps</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2\"></canvas></div></div>"
+    +"<div class=\"cc\" id=\"card-"+pfx+"-re2SB\" style=\"display:none;flex:1;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between\">Pipeline Results - by Sales Bag<div style=\"display:flex;gap:4px\"><button onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 8px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Region</button><button onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 8px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Sales Bag</button><button onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 8px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Mastercode</button></div><div style=\"display:flex;gap:4px\"><button id=\"re2SB-sort-eur\" onclick=\"window.re2SBSort='eur';renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by &euro;</button><button id=\"re2SB-sort-opps\" onclick=\"window.re2SBSort='opps';renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by Opps</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2SB\"></canvas></div></div>"
+    +"<div class=\"cc\" id=\"card-"+pfx+"-re2MC\" style=\"display:none;flex:1;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span style=\"font-size:12px;font-weight:600;white-space:nowrap\">Pipeline Results - by Mastercode</span><div style=\"display:flex;gap:3px;flex-shrink:0\"><button onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Region</button><button onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Sales Bag</button><button onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">By Mastercode</button><button id=\"re2MC-sort-eur\" onclick=\"window.re2MCSort=&apos;eur&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by &euro;</button><button id=\"re2MC-sort-opps\" onclick=\"window.re2MCSort=&apos;opps&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by Opps</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2MC\"></canvas></div></div>"
     +"</div>":"");
       if(pageId!=="ovwPage"){
   var thS2="background:#012931;color:#fff;padding:5px 6px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;white-space:normal;position:sticky;top:0;border-right:1px solid #1B4F5A;max-width:70px;line-height:1.3";
@@ -1844,20 +1840,28 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
   ]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"top",labels:{font:{size:10},boxWidth:10,padding:8}},datalabels:{display:true}},layout:{padding:{right:60,bottom:0,top:4}},scales:{x:{display:false},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:12},autoSkip:false},afterFit:function(s){s.width=regYW;}}}}},
   "Region Name (level 2)","Region Name (level 2)","Region Name (level 2)","Region Name (level 2)");
   }
-  var typRaw=countBy("Campaign Type");
-  // Build ACV per campaign type
+  var typMode=window.typMode||"type";
+  var typRaw=countBy(typMode==="dat"?"Digital Assets team support":"Campaign Type");
+  // Build ACV per campaign type / DAT support
   var typEurMap={};
   pr.forEach(function(p){
     var wbs=String(p["Opp Campaign ID"]||"").trim();
     var camp=data.find(function(r){return String(r["Campaign/WBS Code"]||"").trim()===wbs;});
     if(!camp)return;
-    var t=String(camp["Campaign Type"]||"").trim();if(!t)return;
+    var t=String(camp[typMode==="dat"?"Digital Assets team support":"Campaign Type"]||"").trim();if(!t)return;
     typEurMap[t]=(typEurMap[t]||0)+(parseFloat(p["Eur"]||0)||0);
   });
   var typSorted=typRaw.sort(function(a,b){return b[1]-a[1];});
   var typLabels=typSorted.map(function(r){return r[0];});
   var typCounts=typSorted.map(function(r){return r[1];});
   var typEurs=typSorted.map(function(r){return typEurMap[r[0]]||0;});
+  // Update title and highlight active button
+  var typTitleEl=document.getElementById(pfx+"-typ-title");
+  if(typTitleEl)typTitleEl.textContent=typMode==="dat"?"# Campaigns by DAT Support":"# Campaigns by Type";
+  var typBtnType=document.getElementById(pfx+"-typ-btn-type");
+  var typBtnDat=document.getElementById(pfx+"-typ-btn-dat");
+  if(typBtnType){typBtnType.style.background=typMode==="type"?"#00144A":"";typBtnType.style.color=typMode==="type"?"#fff":"";}
+  if(typBtnDat){typBtnDat.style.background=typMode==="dat"?"#00144A":"";typBtnDat.style.color=typMode==="dat"?"#fff":"";}
   mkC(pfx+"-typ",{type:"bar",data:{labels:typLabels,datasets:[
     {label:"# Campaigns",data:typCounts,backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,xAxisID:"xt1",datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString();},font:{size:9},color:"#32363A"}},
     {label:"ACV €",data:typEurs,backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,xAxisID:"xt2",datalabels:{anchor:"end",align:"end",formatter:function(v){return v>0?"€"+fmtE(v):"";},font:{size:9},color:"#07838F"}}
@@ -1891,7 +1895,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
       if(comboSortMode==="acv")return(comboEurMap[b[0]]||0)-(comboEurMap[a[0]]||0);
       if(comboSortMode==="opps")return(comboOppsMap[b[0]]?comboOppsMap[b[0]].size:0)-(comboOppsMap[a[0]]?comboOppsMap[a[0]].size:0);
       return b[1]-a[1];
-    }).slice(0,10);
+    }).slice(0,13);
     var comboLabels=top10Combos.map(function(r){return r[0].split("|").map(function(s,idx,arr){var t=s.trim();return fmtVal(idx===arr.length-1?fmtReg(t):t);}).join(" / ");});
     var comboVals=top10Combos.map(function(r){return r[1];});
     var comboEurVals=top10Combos.map(function(r){return comboEurMap[r[0]]||0;});
@@ -1903,10 +1907,10 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
     if(btnCamps){btnCamps.style.background=comboSortMode==="camps"?"#00144A":"";btnCamps.style.color=comboSortMode==="camps"?"#fff":"";}
     if(btnAcv){btnAcv.style.background=comboSortMode==="acv"?"#00144A":"";btnAcv.style.color=comboSortMode==="acv"?"#fff":"";}
     if(btnOpps){btnOpps.style.background=comboSortMode==="opps"?"#00144A":"";btnOpps.style.color=comboSortMode==="opps"?"#fff":"";}
-    mkC(pfx+"-combo",{type:"bar",data:{labels:comboLabels.slice(0,10),datasets:[
-      {label:"# Campaigns",data:comboVals.slice(0,10),backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,xAxisID:"x1",datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString();},font:{size:10},color:"#32363A"}},
-      {label:"ACV €",data:comboEurVals.slice(0,10),backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,xAxisID:"x2",datalabels:{anchor:"end",align:"end",formatter:function(v){return v>0?"€"+fmtE(v):"";},font:{size:9},color:"#07838F"}},
-      {label:"# Opps",data:comboOppVals.slice(0,10),backgroundColor:"#32363A",borderColor:"#32363A",borderWidth:1,xAxisID:"x1",datalabels:{anchor:"end",align:"end",formatter:function(v){return v>0?v.toLocaleString()+" opps":"";},font:{size:9},color:"#32363A"}}
+    mkC(pfx+"-combo",{type:"bar",data:{labels:comboLabels.slice(0,13),datasets:[
+      {label:"# Campaigns",data:comboVals.slice(0,13),backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,xAxisID:"x1",datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString();},font:{size:10},color:"#32363A"}},
+      {label:"ACV €",data:comboEurVals.slice(0,13),backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,xAxisID:"x2",datalabels:{anchor:"end",align:"end",formatter:function(v){return v>0?"€"+fmtE(v):"";},font:{size:9},color:"#07838F"}},
+      {label:"# Opps",data:comboOppVals.slice(0,13),backgroundColor:"#32363A",borderColor:"#32363A",borderWidth:1,xAxisID:"x1",datalabels:{anchor:"end",align:"end",formatter:function(v){return v>0?v.toLocaleString()+" opps":"";},font:{size:9},color:"#32363A"}}
     ]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:true}},layout:{padding:{right:70}},
       scales:{
         x1:{position:"bottom",grid:{color:"rgba(0,0,0,.05)"},ticks:{color:"#6A6D70",font:{size:10}},title:{display:true,text:"# Campaigns / # Opps",font:{size:10}}},
@@ -1925,12 +1929,15 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
   var re2BtnEur=document.getElementById("re2-sort-eur");var re2BtnOpps=document.getElementById("re2-sort-opps");
   if(re2BtnEur){re2BtnEur.style.background=re2SortMode==="eur"?"#00144A":"";re2BtnEur.style.color=re2SortMode==="eur"?"#fff":"";}
   if(re2BtnOpps){re2BtnOpps.style.background=re2SortMode==="opps"?"#00144A":"";re2BtnOpps.style.color=re2SortMode==="opps"?"#fff":"";}
+  var re2CampMap={};data.forEach(function(r){var reg=String(r["Region Name (level 2)"]||"").trim();if(reg)re2CampMap[reg]=(re2CampMap[reg]||0)+1;});
+  var re2Camps=re2Sorted.map(function(r){return re2CampMap[r[0]]||0;});
   mkC(pfx+"-re2",{type:"bar",data:{labels:re2Labs,datasets:[
-    {label:"Pipeline €",data:re2Eur,backgroundColor:PALA[0],borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:11},color:"#32363A"}},
-    {label:"# Opps",data:re2Opps,backgroundColor:PALA[4],borderColor:PAL[4],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v+" opps";},font:{size:11},color:PAL[4]}}
+    {label:"Pipeline €",data:re2Eur,backgroundColor:PALA[0],borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:11},color:"#000"}},
+    {label:"# Opps",data:re2Opps,backgroundColor:PALA[4],borderColor:PAL[4],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v+" opps";},font:{size:11},color:"#000"}},
+    {label:"# Campaigns",data:re2Camps,backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v+" camps";},font:{size:10},color:"#000"}}
   ]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
     plugins:{legend:{display:true,position:"top",labels:{font:{size:10},boxWidth:10,padding:8}},datalabels:{display:true}},
-    layout:{padding:{right:40,bottom:0,top:4}},
+    layout:{padding:{right:60,bottom:0,top:4}},
     scales:{x:{display:false},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:12},autoSkip:false},afterFit:function(s){s.width=re2YW;}}}}},"Region Name (level 2)");
   // Pipeline and Opp # by Sales Bag with drill-down
   if(!window.re2SBDrill)window.re2SBDrill={};
@@ -2088,7 +2095,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
     pr.forEach(function(p){var oid=String(p["Opportunity ID"]||"");if(!oid||seenOppTCP[oid])return;seenOppTCP[oid]=true;var tcp=String(p["TCP Pipeline Source Desc"]||"").trim();if(tcp)oppTCPCount[tcp]=(oppTCPCount[tcp]||0)+1;});
     var oppTCPEur={};pr.forEach(function(p){var tcp=String(p["TCP Pipeline Source Desc"]||"").trim();if(tcp)oppTCPEur[tcp]=(oppTCPEur[tcp]||0)+(parseFloat(p["Eur"]||0)||0);});var oppTCPRows=Object.entries(oppTCPCount).sort(function(a,b){return b[1]-a[1];});
     mkC(pfx+"-oppTCP",{type:"bar",data:{labels:oppTCPRows.map(function(r){return r[0];}),datasets:[{label:"# Opps",data:oppTCPRows.map(function(r){return r[1];}),backgroundColor:PALA[0],borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString();},font:{size:9},color:"#32363A"}},{label:"Pipeline €",data:oppTCPRows.map(function(r){return oppTCPEur[r[0]]||0;}),backgroundColor:PALA[4],borderColor:PAL[4],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:9},color:PAL[4]}}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"top",labels:{font:{size:9},boxWidth:10}},datalabels:{display:true}},layout:{padding:{right:40}},scales:{x:{display:false},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:10},autoSkip:false},afterFit:function(s){s.width=80;}}}}});
-  if(pageId!=="ovwPage"){var hodEl=document.getElementById(pfx+"-hod");if(hodEl){if(charts[pfx+"-hod"])charts[pfx+"-hod"].destroy();charts[pfx+"-hod"]=new Chart(hodEl.getContext("2d"),{type:"bar",data:{labels:["Handed Over","Not Handed Over"],datasets:[{label:"# Opps",data:[hodOpps,notHodOpps],backgroundColor:[PAL[0],PAL[1]],borderWidth:0,datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString()+" opps";},font:{size:10},color:"#32363A"}},{label:"Pipeline €",data:[hodEur2,notHodEur],backgroundColor:[PALA[4],PALA[5]],borderWidth:0,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:10},color:PAL[4]}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"top",labels:{font:{size:10},boxWidth:12}},datalabels:{display:true}},layout:{padding:{top:20,right:60}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{display:false}}}});}}
+  if(pageId!=="ovwPage"){var hodEl=document.getElementById(pfx+"-hod");if(hodEl){if(charts[pfx+"-hod"])charts[pfx+"-hod"].destroy();charts[pfx+"-hod"]=new Chart(hodEl.getContext("2d"),{type:"bar",data:{labels:["Handed Over","Not Handed Over"],datasets:[{label:"# Opps",data:[hodOpps,notHodOpps],backgroundColor:["#000","#32363A"],borderWidth:0,datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString()+" opps";},font:{size:10},color:"#000"}},{label:"Pipeline €",data:[hodEur2,notHodEur],backgroundColor:[PALA[4],PALA[5]],borderWidth:0,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:10},color:"#000"}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"top",labels:{font:{size:10},boxWidth:12}},datalabels:{display:true}},layout:{padding:{top:20,right:60}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{display:false}}}});}}
   }
   var sodRaw=countBy("SoD").slice(0,10);
   var sodEurMap={};
@@ -2422,13 +2429,6 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
       {label:"ACV €",data:dgData.map(function(r){return dgEurMap[r[0]]||0;}),backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,xAxisID:"xdg2",datalabels:{anchor:"end",align:"end",formatter:function(v){return v>0?"€"+fmtE(v):"";},font:{size:9},color:"#07838F"}}
     ]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:true}},layout:{padding:{right:55}},
       scales:{xdg1:{position:"bottom",grid:{color:"rgba(0,0,0,.05)"},ticks:{color:"#6A6D70",font:{size:9}},title:{display:true,text:"# Campaigns",font:{size:9}}},xdg2:{position:"top",grid:{display:false},ticks:{color:"#07838F",font:{size:9},callback:function(v){return "€"+fmtE(v);}},title:{display:true,text:"ACV €",font:{size:9}}},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:10},autoSkip:false}}}}},"DG Program");
-    var datData=countBy("Digital Assets team support");
-    var datEurMap={};pr.forEach(function(p){var wbs=String(p["Opp Campaign ID"]||"").trim();var camp=data.find(function(r){return String(r["Campaign/WBS Code"]||"").trim()===wbs;});if(!camp)return;var dat=String(camp["Digital Assets team support"]||"").trim();if(!dat)return;datEurMap[dat]=(datEurMap[dat]||0)+(parseFloat(p["Eur"]||0)||0);});
-    if(datData.length>0)mkC(pfx+"-datsupp",{type:"bar",data:{labels:datData.map(function(r){return r[0];}),datasets:[
-      {label:"# Campaigns",data:datData.map(function(r){return r[1];}),backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,xAxisID:"xdat1",datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString();},font:{size:9},color:"#32363A"}},
-      {label:"ACV €",data:datData.map(function(r){return datEurMap[r[0]]||0;}),backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,xAxisID:"xdat2",datalabels:{anchor:"end",align:"end",formatter:function(v){return v>0?"€"+fmtE(v):"";},font:{size:9},color:"#07838F"}}
-    ]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:true}},layout:{padding:{right:55}},
-      scales:{xdat1:{position:"bottom",grid:{color:"rgba(0,0,0,.05)"},ticks:{color:"#6A6D70",font:{size:9}},title:{display:true,text:"# Campaigns",font:{size:9}}},xdat2:{position:"top",grid:{display:false},ticks:{color:"#07838F",font:{size:9},callback:function(v){return "€"+fmtE(v);}},title:{display:true,text:"ACV €",font:{size:9}}},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:10},autoSkip:false}}}}},"Digital Assets team support");
   }
   var resizeMap={};
   resizeMap[pfx+"-dmc"]=dmc?dmc.length:0;resizeMap[pfx+"-dme"]=dEr?dEr.length:0;
