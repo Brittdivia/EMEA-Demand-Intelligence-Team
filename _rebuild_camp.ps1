@@ -18,7 +18,7 @@ $includeCol = $csv[0].PSObject.Properties.Name | Where-Object { $_ -match 'Inclu
 $tpColName  = $csv[0].PSObject.Properties.Name | Where-Object { $_ -match 'Target Pipeline - value' }
 Write-Host "Include col: [$includeCol]  TP col: [$tpColName]"
 
-$keep = @("Campaign Name","Campaign No","Campaign Origin","Campaign Priority","Campaign Type","Campaign/WBS Code","Demand Manager","Execution End Date","Execution Start Date","Executor","IAC","IB/NNN","Industry (MC)","Number of Accounts","Region Name (level 2)","Region Name (level 3)","Sales Bag","Sequence ID","SoD","Solution Area L1","Solution Area L2","Starting Quarter","Status","Sub Sales Bag","Activity Sub-Type","Campaign Objective","DG PROGRAM","ID","Index")
+$keep = @("Campaign Name","Campaign No","Campaign Origin","Campaign Priority","Campaign Type","Campaign/WBS Code","Demand Manager","Execution End Date","Execution Start Date","Executor","IAC","IB/NNN","Industry (MC)","Number of Accounts","Region Name (level 2)","Region Name (level 3)","Sales Bag","Sequence ID","SoD","Solution Area L1","Solution Area L2","Starting Quarter","Status","Sub Sales Bag","Activity Sub-Type","Campaign Objective","DG PROGRAM","ID","Index","Digital Assets team support")
 
 $records = $csv | Where-Object { $_.$includeCol -eq 'TRUE' } | ForEach-Object {
     $obj = [ordered]@{}
