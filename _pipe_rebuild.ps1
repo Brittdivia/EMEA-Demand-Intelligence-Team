@@ -17,7 +17,7 @@ function ToISO($d) {
     try { return [DateTime]::Parse($d.Trim()).ToString("yyyy-MM-dd") } catch { return "" }
 }
 
-$keep = @("Opp Campaign ID","Opportunity ID","Eur","DRM Category","SDE Handover Date","Create Date","Create Quarter","Closing Qtr","TCP Pipeline Source Desc","MM Identifier","RBC","SAP Mastercode","IAC (Engagement Model)","Solution Area (L1)","Sub-Solution Area (L2)","Account Name","Opp Description")
+$keep = @("Opp Campaign ID","Opportunity ID","Eur","DRM Category","SDE Handover Date","Create Date","Create Quarter","Closing Qtr","TCP Pipeline Source Desc","MM Identifier","RBC","SAP Mastercode","IAC (Engagement Model)","Solution Area (L1)","Sub-Solution Area (L2)","Account Name","Opp Description","Region Lvl 2")
 $csv = Import-Csv $csvTemp
 $records = $csv | ForEach-Object {
     $obj = [ordered]@{}
