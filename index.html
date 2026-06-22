@@ -54,7 +54,7 @@ header{background:#012931;color:#fff;padding:0 24px;height:52px;display:flex;ali
 .tbtn:hover{color:#fff;}
 .tbtn.on{color:#fff;border-bottom-color:var(--bl);}
 .fbar{background:#fff;border-bottom:2px solid #000;padding:8px 16px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;position:sticky;top:132px;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06);}
-.wbar{background:#fff;border-bottom:1px solid #E0E0E0;padding:4px 16px 6px;display:none;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;position:sticky;top:220px;z-index:99;}
+.wbar{background:#fff;border-bottom:1px solid #E0E0E0;padding:4px 16px 6px;display:none;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;position:sticky;top:180px;z-index:99;}
 
 
 .flbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mu);white-space:nowrap;margin-right:2px;}
@@ -242,6 +242,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
   <button class="cab" id="caBtn" style="display:none" onclick="clearAll()">Ã¢Å“â€¢ Clear all</button><div class="ati" id="atags"></div>
 </div>
 <div class="panel on" id="p-exe"><div class="ap" id="exePage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
+<div class="wbar" id="wbar" style="display:none"><span id="wbar-content2"></span></div>
 <div class="panel" id="p-ovw"><div class="ap" id="ovwPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-ana"><div class="ap" id="anaPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-out"><div class="ap" id="outPage"><div class="nr"><div class="ni">Ã¢Å’â€º</div><p>Loading...</p></div></div></div>
@@ -482,7 +483,7 @@ function clearFilter(key){
 function clearAll(){
   FD.forEach(function(f){filters[f.k].clear();});
   drmFilters.clear();syncDrmBtn();eurMinFilter=null;syncEurBtn();
-  srchQ="";document.getElementById("srch").value="";
+  srchQ="";var srchEl=document.getElementById("srch");if(srchEl)srchEl.value="";
   pg=1;closeAllDD();applyFilters();
   FD.forEach(function(f){syncBtn(f.k);});updateTags();syncCab();
   if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="exe")renderExe();
@@ -494,8 +495,10 @@ function syncBtn(key){
 }
 function buildWbar(){
   var WBS_TABS=new Set(["cal","out","ana","acc","pro","dtr"]);
-  var wc=document.getElementById("wbar-content");if(!wc)return;
-  if(!WBS_TABS.has(activeTab)){wc.innerHTML="";return;}
+  var isCal=activeTab==="cal";
+  var wc=document.getElementById(isCal?"wbar-content":"wbar-content2");if(!wc)return;
+  var wb=document.getElementById("wbar");
+  if(!WBS_TABS.has(activeTab)){wc.innerHTML="";if(wb)wb.style.display="none";return;}
   function mkDrop(key,label,data){
     var selVal=filters[key]&&filters[key].size===1?Array.from(filters[key])[0]:"";
     var opts=Array.from(new Set(data.map(function(r){return String(r[key]||"").trim();}).filter(Boolean))).sort();
@@ -513,8 +516,8 @@ function buildWbar(){
   html+=" "+mkDrop("Digital Assets team support","DAT Support",campData);
   html+=" "+mkDrop("DG Program","DG Program",campData);
   wc.innerHTML=html;
-
-
+  if(wb&&!isCal)wb.style.display="flex";
+  if(wb&&isCal)wb.style.display="none";
 }
 function syncCab(){
   var any=srchQ||drmFilters.size>0||eurMinFilter!==null||FD.some(function(f){return filters[f.k].size>0;});
@@ -3011,18 +3014,19 @@ function renderOutInner(page){
   ];
 
   var html3=filterBanner;
-  html3+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><h2 style="color:var(--dk);margin:0">Outreach Details</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
+  html3+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><h2 style="color:var(--dk);margin:0">Outreach Details - ('+data.length.toLocaleString()+' Sequences in Analysis)</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
   html3+="<div class=\"krow\" style=\"flex-wrap:wrap\">";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Sequences</div><div class=\"kv\">"+data.length.toLocaleString()+"</div><div class=\"ks\">matched to calendar</div></div>";
-  html3+="<div class=\"kpi kg\"><div class=\"kl\">Unique Prospects Contacted</div><div class=\"kv\">"+totUniqP.toLocaleString()+"</div><div class=\"ks\">distinct across sequences</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Prospects Contacted</div><div class=\"kv\">"+totP.toLocaleString()+"</div><div class=\"ks\">sum across tracked sequences</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Companies Contacted</div><div class=\"kv\">"+totUniqCo.toLocaleString()+"</div><div class=\"ks\">distinct companies across sequences</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Accounts Added</div><div class=\"kv\">"+totAcctAdded.toLocaleString()+"</div><div class=\"ks\">from export reports</div></div>";
   html3+="<div class=\"kpi ko\"><div class=\"kl\">Prospects Delivered</div><div class=\"kv\">"+totDelivered.toLocaleString()+"</div><div class=\"ks\">&nbsp;</div></div>";
   html3+="<div class=\"kpi kp\"><div class=\"kl\">Open Rate</div><div class=\"kv\">"+openPct+"</div><div class=\"ks\">"+totO.toLocaleString()+" opens / "+totD.toLocaleString()+" delivered</div></div>";
   html3+="<div class=\"kpi kr\"><div class=\"kl\">Reply Rate</div><div class=\"kv\">"+repPct+"</div><div class=\"ks\">"+totR.toLocaleString()+" replies / "+totD.toLocaleString()+" delivered</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Bounce Rate</div><div class=\"kv\">"+( totP>0?(totB/totP*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">"+totB.toLocaleString()+" bounces / "+totP.toLocaleString()+" prospects</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Accounts Added</div><div class=\"kv\">"+totAcctAdded.toLocaleString()+"</div><div class=\"ks\">from export reports</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Bounce Rate</div><div class=\"kv\">"+(totP>0?(totB/totP*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">"+totB.toLocaleString()+" bounces / "+totP.toLocaleString()+" prospects</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Prospects / Account</div><div class=\"kv\">"+(totAcctAdded>0?(totP/totAcctAdded).toFixed(0):"0")+"</div><div class=\"ks\">avg prospects per account</div></div>";
+  html3+="</div>";
+  html3+="<div class=\"krow\" style=\"flex-wrap:wrap\">";
+  html3+="<div class=\"kpi kg\"><div class=\"kl\">Most Unique Prospects Contacted</div><div class=\"kv\">"+totUniqP.toLocaleString()+"</div><div class=\"ks\">distinct across sequences</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Companies Contacted</div><div class=\"kv\">"+totUniqCo.toLocaleString()+"</div><div class=\"ks\">distinct companies across sequences</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Prospects Emailed</div><div class=\"kv\">"+_outUniqEmailed.size.toLocaleString()+"</div><div class=\"ks\">distinct prospects with Emailed = Yes</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Avg Open Rate</div><div class=\"kv\">"+avgOpenOut+"</div><div class=\"ks\">"+_outUniqOpened.size.toLocaleString()+" opened / "+_outUniqEmailed.size.toLocaleString()+" emailed</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Avg Reply Rate</div><div class=\"kv\">"+avgReplyOut+"</div><div class=\"ks\">"+_outUniqReplied.size.toLocaleString()+" replied / "+_outUniqOpened.size.toLocaleString()+" opened</div></div>";
@@ -3391,24 +3395,27 @@ function renderOutInner(page){
       sdeMap[owner].acct+=acct;sdeMap[owner].meet+=meet;sdeMap[owner].pros+=pros;
     });
     // Count unique prospects per sequencer from SEQ_PROSPECT_DATA
+    var sidOwnerMap={};
+    data.forEach(function(r){var sid=String(r["Sequence ID"]||"").trim();var owner=String(r["Owner"]||"").trim();if(sid&&owner)sidOwnerMap[sid]=owner;});
     (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){
-      var sq=String(p.sq||"").trim();if(!sq)return;
+      var sid=String(p.sid||p.sq||"").trim();if(!sid)return;
+      var owner=sidOwnerMap[sid];if(!owner)return;
       var pid=String(p.pid||"").trim();if(!pid)return;
-      if(sdeMap[sq]){
-        if(!sdeMap[sq]._pids)sdeMap[sq]._pids=new Set();
-        sdeMap[sq]._pids.add(pid);
-        var co=String(p.co||"").trim();if(co){if(!sdeMap[sq]._cos)sdeMap[sq]._cos=new Set();sdeMap[sq]._cos.add(co);}
+      if(sdeMap[owner]){
+        if(!sdeMap[owner]._pids)sdeMap[owner]._pids=new Set();
+        sdeMap[owner]._pids.add(pid);
+        var co=String(p.co||"").trim();if(co){if(!sdeMap[owner]._cos)sdeMap[owner]._cos=new Set();sdeMap[owner]._cos.add(co);}
       }
     });
     Object.keys(sdeMap).forEach(function(o){sdeMap[o].uniqPros=sdeMap[o]._pids?sdeMap[o]._pids.size:0;sdeMap[o].uniqCos=sdeMap[o]._cos?sdeMap[o]._cos.size:0;});
     // Count unique prospects/companies from SEQ_PROSPECT_DATA
     (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){
-      var sq=String(p.sq||"").trim();if(!sq)return;
+      var sq=String(p.sid||p.sq||"").trim();if(!sq)return;
       var pid=String(p.pid||"").trim();if(!pid)return;
-      if(sdeMap[sq]){
-        if(!sdeMap[sq]._pids)sdeMap[sq]._pids=new Set();
-        sdeMap[sq]._pids.add(pid);
-        var co=String(p.co||"").trim();if(co){if(!sdeMap[sq]._cos)sdeMap[sq]._cos=new Set();sdeMap[sq]._cos.add(co);}
+      if(sdeMap[sidOwnerMap[sq]||sq]){
+        if(!sdeMap[sidOwnerMap[sq]||sq]._pids)sdeMap[sidOwnerMap[sq]||sq]._pids=new Set();
+        sdeMap[sidOwnerMap[sq]||sq]._pids.add(pid);
+        var co=String(p.co||"").trim();if(co){if(!sdeMap[sidOwnerMap[sq]||sq]._cos)sdeMap[sidOwnerMap[sq]||sq]._cos=new Set();sdeMap[sidOwnerMap[sq]||sq]._cos.add(co);}
       }
     });
     Object.keys(sdeMap).forEach(function(o){sdeMap[o].uniqPros=sdeMap[o]._pids?sdeMap[o]._pids.size:0;sdeMap[o].uniqCos=sdeMap[o]._cos?sdeMap[o]._cos.size:0;});
