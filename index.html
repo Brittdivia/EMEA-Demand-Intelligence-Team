@@ -3025,7 +3025,7 @@ function renderOutInner(page){
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Prospects / Account</div><div class=\"kv\">"+(totAcctAdded>0?(totP/totAcctAdded).toFixed(0):"0")+"</div><div class=\"ks\">avg prospects per account</div></div>";
   html3+="</div>";
   html3+="<div class=\"krow\" style=\"flex-wrap:wrap\">";
-  html3+="<div class=\"kpi kg\"><div class=\"kl\">Most Unique Prospects Contacted</div><div class=\"kv\">"+totUniqP.toLocaleString()+"</div><div class=\"ks\">distinct across sequences</div></div>";
+  html3+="<div class=\"kpi kg\"><div class=\"kl\">Unique Prospects Contacted</div><div class=\"kv\">"+totUniqP.toLocaleString()+"</div><div class=\"ks\">distinct across sequences</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Companies Contacted</div><div class=\"kv\">"+totUniqCo.toLocaleString()+"</div><div class=\"ks\">distinct companies across sequences</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Prospects Emailed</div><div class=\"kv\">"+_outUniqEmailed.size.toLocaleString()+"</div><div class=\"ks\">distinct prospects with Emailed = Yes</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Avg Open Rate</div><div class=\"kv\">"+avgOpenOut+"</div><div class=\"ks\">"+_outUniqOpened.size.toLocaleString()+" opened / "+_outUniqEmailed.size.toLocaleString()+" emailed</div></div>";
@@ -3045,11 +3045,11 @@ function renderOutInner(page){
     window._outClickReg=function(reg){window.outFilter.reg=(window.outFilter.reg===reg)?null:reg;renderOut();};
     var regList=Object.keys(regOwners).sort(function(a,b){return regOwners[b].size-regOwners[a].size;});
     var tbl='<div style="display:flex;gap:14px;margin-bottom:14px">'
-      +'<div class="cc" style="flex:0 0 20%;min-width:0"><div class="ch">Outreach Users by Region</div><div style="padding:6px 8px">'
+      +'<div class="cc" style="flex:0 0 15%;min-width:0"><div class="ch">Outreach Users by Region</div><div style="padding:6px 8px">'
       +'<table style="width:100%;border-collapse:collapse;font-size:12px">'
       +'<thead><tr style="background:#00144A;color:#fff">'
       +'<th style="padding:6px 10px;text-align:left;font-size:11px">Region</th>'
-      +'<th style="padding:6px 10px;text-align:right;font-size:11px"># SDEs</th>'
+      +'<th style="padding:6px 10px;text-align:right;font-size:11px"># Users</th>'
       +'</tr></thead><tbody>';
     regList.forEach(function(reg,idx){
       var owners=Array.from(regOwners[reg]).sort();
@@ -3390,9 +3390,9 @@ function renderOutInner(page){
       var acct=parseInt(r["Accounts Contacted"])||0;
       var meet=parseInt(r["Meetings Booked"])||0;
       var pros=parseInt(r["Prospects - Total"])||0;
-      if(!sdeMap[owner])sdeMap[owner]={del:0,op:0,rp:0,acct:0,meet:0,pros:0,reg:String(r["Region Name (level 2)"]||"").trim()};
+      if(!sdeMap[owner])sdeMap[owner]={del:0,op:0,rp:0,acct:0,meet:0,pros:0,seqs:0,reg:String(r["Region Name (level 2)"]||"").trim()};
       sdeMap[owner].del+=del;sdeMap[owner].op+=op;sdeMap[owner].rp+=rp;
-      sdeMap[owner].acct+=acct;sdeMap[owner].meet+=meet;sdeMap[owner].pros+=pros;
+      sdeMap[owner].acct+=acct;sdeMap[owner].meet+=meet;sdeMap[owner].pros+=pros;sdeMap[owner].seqs+=1;
     });
     // Count unique prospects per sequencer from SEQ_PROSPECT_DATA
     var sidOwnerMap={};
@@ -3440,14 +3440,14 @@ function renderOutInner(page){
           return(av-bv)*sdeSortDir;
         });
         var thS="padding:7px 12px;cursor:pointer;user-select:none;white-space:nowrap;background:#00144A;color:#fff;";
-        function mkTh(col,label,right){
-          var ic=sdeSortCol===col?(sdeSortDir===-1?"â†“":"â†‘"):"â†•";
-          return '<th style="'+thS+(right?"text-align:right":"text-align:left")+'" onclick="window._sdeSortFn(\''+col+'\')">'+label+' <span style="font-size:9px">'+ic+'</span></th>';
+        function mkTh(col,label,right,wrap){
+          var ic=sdeSortCol===col?(sdeSortDir===-1?"&#8595;":"&#8593;"):"&#8597;";
+          return '<th style="'+thS+(right?"text-align:right":"text-align:left")+(wrap?";white-space:normal;max-width:80px":"")+'" onclick="window._sdeSortFn(\''+col+'\')">'+label+' <span style="font-size:9px">'+ic+'</span></th>';
         }
         var tbl='<div style="overflow:auto;max-height:384px"><table style="width:100%;border-collapse:collapse;font-size:12px">'
           +'<thead style="position:sticky;top:0"><tr>'
-          +mkTh("name","Outreach User",false)+mkTh("reg","MU",false)+mkTh("meet","Mtg Booked",true)
-          +mkTh("pros","Prospects (Total)",true)+mkTh("uniqPros","Prospects (Unique)",true)+mkTh("uniqCos","Companies (Unique)",true)+mkTh("del","Emails",true)+mkTh("op","Open Rate",true)+mkTh("rp","Reply Rate",true)
+          +mkTh("name","Outreach User",false)+mkTh("reg","MU",false)+mkTh("seqs","Sequences",true)+mkTh("meet","Mtg Booked",true,true)
+          +mkTh("pros","Prospects (Total)",true,true)+mkTh("uniqPros","Prospects (Unique)",true,true)+mkTh("uniqCos","Companies (Unique)",true)+mkTh("del","Emails",true)+mkTh("op","Open Rate",true)+mkTh("rp","Reply Rate",true)
           +'</tr></thead><tbody>';
         sorted.forEach(function(owner,idx){
           var s=sdeMap[owner];
@@ -3458,6 +3458,7 @@ function renderOutInner(page){
           tbl+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(isSel?'#D1EFFF':(idx%2===0?'#fff':'#F8FBFF'))+';cursor:pointer" onclick="window._outClickOwner(this.dataset.owner)" data-owner="'+(owner.replace(/"/g,'&quot;'))+'">'
             +'<td style="padding:6px 12px;font-weight:700">'+dot+owner+'</td>'
             +'<td style="padding:6px 12px;color:var(--mu)">'+fmtReg(s.reg)+'</td>'
+            +'<td style="padding:6px 12px;text-align:right">'+(s.seqs||0)+'</td>'
             +'<td style="padding:6px 12px;text-align:right;font-weight:700;color:#0f9d58">'+s.meet+'</td>'
             +'<td style="padding:6px 12px;text-align:right">'+s.pros.toLocaleString()+'</td>'
             +'<td style="padding:6px 12px;text-align:right">'+(s.uniqPros||0).toLocaleString()+'</td>'+'<td style="padding:6px 12px;text-align:right">'+(s.uniqCos||0).toLocaleString()+'</td>'+'<td style="padding:6px 12px;text-align:right">'+s.del.toLocaleString()+'</td>'
@@ -3487,14 +3488,14 @@ function renderOutInner(page){
           return(av-bv)*sdeSortDir;
         });
         var thS="padding:7px 12px;cursor:pointer;user-select:none;white-space:nowrap;background:#00144A;color:#fff;";
-        function mkTh(col,label,right){
-          var ic=sdeSortCol===col?(sdeSortDir===-1?"â†“":"â†‘"):"â†•";
-          return '<th style="'+thS+(right?"text-align:right":"text-align:left")+'" onclick="window._sdeSortFn(\''+col+'\')">'+label+' <span style="font-size:9px">'+ic+'</span></th>';
+        function mkTh(col,label,right,wrap){
+          var ic=sdeSortCol===col?(sdeSortDir===-1?"&#8595;":"&#8593;"):"&#8597;";
+          return '<th style="'+thS+(right?"text-align:right":"text-align:left")+(wrap?";white-space:normal;max-width:80px":"")+'" onclick="window._sdeSortFn(\''+col+'\')">'+label+' <span style="font-size:9px">'+ic+'</span></th>';
         }
         var tbl='<div style="overflow:auto;max-height:384px"><table style="width:100%;border-collapse:collapse;font-size:12px">'
           +'<thead style="position:sticky;top:0"><tr>'
-          +mkTh("name","Outreach User",false)+mkTh("reg","MU",false)+mkTh("meet","Mtg Booked",true)
-          +mkTh("pros","Prospects (Total)",true)+mkTh("uniqPros","Prospects (Unique)",true)
+          +mkTh("name","Outreach User",false)+mkTh("reg","MU",false)+mkTh("seqs","Sequences",true)+mkTh("meet","Mtg Booked",true,true)
+          +mkTh("pros","Prospects (Total)",true,true)+mkTh("uniqPros","Prospects (Unique)",true,true)
           +mkTh("uniqCos","Companies (Unique)",true)+mkTh("del","Emails",true)
           +mkTh("op","Open Rate",true)+mkTh("rp","Reply Rate",true)
           +'</tr></thead><tbody>';
@@ -3507,6 +3508,7 @@ function renderOutInner(page){
           tbl+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(isSel?'#D1EFFF':(idx%2===0?'#fff':'#F8FBFF'))+';cursor:pointer" onclick="window._outClickOwner(this.dataset.owner)" data-owner="'+(owner.replace(/"/g,'&quot;'))+'">'
             +'<td style="padding:6px 12px;font-weight:700">'+dot+owner+'</td>'
             +'<td style="padding:6px 12px;color:var(--mu)">'+fmtReg(s.reg)+'</td>'
+            +'<td style="padding:6px 12px;text-align:right">'+(s.seqs||0)+'</td>'
             +'<td style="padding:6px 12px;text-align:right;font-weight:700;color:#0f9d58">'+s.meet+'</td>'
             +'<td style="padding:6px 12px;text-align:right">'+s.pros.toLocaleString()+'</td>'
             +'<td style="padding:6px 12px;text-align:right">'+(s.uniqPros||0).toLocaleString()+'</td>'
