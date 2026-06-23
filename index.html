@@ -213,10 +213,10 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
 <script src="data-pipe.js?v=20260622"></script>
 <script src="data-out.js?v=20260619"></script>
 <script src="data-seqco.js?v=20260619"></script>
-<script src="data-prospects.js?v=20260617c"></script>
+<script src="data-prospects.js?v=20260623j"></script>
 <script src="data-seqprospect.js?v=20260623d"></script>
 <script src="data-profiling-req.js?v=20260622"></script>
-<script src="data-profiling-tags.js?v=20260623f"></script>
+<script src="data-profiling-tags.js?v=20260623j"></script>
 </head>
 <body>
 <header>
@@ -477,11 +477,11 @@ function ddSrch(inp,s){
 
 function toggleF(key,val,checked){
   if(checked)filters[key].add(val);else filters[key].delete(val);
-  pg=1;applyFilters();syncBtn(key);updateTags();syncCab();
+  pg=1;applyFilters();syncBtn(key);updateTags();syncCab();if(activeTab==="dtr")renderDtr();
   if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="exe")renderExe();
 }
 function clearFilter(key){
-  filters[key].clear();pg=1;applyFilters();syncBtn(key);updateTags();syncCab();
+  filters[key].clear();pg=1;applyFilters();syncBtn(key);updateTags();syncCab();if(activeTab==="dtr")renderDtr();
   document.getElementById("fdo_"+sk(key)).innerHTML=buildOpts(key);
   if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="exe")renderExe();
 }
@@ -491,7 +491,7 @@ function clearAll(){
   srchQ="";var srchEl=document.getElementById("srch");if(srchEl)srchEl.value="";
   pg=1;closeAllDD();applyFilters();
   FD.forEach(function(f){syncBtn(f.k);});updateTags();syncCab();
-  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="dtr")renderDtr();if(activeTab==="exe")renderExe();
 }
 function syncBtn(key){
   var s=sk(key),n=filters[key].size;
@@ -3144,8 +3144,8 @@ function renderOutInner(page){
   html3+="<div class=\"kpi kg\"><div class=\"kl\">Unique Prospects Contacted</div><div class=\"kv\">"+totUniqP.toLocaleString()+"</div><div class=\"ks\">distinct across sequences</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Accounts Contacted</div><div class=\"kv\">"+totUniqCo.toLocaleString()+"</div><div class=\"ks\">distinct across sequences</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Prospects Emailed</div><div class=\"kv\">"+_outUniqEmailed.size.toLocaleString()+"</div><div class=\"ks\">distinct across sequences</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Avg Open Rate</div><div class=\"kv\">"+avgOpenOut+"</div><div class=\"ks\">"+_outUniqOpened.size.toLocaleString()+" opened / "+_outUniqEmailed.size.toLocaleString()+" emailed</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Avg Reply Rate</div><div class=\"kv\">"+avgReplyOut+"</div><div class=\"ks\">"+_outUniqReplied.size.toLocaleString()+" replied / "+_outUniqOpened.size.toLocaleString()+" opened</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Open Rate</div><div class=\"kv\">"+avgOpenOut+"</div><div class=\"ks\">"+_outUniqOpened.size.toLocaleString()+" opened / "+_outUniqEmailed.size.toLocaleString()+" emailed</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Reply Rate</div><div class=\"kv\">"+avgReplyOut+"</div><div class=\"ks\">"+_outUniqReplied.size.toLocaleString()+" replied / "+_outUniqOpened.size.toLocaleString()+" opened</div></div>";
 
   html3+="</div>";
   html3+="<div class=\"sec\" style=\"margin-top:18px\">Outreach User Summary</div>";
@@ -3596,9 +3596,10 @@ function renderPro(){
     if(!_outSeqIdsP.has(String(p.sid||"").trim()))return;
     String(p.tg||"").split(",").map(function(t){return t.trim();}).filter(Boolean).forEach(function(t){prospTagsInSeqs.add(t);});
   });
-  // Path 3: Direct tag match - any prospect in PROSPECT_DATA whose tags match profiling request tags
+  // Path 3: Direct tag match - prospects in tracked sequences (filtered) matching profiling tags
   var profTagSet=new Set(profMetaVals.map(function(m){return m.tag;}).filter(Boolean));
-  (window.PROSPECT_DATA||[]).forEach(function(p){
+  (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){
+    if(!_outSeqIdsP.has(String(p.sid||"").trim()))return;
     String(p.tg||"").split(",").map(function(t){return t.trim();}).filter(Boolean).forEach(function(t){
       if(profTagSet.has(t))activeTags.add(t);
     });
@@ -3622,21 +3623,22 @@ function renderPro(){
   var fnote=filtered.length<campData.length?buildFilterBanner(filtered.length,null):"";
   if(!activeTags.size){page.innerHTML=fnote+"<div class=\"nr\"><p>No profiling tags linked to current filtered campaigns.</p></div>";return;}
   var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Profiling</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>'+fnote;
-  html+="<div class=\"krow\">";
-  html+="<div class=\"kpi kb\"><div class=\"kl\">Profiling Requests</div><div class=\"kv\">"+uniqueTitles.size.toLocaleString()+"</div><div class=\"ks\">unique titles</div></div>";
-  html+="<div class=\"kpi kb\"><div class=\"kl\">Linked Campaigns</div><div class=\"kv\">"+(function(){var n=new Set();filtered.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();if(profMap[w])n.add(w);});return n.size;})().toLocaleString()+"</div><div class=\"ks\">linked to Campaign Calendar via WBS</div></div>";
-  html+="<div class=\"kpi kb\"><div class=\"kl\">Linked by Tag</div><div class=\"kv\">"+(function(){var proTags=new Set();(window.PROSPECT_DATA||[]).forEach(function(p){String(p.tg||"").split(",").forEach(function(t){t=t.trim();if(t)proTags.add(t);});});return Array.from(activeTags).filter(function(t){return proTags.has(t);}).length;}()).toLocaleString()+"</div><div class=\"ks\">active tags matched in prospect data</div></div>";
-  html+="<div class=\"kpi kb\"><div class=\"kl\">Demand Managers</div><div class=\"kv\">"+uniqueDDM1.size.toLocaleString()+"</div><div class=\"ks\">unique DDM1 from profiling</div></div>";
-  html+="</div>";
   var _pTitleF2=window.proFilter&&window.proFilter.proTitle||"";
   if(_pTitleF2){html+="<div style=\"margin-bottom:8px;display:flex;align-items:center;gap:8px\"><span style=\"background:#D1EFFF;padding:3px 10px;border-radius:var(--r);font-size:11px;font-weight:600\">Title: "+_pTitleF2+"</span><button onclick=\"window.proFilter.proTitle=null;renderPro()\" style=\"padding:3px 10px;background:#C62828;color:#fff;border:none;border-radius:var(--r);font-size:11px;cursor:pointer\">Clear</button></div>";}
   var curTouched=window.proFilter&&window.proFilter.touched||"";
+  var curStatus=window.proFilter&&window.proFilter.proStatus||"";
+  var statusOpts=window.CAMP_PROF_STATUSES||Array.from(new Set(profMetaVals.map(function(m){return m.status||"";}).filter(Boolean))).sort();
   html+="<div style=\"margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap\">";
   html+="<label style=\"font-size:12px;font-weight:600;color:var(--dk)\">Touched:</label>";
   html+="<select onchange=\"window.proFilter=window.proFilter||{};window.proFilter.touched=this.value;renderPro()\" style=\"padding:5px 10px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px\">";
   html+="<option value=\"\""+(curTouched===""?" selected":"")+">All</option>";
   html+="<option value=\"yes\""+(curTouched==="yes"?" selected":"")+">Yes</option>";
   html+="<option value=\"no\""+(curTouched==="no"?" selected":"")+">No</option>";
+  html+="</select>";
+  html+="<label style=\"font-size:12px;font-weight:600;color:var(--dk);margin-left:10px\">Status:</label>";
+  html+="<select onchange=\"window.proFilter=window.proFilter||{};window.proFilter.proStatus=this.value;renderPro()\" style=\"padding:5px 10px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px\">";
+  html+="<option value=\"\""+(curStatus===""?" selected":"")+">All</option>";
+  statusOpts.forEach(function(s){html+="<option value=\""+s.replace(/"/g,"&quot;")+"\""+(s===curStatus?" selected":"")+">"+s+"</option>";});
   html+="</select></div>";
   html+="<div style=\"display:flex;align-items:center;justify-content:space-between;margin-bottom:0\"><div class=\"sec\" style=\"margin-bottom:0\">Campaigns Linked via Tag and/or WBS Campaign Code</div><button onclick=\"exportProSummary()\" style=\"padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0\">&#11015; Export CSV</button></div>";
   html+="<div id=\"pro-tag-summary\" style=\"margin-bottom:16px;max-width:60%\"></div>";
@@ -3660,9 +3662,10 @@ function renderPro(){
     // Build tag summary from SEQ_PROSPECT_DATA matched to profiling meta tags
     var tagSummary={};
     var tagSummary={};
-    // First: add all active tags from profiling meta directly
+    // First: add all active tags from profiling meta directly (filtered by status if set)
     profMetaVals.forEach(function(m){
       if(!m.tag||!activeTags.has(m.tag))return;
+      if(curStatus&&m.status!==curStatus)return;
       if(!tagSummary[m.tag])tagSummary[m.tag]={pids:new Set(),cos:new Set(),cosAdded:new Set(),minAdded:"",maxAdded:"",owners:new Set()};
       if(m.ddm1)tagSummary[m.tag].owners.add(m.ddm1);
     });
@@ -3693,24 +3696,27 @@ function renderPro(){
       var totPids=new Set();var totCos=new Set();var totCosAdded=new Set();
       sumEntries.forEach(function(e){e[1].pids.forEach(function(p){totPids.add(p);});e[1].cos.forEach(function(c){totCos.add(c);});e[1].cosAdded.forEach(function(c){totCosAdded.add(c);});});
       var uniqueSumTitles=new Set(sumEntries.map(function(e){var m2=tagToMeta[e[0]];return m2?m2.title:"";}).filter(Boolean));
-      var countLine="<div style=\"font-size:11px;color:var(--mu);padding:4px 0 6px\">"+sumEntries.length+" tags &middot; "+uniqueSumTitles.size+" unique titles</div>";
+      var countLine="<div style=\"font-size:11px;color:var(--mu);padding:4px 0 6px\">"+sumEntries.length+" tags &middot; "+uniqueSumTitles.size+" unique titles &middot; <b>"+totCos.size.toLocaleString()+"</b> total companies &middot; <b>"+totPids.size.toLocaleString()+"</b> total prospects</div>";
       var thS="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0;cursor:pointer";
       function mkThS(col,label,right){var ic=sumSortCol===col?(sumSortDir===-1?"&#8595;":"&#8593;"):"&#8597;";return "<th style=\""+thS+(right?";text-align:right":"")+"\" onclick=\"window._sumSort('"+col+"')\">"+label+" "+ic+"</th>";}
-      var tbl="<div style=\"overflow:auto;max-height:300px\"><table style=\"width:100%;border-collapse:collapse;font-size:12px\">"
-        +"<thead><tr>"+mkThS("tag","Campaign Title",false)+mkThS("ddm1","DDM1",false)+mkThS("tag2","Tag",false)+mkThS("pids","# Prospects",true)+mkThS("cos","# Companies",true)+"</tr></thead><tbody>";
+      var tbl="<div style=\"overflow:auto;max-height:300px\"><table style=\"width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed\">"
+        +"<colgroup><col style=\"width:20%\"><col style=\"width:12%\"><col style=\"width:12%\"><col style=\"width:16%\"><col style=\"width:10%\"><col style=\"width:10%\"><col style=\"width:10%\"></colgroup>"
+        +"<thead><tr>"+mkThS("tag","Campaign Title",false)+mkThS("ddm1","DDM1",false)+mkThS("createdBy","Created By",false)+mkThS("tag2","Tag",false)+mkThS("acctReq","Accts Requested",true)+mkThS("cos","# Accounts",true)+mkThS("pids","# Prospects",true)+"</tr></thead><tbody>";
       sumEntries.forEach(function(e,idx){
         var proTitle=tagToMeta[e[0]];
-        var titleStr=proTitle?proTitle.title:"";var ddm1Str=proTitle?proTitle.ddm1||"":"";
+        var titleStr=proTitle?proTitle.title:"";var ddm1Str=proTitle?proTitle.ddm1||"":"";var createdByStr=proTitle?proTitle.createdBy||"":"";
         var isProSel=(window.proFilter&&window.proFilter.proTitle===titleStr);
         tbl+="<tr style=\"border-bottom:1px solid #EBEBEB;background:"+(isProSel?"#D1EFFF":(idx%2===0?"#fff":"#F8FBFF"))+"\">"
           +"<td style=\"padding:5px 10px;font-size:11px;cursor:pointer;text-decoration:underline;text-decoration-style:dotted\" onclick=\"window._proClickTitle(this)\" data-ptitle=\""+titleStr.replace(/"/g,"&quot;")+"\">"+titleStr+"</td>"
           +"<td style=\"padding:5px 10px;font-size:11px\">"+ddm1Str+"</td>"
+          +"<td style=\"padding:5px 10px;font-size:11px;color:var(--mu)\">"+createdByStr+"</td>"
           +"<td style=\"padding:5px 10px;color:#07838F;font-weight:600;font-size:11px\">"+e[0]+"</td>"
-          +"<td style=\"padding:5px 10px;text-align:right;font-weight:700;font-size:11px\">"+e[1].pids.size.toLocaleString()+"</td>"
-          +"<td style=\"padding:5px 10px;text-align:right;font-size:11px\">"+e[1].cos.size.toLocaleString()+"</td>"
+          +"<td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+(proTitle&&proTitle.acctReq?parseInt(proTitle.acctReq).toLocaleString():"")+"</td>"
+          +"<td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+e[1].cos.size.toLocaleString()+"</td>"
+          +"<td style=\"padding:5px 8px;text-align:right;font-weight:700;font-size:11px\">"+e[1].pids.size.toLocaleString()+"</td>"
           +"</tr>";
       });
-      tbl+="<tfoot><tr style=\"background:#F0F4FF;font-weight:700;border-top:2px solid #00144A\"><td style=\"padding:5px 10px;font-size:11px\">TOTAL</td><td></td><td></td><td style=\"padding:5px 10px;text-align:right;font-size:11px\">"+totPids.size.toLocaleString()+"</td><td style=\"padding:5px 10px;text-align:right;font-size:11px\">"+totCos.size.toLocaleString()+"</td></tr></tfoot>";
+      tbl+="<tfoot><tr style=\"background:#F0F4FF;font-weight:700;border-top:2px solid #00144A\"><td style=\"padding:5px 8px;font-size:11px\">TOTAL</td><td></td><td></td><td></td><td></td><td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+totCos.size.toLocaleString()+"</td><td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+totPids.size.toLocaleString()+"</td></tr></tfoot>";
       summaryEl.innerHTML=countLine+tbl+"</tbody></table></div>";
     }
     var el=document.getElementById("pro-prospect-tbl");
@@ -3770,8 +3776,19 @@ function renderPip(){
 function renderDtr(){
   var page=document.getElementById("dtrPage");
   if(!page)return;
+  var profMeta2=window.CAMP_PROF_META||{};
+  var profMetaVals=Object.values(profMeta2);
+  var profMap=window.CAMP_PROF_TAGS||{};
   var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Data Tracking</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
   html+='<p style="font-size:12px;color:var(--mu);margin-bottom:20px">Track data quality and coverage across the campaign calendar and pipeline.</p>';
+  html+="<div class=\"krow\" style=\"flex-wrap:wrap\">";
+  html+="<div class=\"kpi kb\"><div class=\"kl\">Linked Campaigns</div><div class=\"kv\">"+(function(){var n=new Set();filtered.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();if(profMap[w])n.add(w);});return n.size;})().toLocaleString()+"</div><div class=\"ks\">linked to Campaign Calendar via WBS</div></div>";
+  html+="<div class=\"kpi kb\"><div class=\"kl\">Profiling Requests</div><div class=\"kv\">"+(new Set(profMetaVals.map(function(m){return m.id;}).filter(Boolean))).size.toLocaleString()+"</div><div class=\"ks\">total requests in system</div></div>";
+  html+="<div class=\"kpi kb\"><div class=\"kl\">With WBS Code</div><div class=\"kv\">"+profMetaVals.filter(function(m){return m.wbs&&m.wbs.trim();}).length.toLocaleString()+"</div><div class=\"ks\">requests with campaign code</div></div>";
+  html+="<div class=\"kpi kb\"><div class=\"kl\">With Tag for Outreach</div><div class=\"kv\">"+profMetaVals.filter(function(m){return m.tagOut&&m.tagOut.trim();}).length.toLocaleString()+"</div><div class=\"ks\">requests with outreach tag</div></div>";
+  html+="<div class=\"kpi kr\"><div class=\"kl\">No Campaign Code</div><div class=\"kv\">"+profMetaVals.filter(function(m){return !m.wbs||!m.wbs.trim();}).length.toLocaleString()+"</div><div class=\"ks\">requests missing WBS/campaign code</div></div>";
+  html+="<div class=\"kpi kr\"><div class=\"kl\">No Tag</div><div class=\"kv\">"+profMetaVals.filter(function(m){return (!m.tag||!m.tag.trim())&&(!m.tagOut||!m.tagOut.trim());}).length.toLocaleString()+"</div><div class=\"ks\">requests with no prospect or outreach tag</div></div>";
+  html+="</div>";
   var seqIdMap={};(window.OUT_DATA||[]).forEach(function(r){var wbs=String(r["Campaign/WBS Code"]||"").trim();var sid=String(r["Sequence ID"]||"").trim();if(wbs&&sid){if(!seqIdMap[wbs])seqIdMap[wbs]=new Set();seqIdMap[wbs].add(sid);}});
   html+='<div class="krow"><div style="display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px">Planning</div>';
   html+='<div class="kpi kb"><div class="kl">Campaigns</div><div class="kv">'+(new Set(filtered.map(function(r){return String(r["Index"]||"").trim();}).filter(Boolean))).size.toLocaleString()+'</div><div class="ks">unique campaigns by index</div></div>';
@@ -3791,7 +3808,7 @@ function renderDtr(){
     var idx=String(r["Index"]||"").trim();rows.push({idx:idx,dm:dm,wbs:wbs,sid:sids});
   });
   rows.sort(function(a,b){return a.dm.localeCompare(b.dm)||a.wbs.localeCompare(b.wbs);});
-  html+='<div class="sec" style="margin-top:16px">Campaign Tracking - DM / WBS / Sequence ID</div>';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:0"><div class="sec" style="margin-bottom:0">Campaign Tracking - DM / WBS / Sequence ID</div><button onclick="exportDtrTable()" style="padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">&#11015; Export CSV</button></div>';
   html+='<div class="cc" style="margin-bottom:20px"><div style="overflow:auto;max-height:500px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
   html+='<th style="'+thS+'">Index</th><th style="'+thS+'">Demand Manager</th><th style="'+thS+'">WBS Campaign Code</th><th style="'+thS+'">Sequence ID(s)</th></tr></thead><tbody>';
   rows.forEach(function(r,i){
@@ -3802,9 +3819,60 @@ function renderDtr(){
       +'</tr>';
   });
   html+='</tbody></table></div></div>';
+  // Profiling requests linked to filtered campaigns
+  var profMeta2=window.CAMP_PROF_META||{};
+  var profRows=[];
+  var seenProfId={};
+  var _activeDMsLower=new Set(filtered.map(function(r){return String(r["Demand Manager"]||"").trim().toLowerCase();}).filter(Boolean));
+  function normDDM1(d){var p=String(d||"").split(",");return p.length===2?(p[1].trim()+" "+p[0].trim()):d;}
+  Object.values(profMeta2).forEach(function(m){
+    var wbs=String(m.wbs||"").trim();
+    if(wbs&&!filtered.some(function(r){return String(r["Campaign/WBS Code"]||"").trim().replace(/[\r\n]/g,"")==wbs;}))return;
+    if(m.ddm1&&_activeDMsLower.size>0&&!_activeDMsLower.has(normDDM1(m.ddm1).toLowerCase()))return;
+    var key=m.id+"|"+m.tag;
+    if(seenProfId[key])return;
+    seenProfId[key]=true;
+    profRows.push(m);
+  });
+  profRows.sort(function(a,b){return (a.ddm1||"").localeCompare(b.ddm1||"")||(a.title||"").localeCompare(b.title||"");});
+  var thP="background:#00144A;color:#fff;padding:8px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;white-space:nowrap;position:sticky;top:0;border-right:1px solid #1B4F5A";
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:0"><div class="sec" style="margin-bottom:0">Profiling Requests - Linked to Campaigns</div><button onclick="exportDtrProfiling()" style="padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">&#11015; Export CSV</button></div>';
+  html+='<div class="cc" style="margin-bottom:20px"><div style="overflow:auto;max-height:500px"><table id="dtr-prof-tbl" style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<th style="'+thP+'">Campaign Name</th><th style="'+thP+'">Requestor (Created By)</th><th style="'+thP+'">Date Created</th><th style="'+thP+'">Demand Manager</th><th style="'+thP+'">WBS / Campaign Code</th><th style="'+thP+'">Prospect Tag</th><th style="'+thP+'">Tag for Outreach</th></tr></thead><tbody>';
+  profRows.forEach(function(m,i){
+    html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
+      +'<td style="padding:6px 12px;font-size:11px">'+( m.title||"")+'</td>'
+      +'<td style="padding:6px 12px;font-size:11px;color:var(--mu)">'+(m.createdBy||"")+'</td>'
+      +'<td style="padding:6px 12px;font-size:11px;color:var(--mu)">'+(m.created||"")+'</td>'
+      +'<td style="padding:6px 12px;font-size:11px">'+(m.ddm1||"")+'</td>'
+      +'<td style="padding:6px 12px;font-family:monospace;font-size:11px">'+(m.wbs||"")+'</td>'
+      
+      +'<td style="padding:6px 12px;font-size:11px;color:#07838F">'+(m.tag||"")+'</td>'
+      +'<td style="padding:6px 12px;font-size:11px;color:#07838F">'+(m.tagOut||"")+'</td>'
+      +'</tr>';
+  });
+  html+='</tbody></table></div></div>';
   page.innerHTML=html;
 }
 
+function exportDtrTable(){
+  var rows=[["Index","Demand Manager","WBS Campaign Code","Sequence ID(s)"]];
+  document.querySelectorAll("#dtrPage table tbody tr").forEach(function(tr){
+    var cells=tr.querySelectorAll("td");
+    if(cells.length>=4)rows.push([cells[0].textContent,cells[1].textContent,cells[2].textContent,cells[3].textContent]);
+  });
+  var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||"").replace(/"/g,'""')+'"';}).join(",");}).join("\n");
+  var a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);a.download="campaign_tracking.csv";a.click();
+}
+function exportDtrProfiling(){
+  var rows=[["Campaign Name","Requestor","Date Created","Demand Manager","WBS/Campaign Code","Prospect Tag","Tag for Outreach"]];
+  document.querySelectorAll("#dtr-prof-tbl tbody tr").forEach(function(tr){
+    var cells=tr.querySelectorAll("td");
+    if(cells.length>=6)rows.push([cells[0].textContent,cells[1].textContent,cells[2].textContent,cells[3].textContent,cells[4].textContent,cells[5].textContent]);
+  });
+  var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||"").replace(/"/g,'""')+'"';}).join(",");}).join("\n");
+  var a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);a.download="profiling_tracking.csv";a.click();
+}
 function exportProSummary(){
   var rows=[["Campaign Title","DDM1","Tag","# Prospects","# Companies","Accounts Added","First Created","Last Created"]];
   document.querySelectorAll("#pro-tag-summary tbody tr").forEach(function(tr){
