@@ -3858,8 +3858,6 @@ function renderDtr(){
     var wbs=String(m.wbs||"").trim();
     // Include if WBS matches tracked campaign, OR if WBS is blank (missing info)
     if(wbs&&!filtered.some(function(r){return String(r["Campaign/WBS Code"]||"").trim().replace(/[\r\n]/g,"")==wbs;}))return;
-]/g,"""")===wbs;}))return;
-]/g,"")==wbs;}))return;
     var key=m.id+"|"+m.tag;
     if(seenProfId[key])return;
     seenProfId[key]=true;
