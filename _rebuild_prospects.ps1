@@ -16,7 +16,24 @@ for ($col = 1; $col -le 120; $col++) {
     if ($val) { $headers["$val"] = $col }
 }
 Write-Host "Columns found: $($headers.Count)"
-Write-Host "Key cols - Id:$($headers['Id']) Touched At:$($headers['Touched At']) Stage Changed At:$($headers['Stage Changed At']) Tags:$($headers['Tags'])"
+
+$colId       = $headers["Id"]
+$colCo       = $headers["Company"]
+$colTouched  = $headers["Touched At"]
+$colSc       = $headers["Stage Changed At"]
+$colAdded    = $headers["Added At"]
+$colCreated  = $headers["Created At"]
+$colTg       = $headers["Tags"]
+$colOwner    = $headers["Owner Name"]
+$colStage    = $headers["Stage Name"]
+$colEmail    = $headers["Email"]
+$colAu       = $headers["Assigned Users"]
+$colTitle    = $headers["Title"]
+$colPersona  = if ($headers["Persona Name"]) { $headers["Persona Name"] } else { 0 }
+$colActive   = $headers["Active Sequences"]
+$colFinished = $headers["Finished Sequences"]
+
+Write-Host "Key cols: Id=$colId Co=$colCo Stage=$colStage Persona=$colPersona Active=$colActive Finished=$colFinished"
 
 function ToDate($val) {
     if (-not $val) { return "" }
@@ -26,6 +43,7 @@ function ToDate($val) {
 }
 
 function EscJS($s) {
+    if ($null -eq $s) { return "" }
     $s = "$s".Trim()
     $s = $s -replace '\\', '\\'
     $s = $s -replace '"',  '\"'
@@ -35,23 +53,37 @@ function EscJS($s) {
     return $s
 }
 
+function GetVal($row, $col) {
+    if ($col -le 0) { return "" }
+    try { $v = $ws.Cells.Item($row, $col).Value2; if ($null -eq $v) { return "" }; return "$v" }
+    catch { return "" }
+}
+
 $entries = [System.Collections.Generic.List[string]]::new()
 $lastRow = $ws.UsedRange.Rows.Count
+Write-Host "Total rows: $lastRow"
 
 for ($r = 2; $r -le $lastRow; $r++) {
-    $id      = $ws.Cells.Item($r, $headers["Id"]).Value2;           if (-not $id) { continue }
-    $co      = EscJS $ws.Cells.Item($r, $headers["Company"]).Value2
-    $touched = ToDate $ws.Cells.Item($r, $headers["Touched At"]).Value2
-    $sc      = ToDate $ws.Cells.Item($r, $headers["Stage Changed At"]).Value2
-    $added   = ToDate $ws.Cells.Item($r, $headers["Added At"]).Value2
-    $created = ToDate $ws.Cells.Item($r, $headers["Created At"]).Value2
-    $tg      = EscJS $ws.Cells.Item($r, $headers["Tags"]).Value2
-    $owner   = EscJS $ws.Cells.Item($r, $headers["owner"]).Value2
-    $stage   = EscJS $ws.Cells.Item($r, $headers["Stage Name"]).Value2
-    $email   = EscJS $ws.Cells.Item($r, $headers["Email"]).Value2
-    $au      = EscJS $ws.Cells.Item($r, $headers["Assigned Users"]).Value2
-
-    $entries.Add("{`"id`":`"$id`",`"co`":`"$co`",`"touched`":`"$touched`",`"sc`":`"$sc`",`"added`":`"$added`",`"created`":`"$created`",`"tg`":`"$tg`",`"owner`":`"$owner`",`"stage`":`"$stage`",`"email`":`"$email`",`"au`":`"$au`"}")
+    $id = GetVal $r $colId; if (-not $id) { continue }
+    $co      = EscJS (GetVal $r $colCo)
+    $touched = ToDate (GetVal $r $colTouched)
+    $sc      = ToDate (GetVal $r $colSc)
+    $added   = ToDate (GetVal $r $colAdded)
+    $created = ToDate (GetVal $r $colCreated)
+    $tg      = EscJS (GetVal $r $colTg)
+    $owner   = EscJS (GetVal $r $colOwner)
+    $stage   = EscJS (GetVal $r $colStage)
+    $email   = EscJS (GetVal $r $colEmail)
+    $au      = EscJS (GetVal $r $colAu)
+    $title   = EscJS (GetVal $r $colTitle)
+    $persona = EscJS (GetVal $r $colPersona)
+    $active   = EscJS (GetVal $r $colActive)
+    $finished = EscJS (GetVal $r $colFinished)
+    $entries.Add("{`"id`":`"$id`",`"co`":`"$co`",`"touched`":`"$touched`",`"sc`":`"$sc`",`"added`":`"$added`",`"created`":`"$created`",`"tg`":`"$tg`",`"owner`":`"$owner`",`"stage`":`"$stage`",`"email`":`"$email`",`"au`":`"$au`",`"ti`":`"$title`",`"pn`":`"$persona`",`"as`":`"$active`",`"fs`":`"$finished`"}")
+    if ($r % 25000 -eq 0) {
+        Write-Host "Processed $r / $lastRow ($($entries.Count) entries)"
+        # Flush to disk incrementally to avoid memory issues
+    }
 }
 
 $wb.Close($false); $excel.Quit()

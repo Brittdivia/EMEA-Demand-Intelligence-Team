@@ -210,7 +210,7 @@ window.addEventListener('beforeprint',function(){
 });
 window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});</script>
 <script src="data-camp.js?v=20260621c"></script>
-<script src="data-pipe.js?v=20260622"></script>
+<script src="data-pipe.js?v=20260624"></script>
 <script src="data-out.js?v=20260619"></script>
 <script src="data-seqco.js?v=20260619"></script>
 <script src="data-prospects.js?v=20260623j"></script>
@@ -3793,6 +3793,23 @@ function renderDtr(){
   html+="<div class=\"kpi kr\"><div class=\"kl\">No Campaign Code</div><div class=\"kv\">"+profMetaVals.filter(function(m){return !m.wbs||!m.wbs.trim();}).length.toLocaleString()+"</div><div class=\"ks\">requests missing WBS/campaign code</div></div>";
   html+="<div class=\"kpi kr\"><div class=\"kl\">No Tag</div><div class=\"kv\">"+profMetaVals.filter(function(m){return (!m.tag||!m.tag.trim())&&(!m.tagOut||!m.tagOut.trim());}).length.toLocaleString()+"</div><div class=\"ks\">requests with no prospect or outreach tag</div></div>";
   html+="</div>";
+  // DCM Summary table
+  var dcmMap={};
+  filtered.forEach(function(r){var dm=String(r["Demand Manager"]||"").trim();if(dm){if(!dcmMap[dm])dcmMap[dm]={camps:0,profReqs:0};dcmMap[dm].camps++;}});
+  profMetaVals.forEach(function(m){if(m.ddm1){var norm=normDDM1(m.ddm1);if(dcmMap[norm])dcmMap[norm].profReqs++;else dcmMap[norm]={camps:0,profReqs:1};}});
+  var dcmEntries=Object.entries(dcmMap).sort(function(a,b){return b[1].camps-a[1].camps||a[0].localeCompare(b[0]);});
+  var thD="background:#00144A;color:#fff;padding:8px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;white-space:nowrap;position:sticky;top:0;border-right:1px solid #1B4F5A";
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:4px"><div class="sec" style="margin-bottom:0">DCM Summary</div></div>';
+  html+='<div class="cc" style="margin-bottom:20px"><div style="overflow:auto;max-height:300px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<th style="'+thD+'">Demand Manager</th><th style="'+thD+';text-align:right">Campaigns</th><th style="'+thD+';text-align:right">Profiling Requests</th></tr></thead><tbody>';
+  dcmEntries.forEach(function(e,i){
+    html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
+      +'<td style="padding:6px 12px">'+e[0]+'</td>'
+      +'<td style="padding:6px 12px;text-align:right;font-weight:700">'+e[1].camps.toLocaleString()+'</td>'
+      +'<td style="padding:6px 12px;text-align:right">'+e[1].profReqs.toLocaleString()+'</td>'
+      +'</tr>';
+  });
+  html+='</tbody></table></div></div>';
   var seqIdMap={};(window.OUT_DATA||[]).forEach(function(r){var wbs=String(r["Campaign/WBS Code"]||"").trim();var sid=String(r["Sequence ID"]||"").trim();if(wbs&&sid){if(!seqIdMap[wbs])seqIdMap[wbs]=new Set();seqIdMap[wbs].add(sid);}});
   html+='<div class="krow"><div style="display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px">Planning</div>';
   html+='<div class="kpi kb"><div class="kl">Campaigns</div><div class="kv">'+(new Set(filtered.map(function(r){return String(r["Index"]||"").trim();}).filter(Boolean))).size.toLocaleString()+'</div><div class="ks">unique campaigns by index</div></div>';
