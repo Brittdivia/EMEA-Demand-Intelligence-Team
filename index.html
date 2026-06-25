@@ -3044,6 +3044,22 @@ function renderOutInner(page){
   var filtWBS=new Set(campSource.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
   var allData=outData.filter(function(r){return filtWBS.has(String(r["Campaign/WBS Code"]||"").trim());});
 
+  // Build WBS->profiling tag maps from CAMP_PROF_META
+  var _wbsToTagOut={},_wbsToTagPros={};
+  Object.values(window.CAMP_PROF_META||{}).forEach(function(m){
+    var wbs=String(m.wbs||"").trim();if(!wbs)return;
+    if(m.tagOut&&m.tagOut.trim())_wbsToTagOut[wbs]=m.tagOut.trim();
+    if(m.tag&&m.tag.trim())_wbsToTagPros[wbs]=m.tag.trim();
+  });
+  // Build tag option lists from ALL profiling metadata entries
+  var _tagOutSet=new Set(),_tagProsSet=new Set();
+  Object.values(window.CAMP_PROF_META||{}).forEach(function(m){
+    if(m.tagOut&&m.tagOut.trim())_tagOutSet.add(m.tagOut.trim());
+    if(m.tag&&m.tag.trim())_tagProsSet.add(m.tag.trim());
+  });
+  var _tagOutOpts=Array.from(_tagOutSet).sort();
+  var _tagProsOpts=Array.from(_tagProsSet).sort();
+
   // Apply outFilter
   var data=allData.filter(function(r){
     if(window.outFilter.state){
@@ -3056,10 +3072,7 @@ function renderOutInner(page){
     }
     if(window.outFilter.reg){if(String(r["Region Name (level 2)"]||"").trim()!==window.outFilter.reg)return false;}
     if(window.outFilter.owner){if(String(r["Owner"]||"").trim()!==window.outFilter.owner)return false;}
-    if(window.outFilter.owner){if(String(r["Owner"]||"").trim()!==window.outFilter.owner)return false;}
-    if(window.outFilter.owner){if(String(r["Owner"]||"").trim()!==window.outFilter.owner)return false;}
     if(window.outFilter.wbs){if(String(r["Campaign/WBS Code"]||"").trim()!==window.outFilter.wbs)return false;}
-    // Apply main filter bar region/salesbag/iac/sod filters
     if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size>0){if(!filters["Region Name (level 2)"].has(String(r["Region Name (level 2)"]||"")))return false;}
     if(filters["Sales Bag"]&&filters["Sales Bag"].size>0){var rSB=String(r["Sales Bag"]||"").trim();if(!filters["Sales Bag"].has(rSB))return false;}
     if(filters["IAC"]&&filters["IAC"].size>0){var rIAC=String(r["IAC"]||"").trim();if(!filters["IAC"].has(rIAC))return false;}
@@ -3067,6 +3080,8 @@ function renderOutInner(page){
     if(window.outFilter.sb){if(String(r["Sales Bag"]||"").split(",").map(function(s){return s.trim();}).indexOf(window.outFilter.sb)<0)return false;}
     if(window.outFilter.iac){if(String(r["IAC"]||"").split(",").map(function(s){return s.trim();}).indexOf(window.outFilter.iac)<0)return false;}
     if(window.outFilter.sod){if(String(r["SoD"]||"").split(",").map(function(s){return s.trim();}).indexOf(window.outFilter.sod)<0)return false;}
+    if(window.outFilter.proTagOut){var wbs=String(r["Campaign/WBS Code"]||"").trim();if(_wbsToTagOut[wbs]!==window.outFilter.proTagOut)return false;}
+    if(window.outFilter.proTagPros){var wbs2=String(r["Campaign/WBS Code"]||"").trim();if(_wbsToTagPros[wbs2]!==window.outFilter.proTagPros)return false;}
     return true;
   });
 
@@ -3135,6 +3150,14 @@ function renderOutInner(page){
   ];
 
   var html3='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Outreach Details - ('+data.length.toLocaleString()+' Sequences in Analysis)</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>'+filterBanner;
+  var _selSt='font-size:12px;padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);cursor:pointer;max-width:260px';
+  var _curTagOut=window.outFilter.proTagOut||"";
+  var _curTagPros=window.outFilter.proTagPros||"";
+  html3+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;align-items:center;font-size:12px">';
+  html3+='<span style="font-weight:600;color:var(--dk)">Profiling Tag for Outreach:</span><select style="'+_selSt+'" onchange="window.outFilter.proTagOut=this.value||null;renderOut()"><option value="">All</option>'+_tagOutOpts.map(function(t){return'<option value="'+t.replace(/"/g,'&quot;')+'"'+(_curTagOut===t?' selected':'')+'>'+t+'</option>';}).join('')+'</select>';
+  html3+='<span style="font-weight:600;color:var(--dk)">Profiling Tag for Prospect:</span><select style="'+_selSt+'" onchange="window.outFilter.proTagPros=this.value||null;renderOut()"><option value="">All</option>'+_tagProsOpts.map(function(t){return'<option value="'+t.replace(/"/g,'&quot;')+'"'+(_curTagPros===t?' selected':'')+'>'+t+'</option>';}).join('')+'</select>';
+  if(_curTagOut||_curTagPros)html3+='<button onclick="window.outFilter.proTagOut=null;window.outFilter.proTagPros=null;renderOut()" style="font-size:11px;padding:3px 10px;cursor:pointer;border:1px solid var(--rd);border-radius:var(--r);background:#fff;color:var(--rd)">Clear</button>';
+  html3+='</div>';
   html3+="<div class=\"krow\" style=\"flex-wrap:wrap\">";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Prospects Contacted</div><div class=\"kv\">"+totP.toLocaleString()+"</div><div class=\"ks\">through tracked sequences</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Accounts Added</div><div class=\"kv\">"+totAcctAdded.toLocaleString()+"</div><div class=\"ks\">added to tracked sequences</div></div>";
@@ -3780,6 +3803,8 @@ function renderPip(){
 function renderDtr(){
   var page=document.getElementById("dtrPage");
   if(!page)return;
+  function normDDM1(d){var p=String(d||"").split(",");if(p.length<2)return d;var first=p[1].trim();var last=p[0].trim().split(/\s+/)[0];return first+" "+last;}
+  function fmtCreated(v){if(!v)return"";var s=String(v).trim();var n=parseFloat(s);if(!isNaN(n)&&n>40000&&n<60000){var d=new Date(Date.UTC(1899,11,30)+(n*86400000));return d.toISOString().slice(0,10);}var m=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);if(m){var y=m[3].length===2?"20"+m[3]:m[3];return y+"-"+m[2].padStart(2,"0")+"-"+m[1].padStart(2,"0");}try{var dt=new Date(s);if(!isNaN(dt))return dt.toISOString().slice(0,10);}catch(e){}return s.slice(0,10);}
   var profMeta2=window.CAMP_PROF_META||{};
   var profMetaVals=Object.values(profMeta2);
   var profMap=window.CAMP_PROF_TAGS||{};
@@ -3795,16 +3820,31 @@ function renderDtr(){
   html+="</div>";
   // DCM Summary table
   var dcmMap={};
-  filtered.forEach(function(r){var dm=String(r["Demand Manager"]||"").trim();if(dm){if(!dcmMap[dm])dcmMap[dm]={camps:0,profReqs:0};dcmMap[dm].camps++;}});
-  profMetaVals.forEach(function(m){if(m.ddm1){var norm=normDDM1(m.ddm1);if(dcmMap[norm])dcmMap[norm].profReqs++;else dcmMap[norm]={camps:0,profReqs:1};}});
-  var dcmEntries=Object.entries(dcmMap).sort(function(a,b){return b[1].camps-a[1].camps||a[0].localeCompare(b[0]);});
+  filtered.forEach(function(r){var dm=String(r["Demand Manager"]||"").trim();if(dm){if(!dcmMap[dm.toLowerCase()])dcmMap[dm.toLowerCase()]={display:dm,camps:0,profReqs:0};dcmMap[dm.toLowerCase()].camps++;}});
+  var dcmSeen={};
+  profMetaVals.forEach(function(m){
+    if(!m.ddm1)return;
+    var key=m.id;if(dcmSeen[key])return;dcmSeen[key]=true;
+    var norm=normDDM1(m.ddm1).toLowerCase();
+    if(dcmMap[norm]){dcmMap[norm].profReqs++;dcmMap[norm].rawDdm1s=dcmMap[norm].rawDdm1s||new Set();dcmMap[norm].rawDdm1s.add(m.ddm1);}
+    else dcmMap[norm]={display:normDDM1(m.ddm1),camps:0,profReqs:1,rawDdm1s:new Set([m.ddm1])};
+  });;
+  var _globalDmFilter=filters&&filters["Demand Manager"]&&filters["Demand Manager"].size>0?filters["Demand Manager"]:null;
+  var dcmEntries=Object.entries(dcmMap).filter(function(e){
+    if(!_globalDmFilter||!e[0])return true;
+    return _globalDmFilter.has(e[1].display);
+  }).sort(function(a,b){return b[1].camps-a[1].camps||a[1].display.localeCompare(b[1].display);});
   var thD="background:#00144A;color:#fff;padding:8px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;white-space:nowrap;position:sticky;top:0;border-right:1px solid #1B4F5A";
   html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:4px"><div class="sec" style="margin-bottom:0">DCM Summary</div></div>';
   html+='<div class="cc" style="margin-bottom:20px"><div style="overflow:auto;max-height:300px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
   html+='<th style="'+thD+'">Demand Manager</th><th style="'+thD+';text-align:right">Campaigns</th><th style="'+thD+';text-align:right">Profiling Requests</th></tr></thead><tbody>';
+  window._dcmClick=function(key){window._dtrProfFilter=window._dtrProfFilter||{};window._dtrProfFilter.dm=(window._dtrProfFilter.dm===key)?null:key;renderDtr();};
   dcmEntries.forEach(function(e,i){
-    html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
-      +'<td style="padding:6px 12px">'+e[0]+'</td>'
+    var isSel=window._dtrProfFilter&&window._dtrProfFilter.dm===e[0];
+    var clickable=e[0]!=="";
+    var keyEsc=e[0].replace(/\\/g,'\\\\').replace(/"/g,'&quot;');
+    html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(isSel?'#D1EFFF':(i%2===0?'#fff':'#F8FBFF'))+(clickable?';cursor:pointer':'')+'"'+(clickable?' onclick="window._dcmClick(this.dataset.key)" data-key="'+keyEsc+'"':'')+'>  '
+      +'<td style="padding:6px 12px">'+e[1].display+'</td>'
       +'<td style="padding:6px 12px;text-align:right;font-weight:700">'+e[1].camps.toLocaleString()+'</td>'
       +'<td style="padding:6px 12px;text-align:right">'+e[1].profReqs.toLocaleString()+'</td>'
       +'</tr>';
@@ -3825,7 +3865,11 @@ function renderDtr(){
     var dm=String(r["Demand Manager"]||"").trim();
     var wbs=String(r["Campaign/WBS Code"]||"").trim().replace(/[\r\n]/g,"");
     var sids=wbs&&seqIdMap[wbs]?Array.from(seqIdMap[wbs]).join(", "):"";
-    var idx=String(r["Index"]||"").trim();rows.push({idx:idx,dm:dm,wbs:wbs,sid:sids});
+    var idx=String(r["Index"]||"").trim();
+    var name=String(r["Campaign Name"]||"").trim();
+    var exec=String(r["Executor"]||"").trim();
+    var qtr=String(r["Starting Quarter"]||"").trim();
+    rows.push({idx:idx,dm:dm,wbs:wbs,sid:sids,name:name,exec:exec,qtr:qtr});
   });
   rows.sort(function(a,b){return a.dm.localeCompare(b.dm)||a.wbs.localeCompare(b.wbs);});
   var totRows=rows.length;
@@ -3856,10 +3900,14 @@ function renderDtr(){
   html+='<span>Sequence ID:</span><select style="'+selSt+'" onchange="window._dtrCampFilter=window._dtrCampFilter||{};window._dtrCampFilter.sid=this.value;renderDtr()"><option value=""'+((!_sc)?" selected":"")+'>All</option><option value="blank"'+(_sc==="blank"?" selected":"")+'>Blank</option><option value="filled"'+(_sc==="filled"?" selected":"")+'>Filled</option></select>';
   html+='<button onclick="window._dtrCampFilter={};renderDtr()" style="'+selSt+';background:var(--rd);color:#fff;border-color:var(--rd)">Clear</button></div>';
   html+='<div class="cc" style="margin-bottom:20px"><div style="overflow:auto;max-height:500px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
-  html+='<th style="'+thS+'">Index</th><th style="'+thS+'">Demand Manager</th><th style="'+thS+'">WBS Campaign Code</th><th style="'+thS+'">Sequence ID(s)</th></tr></thead><tbody>';
+  html+='<th style="'+thS+'">Index</th><th style="'+thS+'">Campaign Name</th><th style="'+thS+'">Demand Manager</th><th style="'+thS+'">Executor</th><th style="'+thS+'">Starting Quarter</th><th style="'+thS+'">WBS Campaign Code</th><th style="'+thS+'">Sequence ID(s)</th></tr></thead><tbody>';
   filteredRows.forEach(function(r,i){
     html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
-      +'<td style="padding:6px 12px;color:var(--mu);font-size:10px">'+r.idx+'</td>'+'<td style="padding:6px 12px">'+r.dm+'</td>'
+      +'<td style="padding:6px 12px;color:var(--mu);font-size:10px">'+r.idx+'</td>'
+      +'<td style="padding:6px 12px;font-size:11px">'+r.name+'</td>'
+      +'<td style="padding:6px 12px">'+r.dm+'</td>'
+      +'<td style="padding:6px 12px;font-size:11px">'+r.exec+'</td>'
+      +'<td style="padding:6px 12px;font-size:11px">'+r.qtr+'</td>'
       +'<td style="padding:6px 12px;font-family:monospace;font-size:11px">'+r.wbs+'</td>'
       +'<td style="padding:6px 12px;color:var(--mu);font-size:11px">'+r.sid+'</td>'
       +'</tr>';
@@ -3870,19 +3918,22 @@ function renderDtr(){
   var profRows=[];
   var seenProfId={};
   var _activeDMsLower=new Set(filtered.map(function(r){return String(r["Demand Manager"]||"").trim().toLowerCase();}).filter(Boolean));
-  function normDDM1(d){var p=String(d||"").split(",");return p.length===2?(p[1].trim()+" "+p[0].trim()):d;}
   Object.values(profMeta2).forEach(function(m){
-    var wbs=String(m.wbs||"").trim();
-    // Include if WBS matches tracked campaign, OR if WBS is blank (missing info)
-    if(wbs&&!filtered.some(function(r){return String(r["Campaign/WBS Code"]||"").trim().replace(/[\r\n]/g,"")==wbs;}))return;
-    var key=m.id+"|"+m.tag;
+    var key=m.id;
     if(seenProfId[key])return;
     seenProfId[key]=true;
     profRows.push(m);
   });
   profRows.sort(function(a,b){return (a.ddm1||"").localeCompare(b.ddm1||"")||(a.title||"").localeCompare(b.title||"");});
   var _dtrProfFilter=window._dtrProfFilter||{};
+  var _dmRawSet=(_dtrProfFilter.dm&&dcmMap[_dtrProfFilter.dm])?dcmMap[_dtrProfFilter.dm].rawDdm1s:null;
   var filteredProfRows=profRows.filter(function(m){
+    if(_dmRawSet){if(!m.ddm1||!_dmRawSet.has(m.ddm1))return false;}
+    if(_globalDmFilter){
+      var _p=String(m.ddm1||"").split(",");
+      var _norm=_p.length>=2?(_p[1].trim()+" "+_p[0].trim().split(/\s+/)[0]):(m.ddm1||"");
+      if(!_globalDmFilter.has(_norm))return false;
+    }
     if(_dtrProfFilter.wbs==="blank"&&(m.wbs&&m.wbs.trim()))return false;
     if(_dtrProfFilter.wbs==="filled"&&!(m.wbs&&m.wbs.trim()))return false;
     if(_dtrProfFilter.tag==="blank"&&((m.tag&&m.tag.trim())||(m.tagOut&&m.tagOut.trim())))return false;
@@ -3892,22 +3943,24 @@ function renderDtr(){
     return true;
   });
   var thP="background:#00144A;color:#fff;padding:8px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;white-space:nowrap;position:sticky;top:0;border-right:1px solid #1B4F5A";
-  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:0"><div class="sec" style="margin-bottom:0">Profiling Requests - Linked to Campaigns</div><button onclick="exportDtrProfiling()" style="padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">&#11015; Export CSV</button></div>';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;margin-bottom:0"><div class="sec" style="margin-bottom:0">Profiling Requests</div><button onclick="exportDtrProfiling()" style="padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">&#11015; Export CSV</button></div>';
   html+='<div style="font-size:11px;color:var(--mu);padding:6px 0 4px">Total: <b>'+profRows.length.toLocaleString()+'</b> &nbsp;|&nbsp; Showing: <b>'+filteredProfRows.length.toLocaleString()+'</b></div>';
   var _pwc=_dtrProfFilter.wbs||"",_ptc=_dtrProfFilter.tag||"",_poc=_dtrProfFilter.tagOut||"";
   html+='<div style="display:flex;gap:10px;flex-wrap:wrap;padding:4px 0 8px;font-size:11px;align-items:center">';
   html+='<span>WBS Code:</span><select style="'+selSt+'" onchange="window._dtrProfFilter=window._dtrProfFilter||{};window._dtrProfFilter.wbs=this.value;renderDtr()"><option value=""'+((!_pwc)?" selected":"")+'>All</option><option value="blank"'+(_pwc==="blank"?" selected":"")+'>Blank</option><option value="filled"'+(_pwc==="filled"?" selected":"")+'>Filled</option></select>';
   html+='<span>Any Tag:</span><select style="'+selSt+'" onchange="window._dtrProfFilter=window._dtrProfFilter||{};window._dtrProfFilter.tag=this.value;renderDtr()"><option value=""'+((!_ptc)?" selected":"")+'>All</option><option value="blank"'+(_ptc==="blank"?" selected":"")+'>Blank</option><option value="filled"'+(_ptc==="filled"?" selected":"")+'>Filled</option></select>';
   html+='<span>Tag for Outreach:</span><select style="'+selSt+'" onchange="window._dtrProfFilter=window._dtrProfFilter||{};window._dtrProfFilter.tagOut=this.value;renderDtr()"><option value=""'+((!_poc)?" selected":"")+'>All</option><option value="blank"'+(_poc==="blank"?" selected":"")+'>Blank</option><option value="filled"'+(_poc==="filled"?" selected":"")+'>Filled</option></select>';
-  html+='<button onclick="window._dtrProfFilter={};renderDtr()" style="'+selSt+';background:var(--rd);color:#fff;border-color:var(--rd)">Clear</button></div>';
+  html+='<button onclick="window._dtrProfFilter={};renderDtr()" style="'+selSt+';background:var(--rd);color:#fff;border-color:var(--rd)">Clear</button>';
+  if(_dtrProfFilter.dm&&dcmMap[_dtrProfFilter.dm])html+='<span style="font-size:11px;background:#D1EFFF;padding:2px 8px;border-radius:3px;color:#012931">DM: <b>'+dcmMap[_dtrProfFilter.dm].display+'</b></span>';
+  html+='</div>';
   html+='<div class="cc" style="margin-bottom:20px"><div style="overflow:auto;max-height:500px"><table id="dtr-prof-tbl" style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
   html+='<th style="'+thP+'">Campaign Name</th><th style="'+thP+'">Requestor (Created By)</th><th style="'+thP+'">Date Created</th><th style="'+thP+'">Demand Manager</th><th style="'+thP+'">WBS / Campaign Code</th><th style="'+thP+'">Prospect Tag</th><th style="'+thP+'">Tag for Outreach</th></tr></thead><tbody>';
   filteredProfRows.forEach(function(m,i){
     html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
       +'<td style="padding:6px 12px;font-size:11px">'+( m.title||"")+'</td>'
       +'<td style="padding:6px 12px;font-size:11px;color:var(--mu)">'+(m.createdBy||"")+'</td>'
-      +'<td style="padding:6px 12px;font-size:11px;color:var(--mu)">'+(m.created||"")+'</td>'
-      +'<td style="padding:6px 12px;font-size:11px">'+(m.ddm1||"")+'</td>'
+      +'<td style="padding:6px 12px;font-size:11px;color:var(--mu)">'+fmtCreated(m.created)+'</td>'
+      +'<td style="padding:6px 12px;font-size:11px">'+(m.ddm1?normDDM1(m.ddm1):"")+'</td>'
       +'<td style="padding:6px 12px;font-family:monospace;font-size:11px">'+(m.wbs||"")+'</td>'
       
       +'<td style="padding:6px 12px;font-size:11px;color:#07838F">'+(m.tag||"")+'</td>'
@@ -3919,10 +3972,10 @@ function renderDtr(){
 }
 
 function exportDtrTable(){
-  var rows=[["Index","Demand Manager","WBS Campaign Code","Sequence ID(s)"]];
+  var rows=[["Index","Campaign Name","Demand Manager","Executor","Starting Quarter","WBS Campaign Code","Sequence ID(s)"]];
   document.querySelectorAll("#dtrPage table tbody tr").forEach(function(tr){
     var cells=tr.querySelectorAll("td");
-    if(cells.length>=4)rows.push([cells[0].textContent,cells[1].textContent,cells[2].textContent,cells[3].textContent]);
+    if(cells.length>=7)rows.push([cells[0].textContent,cells[1].textContent,cells[2].textContent,cells[3].textContent,cells[4].textContent,cells[5].textContent,cells[6].textContent]);
   });
   var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v||"").replace(/"/g,'""')+'"';}).join(",");}).join("\n");
   var a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);a.download="campaign_tracking.csv";a.click();
