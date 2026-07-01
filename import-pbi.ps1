@@ -31,6 +31,19 @@ $sheetXml.Load("$extPath\xl\worksheets\sheet1.xml")
 [xml]$sheet = $sheetXml
 $rows = $sheet.worksheet.sheetData.row
 
+# Helper: normalize executor names from "Last, First, Last2, First2" to "First Last, First2 Last2"
+function NormExecutor($val) {
+    if ([string]::IsNullOrWhiteSpace($val)) { return '' }
+    $parts = $val -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ }
+    $names = [System.Collections.Generic.List[string]]::new()
+    for ($i = 0; $i -lt $parts.Count; $i += 2) {
+        $last  = $parts[$i]
+        $first = if ($i + 1 -lt $parts.Count) { $parts[$i + 1] } else { '' }
+        if ($first) { $names.Add("$first $last") } else { $names.Add($last) }
+    }
+    return $names -join ', '
+}
+
 # Helper: resolve cell value
 function Get-CellValue($cell) {
     $v = $cell.v
@@ -97,7 +110,7 @@ $campCols = @{
     'Target Pipeline - value kEUR'= 'Target Pipeline - value kEUR'
     'Total Account (Validated)'   = 'Total Account (Validated)'
     'DG PROGRAM'                  = 'DG Program'
-    'Executor.value'              = 'Executor'
+    'Executor1'                   = 'Executor'
     'Number of Accounts'          = '# Accounts'
     'Sequence ID'                 = 'Sequence ID'
     'Digital Assets team support' = 'Digital Assets team support'
@@ -152,6 +165,7 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
         $destKey = $campCols[$srcHdr]
         $val = GetByHeader $srcHdr
         if ($dateColsSrc -contains $srcHdr) { $val = ConvertTo-ExcelDate $val }
+        if ($destKey -eq 'Executor') { $val = NormExecutor $val }
         $fields.Add('"' + (EscapeJson $destKey) + '":"' + (EscapeJson $val) + '"')
     }
     $campRows.Add('{' + ($fields -join ',') + '}')
