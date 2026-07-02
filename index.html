@@ -238,6 +238,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
   <button class="tbtn-sub" onclick="switchTab(&#39;out&#39;)">Outreach Details</button>
   <button class="tbtn-sub" onclick="switchTab(&#39;acc&#39;)">Account Details</button>
   <button class="tbtn-sub" onclick="switchTab(&#39;pro&#39;)">Profiling</button>
+  <button class="tbtn-sub" onclick="switchTab('pdel')">Prospect Deletion</button>
   <button class="tbtn-sub" onclick="switchTab(&#39;dtr&#39;)">Data Tracking</button>
 </div>
 <div class="fbar" id="fbar">
@@ -251,6 +252,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
 <div class="panel" id="p-ana"><div class="ap" id="anaPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-out"><div class="ap" id="outPage"><div class="nr"><div class="ni">Ã¢Å’â€º</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-pro"><div class="ap" id="proPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
+<div class="panel" id="p-pdel"><div class="ap" id="pdelPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-acc"><div class="ap" id="accPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-pip"><div class="ap" id="pipPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-dtr"><div class="ap" id="dtrPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
@@ -364,7 +366,7 @@ document.addEventListener("DOMContentLoaded",function(){
 });
 
 var _accFiltersSaved=null;
-var DETAIL_TABS={"ana":"Campaign and Pipeline Details","pip":"Pipeline Details","out":"Outreach Details","acc":"Account Details","pro":"Profiling","cal":"EMEA Campaign Calendar","dtr":"Data Tracking"};
+var DETAIL_TABS={"ana":"Campaign and Pipeline Details","pip":"Pipeline Details","out":"Outreach Details","acc":"Account Details","pro":"Profiling","pdel":"Prospect Deletion","cal":"EMEA Campaign Calendar","dtr":"Data Tracking"};
 function switchTab(t){
   if(activeTab==="acc"&&t!=="acc"&&_accFiltersSaved){filters["Starting Quarter"]=_accFiltersSaved.quarter;filters["Status"]=_accFiltersSaved.status;_accFiltersSaved=null;pg=1;applyFilters();updateTags();syncCab();buildFbar();buildWbar();}
   activeTab=t;
@@ -378,6 +380,7 @@ function switchTab(t){
   if(t==="ana")renderAna();
   if(t==="out")renderOut();
   if(t==="pro")renderPro();
+  if(t==="pdel")renderPdel();
   if(t==="pip")renderPip();
   if(t==="dtr")renderDtr();
   if(t==="acc"){_accFiltersSaved={quarter:new Set(filters["Starting Quarter"]),status:new Set(filters["Status"])};filters["Starting Quarter"]=new Set(["2026-Q1","2026-Q2","2026-Q3","2026-Q4"]);filters["Status"]=new Set(["Executed","Running"]);pg=1;applyFilters();updateTags();syncCab();buildFbar();buildWbar();renderAcc();setTimeout(function(){FD.forEach(function(f){syncBtn(f.k);});syncDrmBtn();syncEurBtn();},50);return;}
@@ -388,7 +391,7 @@ function sk(k){return k.replace(/[^a-zA-Z0-9]/g,"_");}
 
 function buildFbar(){
   var bar=document.getElementById("fbar"),div=document.getElementById("fdiv");
-  var WBS_TABS=new Set(["cal","out","ana","acc","pro","dtr"]);
+  var WBS_TABS=new Set(["cal","out","ana","acc","pro","pdel","dtr"]);
   bar.querySelectorAll(".fbi").forEach(function(e){e.remove();});
   FD.forEach(function(fd){
     if(fd.k==="Campaign/WBS Code"||fd.k==="Executor"||fd.k==="Digital Assets team support"||fd.k==="DG Program")return;
@@ -453,11 +456,11 @@ function filterExcept(excl){
 
 function matchF(cell,sel){
   if(!sel.size)return true;if(!cell)return false;
-  var norm=cell.trim();
+  var norm=cell.trim().replace(/_x000D_\s*/g,"").trim();
   norm=norm==="RunningExecuted"?"Executed":norm==="Canceled"?"Cancelled":norm;
   if(sel.has(norm))return true;
   if(sel.has(cell.trim()))return true;
-  var f=false;sel.forEach(function(s){if(cell.indexOf(s)>=0)f=true;});return f;
+  var f=false;sel.forEach(function(s){if(norm.indexOf(s)>=0||cell.indexOf(s)>=0)f=true;});return f;
 }
 
 function toggleDD(key){
@@ -482,12 +485,12 @@ function ddSrch(inp,s){
 function toggleF(key,val,checked){
   if(checked)filters[key].add(val);else filters[key].delete(val);
   pg=1;applyFilters();syncBtn(key);updateTags();syncCab();buildWbar();if(activeTab==="dtr")renderDtr();
-  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="pdel")renderPdel();if(activeTab==="exe")renderExe();
 }
 function clearFilter(key){
   filters[key].clear();pg=1;applyFilters();syncBtn(key);updateTags();syncCab();buildWbar();if(activeTab==="dtr")renderDtr();
   document.getElementById("fdo_"+sk(key)).innerHTML=buildOpts(key);
-  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="pdel")renderPdel();if(activeTab==="exe")renderExe();
 }
 function clearAll(){
   FD.forEach(function(f){filters[f.k].clear();});
@@ -495,7 +498,7 @@ function clearAll(){
   srchQ="";var srchEl=document.getElementById("srch");if(srchEl)srchEl.value="";
   pg=1;closeAllDD();applyFilters();
   FD.forEach(function(f){syncBtn(f.k);});updateTags();syncCab();
-  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="dtr")renderDtr();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="pdel")renderPdel();if(activeTab==="dtr")renderDtr();if(activeTab==="exe")renderExe();
 }
 function syncBtn(key){
   var s=sk(key),n=filters[key].size;
@@ -503,7 +506,7 @@ function syncBtn(key){
   if(!btn)return;btn.classList.toggle("on",n>0);if(fc)fc.textContent=n;
 }
 function buildWbar(){
-  var WBS_TABS=new Set(["cal","out","ana","acc","pro","dtr"]);
+  var WBS_TABS=new Set(["cal","out","ana","acc","pro","pdel","dtr"]);
   var isCal=activeTab==="cal";
   var wc=document.getElementById(isCal?"wbar-content":"wbar-content2");if(!wc)return;
   var wb=document.getElementById("wbar");
@@ -539,7 +542,15 @@ function buildWbar(){
     return '<span style="display:inline-flex;align-items:center;gap:6px"><span class="flbl">'+label+':</span>'+s+'</span>';
   }
   var html=mkTextSearch("Campaign/WBS Code","WBS Code");
-  html+=" "+mkTextSearch("Campaign Name","Campaign Name");
+  if(activeTab==="pro"||activeTab==="pdel"){
+    // Profiling request title search
+    var _proTitleCur=window.proFilter&&window.proFilter.proTitleSearch||"";
+    var _proTitleInput='<input type="text" value="'+_proTitleCur.replace(/"/g,'&quot;')+'" placeholder="Search Campaign Title (Profiling Request)..." style="font-size:12px;padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);width:220px" oninput="var _el=this;clearTimeout(window._sfT);window._sfT=setTimeout(function(){window.proFilter=window.proFilter||{};window.proFilter.proTitleSearch=_el.value.trim();renderPro();},300)">';
+    if(_proTitleCur)_proTitleInput+=' <button onclick="window.proFilter.proTitleSearch=\'\';renderPro()" style="font-size:11px;padding:2px 8px;border:1px solid var(--rd);border-radius:var(--r);cursor:pointer;background:#fff;color:var(--rd)">Clear</button>';
+    html+=' <span style="display:inline-flex;align-items:center;gap:6px"><span class="flbl">Campaign Title (Profiling Request):</span>'+_proTitleInput+'</span>';
+  } else {
+    html+=" "+mkTextSearch("Campaign Name","Campaign Name");
+  }
   html+=" "+mkDrop("Executor","Executor",filterExcept("Executor"));
   html+=" "+mkDrop("Digital Assets team support","DAT Support",filterExcept("Digital Assets team support"));
   html+=" "+mkDrop("DG Program","DG Program",filterExcept("DG Program"));
@@ -570,7 +581,7 @@ function updateTags(){
 function removeTag(key,val){
   filters[key].delete(val);pg=1;applyFilters();syncBtn(key);updateTags();syncCab();
   document.getElementById("fdo_"+sk(key)).innerHTML=buildOpts(key);
-  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="pdel")renderPdel();if(activeTab==="exe")renderExe();
 }
 
 // DRM filter
@@ -583,12 +594,12 @@ function applyEurFilter(){
   var v=parseFloat(document.getElementById("eur-input").value);
   eurMinFilter=isNaN(v)?null:v;
   syncEurBtn();syncCab();closeAllDD();
-  if(activeTab==="ana")renderAna();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="exe")renderExe();if(activeTab==="out")renderOut();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="pdel")renderPdel();if(activeTab==="exe")renderExe();if(activeTab==="out")renderOut();if(activeTab==="exe")renderExe();
 }
 function clearEurFilter(){
   eurMinFilter=null;var _ei2=document.getElementById("eur-input");if(_ei2)_ei2.value="";
   syncEurBtn();syncCab();
-  if(activeTab==="ana")renderAna();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="exe")renderExe();if(activeTab==="out")renderOut();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="pdel")renderPdel();if(activeTab==="exe")renderExe();if(activeTab==="out")renderOut();if(activeTab==="exe")renderExe();
 }
 function syncEurBtn(){
   var btn=document.getElementById("eur-fbtn"),val=document.getElementById("eur-val");
@@ -615,11 +626,11 @@ function toggleDrmDD(){
 function toggleDrmF(val,checked){
   if(checked)drmFilters.add(val);else drmFilters.delete(val);
   syncDrmBtn();syncCab();
-  if(activeTab==="ana")renderAna();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="pdel")renderPdel();if(activeTab==="exe")renderExe();
 }
 function clearDrmFilter(){
   drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});syncDrmBtn();eurMinFilter=null;syncEurBtn();syncCab();buildDrmDD();
-  if(activeTab==="ana")renderAna();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="pdel")renderPdel();if(activeTab==="exe")renderExe();
 }
 function syncDrmBtn(){
   var btn=document.getElementById("drm-fbtn"),fc=document.getElementById("drm-fc");
@@ -3744,7 +3755,7 @@ function renderPro(){
   var uniqueTitles=new Set();var uniqueDDM1=new Set();
   profMetaVals.forEach(function(meta){if(meta.title)uniqueTitles.add(meta.title);if(meta.ddm1){var _d=meta.ddm1;var _p=_d.split(",");var _n=_p.length===2?(_p[1].trim()+" "+_p[0].trim()):_d;uniqueDDM1.add(_n);};});
   var fnote=filtered.length<campData.length?buildFilterBanner(filtered.length,null):"";
-  if(!activeTags.size){page.innerHTML=fnote+"<div class=\"nr\"><p>No profiling tags linked to current filtered campaigns.</p></div>";return;}
+  // Don't blank the page if activeTags is empty — just show empty prospect table
   var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Profiling</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>'+fnote;
   var _pTitleF2=window.proFilter&&window.proFilter.proTitle||"";
   if(_pTitleF2){html+="<div style=\"margin-bottom:8px;display:flex;align-items:center;gap:8px\"><span style=\"background:#D1EFFF;padding:3px 10px;border-radius:var(--r);font-size:11px;font-weight:600\">Title: "+_pTitleF2+"</span><button onclick=\"window.proFilter.proTitle=null;renderPro()\" style=\"padding:3px 10px;background:#C62828;color:#fff;border:none;border-radius:var(--r);font-size:11px;cursor:pointer\">Clear</button></div>";}
@@ -3770,6 +3781,7 @@ function renderPro(){
   var ddm1Counts={};
   profMetaVals.forEach(function(m){
     if(curStatus&&m.status!==curStatus)return;
+    if(_pTitleF2&&m.title!==_pTitleF2)return;
     if(!String(m.created||"").startsWith("2026"))return;
     var d=normDCM(m.ddm1);if(!d)d="(No DCM)";
     ddm1Counts[d]=(ddm1Counts[d]||0)+1;
@@ -3797,12 +3809,16 @@ function renderPro(){
     var filteredMetaTags=new Set(filteredMetaVals.map(function(m){return m.tag;}).filter(Boolean));
     // Restrict activeTags to only tags belonging to filtered DCM
     if(_proDcm){activeTags=new Set(Array.from(activeTags).filter(function(t){return filteredMetaTags.has(t);}));}
+    // When a title is selected, get its tags from filteredMetaVals directly
+    var _selTitleTags=new Set();
+    if(_pTiF){filteredMetaVals.filter(function(m){return m.title===_pTiF;}).forEach(function(m){if(m.tag)_selTitleTags.add(m.tag);});}
+    // Build effective tag set for prospect filtering
+    var _effectiveTags=_pTiF?_selTitleTags:activeTags;
     var prospects=(window.PROSPECT_DATA||[]).filter(function(p){
       if(!p.tg) return false;
-      if(!p.tg.split(",").map(function(t){return t.trim();}).some(function(t){return activeTags.has(t);})) return false;
+      if(!p.tg.split(",").map(function(t){return t.trim();}).some(function(t){return _effectiveTags.has(t);})) return false;
       if(_proTouched==="yes"&&(!p.touched||p.touched===""||p.touched==="1970-01-01")&&(!p.sc||p.sc===""||p.sc==="1970-01-01")) return false;
       if(_proTouched==="no"&&((p.touched&&p.touched!==""&&p.touched!=="1970-01-01")||(p.sc&&p.sc!==""&&p.sc!=="1970-01-01"))) return false;
-      if(_pTiF){var _pTiTags=titleToTags[_pTiF]||new Set();var ht=p.tg.split(",").map(function(t){return t.trim();}).filter(function(t){return activeTags.has(t);}).some(function(t){return _pTiTags.has(t);});if(!ht)return false;}
       return true;
     });
     var tagMetaSet=new Set();filteredMetaVals.forEach(function(m){if(m.tag)tagMetaSet.add(m.tag);});
@@ -3847,39 +3863,73 @@ function renderPro(){
       var sumSortCol=window.sumSortCol||"pids";var sumSortDir=window.sumSortDir||-1;
       window._sumSort=function(col){if(sumSortCol===col)sumSortDir*=-1;else{sumSortCol=col;sumSortDir=-1;}window.sumSortCol=sumSortCol;window.sumSortDir=sumSortDir;renderPro();};
       window._proClickTitle=function(el){var t=el.dataset.ptitle;window.proFilter=window.proFilter||{};window.proFilter.proTitle=(window.proFilter.proTitle===t)?null:t;renderPro();};
-      var sumEntries=Object.entries(tagSummary).sort(function(a,b){
-        var av,bv;
-        if(sumSortCol==="pids"){return(a[1].pids.size-b[1].pids.size)*sumSortDir;}
-        if(sumSortCol==="cos"){return(a[1].cos.size-b[1].cos.size)*sumSortDir;}
-        if(sumSortCol==="seqCos"){return(a[1].seqCos.size-b[1].seqCos.size)*sumSortDir;}
-        if(sumSortCol==="cosAdded"){return(a[1].cosAdded.size-b[1].cosAdded.size)*sumSortDir;}
-        if(sumSortCol==="minAdded"){av=a[1].minAdded||"";bv=b[1].minAdded||"";return av.localeCompare(bv)*sumSortDir;}
-        if(sumSortCol==="maxAdded"){av=a[1].maxAdded||"";bv=b[1].maxAdded||"";return av.localeCompare(bv)*sumSortDir;}
+      // Show ALL profiling requests regardless of linkage
+      // Pre-build tag->cos/pids map from PROSPECT_DATA once
+      var _tagToCos={},_tagToPids={};
+      (window.PROSPECT_DATA||[]).forEach(function(p){
+        String(p.tg||"").split(",").forEach(function(t){
+          t=t.trim();if(!t)return;
+          if(p.co){if(!_tagToCos[t])_tagToCos[t]=new Set();_tagToCos[t].add(p.co);}
+          if(p.id){if(!_tagToPids[t])_tagToPids[t]=new Set();_tagToPids[t].add(p.id);}
+        });
+      });
+      var _seenTitle={};
+      var _proTitleSearch=(window.proFilter&&window.proFilter.proTitleSearch||"").toLowerCase();
+      var sumEntries=filteredMetaVals.filter(function(m){
+        if(curStatus&&m.status!==curStatus)return false;
+        if(_pTiF&&m.title!==_pTiF)return false;
+        if(_proTitleSearch&&(!m.title||m.title.toLowerCase().indexOf(_proTitleSearch)<0))return false;
+        if(_seenTitle[m.title])return false;
+        _seenTitle[m.title]=true;
+        return true;
+      }).map(function(m){
+        var tag=m.tag||"";
+        var ts=tagSummary[tag]||{pids:new Set(),cos:new Set(),cosAdded:new Set(),seqPids:new Set(),seqCos:new Set(),seqId:""};
+        // Always try to resolve seqId from wbs if not already set
+        if(!ts.seqId&&m.wbs)ts.seqId=_wbsToSeqId[m.wbs]||"";
+        // If ts is empty (tag not in activeTags), populate from raw data
+        if(ts.cos.size===0&&ts.seqCos.size===0){
+          var sid=ts.seqId;
+          if(sid){
+            (_seqCos[sid]||new Set()).forEach(function(c){ts.seqCos.add(c);});
+            (_seqPids[sid]||new Set()).forEach(function(p){ts.seqPids.add(p);});
+          }
+          // Also populate cos/pids from PROSPECT_DATA by tag (pre-built map)
+          if(tag){
+            (_tagToCos[tag]||new Set()).forEach(function(c){ts.cos.add(c);});
+            (_tagToPids[tag]||new Set()).forEach(function(p){ts.pids.add(p);});
+          }
+        }
+        return[m.title,ts,m];
+      }).sort(function(a,b){
+        if(sumSortCol==="pids")return(a[1].pids.size-b[1].pids.size)*sumSortDir;
+        if(sumSortCol==="cos")return(a[1].cos.size-b[1].cos.size)*sumSortDir;
+        if(sumSortCol==="seqCos")return(a[1].seqCos.size-b[1].seqCos.size)*sumSortDir;
         return a[0].localeCompare(b[0])*sumSortDir;
       });
-      var totPids=new Set();var totCos=new Set();var totCosAdded=new Set();
-      sumEntries.forEach(function(e){e[1].pids.forEach(function(p){totPids.add(p);});e[1].cos.forEach(function(c){totCos.add(c);});e[1].cosAdded.forEach(function(c){totCosAdded.add(c);});});
-      var uniqueSumTitles=new Set(sumEntries.map(function(e){var m2=tagToMeta[e[0]];return m2?m2.title:"";}).filter(Boolean));
-      var countLine="<div style=\"font-size:11px;color:var(--mu);padding:4px 0 6px\">"+sumEntries.length+" tags &middot; "+uniqueSumTitles.size+" unique titles &middot; <b>"+totCos.size.toLocaleString()+"</b> total companies &middot; <b>"+totPids.size.toLocaleString()+"</b> total prospects</div>";
+      var totPids=new Set();var totCos=new Set();
+      sumEntries.forEach(function(e){e[1].pids.forEach(function(p){totPids.add(p);});e[1].cos.forEach(function(c){totCos.add(c);});});
+      var countLine="<div style=\"font-size:11px;color:var(--mu);padding:4px 0 6px\">"+sumEntries.length+" profiling requests &middot; <b>"+totCos.size.toLocaleString()+"</b> total companies &middot; <b>"+totPids.size.toLocaleString()+"</b> total prospects</div>";
       var thS="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:normal;position:sticky;top:0;cursor:pointer";
       function mkThS(col,label,right){var ic=sumSortCol===col?(sumSortDir===-1?"&#8595;":"&#8593;"):"&#8597;";return "<th style=\""+thS+(right?";text-align:right":"")+"\" onclick=\"window._sumSort('"+col+"')\">"+label+" "+ic+"</th>";}
       var tbl="<div style=\"overflow:auto;max-height:300px\"><table style=\"width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed\">"
         +"<colgroup><col style=\"width:18%\"><col style=\"width:10%\"><col style=\"width:10%\"><col style=\"width:13%\"><col style=\"width:8%\"><col style=\"width:8%\"><col style=\"width:9%\"><col style=\"width:9%\"><col style=\"width:9%\"></colgroup>"
-        +"<thead><tr>"+mkThS("tag","Campaign Title",false)+mkThS("ddm1","DCM",false)+mkThS("createdBy","Created By",false)+mkThS("tag2","Tag",false)+mkThS("acctReq","Accts Requested",true)+mkThS("seqId","Sequence ID",false)+mkThS("cos","# Accts linked to tag",true)+mkThS("seqCos","# Accts linked to seq",true)+mkThS("pids","# Prospects",true)+"</tr></thead><tbody>";
+        +"<thead><tr>"+mkThS("tag","Campaign Title (Profiling Request)",false)+mkThS("ddm1","DCM",false)+mkThS("createdBy","Created By",false)+mkThS("tag2","Tag",false)+mkThS("acctReq","Accts Rqst'd (manual profiling input)",true)+mkThS("seqId","Sequence ID",false)+mkThS("cos","# Accts linked to tag",true)+mkThS("seqCos","# Accts linked to seq",true)+mkThS("pids","# Prospects",true)+"</tr></thead><tbody>";
       sumEntries.forEach(function(e,idx){
-        var proTitle=tagToMeta[e[0]];
-        var titleStr=proTitle?proTitle.title:"";var ddm1Str=proTitle?normDCM(proTitle.ddm1):"";var createdByStr=proTitle?proTitle.createdBy||"":"";
+        var titleStr=e[0];var ts=e[1];var meta=e[2];
+        var ddm1Str=meta?normDCM(meta.ddm1):"";var createdByStr=meta?meta.createdBy||"":"";
+        var tagStr=meta?meta.tag||"":"";
         var isProSel=(window.proFilter&&window.proFilter.proTitle===titleStr);
         tbl+="<tr style=\"border-bottom:1px solid #EBEBEB;background:"+(isProSel?"#D1EFFF":(idx%2===0?"#fff":"#F8FBFF"))+"\">"
           +"<td style=\"padding:5px 10px;font-size:11px;cursor:pointer;text-decoration:underline;text-decoration-style:dotted\" onclick=\"window._proClickTitle(this)\" data-ptitle=\""+titleStr.replace(/"/g,"&quot;")+"\">"+titleStr+"</td>"
           +"<td style=\"padding:5px 10px;font-size:11px\">"+ddm1Str+"</td>"
           +"<td style=\"padding:5px 10px;font-size:11px;color:var(--mu)\">"+createdByStr+"</td>"
-          +"<td style=\"padding:5px 10px;color:#07838F;font-weight:600;font-size:11px\">"+e[0]+"</td>"
-          +"<td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+(proTitle&&proTitle.acctRequested?parseInt(proTitle.acctRequested).toLocaleString():"")+"</td>"
-          +"<td style=\"padding:5px 10px;font-size:11px;color:var(--mu)\">"+e[1].seqId+"</td>"
-          +"<td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+e[1].cos.size.toLocaleString()+"</td>"
-          +"<td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+e[1].seqCos.size.toLocaleString()+"</td>"
-          +"<td style=\"padding:5px 8px;text-align:right;font-weight:700;font-size:11px\">"+e[1].pids.size.toLocaleString()+"</td>"
+          +"<td style=\"padding:5px 10px;color:#07838F;font-weight:600;font-size:11px\">"+tagStr+"</td>"
+          +"<td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+(meta&&meta.acctRequested?parseInt(meta.acctRequested).toLocaleString():"")+"</td>"
+          +"<td style=\"padding:5px 10px;font-size:11px;color:var(--mu)\">"+ts.seqId+"</td>"
+          +"<td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+ts.cos.size.toLocaleString()+"</td>"
+          +"<td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+ts.seqCos.size.toLocaleString()+"</td>"
+          +"<td style=\"padding:5px 8px;text-align:right;font-weight:700;font-size:11px\">"+ts.pids.size.toLocaleString()+"</td>"
           +"</tr>";
       });
       tbl+="<tfoot><tr style=\"background:#F0F4FF;font-weight:700;border-top:2px solid #00144A\"><td style=\"padding:5px 8px;font-size:11px\">TOTAL</td><td></td><td></td><td></td><td></td><td></td><td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+totCos.size.toLocaleString()+"</td><td></td><td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+totPids.size.toLocaleString()+"</td></tr></tfoot>";
@@ -3889,7 +3939,7 @@ function renderPro(){
     if(el){
       var wbsExec={};campData.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var ex=String(r["Executor"]||"").trim();if(w&&ex)wbsExec[w]=ex;});
       prospects.forEach(function(p){
-        var pTags=p.tg.split(",").map(function(t){return t.trim();}).filter(function(t){return activeTags.has(t);});
+        var pTags=p.tg.split(",").map(function(t){return t.trim();}).filter(function(t){return _effectiveTags.has(t);});
         var tag=pTags.find(function(t){return tagMetaSet.has(t);})||"";
         var campCode="";
         Object.entries(profMap).forEach(function(e){if(e[1]===tag)campCode=e[0];});
@@ -3934,6 +3984,201 @@ function renderPro(){
     }
   },50);
 }
+
+function renderPdel(){
+  var page=document.getElementById("pdelPage");
+  if(!page)return;
+  var html='<h2 style="color:var(--dk);margin:0 0 6px">Prospect Deletion</h2>';
+  html+='<div style="font-size:11px;color:var(--mu);margin-bottom:12px">Prospects in tracked Outreach sequences connected to campaigns in the calendar.</div>';
+  // Filter controls
+  var pf=window.pdelFilter||{};
+  html+='<div style="margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
+  html+='<label style="font-size:12px;font-weight:600">Age &gt;:</label>';
+  html+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.age=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option><option value="25"'+(pf.age==="25"?" selected":"")+'>25 days</option><option value="50"'+(pf.age==="50"?" selected":"")+'>50 days</option><option value="100"'+(pf.age==="100"?" selected":"")+'>100 days</option></select>';
+  html+='<label style="font-size:12px;font-weight:600;margin-left:10px">Touched:</label>';
+  html+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.touched=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option><option value="yes"'+(pf.touched==="yes"?" selected":"")+'>Yes (date)</option><option value="in_sequence"'+(pf.touched==="in_sequence"?" selected":"")+'>In Sequence</option><option value="finished_sequence"'+(pf.touched==="finished_sequence"?" selected":"")+'>Finished Sequence</option><option value="no"'+(pf.touched==="no"?" selected":"")+'>No</option></select>';
+  html+='<span id="pdel-ct-filter"></span>';
+  html+='<span id="pdel-src-filter"></span>';
+  html+='<span id="pdel-exec-filter"></span>';
+  html+='<span id="pdel-persona-filter"></span>';
+  html+='</div>';
+  html+='<div id="pdel-tbl"></div>';
+  page.innerHTML=html;
+
+  setTimeout(function(){
+    // Build pid->created and pid->persona maps from PROSPECT_DATA
+    var pidToCreated={};var pidToPersona={};var pidToActiveSeq={};var pidToFinishedSeq={};
+    (window.PROSPECT_DATA||[]).forEach(function(p){
+      if(p.id&&p.created)pidToCreated[p.id]=p.created;
+      if(p.id&&p.pn)pidToPersona[p.id]=p.pn;
+      if(p.id&&p.as)pidToActiveSeq[p.id]=p.as;
+      if(p.id&&p.fs)pidToFinishedSeq[p.id]=p.fs;
+    });
+    // Build wbs->seqId and wbs->campName from campData
+    var wbsToSeq={};var wbsToName={};var wbsToExec={};
+    (campData||[]).forEach(function(r){
+      var w=String(r["Campaign/WBS Code"]||"").trim();if(!w)return;
+      var sid=String(r["Sequence ID"]||"").trim();
+      if(sid&&!wbsToSeq[w])wbsToSeq[w]=sid;
+      if(!wbsToName[w])wbsToName[w]=String(r["Campaign Name"]||"").trim();
+      if(!wbsToExec[w])wbsToExec[w]=String(r["Executor"]||"").trim();
+    });
+    var filtWBS=new Set((filtered||campData).map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
+
+    // Path 1: All prospects in SEQ_PROSPECT_DATA where sid matches a sequence from filtered campaigns
+    var filtSeqIds=new Set();
+    (window.OUT_DATA||[]).forEach(function(r){
+      var wbs=String(r["Campaign/WBS Code"]||"").trim();
+      if(filtWBS.has(wbs)){var sid=String(r["Sequence ID"]||"").trim();if(sid)filtSeqIds.add(sid);}
+    });
+    // Also add sequence IDs directly from campData
+    (filtered||campData).forEach(function(r){
+      var wbs=String(r["Campaign/WBS Code"]||"").trim();
+      var sid=String(r["Sequence ID"]||"").trim();
+      if(wbs&&sid)filtSeqIds.add(sid);
+    });
+
+    // Path 2: WBS codes from profiling requests that match filtered campaigns
+    var profMeta=window.CAMP_PROF_META||{};
+    var profWbsSeq={};// profiling wbs -> sid
+    Object.values(profMeta).forEach(function(m){
+      var wbs=String(m.wbs||"").trim();
+      if(!wbs||!filtWBS.has(wbs))return;
+      // get sequence from campData for this wbs
+      var sid=wbsToSeq[wbs];
+      if(sid)profWbsSeq[wbs]=sid;
+    });
+    Object.values(profWbsSeq).forEach(function(sid){filtSeqIds.add(sid);});
+
+    // Build prospect rows from SEQ_PROSPECT_DATA
+    var seqToCampWbs={};
+    (filtered||campData).forEach(function(r){
+      var w=String(r["Campaign/WBS Code"]||"").trim();
+      var sid=String(r["Sequence ID"]||"").trim();
+      if(w&&sid)seqToCampWbs[sid]=w;
+    });
+    (window.OUT_DATA||[]).forEach(function(r){
+      var wbs=String(r["Campaign/WBS Code"]||"").trim();
+      var sid=String(r["Sequence ID"]||"").trim();
+      if(wbs&&sid&&filtWBS.has(wbs))seqToCampWbs[sid]=wbs;
+    });
+
+    var seen={};
+    var rows=[];
+    (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){
+      var sid=String(p.sid||"").trim();
+      if(!filtSeqIds.has(sid))return;
+      var key=p.pid+"|"+sid;
+      if(seen[key])return;seen[key]=true;
+      var wbs=seqToCampWbs[sid]||"";
+      var campName=wbsToName[wbs]||"";
+      var executor=wbsToExec[wbs]||"";
+      var connType=profWbsSeq[wbs]?"WBS Code":"Sequence ID";
+      var created=pidToCreated[p.pid]||"";
+      var persona=pidToPersona[p.pid]||"";
+      var activeSeq=pidToActiveSeq[p.pid]||"";
+      var finishedSeq=pidToFinishedSeq[p.pid]||"";
+      var days=created?Math.floor((Date.now()-new Date(created).getTime())/(1000*60*60*24)):"";
+      if(pf.age&&(days||0)<=parseInt(pf.age))return;
+      var _ts="no";
+      if(p.touched&&p.touched!=="1970-01-01"&&p.touched!=="")_ts="yes";
+      else if(activeSeq)_ts="in_sequence";
+      else if(finishedSeq)_ts="finished_sequence";
+      rows.push({sid:sid,pid:p.pid,co:p.co||"",campName:campName,wbs:wbs,connType:connType,src:p.src||"",ct:p.ct||"",days:days,created:created,touched:p.touched||"",touchedStatus:_ts,executor:executor,persona:persona,activeSeq:activeSeq,finishedSeq:finishedSeq});
+    });
+
+    rows.sort(function(a,b){return(b.days||0)-(a.days||0);});
+
+    // Build and inject Company Type, Source, Executor, Persona filter dropdowns
+    var _ctSet=new Set();var _srcSet=new Set();var _execSet=new Set();var _personaSet=new Set();
+    rows.forEach(function(r){if(r.ct)_ctSet.add(r.ct);if(r.src)_srcSet.add(r.src);if(r.executor)_execSet.add(r.executor);if(r.persona)_personaSet.add(r.persona);});
+    var ctOpts=Array.from(_ctSet).sort();var srcOpts=Array.from(_srcSet).sort();
+    var execOpts=Array.from(_execSet).sort();var personaOpts=Array.from(_personaSet).sort();
+    var ctEl=document.getElementById("pdel-ct-filter");
+    var srcEl=document.getElementById("pdel-src-filter");
+    var execEl=document.getElementById("pdel-exec-filter");
+    var personaEl=document.getElementById("pdel-persona-filter");
+    function mkPdelDrop(el,label,key,opts){
+      if(!el)return;
+      var h='<label style="font-size:12px;font-weight:600;margin-left:10px">'+label+':</label>';
+      h+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.'+key+'=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option>';
+      opts.forEach(function(v){h+='<option value="'+v.replace(/"/g,"&quot;")+'"'+(pf[key]===v?" selected":"")+'>'+v+'</option>';});
+      h+='</select>';el.innerHTML=h;
+    }
+    function mkPdelSearch(el,label,key,opts){
+      if(!el)return;
+      var cur=pf[key]||"";
+      var h='<label style="font-size:12px;font-weight:600;margin-left:10px">'+label+':</label>';
+      h+='<span style="position:relative;display:inline-block">';
+      h+='<input type="text" value="'+cur.replace(/"/g,"&quot;")+'" placeholder="Search..." id="pdel-'+key+'-inp" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px;width:150px" oninput="(function(el){var q=el.value.toLowerCase();document.getElementById(\'pdel-'+key+'-sel\').querySelectorAll(\'option\').forEach(function(o){o.style.display=!q||o.text.toLowerCase().indexOf(q)>=0?\'\':\' none\';});})(this)">';
+      h+='<select id="pdel-'+key+'-sel" onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.'+key+'=this.value;document.getElementById(\'pdel-'+key+'-inp\').value=this.options[this.selectedIndex].text===\'All\'?\'\':(this.value);renderPdel()" size="1" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px;max-width:160px"><option value="">All</option>';
+      opts.forEach(function(v){h+='<option value="'+v.replace(/"/g,"&quot;")+'"'+(cur===v?" selected":"")+'>'+v+'</option>';});
+      h+='</select></span>';
+      el.innerHTML=h;
+    }
+    mkPdelDrop(ctEl,"Company Type","ct",ctOpts);
+    mkPdelDrop(srcEl,"Source","src",srcOpts);
+    mkPdelSearch(execEl,"Executor","executor",execOpts);
+    mkPdelDrop(personaEl,"Persona","persona",personaOpts);
+    // Apply all filters
+    if(pf.ct||pf.src||pf.executor||pf.persona||pf.touched){rows=rows.filter(function(r){
+      return(!pf.ct||r.ct===pf.ct)&&(!pf.src||r.src===pf.src)&&(!pf.executor||r.executor===pf.executor)&&(!pf.persona||r.persona===pf.persona)&&(!pf.touched||r.touchedStatus===pf.touched);
+    });}
+
+    // Store full filtered rows for export
+    window._pdelRowsCache=rows;
+    var tbl="<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px'>";
+    tbl+="<div style='font-size:11px;color:var(--mu)'>"+rows.length.toLocaleString()+" prospects</div>";
+    tbl+="<button onclick=\"window._exportPdel()\" style='padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer'>&#11015; Export CSV</button>";
+    tbl+="</div>";
+    tbl+="<div style='overflow:auto;max-height:600px'><table style='width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed'>";
+    var thS="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;white-space:nowrap;position:sticky;top:0";
+    tbl+="<colgroup><col style='width:12%'><col style='width:7%'><col style='width:10%'><col style='width:7%'><col style='width:6%'><col style='width:6%'><col style='width:6%'><col style='width:7%'><col style='width:7%'><col style='width:7%'><col style='width:7%'><col style='width:5%'></colgroup>";
+    tbl+="<thead><tr>";
+    ["Campaign Name","Sequence ID","Company","Prospect ID","Connection","Source","Company Type","Executor (Campaign Calendar)","Persona Name","Created","Touched/In/Finished Seq","Age (days)"].forEach(function(h){tbl+="<th style='"+thS+"'>"+h+"</th>";});
+    tbl+="</tr></thead><tbody>";
+    rows.slice(0,500).forEach(function(r,i){
+      tbl+="<tr style='border-bottom:1px solid #EBEBEB;background:"+(i%2===0?"#fff":"#F8FBFF")+"'>";
+      tbl+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap' title='"+r.campName+"'>"+r.campName+"</td>";
+      tbl+="<td style='padding:5px 8px;color:var(--mu)'>"+r.sid+"</td>";
+      tbl+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.co+"</td>";
+      tbl+="<td style='padding:5px 8px;color:var(--mu)'>"+r.pid+"</td>";
+      tbl+="<td style='padding:5px 8px'>"+r.connType+"</td>";
+      tbl+="<td style='padding:5px 8px'>"+r.src+"</td>";
+      tbl+="<td style='padding:5px 8px'>"+r.ct+"</td>";
+      tbl+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.executor+"</td>";
+      tbl+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.persona+"</td>";
+      var touchedDisp=((r.touched&&r.touched!=="1970-01-01")?r.touched.substring(0,10):"");
+      var touchedStatus="no";
+      if(r.touched&&r.touched!=="1970-01-01"&&r.touched!=="")touchedStatus="yes";
+      else if(r.activeSeq)touchedStatus="in_sequence";
+      else if(r.finishedSeq)touchedStatus="finished_sequence";
+      if(!touchedDisp&&touchedStatus==="in_sequence")touchedDisp="In Sequence: "+r.activeSeq.split(",")[0];
+      if(!touchedDisp&&touchedStatus==="finished_sequence")touchedDisp="Finished: "+r.finishedSeq.split(",")[0];
+      tbl+="<td style='padding:5px 8px'>"+r.created+"</td>";
+      tbl+="<td style='padding:5px 8px'>"+touchedDisp+"</td>";
+      tbl+="<td style='padding:5px 8px;text-align:right;font-weight:700"+(r.days>25?";background:#FFF9C4":"")+"'>"+r.days+"</td>";
+      tbl+="</tr>";
+    });
+    if(rows.length>500)tbl+="<tr><td colspan='12' style='padding:8px;text-align:center;color:var(--mu);font-size:11px'>Showing 500 of "+rows.length.toLocaleString()+"</td></tr>";
+    tbl+="</tbody></table></div>";
+    var el=document.getElementById("pdel-tbl");
+    if(el)el.innerHTML=tbl;
+  },50);
+}
+
+window._exportPdel=function(){
+  var rows=window._pdelRowsCache||[];
+  var headers=["Campaign Name","Sequence ID","Company","Prospect ID","Connection","Source","Company Type","Executor","Persona Name","Created","Touched","Age (days)"];
+  function esc(v){v=String(v||"");return v.indexOf(",")>-1||v.indexOf('"')>-1?'"'+v.replace(/"/g,'""')+'"':v;}
+  var csv=[headers.map(esc).join(",")];
+  rows.forEach(function(r){
+    var touched=(r.touched&&r.touched!=="1970-01-01")?r.touched.substring(0,10):(r.activeSeq?"In Sequence":(r.finishedSeq?"Finished":""));
+    csv.push([r.campName,r.sid,r.co,r.pid,r.connType,r.src,r.ct,r.executor,r.persona,r.created,touched,r.days].map(esc).join(","));
+  });
+  var blob=new Blob([csv.join("\n")],{type:"text/csv"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="prospect_deletion.csv";a.click();
+};
 
 function renderPip(){
   var page=document.getElementById("pipPage");

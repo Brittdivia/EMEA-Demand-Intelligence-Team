@@ -68,6 +68,7 @@ function ConvertTo-ExcelDate($serial) {
 function EscapeJson($val) {
     if ($null -eq $val) { return '' }
     $s = [string]$val
+    $s = $s -replace '_x000D_','' # remove carriage return encoding
     $s = $s.Replace('\', '\\').Replace('"', '\"').Replace("`r`n", ' ').Replace("`n", ' ').Replace("`r", ' ').Replace("`t", ' ')
     return $s
 }

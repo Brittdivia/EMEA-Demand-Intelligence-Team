@@ -25,11 +25,19 @@ foreach ($row in $seqStats) {
 }
 Write-Host "Sequence Stats name->ID map: $($nameToId.Count) entries"
 
-# Filter to only sequences tracked in outreach.json (campaign-matched)
-$outJson = Get-Content "C:\Users\I572929\campaign-calendar-site\outreach.json" -Raw | ConvertFrom-Json
+# Build tracked sequence IDs from campaign calendar data (data-camp.js) and outreach.json
 $trackedSids = New-Object System.Collections.Generic.HashSet[string]
+
+# From campaign calendar - Sequence ID column
+$campJs = [System.IO.File]::ReadAllText("C:\Users\I572929\campaign-calendar-site\data-camp.js")
+$campSids = [regex]::Matches($campJs, '"Sequence ID":"([^"]+)"') | ForEach-Object { $_.Groups[1].Value.Trim() } | Where-Object { $_ }
+foreach ($sid in $campSids) { [void]$trackedSids.Add($sid) }
+
+# From outreach.json (sequence stats linked to campaigns)
+$outJson = Get-Content "C:\Users\I572929\campaign-calendar-site\outreach.json" -Raw | ConvertFrom-Json
 $outJson | ForEach-Object { [void]$trackedSids.Add("$($_.'Sequence ID')".Trim()) }
-Write-Host "Tracked sequences in outreach.json: $($trackedSids.Count)"
+
+Write-Host "Tracked sequences (calendar + outreach): $($trackedSids.Count)"
 
 # Column indices
 $colId       = $colMap["ID"]
