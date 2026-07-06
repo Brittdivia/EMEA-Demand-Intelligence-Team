@@ -993,7 +993,7 @@ function renderExe(){try{
   // Charts: build canvases in html, then render after DOM update
   html+='<div style="display:flex;gap:16px;flex-wrap:wrap">';
   // Chart 2: Product breakdown by region  
-  html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>Product Breakdown &mdash; by Sales Bag<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) by Sub Sales Bag &middot; product family stacked</span></div><div style="display:flex;gap:3px"><button id="exe-prod-btn-l2" onclick="window.prodRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-prod-btn-l3" onclick="window.prodRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:260px"><canvas id="exe-prod-mu"></canvas></div></div>';
+  html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>Product Breakdown &mdash; by Sales Bag<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) by Sub Sales Bag &middot; product family stacked</span><br><span id="exe-prod-info" style="font-size:10px;font-weight:400;color:var(--mu)"></span></div><div style="display:flex;gap:3px"><button id="exe-prod-btn-l2" onclick="window.prodRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-prod-btn-l3" onclick="window.prodRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:260px"><canvas id="exe-prod-mu"></canvas></div></div>';
   html+='</div>';
   html+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px">';
   html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>IAC &mdash; by Market Unit<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) by IAC classification per MU</span></div><div style="display:flex;gap:3px"><button id="exe-iac-btn-l2" onclick="window.iacRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-iac-btn-l3" onclick="window.iacRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:260px"><canvas id="exe-iac-mu"></canvas></div></div>';
@@ -1047,7 +1047,7 @@ function renderExe(){try{
     var _prodRegMode=window.prodRegMode||"l2";
     var prodRegs={}, allProds=new Set(), _seenOppProd={};
     pr2.forEach(function(p){
-      var oid=String(p["Opportunity ID"]||"").trim();if(!oid||_seenOppProd[oid])return;_seenOppProd[oid]=true;
+      var oid=String(p["Opportunity ID"]||"").trim();if(oid)_seenOppProd[oid]=true;
       var w=String(p["Opp Campaign ID"]||"").trim();
       if(!wbsToRegs[w])return;
       var oppL2=String(p["Region Lvl 2"]||"").trim();if(!oppL2)return;
@@ -1062,18 +1062,16 @@ function renderExe(){try{
         reg=wbsToReg[w];if(!reg)return;
         if(_activeCalRegs.size&&!_activeCalRegs.has(reg))return;
       }
-      var subSB=wbsToSubSB[w]||"";
+      var pipeSubSol=String(p["Sub-Solution Area (L2)"]||"").trim();
+      var pipeSol=String(p["Solution Area (L1)"]||"").trim();
       var eur=parseFloat(p["Eur"]||0)||0;
-      var prods=subSB?subSB.split(",").map(function(s){
-        s=s.trim().replace(/Ã¢€"/g,"â€“").replace(/Ã¢€â„¢/g,"'").replace(/ÃƒÂ©/g,"Ã©").replace(/[^\x00-\x7F]/g,"");
-        var idx=s.indexOf(" - ");
-        return idx>-1?s.substring(idx+3).trim():s;
-      }).filter(Boolean):["Other"];
+      var prods=(pipeSubSol||pipeSol)?[pipeSubSol||pipeSol]:["Other"];
       if(!prods.length)prods=["Other"];
+      var eurPerProd=eur/prods.length;
       prods.forEach(function(prod){
         allProds.add(prod);
         if(!prodRegs[reg])prodRegs[reg]={};
-        prodRegs[reg][prod]=(prodRegs[reg][prod]||0)+eur;
+        prodRegs[reg][prod]=(prodRegs[reg][prod]||0)+eurPerProd;
       });
     });
     var regOrder2=Object.keys(prodRegs).sort(function(a,b){
@@ -1089,6 +1087,10 @@ function renderExe(){try{
       return tb-ta;
     }).slice(0,10);
     var prodColors=[PAL[2],PAL[3],PAL[0],PAL[1],PAL[6],PAL[7],PAL[8],PAL[4],PAL[5],PAL[10]];
+    var _prodOppCount=Object.keys(_seenOppProd).length;
+    var _prodTotalEur=regOrder2.reduce(function(a,r){return a+Object.values(prodRegs[r]||{}).reduce(function(s,v){return s+v;},0);},0);
+    var _prodInfoEl=document.getElementById("exe-prod-info");
+    if(_prodInfoEl)_prodInfoEl.textContent=_prodOppCount.toLocaleString()+" opps · €"+fmtE(_prodTotalEur)+" total";
     var c2=document.getElementById("exe-prod-mu");
     var btnL2=document.getElementById("exe-prod-btn-l2");var btnL3=document.getElementById("exe-prod-btn-l3");
     if(btnL2){btnL2.style.background=_prodRegMode==="l2"?"#00144A":"";btnL2.style.color=_prodRegMode==="l2"?"#fff":"";}
@@ -3940,7 +3942,7 @@ function renderPro(){
       var wbsExec={};campData.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var ex=String(r["Executor"]||"").trim();if(w&&ex)wbsExec[w]=ex;});
       prospects.forEach(function(p){
         var pTags=p.tg.split(",").map(function(t){return t.trim();}).filter(function(t){return _effectiveTags.has(t);});
-        var tag=pTags.find(function(t){return tagMetaSet.has(t);})||"";
+        var tag=pTags.find(function(t){return tagMetaSet.has(t);})||pTags[0]||"";
         var campCode="";
         Object.entries(profMap).forEach(function(e){if(e[1]===tag)campCode=e[0];});
         var proTitle2=tagToMeta[tag];
@@ -4079,7 +4081,6 @@ function renderPdel(){
       var activeSeq=pidToActiveSeq[p.pid]||"";
       var finishedSeq=pidToFinishedSeq[p.pid]||"";
       var days=created?Math.floor((Date.now()-new Date(created).getTime())/(1000*60*60*24)):"";
-      if(!created)return;
       if(pf.age&&(days||0)<=parseInt(pf.age))return;
       var _ts="no";
       if(p.touched&&p.touched!=="1970-01-01"&&p.touched!=="")_ts="yes";
