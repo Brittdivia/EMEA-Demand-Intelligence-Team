@@ -4279,7 +4279,7 @@ function renderDtr(){
   // Connection table (remaining ~40%)
   html+='<div style="flex:1;min-width:0">';
   html+='<div style="display:flex;align-items:center;margin-bottom:4px"><div class="sec" style="margin-bottom:0">Connection</div></div>';
-  html+='<div class="cc"><div style="overflow:auto;max-height:300px"><table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:22%"><col style="width:16%"><col style="width:16%"><col style="width:29%"><col style="width:17%"></colgroup><thead><tr>';  html+='<th style="'+thD+'">DCM</th><th style="'+thD+';text-align:right">WBS ↔ Profiling</th><th style="'+thD+';text-align:right">Seq ↔ Calendar</th><th style="'+thD+';text-align:right">Tag ↔ Calendar (#prospects)</th><th style="'+thD+';text-align:right">Camps Connected</th></tr></thead><tbody>';
+  html+='<div class="cc"><div style="overflow:auto;max-height:300px"><table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:20%"><col style="width:14%"><col style="width:14%"><col style="width:22%"><col style="width:15%"><col style="width:15%"></colgroup><thead><tr>';  html+='<th style="'+thD+'">DCM</th><th style="'+thD+';text-align:right">WBS ↔ Profiling</th><th style="'+thD+';text-align:right">Seq ↔ Calendar</th><th style="'+thD+';text-align:right">Tag ↔ Calendar (#prospects)</th><th style="'+thD+';text-align:right">Tag → Camps</th><th style="'+thD+';text-align:right">Camps Connected</th></tr></thead><tbody>';
   (function(){
     function isRealWBS(w){return w&&/^CRM-/i.test(String(w).trim());}
     var filtWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
@@ -4348,12 +4348,40 @@ function renderDtr(){
       if(tag&&isRealWBS(wbs)&&_prospTagSet.has(tag))_dcmConnectedWBS[dKey].add(wbs);
     });
 
+    // Build pid->sids map from SEQ_PROSPECT_DATA for tag→sequence→calendar linkage
+    var _pidToSids={};
+    (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){
+      var pid=String(p.pid||"").trim();var sid=String(p.sid||"").trim();
+      if(!pid||!sid)return;
+      if(!_pidToSids[pid])_pidToSids[pid]=new Set();
+      _pidToSids[pid].add(sid);
+    });
+    // Build sid->calWBS map from filtered calendar
+    var _sidToCalWBS={};
+    filtered.forEach(function(r){var sid=String(r["Sequence ID"]||"").trim();var wbs=String(r["Campaign/WBS Code"]||"").trim();if(sid&&wbs)_sidToCalWBS[sid]=wbs;});
     // campConnected = unique calendar WBS codes that appear in this DCM's profiling requests (any calendar row)
     Object.keys(connMap).forEach(function(dKey){
       var dcmWBS=_dcmConnectedWBS[dKey]||new Set();
       var count=0;
       dcmWBS.forEach(function(wbs){if(filtWBS.has(wbs))count++;});
       connMap[dKey].campConnected=count;
+      // tagCalCamps: unique calendar WBS codes linked via profiling tag → prospect → sequence → calendar
+      var profTags=_dcmProfTags[dKey]||new Set();
+      var tagCalWBS=new Set();
+      (window.PROSPECT_DATA||[]).forEach(function(p){
+        var ptags=String(p.tg||"").split(",").map(function(t){return t.trim();});
+        if(!ptags.some(function(t){return profTags.has(t);}))return;
+        var pid=String(p.id||"").trim();
+        if(!_pidToSids[pid])return;
+        _pidToSids[pid].forEach(function(sid){
+          if(_sidToCalWBS[sid])tagCalWBS.add(_sidToCalWBS[sid]);
+        });
+      });
+      connMap[dKey].tagCalCamps=tagCalWBS.size;
+      // Add tag-linked WBS codes to campConnected if not already counted
+      tagCalWBS.forEach(function(wbs){
+        if(!dcmWBS.has(wbs)&&filtWBS.has(wbs))connMap[dKey].campConnected++;
+      });
     });
     // Build per-DCM totals for % denominators
     var _dcmTotalProfWBS={};
@@ -4375,21 +4403,23 @@ function renderDtr(){
       var dKey=e[0];var v=e[1];
       var totProfWBS=(_dcmTotalProfWBS[dKey]||new Set()).size;
       var totCalCamps=_dcmTotalCalCamps[dKey]||0;
-      totWBS+=v.wbsMatch;totSeq+=v.seqMatch;totTag+=v.tagMatch;totConn+=v.campConnected;      html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
+      totWBS+=v.wbsMatch;totSeq+=v.seqMatch;totTag+=v.tagMatch;totConn+=v.campConnected;var totTagCamp=(v.tagCalCamps||0);      html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
         +'<td style="padding:6px 12px">'+(v.display||e[0])+'</td>'
         +'<td style="padding:6px 12px;text-align:right;font-weight:700">'+cell(v.wbsMatch)+'</td>'
         +'<td style="padding:6px 12px;text-align:right">'+cell(v.seqMatch)+'</td>'
         +'<td style="padding:6px 12px;text-align:right">'+cell(v.tagMatch)+'</td>'
+        +'<td style="padding:6px 12px;text-align:right">'+cell(totTagCamp)+'</td>'
         +'<td style="padding:6px 12px;text-align:right;font-weight:700">'+cell(v.campConnected)+'</td>'
         +'</tr>';
     });
     html+='</tbody></table></div>';
-    html+='<table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:22%"><col style="width:16%"><col style="width:16%"><col style="width:29%"><col style="width:17%"></colgroup>';
+    html+='<table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:20%"><col style="width:14%"><col style="width:14%"><col style="width:22%"><col style="width:15%"><col style="width:15%"></colgroup>';
     html+='<tfoot><tr style="background:#00144A;color:#fff;font-weight:700">'
       +'<td style="padding:5px 10px;font-size:11px">TOTAL</td>'
       +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totWBS.toLocaleString()+'</td>'
       +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totSeq.toLocaleString()+'</td>'
       +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totTag.toLocaleString()+'</td>'
+      +'<td style="padding:5px 10px;text-align:right;font-size:11px"></td>'
       +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totConn.toLocaleString()+'</td>'
       +'</tr></tfoot></table></div></div>';
   })();
