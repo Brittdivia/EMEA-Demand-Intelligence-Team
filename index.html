@@ -218,6 +218,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
 <script src="data-profiling-req.js?v=20260622"></script>
 <script src="data-profiling-tags.js?v=20260623j"></script>
 <script src="data-seqstates-tags.js?v=20260706"></script>
+<script src="data-seqstates-flags.js?v=20260706"></script>
 </head>
 <body>
 <header>
@@ -942,7 +943,7 @@ function renderExe(){try{
   var hodEur=pr.filter(function(r){return hasHod(r["SDE Handover Date"]);}).reduce(function(a,r){return a+(parseFloat(r["Eur"]||0)||0);},0);
   var hoRate=totOpps>0?(hodOpps/totOpps*100).toFixed(0)+"%":"0%";
   var camp2026Eur=pr.filter(function(p){return String(p["Create Quarter"]||"").indexOf("2026")===0;}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
-  var _all2026Eur=pipeData.reduce(function(a,p){return String(p["Create Quarter"]||"").indexOf("2026")===0?a+(parseFloat(p["Eur"]||0)||0):a;},0);
+  var _all2026Eur=pipeData.reduce(function(a,p){return String(p["Create Quarter"]||"").indexOf("2026")===0&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"?a+(parseFloat(p["Eur"]||0)||0):a;},0);
   var camp2026Pct=_all2026Eur>0?(camp2026Eur/_all2026Eur*100).toFixed(0)+"%":"0%";
   var activeCamps=filtered.filter(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).length;
   var cfCounts={};filtered.forEach(function(r){String(r["IAC"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean).forEach(function(s){cfCounts[s]=(cfCounts[s]||0)+1;});});
@@ -1383,7 +1384,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
   var qualOppsSet=new Set(pr.filter(function(p){return qualifiedDRM.indexOf(String(p["DRM Category"]||"").trim())>-1;}).map(function(p){return String(p["Opportunity ID"]||"");}).filter(Boolean));
   var qualOppRate=totOpps>0?(qualOppsSet.size/totOpps*100).toFixed(0)+"%":"0%";
   var camp2026Eur=pr.filter(function(p){return String(p["Create Quarter"]||"").indexOf("2026")===0;}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
-  var _all2026Eur=pipeData.reduce(function(a,p){return String(p["Create Quarter"]||"").indexOf("2026")===0?a+(parseFloat(p["Eur"]||0)||0):a;},0);
+  var _all2026Eur=pipeData.reduce(function(a,p){return String(p["Create Quarter"]||"").indexOf("2026")===0&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"?a+(parseFloat(p["Eur"]||0)||0):a;},0);
   var camp2026Pct=_all2026Eur>0?(camp2026Eur/_all2026Eur*100).toFixed(0)+"%":"0%";
   var closing2026Eur=pr.filter(function(p){return String(p["Closing Qtr"]||"").indexOf("2026")===0;}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
   var _pipeWBSSet=new Set(pr.map(function(p){return String(p["Opp Campaign ID"]||"").trim();}).filter(Boolean));
@@ -2375,7 +2376,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
     window.bizMapCache={};window.bizMapCacheDg={};window.bizPfx=pfx;window.bizIbColors=ibColors;window.bizTypeList=typeList2;window.bizDgList=dgList4;window.bizOffsets=offsets2;
     Object.keys(drmGroups).forEach(function(grp){
       var mapType={};var mapDg={};
-      pipeData.filter(function(p){return drmGroups[grp].indexOf(String(p["DRM Category"]||"").trim())>-1;}).forEach(function(p){
+      pipeData.filter(function(p){return drmGroups[grp].indexOf(String(p["DRM Category"]||"").trim())>-1&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline";}).forEach(function(p){
         var wbs=String(p["Opp Campaign ID"]||"").trim();
         var camp=data.find(function(r){return String(r["Campaign/WBS Code"]||"").trim()===wbs;});
         if(!camp)return;
@@ -2486,6 +2487,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
         var _wbsSet2026=new Set(pdet.filter(function(r){return String(r.cqtr||"").indexOf("2026")===0;}).map(function(r){return r.wbs;}).filter(Boolean));
         pipeData.forEach(function(p){
           if(String(p["Create Quarter"]||"").indexOf("2026")!==0)return;
+          if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
           if(!_wbsSet2026.has(String(p["Opp Campaign ID"]||"").trim()))return;
           var sa=String(p["Solution Area (L1)"]||"").trim();if(!sa)return;
           var eur=parseFloat(p["Eur"]||0)||0;
@@ -2507,6 +2509,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
       var pipe2026Den={};
       pipeData.forEach(function(p){
         if(String(p["Create Quarter"]||"").indexOf("2026")!==0)return;
+        if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
         var eur=parseFloat(p["Eur"]||0)||0;
         if(_pipe2026Mode==="sb"){
           var sa=String(p["Solution Area (L1)"]||"").trim();if(!sa)return;
@@ -3211,9 +3214,12 @@ function renderOutInner(page){
   var totUniqP=new Set(_outSeqProspects.map(function(p){return p.pid;})).size;
   var totAcctAdded=_outSeqProspects.filter(function(p){return p.co;}).length;
   var totUniqCo=new Set(_outSeqProspects.map(function(p){return p.co;}).filter(Boolean)).size;
-  var _outUniqEmailed=data.reduce(function(a,r){return a+(parseInt(r["Emails - Deliveries"]||0)||0);},0);
-  var _outUniqOpened =data.reduce(function(a,r){return a+(parseInt(r["Prospects - Opened"]||0)||0);},0);
-  var _outUniqReplied=data.reduce(function(a,r){return a+(parseInt(r["Prospects - Replied"]||0)||0);},0);
+  // Per-prospect flags from SEQ_PROSPECT_FLAGS (Sequence States export)
+  var _outFlags=(window.SEQ_PROSPECT_FLAGS||[]).filter(function(p){return _outSeqIds.has(String(p.sid||"").trim());});
+  var _outUniqEmailed=new Set(_outFlags.filter(function(p){return p.em===1;}).map(function(p){return p.pid;})).size;
+  var _outUniqOpened =new Set(_outFlags.filter(function(p){return p.op===1;}).map(function(p){return p.pid;})).size;
+  var _outUniqClicked=new Set(_outFlags.filter(function(p){return p.cl===1;}).map(function(p){return p.pid;})).size;
+  var _outUniqReplied=new Set(_outFlags.filter(function(p){return p.re===1;}).map(function(p){return p.pid;})).size;
   var avgOpenOut=_outUniqEmailed>0?(_outUniqOpened/_outUniqEmailed*100).toFixed(0)+"%":"0%";
   var avgReplyOut=_outUniqOpened>0?(_outUniqReplied/_outUniqOpened*100).toFixed(0)+"%":"0%";
   var openPct=totD>0?(totO/totD*100).toFixed(0)+"%" : "0%";
@@ -3265,20 +3271,20 @@ function renderOutInner(page){
   if(_curTagOut||_curTagPros)html3+='<button onclick="window.outFilter.proTagOut=null;window.outFilter.proTagPros=null;renderOut()" style="font-size:11px;padding:3px 10px;cursor:pointer;border:1px solid var(--rd);border-radius:var(--r);background:#fff;color:var(--rd)">Clear</button>';
   html3+='</div>';
   html3+="<div class=\"krow\" style=\"flex-wrap:wrap\">";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Prospects Contacted</div><div class=\"kv\">"+totP.toLocaleString()+"</div><div class=\"ks\">through tracked sequences</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Accounts Added</div><div class=\"kv\">"+totAcctAdded.toLocaleString()+"</div><div class=\"ks\">added to tracked sequences</div></div>";
-  html3+="<div class=\"kpi ko\"><div class=\"kl\">Prospects Delivered</div><div class=\"kv\">"+totDelivered.toLocaleString()+"</div><div class=\"ks\">&nbsp;</div></div>";
-  html3+="<div class=\"kpi kp\"><div class=\"kl\">Open Rate</div><div class=\"kv\">"+openPct+"</div><div class=\"ks\">"+totO.toLocaleString()+" opens / "+totD.toLocaleString()+" delivered</div></div>";
-  html3+="<div class=\"kpi kr\"><div class=\"kl\">Reply Rate</div><div class=\"kv\">"+repPct+"</div><div class=\"ks\">"+totR.toLocaleString()+" replies / "+totO.toLocaleString()+" opens</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Bounce Rate</div><div class=\"kv\">"+(totP>0?(totB/totP*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">"+totB.toLocaleString()+" bounces / "+totP.toLocaleString()+" prospects contacted</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Prospects / Account</div><div class=\"kv\">"+(totAcctAdded>0?(totP/totAcctAdded).toFixed(0):"0")+"</div><div class=\"ks\">avg prospects per account</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Prospects Contacted</div><div class=\"kv\">"+totP.toLocaleString()+"</div><div class=\"ks\">through tracked sequences &middot; "+data.length.toLocaleString()+" sequences</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Accounts Added</div><div class=\"kv\">"+totAcctAdded.toLocaleString()+"</div><div class=\"ks\">added to tracked sequences &middot; "+data.length.toLocaleString()+" sequences</div></div>";
+  html3+="<div class=\"kpi ko\"><div class=\"kl\">Prospects Delivered</div><div class=\"kv\">"+totDelivered.toLocaleString()+"</div><div class=\"ks\">"+data.length.toLocaleString()+" sequences</div></div>";
+  html3+="<div class=\"kpi kp\"><div class=\"kl\">Email Open Rate</div><div class=\"kv\">"+openPct+"</div><div class=\"ks\">"+totO.toLocaleString()+" opens / "+totD.toLocaleString()+" delivered &middot; "+data.length.toLocaleString()+" sequences</div></div>";
+  html3+="<div class=\"kpi kr\"><div class=\"kl\">Email Reply Rate</div><div class=\"kv\">"+repPct+"</div><div class=\"ks\">"+totR.toLocaleString()+" replies / "+totO.toLocaleString()+" opens &middot; "+data.length.toLocaleString()+" sequences</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Prospect Bounce Rate</div><div class=\"kv\">"+(totP>0?(totB/totP*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">"+totB.toLocaleString()+" bounces / "+totP.toLocaleString()+" prospects contacted &middot; "+data.length.toLocaleString()+" sequences</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Prospects / Account</div><div class=\"kv\">"+(totAcctAdded>0?(totP/totAcctAdded).toFixed(0):"0")+"</div><div class=\"ks\">avg prospects per account &middot; "+data.length.toLocaleString()+" sequences</div></div>";
   html3+="</div>";
   html3+="<div class=\"krow\" style=\"flex-wrap:wrap\">";
-  html3+="<div class=\"kpi kg\"><div class=\"kl\">Unique Prospects Contacted</div><div class=\"kv\">"+totUniqP.toLocaleString()+"</div><div class=\"ks\">distinct across sequences</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Accounts Contacted</div><div class=\"kv\">"+totUniqCo.toLocaleString()+"</div><div class=\"ks\">distinct across sequences</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Emails Delivered</div><div class=\"kv\">"+_outUniqEmailed.toLocaleString()+"</div><div class=\"ks\">across sequences</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Open Rate</div><div class=\"kv\">"+avgOpenOut+"</div><div class=\"ks\">"+_outUniqOpened.toLocaleString()+" opened / "+_outUniqEmailed.toLocaleString()+" delivered</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Reply Rate</div><div class=\"kv\">"+avgReplyOut+"</div><div class=\"ks\">"+_outUniqReplied.toLocaleString()+" replied / "+_outUniqOpened.toLocaleString()+" opened</div></div>";
+  html3+="<div class=\"kpi kg\"><div class=\"kl\">Unique Prospects Contacted</div><div class=\"kv\">"+totUniqP.toLocaleString()+"</div><div class=\"ks\">distinct across "+data.length.toLocaleString()+" sequences</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Accounts Contacted</div><div class=\"kv\">"+totUniqCo.toLocaleString()+"</div><div class=\"ks\">distinct across "+data.length.toLocaleString()+" sequences</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Prospects Emailed</div><div class=\"kv\">"+_outUniqEmailed.toLocaleString()+"</div><div class=\"ks\">distinct prospects emailed &middot; "+data.length.toLocaleString()+" sequences</div></div>";
+  html3+="<div class=\"kpi kp\"><div class=\"kl\">Unique Open Rate</div><div class=\"kv\">"+avgOpenOut+"</div><div class=\"ks\">"+_outUniqOpened.toLocaleString()+" opened / "+_outUniqEmailed.toLocaleString()+" emailed &middot; "+data.length.toLocaleString()+" sequences</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Prospects Clicked</div><div class=\"kv\">"+_outUniqClicked.toLocaleString()+"</div><div class=\"ks\">"+_outUniqClicked.toLocaleString()+" clicked / "+_outUniqEmailed.toLocaleString()+" emailed &middot; "+data.length.toLocaleString()+" sequences</div></div>";
 
   html3+="</div>";
   html3+="<div class=\"sec\" style=\"margin-top:18px\">Outreach User Summary</div>";
@@ -4191,6 +4197,15 @@ function renderDtr(){
     html+="<div class=\"kpi kb\"><div class=\"kl\">w/ Sequence ID</div><div class=\"kv\">"+pctSeqPro+"%</div><div class=\"ks\">"+withSeqPro.toLocaleString()+" of "+total.toLocaleString()+" requests</div></div>";
     html+="<div class=\"kpi kb\"><div class=\"kl\">With Tag for Outreach</div><div class=\"kv\">"+pctTag+"%</div><div class=\"ks\">"+withTag.toLocaleString()+" of "+total.toLocaleString()+" requests</div></div>";
   })();
+  (function(){
+    var _calWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
+    var dhAll=pipeData.filter(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim()==="Digital Hub"&&String(p["Create Quarter"]||"").trim().startsWith("2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline";});
+    var dhConnected=dhAll.filter(function(p){return _calWBS.has(String(p["Opp Campaign ID"]||"").trim());});
+    var totAll=dhAll.reduce(function(s,p){return s+(parseFloat(p["Eur"])||0);},0);
+    var totConn=dhConnected.reduce(function(s,p){return s+(parseFloat(p["Eur"])||0);},0);
+    var pct=totAll>0?Math.round(totConn/totAll*100):0;
+    html+="<div class=\"kpi kb\"><div class=\"kl\">DH Pipeline → Calendar</div><div class=\"kv\">"+pct+"%</div><div class=\"ks\">"+totConn.toLocaleString(undefined,{maximumFractionDigits:0})+" / "+totAll.toLocaleString(undefined,{maximumFractionDigits:0})+" EUR (2026 DH pipeline)</div></div>";
+  })();
   html+="</div>";
   // DCM Summary table
   var dcmMap={};
@@ -4386,9 +4401,10 @@ function renderDtr(){
     var _dhMmFilter=window._dhMmFilter||"";
     var dhRows=pipeData.filter(function(p){
       return String(p["TCP Pipeline Source Desc"]||"").trim()==="Digital Hub"
-        &&String(p["Create Quarter"]||"").trim().startsWith("2026");
+        &&String(p["Create Quarter"]||"").trim().startsWith("2026")
+        &&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline";
     });
-    var _dhMmOpts=Array.from(new Set(dhRows.map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean))).sort();
+    var _dhMmOpts=Array.from(new Set(dhRows.filter(function(p){return _calWBS.has(String(p["Opp Campaign ID"]||"").trim());}).map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean))).sort();
     if(_dhMmFilter)dhRows=dhRows.filter(function(p){return String(p["MM Identifier"]||"").trim()===_dhMmFilter;});
     dhRows.sort(function(a,b){return (String(a["Create Quarter"]||"")).localeCompare(String(b["Create Quarter"]||""))||(parseFloat(b["Eur"]||0)-parseFloat(a["Eur"]||0));});
     var totEur=dhRows.reduce(function(s,p){return s+(parseFloat(p["Eur"])||0);},0);
