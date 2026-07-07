@@ -3737,7 +3737,7 @@ function renderPro(){
     String(p.tg||"").split(",").map(function(t){return t.trim();}).filter(Boolean).forEach(function(t){prospTagsInSeqs.add(t);});
   });
   // Path 3: Direct tag match - prospects in tracked sequences (filtered) matching profiling tags
-  var profTagSet=new Set(profMetaVals.map(function(m){return m.tag;}).filter(Boolean));
+  var profTagSet=new Set(profMetaVals.map(function(m){return m.tagOut||m.tag||"";}).filter(Boolean));
   (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){
     if(!_outSeqIdsP.has(String(p.sid||"").trim()))return;
     String(p.tg||"").split(",").map(function(t){return t.trim();}).filter(Boolean).forEach(function(t){
@@ -3745,7 +3745,7 @@ function renderPro(){
     });
   });
   // A profiling request tag is active if it appears in prospect tags for tracked sequences
-  profMetaVals.forEach(function(m){if(m.tag&&prospTagsInSeqs.has(m.tag)){activeTags.add(m.tag);if(!_tagConnection[m.tag])_tagConnection[m.tag]="Tag";}});
+  profMetaVals.forEach(function(m){var t=m.tagOut||m.tag||"";if(t&&prospTagsInSeqs.has(t)){activeTags.add(t);if(!_tagConnection[t])_tagConnection[t]="Tag";}});
   var _selTitle=window.proFilter&&window.proFilter.proTitle||"";
   if(_selTitle){
     var _titleTags=titleToTags[_selTitle]||new Set();
@@ -3799,12 +3799,12 @@ function renderPro(){
     var _proDcm=window.proFilter&&window.proFilter.ddm1||"";
     // Apply DCM filter to profMetaVals for all downstream tables
     var filteredMetaVals=_proDcm?profMetaVals.filter(function(m){return normDCM(m.ddm1)===_proDcm;}):profMetaVals;
-    var filteredMetaTags=new Set(filteredMetaVals.map(function(m){return m.tag;}).filter(Boolean));
+    var filteredMetaTags=new Set(filteredMetaVals.map(function(m){return m.tagOut||m.tag||"";}).filter(Boolean));
     // Restrict activeTags to only tags belonging to filtered DCM
     if(_proDcm){activeTags=new Set(Array.from(activeTags).filter(function(t){return filteredMetaTags.has(t);}));}
     // When a title is selected, get its tags from filteredMetaVals directly
     var _selTitleTags=new Set();
-    if(_pTiF){filteredMetaVals.filter(function(m){return m.title===_pTiF;}).forEach(function(m){if(m.tag)_selTitleTags.add(m.tag);});}
+    if(_pTiF){filteredMetaVals.filter(function(m){return m.title===_pTiF;}).forEach(function(m){var t=m.tagOut||m.tag||"";if(t)_selTitleTags.add(t);});}
     // Build effective tag set for prospect filtering
     var _effectiveTags=_pTiF?_selTitleTags:activeTags;
     var prospects=(window.PROSPECT_DATA||[]).filter(function(p){
@@ -3821,34 +3821,34 @@ function renderPro(){
     tagToMeta={};filteredMetaVals.forEach(function(m){if(m.tag&&!tagToMeta[m.tag])tagToMeta[m.tag]=m;});
     // Build tag summary from SEQ_PROSPECT_DATA matched to profiling meta tags
     var tagSummary={};
-    var tagSummary={};
     // Build wbs->seqId map from CAMP_DATA
     var _wbsToSeqId={};
     (campData||[]).forEach(function(r){var wbs=String(r["Campaign/WBS Code"]||"").trim();var sid=String(r["Sequence ID"]||"").trim();if(wbs&&sid)_wbsToSeqId[wbs]=sid;});
     // Build seqId->cos/pids from SEQ_PROSPECT_DATA
     var _seqCos={},_seqPids={};
     (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){var sid=String(p.sid||"").trim();if(!sid)return;if(p.co){if(!_seqCos[sid])_seqCos[sid]=new Set();_seqCos[sid].add(p.co);}if(p.pid){if(!_seqPids[sid])_seqPids[sid]=new Set();_seqPids[sid].add(p.pid);}});
+    var _seqPidCo={};
+    (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){var pid=String(p.pid||"").trim();if(pid&&p.co)_seqPidCo[pid]=p.co;});
     // First: add all active tags from profiling meta directly (filtered by status and DCM if set)
     filteredMetaVals.forEach(function(m){
-      if(!m.tag||!activeTags.has(m.tag))return;
+      var tag=m.tagOut||m.tag||"";
+      if(!tag)return;
       if(curStatus&&m.status!==curStatus)return;
-      if(!tagSummary[m.tag])tagSummary[m.tag]={pids:new Set(),cos:new Set(),cosAdded:new Set(),seqPids:new Set(),seqCos:new Set(),seqId:"",minAdded:"",maxAdded:"",owners:new Set()};
-      if(m.ddm1)tagSummary[m.tag].owners.add(m.ddm1);
-      var sid=m.wbs?_wbsToSeqId[m.wbs]||"":"";
-      if(sid){
-        tagSummary[m.tag].seqId=sid;
-        (_seqCos[sid]||new Set()).forEach(function(c){tagSummary[m.tag].seqCos.add(c);});
-        (_seqPids[sid]||new Set()).forEach(function(p){tagSummary[m.tag].seqPids.add(p);});
-      }
+      if(!tagSummary[tag])tagSummary[tag]={pids:new Set(),cos:new Set(),cosAdded:new Set(),seqPids:new Set(),seqCos:new Set(),seqId:"",minAdded:"",maxAdded:"",owners:new Set()};
+      if(m.ddm1)tagSummary[tag].owners.add(m.ddm1);
+      var sid=m.wbs&&/^CRM-/i.test(m.wbs)?_wbsToSeqId[m.wbs]||"":"";
+      if(sid)tagSummary[tag].seqId=sid;
     });
     // Then enrich with prospect data
     prospects.forEach(function(p){
-      p.tg.split(",").map(function(t){return t.trim();}).filter(function(t){return activeTags.has(t)&&tagSummary[t];}).forEach(function(tag){
+      p.tg.split(",").map(function(t){return t.trim();}).filter(function(t){return tagSummary[t];}).forEach(function(tag){
         if(p.id) tagSummary[tag].pids.add(p.id);
         if(p.co) tagSummary[tag].cos.add(p.co);
         if(p.co&&p.added&&p.added!=="") tagSummary[tag].cosAdded.add(p.co);
         if(p.owner) tagSummary[tag].owners.add(p.owner);
         if(p.created){if(!tagSummary[tag].minAdded||p.created<tagSummary[tag].minAdded)tagSummary[tag].minAdded=p.created;if(!tagSummary[tag].maxAdded||p.created>tagSummary[tag].maxAdded)tagSummary[tag].maxAdded=p.created;}
+        // seqCos: companies from SEQ_PROSPECT_DATA that have this prospect pid
+        if(_seqPidCo[p.id])tagSummary[tag].seqCos.add(_seqPidCo[p.id]);
       });
     });
     var summaryEl=document.getElementById("pro-tag-summary");
@@ -3866,6 +3866,11 @@ function renderPro(){
           if(p.id){if(!_tagToPids[t])_tagToPids[t]=new Set();_tagToPids[t].add(p.id);}
         });
       });
+      var _calWBSSet=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
+      var _calSeqIdSet=new Set();
+      (campData||[]).forEach(function(r){var sid=String(r["Sequence ID"]||"").trim();if(sid)_calSeqIdSet.add(sid);});
+      var _calPidSet=new Set();
+      (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){if(_calSeqIdSet.has(String(p.sid||"").trim()))_calPidSet.add(String(p.pid||"").trim());});
       var _seenTitle={};
       var _proTitleSearch=(window.proFilter&&window.proFilter.proTitleSearch||"").toLowerCase();
       var sumEntries=filteredMetaVals.filter(function(m){
@@ -3876,10 +3881,10 @@ function renderPro(){
         _seenTitle[m.title]=true;
         return true;
       }).map(function(m){
-        var tag=m.tag||"";
+        var tag=m.tagOut||m.tag||"";
         var ts=tagSummary[tag]||{pids:new Set(),cos:new Set(),cosAdded:new Set(),seqPids:new Set(),seqCos:new Set(),seqId:""};
         // Always try to resolve seqId from wbs if not already set
-        if(!ts.seqId&&m.wbs)ts.seqId=_wbsToSeqId[m.wbs]||"";
+        if(!ts.seqId&&m.wbs&&/^CRM-/i.test(m.wbs))ts.seqId=_wbsToSeqId[m.wbs]||"";
         // If ts is empty (tag not in activeTags), populate from raw data
         if(ts.cos.size===0&&ts.seqCos.size===0){
           var sid=ts.seqId;
@@ -3900,17 +3905,22 @@ function renderPro(){
         if(sumSortCol==="seqCos")return(a[1].seqCos.size-b[1].seqCos.size)*sumSortDir;
         return a[0].localeCompare(b[0])*sumSortDir;
       });
-      var totPids=new Set();var totCos=new Set();
-      sumEntries.forEach(function(e){e[1].pids.forEach(function(p){totPids.add(p);});e[1].cos.forEach(function(c){totCos.add(c);});});
+      var totPids=new Set();var totCos=new Set();var totSeqCos=new Set();var totAcctReq=0;var totTagCalPids=0;
+      sumEntries.forEach(function(e){e[1].pids.forEach(function(p){totPids.add(p);});e[1].cos.forEach(function(c){totCos.add(c);});e[1].seqCos.forEach(function(c){totSeqCos.add(c);});var m2=e[2];if(m2&&m2.acctRequested)totAcctReq+=parseInt(m2.acctRequested)||0;});
       var countLine="<div style=\"font-size:11px;color:var(--mu);padding:4px 0 6px\">"+sumEntries.length+" profiling requests &middot; <b>"+totCos.size.toLocaleString()+"</b> total companies &middot; <b>"+totPids.size.toLocaleString()+"</b> total prospects</div>";
       var thS="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:normal;position:sticky;top:0;cursor:pointer";
       function mkThS(col,label,right){var ic=sumSortCol===col?(sumSortDir===-1?"&#8595;":"&#8593;"):"&#8597;";return "<th style=\""+thS+(right?";text-align:right":"")+"\" onclick=\"window._sumSort('"+col+"')\">"+label+" "+ic+"</th>";}
       var tbl="<div style=\"overflow:auto;max-height:300px\"><table style=\"width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed\">"
-        +"<colgroup><col style=\"width:22%\"><col style=\"width:12%\"><col style=\"width:12%\"><col style=\"width:12%\"><col style=\"width:14%\"><col style=\"width:14%\"><col style=\"width:14%\"></colgroup>"
-        +"<thead><tr>"+mkThS("tag","Campaign Title (Profiling Request)",false)+mkThS("ddm1","DCM",false)+mkThS("createdBy","Created By",false)+mkThS("acctReq","Accts Rqst'd",true)+mkThS("cos","# Accts linked to tag",true)+mkThS("seqCos","# Accts linked to seq",true)+mkThS("pids","# Prospects",true)+"</tr></thead><tbody>";
+        +"<colgroup><col style=\"width:17%\"><col style=\"width:9%\"><col style=\"width:9%\"><col style=\"width:8%\"><col style=\"width:9%\"><col style=\"width:10%\"><col style=\"width:9%\"><col style=\"width:7%\"><col style=\"width:7%\"><col style=\"width:8%\"><col style=\"width:7%\"></colgroup>"
+        +"<thead><tr>"+mkThS("tag","Campaign Title (Profiling Request)",false)+mkThS("ddm1","DCM",false)+mkThS("createdBy","Created By",false)+mkThS("acctReq","Acct Requested: manual, profiling",true)+mkThS("cos","# Accts linked to tag",true)+mkThS("seqCos","# Accts linked to seq",true)+mkThS("pids","# Prospects linked to tag",true)+mkThS("tagCalPids","# Prospects via Tag (calendar)",true)+mkThS("calConn","WBS → Calendar",false)+mkThS("seqConn","Seq → Calendar",false)+"</tr></thead><tbody>";
       sumEntries.forEach(function(e,idx){
         var titleStr=e[0];var ts=e[1];var meta=e[2];
         var ddm1Str=meta?normDCM(meta.ddm1):"";var createdByStr=meta?meta.createdBy||"":"";
+        var wbsConn=meta&&meta.wbs&&/^CRM-/i.test(meta.wbs)&&_calWBSSet.has(String(meta.wbs).trim());
+        var seqConn=meta&&meta.wbs&&/^CRM-/i.test(meta.wbs)&&!!_wbsToSeqId[String(meta.wbs).trim()];
+        var tag=meta&&(meta.tagOut||meta.tag)||"";
+        var tagCalPids=0;
+        if(tag&&_tagToPids[tag]){_tagToPids[tag].forEach(function(pid){if(_calPidSet.has(pid))tagCalPids++;});}
         var isProSel=(window.proFilter&&window.proFilter.proTitle===titleStr);
         tbl+="<tr style=\"border-bottom:1px solid #EBEBEB;background:"+(isProSel?"#D1EFFF":(idx%2===0?"#fff":"#F8FBFF"))+"\">"
           +"<td style=\"padding:5px 10px;font-size:11px;cursor:pointer;text-decoration:underline;text-decoration-style:dotted\" onclick=\"window._proClickTitle(this)\" data-ptitle=\""+titleStr.replace(/"/g,"&quot;")+"\">"+titleStr+"</td>"
@@ -3920,10 +3930,30 @@ function renderPro(){
           +"<td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+ts.cos.size.toLocaleString()+"</td>"
           +"<td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+ts.seqCos.size.toLocaleString()+"</td>"
           +"<td style=\"padding:5px 8px;text-align:right;font-weight:700;font-size:11px\">"+ts.pids.size.toLocaleString()+"</td>"
+          +"<td style=\"padding:5px 8px;text-align:right;font-size:11px;color:#07838F;font-weight:600\">"+(tagCalPids>0?tagCalPids.toLocaleString():"")+"</td>"
+          +"<td style=\"padding:5px 10px;font-size:11px;font-weight:600;color:"+(wbsConn?"#1B7A34":"#B0B0B0")+"\">"+( wbsConn?"Yes":"No")+"</td>"
+          +"<td style=\"padding:5px 10px;font-size:11px;font-weight:600;color:"+(seqConn?"#1B7A34":"#B0B0B0")+"\">"+(seqConn?"Yes":"No")+"</td>"
           +"</tr>";
+        totTagCalPids+=tagCalPids;
       });
-      tbl+="<tfoot><tr style=\"background:#F0F4FF;font-weight:700;border-top:2px solid #00144A\"><td style=\"padding:5px 8px;font-size:11px\">TOTAL</td><td></td><td></td><td></td><td></td><td></td><td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+totCos.size.toLocaleString()+"</td><td></td><td style=\"padding:5px 8px;text-align:right;font-size:11px\">"+totPids.size.toLocaleString()+"</td></tr></tfoot>";
-      summaryEl.innerHTML=countLine+tbl+"</tbody></table></div>";
+      tbl+="</tbody></table></div>";
+      var tfootStyle="background:#00144A;color:#fff;padding:5px 8px;font-size:11px;font-weight:700;text-align:right";
+      var tfootL="background:#00144A;color:#fff;padding:5px 10px;font-size:11px;font-weight:700;text-align:left";
+      tbl+="<table style=\"width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed\"><colgroup><col style=\"width:17%\"><col style=\"width:9%\"><col style=\"width:9%\"><col style=\"width:8%\"><col style=\"width:9%\"><col style=\"width:10%\"><col style=\"width:9%\"><col style=\"width:7%\"><col style=\"width:7%\"><col style=\"width:8%\"><col style=\"width:7%\"></colgroup>"
+        +"<tfoot><tr>"
+        +"<td style=\""+tfootL+"\">TOTAL</td>"
+        +"<td style=\""+tfootStyle+"\"></td>"
+        +"<td style=\""+tfootStyle+"\"></td>"
+        +"<td style=\""+tfootStyle+"\">"+(totAcctReq>0?totAcctReq.toLocaleString():"")+"</td>"
+        +"<td style=\""+tfootStyle+"\">"+totCos.size.toLocaleString()+"</td>"
+        +"<td style=\""+tfootStyle+"\">"+totSeqCos.size.toLocaleString()+"</td>"
+        +"<td style=\""+tfootStyle+"\">"+totPids.size.toLocaleString()+"</td>"
+        +"<td style=\""+tfootStyle+"\">"+totTagCalPids.toLocaleString()+"</td>"
+        +"<td style=\""+tfootStyle+"\"></td>"
+        +"<td style=\""+tfootStyle+"\"></td>"
+        +"<td style=\""+tfootStyle+"\"></td>"
+        +"</tr></tfoot></table>";
+      summaryEl.innerHTML=countLine+tbl;
     }
   },50);
 }
@@ -3987,23 +4017,60 @@ function renderPdel(){
     Object.values(profMeta).forEach(function(m){
       var wbs=String(m.wbs||"").trim();
       if(!wbs||!filtWBS.has(wbs))return;
-      // get sequence from campData for this wbs
       var sid=wbsToSeq[wbs];
       if(sid)profWbsSeq[wbs]=sid;
     });
     Object.values(profWbsSeq).forEach(function(sid){filtSeqIds.add(sid);});
 
+    // Path 3: Tag connection - prospects whose tag matches a profiling tagOut/tag in filtered campaigns
+    var _filtProfTags=new Set();
+    Object.values(profMeta).forEach(function(m){
+      var tag=String(m.tagOut||m.tag||"").trim();
+      if(tag)_filtProfTags.add(tag);
+    });
+    // Build pid->tags from PROSPECT_DATA, collect pids that match a profiling tag
+    var _tagMatchPids=new Set();
+    (window.PROSPECT_DATA||[]).forEach(function(p){
+      if(!p.tg)return;
+      String(p.tg).split(",").forEach(function(t){
+        t=t.trim();if(t&&_filtProfTags.has(t)&&p.id)_tagMatchPids.add(String(p.id).trim());
+      });
+    });
+    // Find sequence IDs for those pids via SEQ_PROSPECT_DATA
+    (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){
+      var pid=String(p.pid||"").trim();
+      var sid=String(p.sid||"").trim();
+      if(pid&&sid&&_tagMatchPids.has(pid))filtSeqIds.add(sid);
+    });
+
     // Build prospect rows from SEQ_PROSPECT_DATA
-    var seqToCampWbs={};
+    var seqToCampWbs={};var seqToCampName={};
     (filtered||campData).forEach(function(r){
       var w=String(r["Campaign/WBS Code"]||"").trim();
       var sid=String(r["Sequence ID"]||"").trim();
-      if(w&&sid)seqToCampWbs[sid]=w;
+      var n=String(r["Campaign Name"]||"").trim();
+      if(w&&sid){seqToCampWbs[sid]=w;if(n)seqToCampName[sid]=n;}
     });
     (window.OUT_DATA||[]).forEach(function(r){
       var wbs=String(r["Campaign/WBS Code"]||"").trim();
       var sid=String(r["Sequence ID"]||"").trim();
-      if(wbs&&sid&&filtWBS.has(wbs))seqToCampWbs[sid]=wbs;
+      var sname=String(r["Sequence Name"]||"").trim();
+      if(wbs&&sid&&filtWBS.has(wbs)){seqToCampWbs[sid]=wbs;if(!seqToCampName[sid])seqToCampName[sid]=wbsToName[wbs]||"";}
+      if(sid&&sname&&!seqToCampName[sid])seqToCampName[sid]=sname;
+    });
+    // Build tag -> profiling title for tag-connected name fallback
+    var _tagToProfTitle={};
+    Object.values(profMeta).forEach(function(m){
+      var tag=String(m.tagOut||m.tag||"").trim();
+      if(tag&&m.title&&!_tagToProfTitle[tag])_tagToProfTitle[tag]=m.title;
+    });
+    // Build pid -> matching profiling tag
+    var _pidToProfTag={};
+    (window.PROSPECT_DATA||[]).forEach(function(p){
+      if(!p.tg||!p.id)return;
+      String(p.tg).split(",").forEach(function(t){
+        t=t.trim();if(t&&_filtProfTags.has(t)&&!_pidToProfTag[p.id])_pidToProfTag[p.id]=t;
+      });
     });
 
     var seen={};
@@ -4014,9 +4081,11 @@ function renderPdel(){
       var key=p.pid+"|"+sid;
       if(seen[key])return;seen[key]=true;
       var wbs=seqToCampWbs[sid]||"";
-      var campName=wbsToName[wbs]||"";
+      var _pid=String(p.pid||"").trim();
+      var _profTag=_pidToProfTag[_pid]||"";
+      var campName=seqToCampName[sid]||wbsToName[wbs]||(_profTag?_tagToProfTitle[_profTag]||"":"");
       var executor=wbsToExec[wbs]||"";
-      var connType=profWbsSeq[wbs]?"WBS Code":"Sequence ID";
+      var connType=profWbsSeq[wbs]?"WBS Code":(_tagMatchPids.has(_pid)?"Tag":"Sequence ID");
       var created=pidToCreated[p.pid]||"";
       var persona=pidToPersona[p.pid]||"";
       var activeSeq=pidToActiveSeq[p.pid]||"";
@@ -4070,7 +4139,9 @@ function renderPdel(){
 
     // Store full filtered rows for export
     window._pdelRowsCache=rows;
-    var tbl="<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px'>";
+    var _pdelUniqCamps=new Set(rows.map(function(r){return r.campName;}).filter(Boolean)).size;
+    var tbl="<div class='krow' style='flex-wrap:wrap;margin-bottom:14px'><div class='kpi kb'><div class='kl'>Campaigns</div><div class='kv'>"+_pdelUniqCamps.toLocaleString()+"</div><div class='ks'>unique campaigns included</div></div></div>";
+    tbl+="<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px'>";
     tbl+="<div style='font-size:11px;color:var(--mu)'>"+rows.length.toLocaleString()+" prospects</div>";
     tbl+="<button onclick=\"window._exportPdel()\" style='padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer'>&#11015; Export CSV</button>";
     tbl+="</div>";
@@ -4158,7 +4229,7 @@ function renderDtr(){
   })();
   (function(){
     var totalCamps=new Set(filtered.map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean)).size;
-    var withSeq=new Set(filtered.filter(function(r){return String(r["Sequence ID"]||"").trim();}).map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean)).size;
+    var withSeq=new Set(filtered.filter(function(r){return /^\d+$/.test(String(r["Sequence ID"]||"").trim());}).map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean)).size;
     var pct=totalCamps>0?Math.round(withSeq/totalCamps*100):0;
     html+="<div class=\"kpi kb\"><div class=\"kl\">Campaigns w/ Sequence ID</div><div class=\"kv\">"+pct+"%</div><div class=\"ks\">"+withSeq.toLocaleString()+" of "+totalCamps.toLocaleString()+" campaigns (calendar)</div></div>";
   })();
@@ -4171,10 +4242,10 @@ function renderDtr(){
   html+="<div class=\"kpi kb\"><div class=\"kl\">Profiling Requests</div><div class=\"kv\">"+(new Set(profMetaVals.map(function(m){return m.id;}).filter(Boolean))).size.toLocaleString()+"</div><div class=\"ks\">total requests</div></div>";
   (function(){
     var total=(new Set(profMetaVals.map(function(m){return m.id;}).filter(Boolean))).size;
-    var withWBS=profMetaVals.filter(function(m){return m.wbs&&m.wbs.trim();}).length;
+    var withWBS=profMetaVals.filter(function(m){return m.wbs&&/^CRM-/i.test(String(m.wbs).trim());}).length;
     var withTag=profMetaVals.filter(function(m){return m.tagOut&&m.tagOut.trim();}).length;
     var pctWBS=total>0?Math.round(withWBS/total*100):0;
-    var withSeqPro=(function(){var ws={};(campData||[]).forEach(function(r){var w=String(r['Campaign/WBS Code']||'').trim();var s=String(r['Sequence ID']||'').trim();if(w&&s)ws[w]=1;});return profMetaVals.filter(function(m){var w=String(m.wbs||'').trim();return w&&ws[w];}).length;})();var pctSeqPro=total>0?Math.round(withSeqPro/total*100):0;var pctTag=total>0?Math.round(withTag/total*100):0;
+    var withSeqPro=(function(){var ws={};(campData||[]).forEach(function(r){var w=String(r['Campaign/WBS Code']||'').trim();var s=String(r['Sequence ID']||'').trim();if(w&&s)ws[w]=1;});return profMetaVals.filter(function(m){var w=String(m.wbs||'').trim();return /^CRM-/i.test(w)&&ws[w];}).length;})();var pctSeqPro=total>0?Math.round(withSeqPro/total*100):0;var pctTag=total>0?Math.round(withTag/total*100):0;
     html+="<div class=\"kpi kb\"><div class=\"kl\">With WBS Code</div><div class=\"kv\">"+pctWBS+"%</div><div class=\"ks\">"+withWBS.toLocaleString()+" of "+total.toLocaleString()+" requests</div></div>";
     html+="<div class=\"kpi kb\"><div class=\"kl\">w/ Sequence ID</div><div class=\"kv\">"+pctSeqPro+"%</div><div class=\"ks\">"+withSeqPro.toLocaleString()+" of "+total.toLocaleString()+" requests</div></div>";
     html+="<div class=\"kpi kb\"><div class=\"kl\">With Tag for Outreach</div><div class=\"kv\">"+pctTag+"%</div><div class=\"ks\">"+withTag.toLocaleString()+" of "+total.toLocaleString()+" requests</div></div>";
@@ -4189,7 +4260,7 @@ function renderDtr(){
     dcmMap[dm.toLowerCase()].camps++;
     var wbs=String(r["Campaign/WBS Code"]||"").trim();
     if(wbs)dcmMap[dm.toLowerCase()].withWBS++;
-    if(String(r["Sequence ID"]||"").trim())dcmMap[dm.toLowerCase()].withSeq++;
+    if(/^\d+$/.test(String(r["Sequence ID"]||"").trim()))dcmMap[dm.toLowerCase()].withSeq++;
     // Has tag if Outreach TAGS is set OR WBS is in CAMP_PROF_TAGS
     var hasTag=String(r["Outreach TAGS"]||"").trim()||(wbs&&_profTagsMap[wbs]);
     if(hasTag)dcmMap[dm.toLowerCase()].withTag++;
@@ -4241,8 +4312,8 @@ function renderDtr(){
     var d=String(m.ddm1||"").trim();if(!d)d="(No DDM1)";
     if(!ddm1ReqMap[d])ddm1ReqMap[d]={total:0,withWBS:0,withSeq:0,withTag:0};
     ddm1ReqMap[d].total++;
-    if(m.wbs&&m.wbs.trim())ddm1ReqMap[d].withWBS++;
-    if(m.wbs&&_dtrWbsToSeq[m.wbs.trim()])ddm1ReqMap[d].withSeq++;var _mt2=String(m.tagOut||m.tag||'').trim();if(_mt2)ddm1ReqMap[d].withTag++;
+    if(m.wbs&&/^CRM-/i.test(String(m.wbs).trim()))ddm1ReqMap[d].withWBS++;
+    if(m.wbs&&/^CRM-/i.test(String(m.wbs).trim())&&_dtrWbsToSeq[m.wbs.trim()])ddm1ReqMap[d].withSeq++;var _mt2=String(m.tagOut||m.tag||'').trim();if(_mt2)ddm1ReqMap[d].withTag++;
   });
   Object.entries(ddm1ReqMap).sort(function(a,b){return b[1].total-a[1].total;}).forEach(function(e,i){
     html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'"><td style="padding:6px 12px">'+e[0]+'</td><td style="padding:6px 12px;text-align:right;font-weight:700">'+e[1].total.toLocaleString()+'</td><td style="padding:6px 12px;text-align:right">'+e[1].withWBS.toLocaleString()+'</td><td style="padding:6px 12px;text-align:right">'+e[1].withSeq.toLocaleString()+'</td><td style="padding:6px 12px;text-align:right">'+e[1].withTag.toLocaleString()+'</td></tr>';
@@ -4252,9 +4323,9 @@ function renderDtr(){
   // Connection table (remaining ~40%)
   html+='<div style="flex:1;min-width:0">';
   html+='<div style="display:flex;align-items:center;margin-bottom:4px"><div class="sec" style="margin-bottom:0">Connection</div></div>';
-  html+='<div class="cc"><div style="overflow:auto;max-height:300px"><table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:22%"><col style="width:16%"><col style="width:16%"><col style="width:29%"><col style="width:17%"></colgroup><thead><tr>';
-  html+='<th style="'+thD+'">DCM</th><th style="'+thD+';text-align:right">WBS ↔ Profiling</th><th style="'+thD+';text-align:right">Seq ↔ Calendar</th><th style="'+thD+';text-align:right">Tag ↔ Calendar (#prospects)</th><th style="'+thD+';text-align:right">Camps Connected</th></tr></thead><tbody>';
+  html+='<div class="cc"><div style="overflow:auto;max-height:300px"><table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:22%"><col style="width:16%"><col style="width:16%"><col style="width:29%"><col style="width:17%"></colgroup><thead><tr>';  html+='<th style="'+thD+'">DCM</th><th style="'+thD+';text-align:right">WBS ↔ Profiling</th><th style="'+thD+';text-align:right">Seq ↔ Calendar</th><th style="'+thD+';text-align:right">Tag ↔ Calendar (#prospects)</th><th style="'+thD+';text-align:right">Camps Connected</th></tr></thead><tbody>';
   (function(){
+    function isRealWBS(w){return w&&/^CRM-/i.test(String(w).trim());}
     var filtWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
     var _wbsToSeqCal={};
     (campData||[]).forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var sid=String(r["Sequence ID"]||"").trim();if(w&&sid&&/^CRM/i.test(w))_wbsToSeqCal[w]=sid;});
@@ -4276,22 +4347,21 @@ function renderDtr(){
     // Build per-DCM profiling tag sets
     var _dcmProfTags={};
     profMetaVals.forEach(function(m){
-      var d=String(m.ddm1||"").trim();if(!d)d="(No DDM1)";var dKey=d.toLowerCase();
+      var d=normDDM1(String(m.ddm1||"").trim());if(!d)d="(No DDM1)";var dKey=d.toLowerCase();
       if(!_dcmProfTags[dKey])_dcmProfTags[dKey]=new Set();
       var tag=String(m.tagOut||m.tag||"").trim();if(tag)_dcmProfTags[dKey].add(tag);
     });
     var _prospTagSet=_calConnTagSet;
-    // Build set of WBS codes that have a profiling request
-    var _profWBSSet=new Set(profMetaVals.map(function(m){return String(m.wbs||"").trim();}).filter(Boolean));
+    var _profWBSSet=new Set(profMetaVals.map(function(m){return String(m.wbs||"").trim();}).filter(isRealWBS));
     var connMap={};
     var _connTagSeen={};var _connWBSSeen={};var _connSeqSeen={};
     profMetaVals.forEach(function(m){
-      var d=String(m.ddm1||"").trim();if(!d)d="(No DDM1)";
+      var d=normDDM1(String(m.ddm1||"").trim());if(!d)d="(No DDM1)";
       var dKey=d.toLowerCase();
-      if(!connMap[dKey]){connMap[dKey]={display:normDDM1(d),wbsMatch:0,seqMatch:0,tagMatch:0,campConnected:0};_connTagSeen[dKey]=new Set();_connWBSSeen[dKey]=new Set();_connSeqSeen[dKey]=new Set();}
+      if(!connMap[dKey]){connMap[dKey]={display:d,wbsMatch:0,seqMatch:0,tagMatch:0,campConnected:0};_connTagSeen[dKey]=new Set();_connWBSSeen[dKey]=new Set();_connSeqSeen[dKey]=new Set();}
       var wbs=String(m.wbs||"").trim();
-      if(wbs&&filtWBS.has(wbs)&&!_connWBSSeen[dKey].has(wbs)){_connWBSSeen[dKey].add(wbs);connMap[dKey].wbsMatch++;}
-      if(wbs&&_wbsToSeqCal[wbs]&&!_connSeqSeen[dKey].has(wbs)){_connSeqSeen[dKey].add(wbs);connMap[dKey].seqMatch++;}
+      if(isRealWBS(wbs)&&filtWBS.has(wbs)&&!_connWBSSeen[dKey].has(wbs)){_connWBSSeen[dKey].add(wbs);connMap[dKey].wbsMatch++;}
+      if(isRealWBS(wbs)&&_wbsToSeqCal[wbs]&&!_connSeqSeen[dKey].has(wbs)){_connSeqSeen[dKey].add(wbs);connMap[dKey].seqMatch++;}
       var tag=String(m.tagOut||m.tag||"").trim();
       if(tag&&_prospTagSet.has(tag)&&!_connTagSeen[dKey].has(tag)){_connTagSeen[dKey].add(tag);}
     });
@@ -4305,40 +4375,29 @@ function renderDtr(){
       });
       connMap[dKey].tagMatch=pidSet.size;
     });
-    // Count campaigns per DCM connected via ANY method (WBS, Seq, or Tag)
-    // Build set of WBS codes connected via tag (tagOut/tag in prospect data)
     var _tagToWBS={};
     profMetaVals.forEach(function(m){
       var tag=String(m.tagOut||m.tag||"").trim();
       var wbs=String(m.wbs||"").trim();
-      if(tag&&wbs)_tagToWBS[tag]=wbs;
+      if(tag&&isRealWBS(wbs))_tagToWBS[tag]=wbs;
     });
-    var _campConnectedWBS=new Set();
-    // Via WBS match
-    profMetaVals.forEach(function(m){var wbs=String(m.wbs||"").trim();if(wbs&&filtWBS.has(wbs))_campConnectedWBS.add(wbs);});
-    // Via Seq match
-    profMetaVals.forEach(function(m){var wbs=String(m.wbs||"").trim();if(wbs&&_wbsToSeqCal[wbs])_campConnectedWBS.add(wbs);});
-    // Via Tag match
-    profMetaVals.forEach(function(m){var tag=String(m.tagOut||m.tag||"").trim();var wbs=String(m.wbs||"").trim();if(tag&&wbs&&_prospTagSet.has(tag))_campConnectedWBS.add(wbs);});
+    // Build per-DCM connected WBS sets
+    var _dcmConnectedWBS={};
+    profMetaVals.forEach(function(m){
+      var d=normDDM1(String(m.ddm1||"").trim());if(!d)d="(No DDM1)";var dKey=d.toLowerCase();
+      if(!_dcmConnectedWBS[dKey])_dcmConnectedWBS[dKey]=new Set();
+      var wbs=String(m.wbs||"").trim();
+      var tag=String(m.tagOut||m.tag||"").trim();
+      if(isRealWBS(wbs)&&(filtWBS.has(wbs)||_wbsToSeqCal[wbs]))_dcmConnectedWBS[dKey].add(wbs);
+      if(tag&&isRealWBS(wbs)&&_prospTagSet.has(tag))_dcmConnectedWBS[dKey].add(wbs);
+    });
 
-    // Build dm display -> connMap key mapping (normalize both sides)
-    var _dmKeyMap={};
-    Object.keys(connMap).forEach(function(k){
-      var display=connMap[k].display||"";
-      _dmKeyMap[display.toLowerCase()]=k;
-    });
-    var _dmCampConnSeen={};
-    filtered.forEach(function(r){
-      var dm=String(r["Demand Manager"]||"").trim();if(!dm)return;
-      var wbs=String(r["Campaign/WBS Code"]||"").trim();
-      if(!wbs||!_campConnectedWBS.has(wbs))return;
-      // Try to find connMap key by normalized display name
-      var key=_dmKeyMap[dm.toLowerCase()];
-      if(!key)return;
-      var seenKey=key+'|'+wbs;
-      if(_dmCampConnSeen[seenKey])return;
-      _dmCampConnSeen[seenKey]=true;
-      connMap[key].campConnected=(connMap[key].campConnected||0)+1;
+    // campConnected = unique calendar WBS codes that appear in this DCM's profiling requests (any calendar row)
+    Object.keys(connMap).forEach(function(dKey){
+      var dcmWBS=_dcmConnectedWBS[dKey]||new Set();
+      var count=0;
+      dcmWBS.forEach(function(wbs){if(filtWBS.has(wbs))count++;});
+      connMap[dKey].campConnected=count;
     });
     // Build per-DCM totals for % denominators
     var _dcmTotalProfWBS={};
@@ -4349,27 +4408,35 @@ function renderDtr(){
     });
     var _dcmTotalCalCamps={};
     filtered.forEach(function(r){
-      var dm=String(r["Demand Manager"]||"").trim();if(!dm)return;
-      var key=_dmKeyMap[dm.toLowerCase()];if(!key)return;
+      var dm=normDDM1(String(r["Demand Manager"]||"").trim());if(!dm)return;
+      var key=dm.toLowerCase();if(!connMap[key])return;
       _dcmTotalCalCamps[key]=(_dcmTotalCalCamps[key]||0)+1;
     });
     var _totalCalPids=Object.keys(_calPidTags).length;
-    function pct(n,d){return d>0?Math.round(n/d*100):0;}
-    Object.entries(connMap).sort(function(a,b){return(b[1].wbsMatch+b[1].seqMatch+b[1].tagMatch)-(a[1].wbsMatch+a[1].seqMatch+a[1].tagMatch);}).forEach(function(e,i){
+      var totWBS=0,totSeq=0,totTag=0,totConn=0;
+      function cell(n){return n.toLocaleString();}
+      Object.entries(connMap).sort(function(a,b){return(b[1].wbsMatch+b[1].seqMatch+b[1].tagMatch)-(a[1].wbsMatch+a[1].seqMatch+a[1].tagMatch);}).forEach(function(e,i){
       var dKey=e[0];var v=e[1];
       var totProfWBS=(_dcmTotalProfWBS[dKey]||new Set()).size;
       var totCalCamps=_dcmTotalCalCamps[dKey]||0;
-      function cell(n,d){return n.toLocaleString()+(d>0?'<span style="color:var(--mu);font-size:10px;margin-left:4px">('+pct(n,d)+'%)</span>':'')}
-      html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
+      totWBS+=v.wbsMatch;totSeq+=v.seqMatch;totTag+=v.tagMatch;totConn+=v.campConnected;      html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
         +'<td style="padding:6px 12px">'+(v.display||e[0])+'</td>'
-        +'<td style="padding:6px 12px;text-align:right;font-weight:700">'+cell(v.wbsMatch,totProfWBS)+'</td>'
-        +'<td style="padding:6px 12px;text-align:right">'+cell(v.seqMatch,totProfWBS)+'</td>'
-        +'<td style="padding:6px 12px;text-align:right">'+cell(v.tagMatch,_totalCalPids)+'</td>'
-        +'<td style="padding:6px 12px;text-align:right;font-weight:700">'+cell(v.campConnected,totCalCamps)+'</td>'
+        +'<td style="padding:6px 12px;text-align:right;font-weight:700">'+cell(v.wbsMatch)+'</td>'
+        +'<td style="padding:6px 12px;text-align:right">'+cell(v.seqMatch)+'</td>'
+        +'<td style="padding:6px 12px;text-align:right">'+cell(v.tagMatch)+'</td>'
+        +'<td style="padding:6px 12px;text-align:right;font-weight:700">'+cell(v.campConnected)+'</td>'
         +'</tr>';
     });
+    html+='</tbody></table></div>';
+    html+='<table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:22%"><col style="width:16%"><col style="width:16%"><col style="width:29%"><col style="width:17%"></colgroup>';
+    html+='<tfoot><tr style="background:#00144A;color:#fff;font-weight:700">'
+      +'<td style="padding:5px 10px;font-size:11px">TOTAL</td>'
+      +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totWBS.toLocaleString()+'</td>'
+      +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totSeq.toLocaleString()+'</td>'
+      +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totTag.toLocaleString()+'</td>'
+      +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totConn.toLocaleString()+'</td>'
+      +'</tr></tfoot></table></div></div>';
   })();
-  html+='</tbody></table></div></div>';
   html+='</div>';
   html+='</div>';
   page.innerHTML=html;
