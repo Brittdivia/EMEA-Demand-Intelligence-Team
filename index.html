@@ -485,11 +485,14 @@ function ddSrch(inp,s){
 
 function toggleF(key,val,checked){
   if(checked)filters[key].add(val);else filters[key].delete(val);
+  if(key==="Demand Manager"&&window.outFilter){window.outFilter.reg=null;window.outFilter.owner=null;window.outFilter.wbs=null;window.outFilter.sb=null;}
   pg=1;applyFilters();syncBtn(key);updateTags();syncCab();buildWbar();if(activeTab==="dtr")renderDtr();
   if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="pdel")renderPdel();if(activeTab==="exe")renderExe();
 }
 function clearFilter(key){
-  filters[key].clear();pg=1;applyFilters();syncBtn(key);updateTags();syncCab();buildWbar();if(activeTab==="dtr")renderDtr();
+  filters[key].clear();
+  if(key==="Demand Manager"&&window.outFilter){window.outFilter.reg=null;window.outFilter.owner=null;window.outFilter.wbs=null;window.outFilter.sb=null;}
+  pg=1;applyFilters();syncBtn(key);updateTags();syncCab();buildWbar();if(activeTab==="dtr")renderDtr();
   document.getElementById("fdo_"+sk(key)).innerHTML=buildOpts(key);
   if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="acc")renderAcc();if(activeTab==="exe")renderExe();if(activeTab==="pro")renderPro();if(activeTab==="pdel")renderPdel();if(activeTab==="exe")renderExe();
 }
@@ -3152,6 +3155,10 @@ function renderOutInner(page){
   var _tagOutOpts=Array.from(_tagOutSet).sort();
   var _tagProsOpts=Array.from(_tagProsSet).sort();
 
+  // Build wbs->region from filtered calendar (authoritative region, not outreach row's region)
+  var _wbsToRegOut={};
+  campSource.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var reg=String(r["Region Name (level 2)"]||"").trim();if(w&&reg)_wbsToRegOut[w]=reg;});
+
   // Apply outFilter
   var data=allData.filter(function(r){
     if(window.outFilter.state){
@@ -3162,7 +3169,7 @@ function renderOutInner(page){
       var key2=window.outFilter.stage;
       if(!(parseInt(r[key2])||0))return false;
     }
-    if(window.outFilter.reg){if(String(r["Region Name (level 2)"]||"").trim()!==window.outFilter.reg)return false;}
+    if(window.outFilter.reg){var _rRegCheck=_wbsToRegOut[String(r["Campaign/WBS Code"]||"").trim()]||String(r["Region Name (level 2)"]||"").trim();if(_rRegCheck!==window.outFilter.reg)return false;}
     if(window.outFilter.owner){if(String(r["Owner"]||"").trim()!==window.outFilter.owner)return false;}
     if(window.outFilter.wbs){if(String(r["Campaign/WBS Code"]||"").trim()!==window.outFilter.wbs)return false;}
     if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size>0){if(!filters["Region Name (level 2)"].has(String(r["Region Name (level 2)"]||"")))return false;}
@@ -3279,7 +3286,8 @@ function renderOutInner(page){
   (function(){
     var regOwners={};
     data.forEach(function(r){
-      var reg=String(r["Region Name (level 2)"]||"").trim();if(!reg)return;
+      var wbs=String(r["Campaign/WBS Code"]||"").trim();
+      var reg=_wbsToRegOut[wbs]||String(r["Region Name (level 2)"]||"").trim();if(!reg)return;
       var owner=String(r["Owner"]||"").trim();if(!owner)return;
       if(!regOwners[reg])regOwners[reg]=new Set();
       regOwners[reg].add(owner);
@@ -3432,7 +3440,7 @@ function renderOutInner(page){
       var acct=parseInt(r["Accounts Contacted"])||0;
       var meet=parseInt(r["Meetings Booked"])||0;
       var pros=parseInt(r["Prospects - Total"])||0;
-      if(!sdeMap[owner])sdeMap[owner]={del:0,op:0,rp:0,acct:0,meet:0,pros:0,seqs:0,reg:String(r["Region Name (level 2)"]||"").trim()};
+      if(!sdeMap[owner])sdeMap[owner]={del:0,op:0,rp:0,acct:0,meet:0,pros:0,seqs:0,reg:_wbsToRegOut[String(r["Campaign/WBS Code"]||"").trim()]||String(r["Region Name (level 2)"]||"").trim()};
       sdeMap[owner].del+=del;sdeMap[owner].op+=op;sdeMap[owner].rp+=rp;
       sdeMap[owner].acct+=acct;sdeMap[owner].meet+=meet;sdeMap[owner].pros+=pros;sdeMap[owner].seqs+=1;
     });
@@ -4022,9 +4030,13 @@ function renderPdel(){
     });
     Object.values(profWbsSeq).forEach(function(sid){filtSeqIds.add(sid);});
 
-    // Path 3: Tag connection - prospects whose tag matches a profiling tagOut/tag in filtered campaigns
+    // Path 3: Tag connection - scoped to DCMs in filtered calendar rows
+    var _filtDMs=new Set((filtered||campData).map(function(r){return String(r["Demand Manager"]||"").trim().toLowerCase();}).filter(Boolean));
+    function normDDM1pdel(d){var p=String(d||"").split(",");if(p.length<2)return String(d||"").trim();var first=p[1].trim();var last=p[0].trim().split(/\s+/)[0];return first+" "+last;}
     var _filtProfTags=new Set();
     Object.values(profMeta).forEach(function(m){
+      var dmNorm=normDDM1pdel(String(m.ddm1||"").trim()).toLowerCase();
+      if(!_filtDMs.has(dmNorm))return;
       var tag=String(m.tagOut||m.tag||"").trim();
       if(tag)_filtProfTags.add(tag);
     });
@@ -4061,6 +4073,8 @@ function renderPdel(){
     // Build tag -> profiling title for tag-connected name fallback
     var _tagToProfTitle={};
     Object.values(profMeta).forEach(function(m){
+      var dmNorm=normDDM1pdel(String(m.ddm1||"").trim()).toLowerCase();
+      if(!_filtDMs.has(dmNorm))return;
       var tag=String(m.tagOut||m.tag||"").trim();
       if(tag&&m.title&&!_tagToProfTitle[tag])_tagToProfTitle[tag]=m.title;
     });
