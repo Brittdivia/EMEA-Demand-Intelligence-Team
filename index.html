@@ -3980,9 +3980,19 @@ function renderPdel(){
       var _calSeqForWBS=calSeq;
       var connSeqCal="";
       if(_calSeqForWBS){profMetaValsP.forEach(function(m){if(connSeqCal)return;var pw=String(m.wbs||"").trim();if(!isRealWBS(pw))return;var ps=_wbsToSeqCal[pw];if(ps&&ps===_calSeqForWBS)connSeqCal=ps;});}
-      var connTag=_tagConnWBS[wbs]?Array.from(_tagConnWBS[wbs]).join(", "):"";
-      if(!connTag){connTag=_tagToCalWBS[wbs]?Array.from(_tagToCalWBS[wbs]).join(", "):"";}
-      rows.push({name:name,wbs:wbs,calSeq:calSeq,dm:dm,profWBS:profWBS,profSeq:profSeq,connWBS:connWBS,connSeq:connSeq,connSeqCal:connSeqCal,connTag:connTag});
+      var _campProfTags=window.CAMP_PROF_TAGS||{};
+      var connTag="";
+      // Only match if this WBS appears in a profiling request from the filtered set
+      if(_profWBSSet.has(wbs)){
+        connTag=_campProfTags[wbs]?String(_campProfTags[wbs]).trim():"";
+        if(!connTag){
+          profMetaValsP.forEach(function(m){
+            if(connTag)return;
+            var mwbs=String(m.wbs||"").trim();
+            if(isRealWBS(mwbs)&&mwbs===wbs){var t=String(m.tagOut||m.tag||"").trim();if(t)connTag=t;}
+          });
+        }
+      }      rows.push({name:name,wbs:wbs,calSeq:calSeq,dm:dm,profWBS:profWBS,profSeq:profSeq,connWBS:connWBS,connSeq:connSeq,connSeqCal:connSeqCal,connTag:connTag});
     });
     rows.sort(function(a,b){return a.dm.localeCompare(b.dm)||a.name.localeCompare(b.name);});
     var totConnWBS=rows.filter(function(r){return r.connWBS;}).length;
@@ -3997,9 +4007,11 @@ function renderPdel(){
       +'<th style="'+thC+'">DCM</th>'
       +'<th style="'+thC+'">WBS (Calendar)</th>'
       +'<th style="'+thC+'">WBS (Profiling)</th>'
+      +'<th style="'+thC+'">WBS Match</th>'
       +'<th style="'+thC+'">Seq ID (Calendar)</th>'
       +'<th style="'+thC+'">Seq ID (Profiling)</th>'
-      +'<th style="'+thC+'">Profiling Tag to Outreach Tag to Sequence ID in Calendar</th>'
+      +'<th style="'+thC+'">Seq Match</th>'
+      +'<th style="'+thC+'">Lookup Tag Connection to Campaign Name</th>'
       +'</tr></thead><tbody>';
     rows.forEach(function(r,i){
       var isConn=r.connWBS||r.connSeq||r.connSeqCal||r.connTag;
@@ -4008,15 +4020,17 @@ function renderPdel(){
         +'<td style="padding:5px 10px;font-size:11px">'+r.dm+'</td>'
         +'<td style="padding:5px 10px;font-size:11px;font-family:monospace;color:var(--mu)">'+r.wbs+'</td>'
         +'<td style="padding:5px 10px;font-size:11px;font-family:monospace;color:'+(r.profWBS?'#1B7A34':'#B0B0B0')+'">'+( r.profWBS||"—")+'</td>'
+        +'<td style="padding:5px 10px;font-size:11px;font-weight:600;color:'+(r.profWBS&&r.profWBS===r.wbs?'#1B7A34':'#B0B0B0')+'">'+(r.profWBS&&r.profWBS===r.wbs?'Match':'—')+'</td>'
         +'<td style="padding:5px 10px;font-size:11px;color:var(--mu)">'+( r.calSeq||"—")+'</td>'
         +'<td style="padding:5px 10px;font-size:11px;color:'+(r.profSeq?'#1B7A34':'#B0B0B0')+'">'+( r.profSeq||"—")+'</td>'
-if(r.connTag&&r.connTag.length>60){html+='<td style="padding:5px 10px;font-size:11px;color:'+(r.connTag?'#07838F':'#B0B0B0')+'";overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.connTag.replace(/"/g,"&quot;")+'">'+r.connTag+'</td>';}
-        else{html+='<td style="padding:5px 10px;font-size:11px;color:'+(r.connTag?'#07838F':'#B0B0B0')+'">'+( r.connTag||"—")+'</td>';}
+        +'<td style="padding:5px 10px;font-size:11px;font-weight:600;color:'+(r.calSeq&&r.profSeq&&r.calSeq===r.profSeq?'#1B7A34':'#B0B0B0')+'">'+(r.calSeq&&r.profSeq&&r.calSeq===r.profSeq?'Match':'—')+'</td>'
+if(r.connTag){html+='<td style="padding:5px 10px;font-size:11px;font-weight:600;color:#1B7A34">Match</td>';}
+        else{html+='<td style="padding:5px 10px;font-size:11px;color:#B0B0B0">—</td>';}
       html+='</tr>';
     });
     html+='</tbody><tfoot style="position:sticky;bottom:0"><tr style="background:#00144A;color:#fff;font-weight:700">'
       +'<td style="padding:5px 10px;font-size:11px">'+totConnAny.toLocaleString()+' / '+rows.length.toLocaleString()+' connected</td>'
-      +'<td colspan="4" style="padding:5px 10px;font-size:11px"></td>'
+      +'<td colspan="6" style="padding:5px 10px;font-size:11px"></td>'
       +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totConnTag.toLocaleString()+'</td>'
       +'</tr></tfoot></table></div></div>';
   })();
