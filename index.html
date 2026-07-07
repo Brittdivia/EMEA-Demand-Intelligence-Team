@@ -3211,11 +3211,11 @@ function renderOutInner(page){
   var totUniqP=new Set(_outSeqProspects.map(function(p){return p.pid;})).size;
   var totAcctAdded=_outSeqProspects.filter(function(p){return p.co;}).length;
   var totUniqCo=new Set(_outSeqProspects.map(function(p){return p.co;}).filter(Boolean)).size;
-  var _outUniqEmailed=new Set(_outSeqProspects.filter(function(p){return p.em==="Yes";}).map(function(p){return p.pid;}));
-  var _outUniqOpened =new Set(_outSeqProspects.filter(function(p){return p.op==="Yes";}).map(function(p){return p.pid;}));
-  var _outUniqReplied=new Set(_outSeqProspects.filter(function(p){return p.re==="Yes";}).map(function(p){return p.pid;}));
-  var avgOpenOut=_outUniqEmailed.size>0?(_outUniqOpened.size/_outUniqEmailed.size*100).toFixed(0)+"%":"0%";
-  var avgReplyOut=_outUniqOpened.size>0?(_outUniqReplied.size/_outUniqOpened.size*100).toFixed(0)+"%":"0%";
+  var _outUniqEmailed=data.reduce(function(a,r){return a+(parseInt(r["Emails - Deliveries"]||0)||0);},0);
+  var _outUniqOpened =data.reduce(function(a,r){return a+(parseInt(r["Prospects - Opened"]||0)||0);},0);
+  var _outUniqReplied=data.reduce(function(a,r){return a+(parseInt(r["Prospects - Replied"]||0)||0);},0);
+  var avgOpenOut=_outUniqEmailed>0?(_outUniqOpened/_outUniqEmailed*100).toFixed(0)+"%":"0%";
+  var avgReplyOut=_outUniqOpened>0?(_outUniqReplied/_outUniqOpened*100).toFixed(0)+"%":"0%";
   var openPct=totD>0?(totO/totD*100).toFixed(0)+"%" : "0%";
   var repPct =totO>0?(totR/totO*100).toFixed(0)+"%" : "0%";
 
@@ -3276,9 +3276,9 @@ function renderOutInner(page){
   html3+="<div class=\"krow\" style=\"flex-wrap:wrap\">";
   html3+="<div class=\"kpi kg\"><div class=\"kl\">Unique Prospects Contacted</div><div class=\"kv\">"+totUniqP.toLocaleString()+"</div><div class=\"ks\">distinct across sequences</div></div>";
   html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Accounts Contacted</div><div class=\"kv\">"+totUniqCo.toLocaleString()+"</div><div class=\"ks\">distinct across sequences</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Prospects Emailed</div><div class=\"kv\">"+_outUniqEmailed.size.toLocaleString()+"</div><div class=\"ks\">distinct across sequences</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Open Rate</div><div class=\"kv\">"+avgOpenOut+"</div><div class=\"ks\">"+_outUniqOpened.size.toLocaleString()+" opened / "+_outUniqEmailed.size.toLocaleString()+" emailed</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Reply Rate</div><div class=\"kv\">"+avgReplyOut+"</div><div class=\"ks\">"+_outUniqReplied.size.toLocaleString()+" replied / "+_outUniqOpened.size.toLocaleString()+" opened</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Emails Delivered</div><div class=\"kv\">"+_outUniqEmailed.toLocaleString()+"</div><div class=\"ks\">across sequences</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Open Rate</div><div class=\"kv\">"+avgOpenOut+"</div><div class=\"ks\">"+_outUniqOpened.toLocaleString()+" opened / "+_outUniqEmailed.toLocaleString()+" delivered</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Reply Rate</div><div class=\"kv\">"+avgReplyOut+"</div><div class=\"ks\">"+_outUniqReplied.toLocaleString()+" replied / "+_outUniqOpened.toLocaleString()+" opened</div></div>";
 
   html3+="</div>";
   html3+="<div class=\"sec\" style=\"margin-top:18px\">Outreach User Summary</div>";
@@ -3313,10 +3313,6 @@ function renderOutInner(page){
       +'<div class="cc" style="flex:1;min-width:0;overflow:auto"><div class="ch">Outreach User Summary</div><div id="out-sde-tbl"></div></div>'
       +'</div>';
     html3+=tbl;
-    html3+='<div class="sec" style="margin-top:18px">Profile Mix - Total Prospects</div>';
-    html3+='<div class="cc" style="margin-bottom:20px"><div id="out-mix-tbl"></div></div>';
-    html3+='<div class="sec" style="margin-top:18px">Profile Mix - Unique Prospects</div>';
-    html3+='<div class="cc" style="margin-bottom:20px"><div id="out-mix-uniq-tbl"></div></div>';
   })();
   html3+="<div class=\"sec\" style=\"margin-top:18px\">Prospect Engagement</div>";
   html3+="<div style=\"display:flex;gap:14px;margin-bottom:14px;align-items:flex-start\">";
@@ -3631,75 +3627,6 @@ function renderOutInner(page){
     });
     });
     var _mixEntries=Object.values(_mixProfileMap);
-
-    // Profile Mix - Total Prospects table
-    var mixEl=document.getElementById("out-mix-tbl");
-    if(mixEl&&_mixEntries.length){
-      var mixSortCol="pros",mixSortDir=-1;
-      window._mixSortFn=function(col){if(mixSortCol===col)mixSortDir*=-1;else{mixSortCol=col;mixSortDir=-1;}renderMixTable();};
-      function renderMixTable(){
-        var sorted=_mixEntries.slice().sort(function(a,b){
-          if(mixSortCol==="label")return mixSortDir*a.label.localeCompare(b.label);
-          if(mixSortCol==="op")return mixSortDir*((a.del>0?a.op/a.del:0)-(b.del>0?b.op/b.del:0));
-          if(mixSortCol==="rp")return mixSortDir*((a.del>0?a.rp/a.del:0)-(b.del>0?b.rp/b.del:0));
-          return mixSortDir*((a[mixSortCol]||0)-(b[mixSortCol]||0));
-        });
-        var thS="padding:7px 12px;cursor:pointer;user-select:none;white-space:nowrap;background:#00144A;color:#fff;font-size:11px;";
-        function mkTh(col,label,right){var ic=mixSortCol===col?(mixSortDir===-1?"&#8595;":"&#8593;"):"&#8597;";return'<th style="'+thS+(right?"text-align:right":"text-align:left")+'" onclick="window._mixSortFn(\''+col+'\')">'+label+' <span style="font-size:9px">'+ic+'</span></th>';}
-        var tbl='<div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead style="position:sticky;top:0"><tr>'
-          +mkTh("label","Sales Bag / Industry / IB-NNN / IAC / Region / Prospect Range / Email Range",false)
-          +mkTh("op","Open Rate (total)",true)+mkTh("rp","Reply Rate (total)",true)
-          +'</tr></thead><tbody>';
-        function mkRange(n){var lo=Math.floor(n/100)*100;return lo+"-"+(lo+99);}
-        sorted.forEach(function(d,idx){
-          var op=d.del>0?(d.op/d.del*100).toFixed(0)+"%":"0%";
-          var rp=d.del>0?(d.rp/d.del*100).toFixed(0)+"%":"0%";
-          tbl+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(idx%2===0?'#fff':'#F8FBFF')+'">'
-            +'<td style="padding:5px 12px;font-size:11px">'+d.label+'</td>'
-            +'<td style="padding:5px 12px;text-align:right">'+op+'</td>'
-            +'<td style="padding:5px 12px;text-align:right">'+rp+'</td>'
-            +'</tr>';
-        });
-        tbl+='</tbody></table></div>';
-        mixEl.innerHTML=tbl;
-      }
-      renderMixTable();
-    }
-
-    // Profile Mix - Unique Prospects table
-    var mixUniqEl=document.getElementById("out-mix-uniq-tbl");
-    if(mixUniqEl&&_mixEntries.length){
-      var mixUSortCol="uniq",mixUSortDir=-1;
-      window._mixUSortFn=function(col){if(mixUSortCol===col)mixUSortDir*=-1;else{mixUSortCol=col;mixUSortDir=-1;}renderMixUniqTable();};
-      function renderMixUniqTable(){
-        var sorted=_mixEntries.slice().sort(function(a,b){
-          if(mixUSortCol==="label")return mixUSortDir*a.label.localeCompare(b.label);
-          if(mixUSortCol==="uniq")return mixUSortDir*(a.pids.size-b.pids.size);
-          if(mixUSortCol==="op")return mixUSortDir*((a.del>0?a.op/a.del:0)-(b.del>0?b.op/b.del:0));
-          if(mixUSortCol==="rp")return mixUSortDir*((a.del>0?a.rp/a.del:0)-(b.del>0?b.rp/b.del:0));
-          return mixUSortDir*((a[mixUSortCol]||0)-(b[mixUSortCol]||0));
-        });
-        var thS="padding:7px 12px;cursor:pointer;user-select:none;white-space:nowrap;background:#00144A;color:#fff;font-size:11px;";
-        function mkTh(col,label,right){var ic=mixUSortCol===col?(mixUSortDir===-1?"&#8595;":"&#8593;"):"&#8597;";return'<th style="'+thS+(right?"text-align:right":"text-align:left")+'" onclick="window._mixUSortFn(\''+col+'\')">'+label+' <span style="font-size:9px">'+ic+'</span></th>';}
-        var tbl='<div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead style="position:sticky;top:0"><tr>'
-          +mkTh("label","Sales Bag / Industry / IB-NNN / IAC / Region / Prospect Range / Email Range",false)
-          +mkTh("op","Open Rate (total)",true)+mkTh("rp","Reply Rate (total)",true)
-          +'</tr></thead><tbody>';
-        function mkRangeU(n){var lo=Math.floor(n/100)*100;return lo+"-"+(lo+99);}
-        sorted.forEach(function(d,idx){
-          var op=d.del>0?(d.op/d.del*100).toFixed(0)+"%":"0%";
-          var rp=d.del>0?(d.rp/d.del*100).toFixed(0)+"%":"0%";
-          tbl+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(idx%2===0?'#fff':'#F8FBFF')+'">'
-            +'<td style="padding:5px 12px;font-size:11px">'+d.label+'</td>'
-            +'<td style="padding:5px 12px;text-align:right">'+op+'</td>'
-            +'<td style="padding:5px 12px;text-align:right">'+rp+'</td>'
-            +'</tr>';
-        });
-        tbl+='</tbody></table></div>';
-        mixUniqEl.innerHTML=tbl;
-      }
-      renderMixUniqTable();
-    }
 
   })();
 }
@@ -4220,10 +4147,10 @@ function renderDtr(){
   var page=document.getElementById("dtrPage");
   if(!page)return;
   function normDDM1(d){var p=String(d||"").split(",");if(p.length<2)return d;var first=p[1].trim();var last=p[0].trim().split(/\s+/)[0];return first+" "+last;}
-  function fmtCreated(v){if(!v)return"";var s=String(v).trim();var n=parseFloat(s);if(!isNaN(n)&&n>40000&&n<60000){var d=new Date(Date.UTC(1899,11,30)+(n*86400000));return d.toISOString().slice(0,10);}var m=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);if(m){var y=m[3].length===2?"20"+m[3]:m[3];return y+"-"+m[2].padStart(2,"0")+"-"+m[1].padStart(2,"0");}try{var dt=new Date(s);if(!isNaN(dt))return dt.toISOString().slice(0,10);}catch(e){}return s.slice(0,10);}
+  function fmtCreated(v){if(!v)return"";var s=String(v).trim();var n=parseFloat(s);if(!isNaN(n)&&n>40000&&n<60000){var d=new Date(Date.UTC(1899,11,30)+(n*86400000));return d.toISOString().slice(0,10);}if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);var m=s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);if(m){var y=m[3].length===2?"20"+m[3]:m[3];return y+"-"+m[2].padStart(2,"0")+"-"+m[1].padStart(2,"0");}try{var dt=new Date(s);if(!isNaN(dt))return dt.toISOString().slice(0,10);}catch(e){}return s.slice(0,10);}
   var profMeta2=window.CAMP_PROF_META||{};
   var profMetaVals=Object.values(profMeta2);var _dtrDmFilter=filters&&filters["Demand Manager"]&&filters["Demand Manager"].size>0?filters["Demand Manager"]:null;if(_dtrDmFilter){profMetaVals=profMetaVals.filter(function(m){var norm=normDDM1(String(m.ddm1||"")).toLowerCase();return Array.from(_dtrDmFilter).some(function(d){return d.toLowerCase()===norm;});});}
-  var _dtrYearFilter=window._dtrYearFilter||"";
+  var _dtrYearFilter=window._dtrYearFilter!==undefined?window._dtrYearFilter:"2026";
   var _dtrYears=Array.from(new Set(Object.values(profMeta2).map(function(m){var s=fmtCreated(m.created);return s?s.slice(0,4):"";}).filter(Boolean))).sort();
   if(_dtrYearFilter)profMetaVals=profMetaVals.filter(function(m){return fmtCreated(m.created).slice(0,4)===_dtrYearFilter;});
   var profMap=window.CAMP_PROF_TAGS||{};
@@ -4314,7 +4241,7 @@ function renderDtr(){
   html+='</tbody></table></div></div>';
   html+='</div>';
   // Profiling Requests by DDM1 table (25%)
-  html+='<div style="flex:0 0 25%;min-width:0">';
+  html+='<div style="flex:0 0 35%;min-width:0">';
   html+='<div style="display:flex;align-items:center;margin-bottom:4px"><div class="sec" style="margin-bottom:0">Profiling Requests by DCM</div></div>';
   html+='<div class="cc"><div style="overflow:auto;max-height:300px"><table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:35%"><col style="width:16%"><col style="width:16%"><col style="width:16%"><col style="width:17%"></colgroup><thead><tr>';
   html+='<th style="'+thD+'">DCM</th><th style="'+thD+';text-align:right"># Requests</th><th style="'+thD+';text-align:right">w/ WBS</th><th style="'+thD+';text-align:right">w/ Seq. ID</th><th style=""+thD+";text-align:right">w/tag</th></tr></thead><tbody>';
@@ -4453,6 +4380,50 @@ function renderDtr(){
   })();
   html+='</div>';
   html+='</div>';
+  // Digital Hub Pipeline table
+  (function(){
+    var _calWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
+    var _dhMmFilter=window._dhMmFilter||"";
+    var dhRows=pipeData.filter(function(p){
+      return String(p["TCP Pipeline Source Desc"]||"").trim()==="Digital Hub"
+        &&String(p["Create Quarter"]||"").trim().startsWith("2026");
+    });
+    var _dhMmOpts=Array.from(new Set(dhRows.map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean))).sort();
+    if(_dhMmFilter)dhRows=dhRows.filter(function(p){return String(p["MM Identifier"]||"").trim()===_dhMmFilter;});
+    dhRows.sort(function(a,b){return (String(a["Create Quarter"]||"")).localeCompare(String(b["Create Quarter"]||""))||(parseFloat(b["Eur"]||0)-parseFloat(a["Eur"]||0));});
+    var totEur=dhRows.reduce(function(s,p){return s+(parseFloat(p["Eur"])||0);},0);
+    var thD2="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0";
+    html+='<div class="sec" style="margin-top:20px">Digital Hub Pipeline Created in 2026</div>';
+    html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px">';
+    html+='<label style="font-weight:600;color:var(--dk)">GB Identifier:</label>';
+    html+='<select onchange="window._dhMmFilter=this.value;renderDtr()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value=""'+(!_dhMmFilter?" selected":"")+'>All</option>';
+    _dhMmOpts.forEach(function(v){html+='<option value="'+v.replace(/"/g,'&quot;')+'"'+(v===_dhMmFilter?" selected":"")+'>'+v+'</option>';});
+    html+='</select>';
+    if(_dhMmFilter)html+='<button onclick="window._dhMmFilter=\'\';renderDtr()" style="font-size:11px;padding:2px 8px;border:1px solid var(--rd);border-radius:var(--r);cursor:pointer;background:#fff;color:var(--rd)">Clear</button>';
+    html+='</div>';
+    html+='<div style="font-size:11px;color:var(--mu);margin-bottom:6px">'+dhRows.length.toLocaleString()+' opportunities &middot; <b>'+totEur.toLocaleString(undefined,{maximumFractionDigits:0})+'</b> EUR total</div>';
+    html+='<div class="cc" style="margin-bottom:20px"><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:9%"><col style="width:8%"><col style="width:15%"><col style="width:8%"><col style="width:15%"><col style="width:20%"><col style="width:8%"><col style="width:9%"><col style="width:8%"></colgroup><thead><tr>';
+    html+='<th style="'+thD2+'">TCP Pipeline Source</th><th style="'+thD2+'">Create Quarter</th><th style="'+thD2+'">Campaign WBS Code</th><th style="'+thD2+'">Opp ID</th><th style="'+thD2+'">GB Identifier</th><th style="'+thD2+'">Opp Description</th><th style="'+thD2+';text-align:right">EUR</th><th style="'+thD2+'">In Calendar</th></tr></thead><tbody>';
+    dhRows.forEach(function(p,i){
+      var wbs=String(p["Opp Campaign ID"]||"").trim();
+      var inCal=_calWBS.has(wbs);
+      html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
+        +'<td style="padding:5px 10px">'+String(p["TCP Pipeline Source Desc"]||"").trim()+'</td>'
+        +'<td style="padding:5px 10px">'+String(p["Create Quarter"]||"").trim()+'</td>'
+        +'<td style="padding:5px 10px;font-family:monospace">'+wbs+'</td>'
+        +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["Opportunity ID"]||"").trim()+'</td>'
+        +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["MM Identifier"]||"").trim()+'</td>'
+        +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["Opp Description"]||"").trim()+'</td>'
+        +'<td style="padding:5px 10px;text-align:right;font-weight:600">'+(parseFloat(p["Eur"])||0).toLocaleString(undefined,{maximumFractionDigits:0})+'</td>'
+        +'<td style="padding:5px 10px;font-weight:600;color:'+(inCal?'#1B7A34':'#B0B0B0')+'">'+(inCal?'Yes':'No')+'</td>'
+        +'</tr>';
+    });
+    html+='</tbody><tfoot><tr style="background:#00144A;color:#fff;font-weight:700">'
+      +'<td style="padding:5px 10px;font-size:11px" colspan="6">TOTAL</td>'
+      +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totEur.toLocaleString(undefined,{maximumFractionDigits:0})+'</td>'
+      +'<td></td>'
+      +'</tr></tfoot></table></div></div>';
+  })();
   page.innerHTML=html;
 }
 
