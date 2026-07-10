@@ -226,7 +226,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
   <div class="ht">EMEA Campaign Insights</div>
   <div class="hsp"></div>
   <div class="hm">
-    <span class="hu">Last updated: 29 Jun 2026</span>
+    <span class="hu">Last updated: 07 Jul 2026</span>
     <span class="hc" id="hcount">2,798 campaigns</span>
   </div>
 </header>
@@ -239,7 +239,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
   <button class="tbtn-sub" onclick="switchTab(&#39;ana&#39;)">Campaign and Pipeline Details</button>
   <button class="tbtn-sub" onclick="switchTab(&#39;out&#39;)">Outreach Details</button>
   <button class="tbtn-sub" onclick="switchTab(&#39;acc&#39;)">Account Details</button>
-  <button class="tbtn-sub" onclick="switchTab('pdel')">Prospect Deletion</button>
+  <button class="tbtn-sub" onclick="switchTab('pdel')">Prospect Tracking</button>
   <button class="tbtn-sub" onclick="switchTab(&#39;dtr&#39;)">Data Tracking</button>
 </div>
 <div class="fbar" id="fbar">
@@ -364,7 +364,7 @@ document.addEventListener("DOMContentLoaded",function(){
 });
 
 var _accFiltersSaved=null;
-var DETAIL_TABS={"ana":"Campaign and Pipeline Details","pip":"Pipeline Details","out":"Outreach Details","acc":"Account Details","pdel":"Prospect Deletion","cal":"EMEA Campaign Calendar","dtr":"Data Tracking"};
+var DETAIL_TABS={"ana":"Campaign and Pipeline Details","pip":"Pipeline Details","out":"Outreach Details","acc":"Account Details","pdel":"Prospect Tracking","cal":"EMEA Campaign Calendar","dtr":"Data Tracking"};
 function switchTab(t){
   activeTab=t;
   var tabs=["exe","ovw","cal"];document.querySelectorAll(".tbtn").forEach(function(b,i){b.classList.toggle("on",tabs[i]===t);});
@@ -3652,30 +3652,34 @@ function renderOutInner(page){
 function renderPdel(){
   var page=document.getElementById("pdelPage");
   if(!page)return;
-  var html='<h2 style="color:var(--dk);margin:0 0 6px">Prospect Deletion</h2>';
+  var html='<h2 style="color:var(--dk);margin:0 0 6px">Prospect Tracking</h2>';
   html+='<div style="font-size:11px;color:var(--mu);margin-bottom:12px">Prospects in tracked Outreach sequences connected to campaigns in the calendar.<br>1. Profiling connected to Pipeline: means a profiling request can be connected to a campaign in the campaign calendar via WBS code. Therefore, pipeline can be connected to Profiling request and Campaign Calendar.<br>2. Calendar Connected to Outreach: connects the WBS code in the profiling request to the WBS code in the Campaign Calendar, if there is a sequence in Calendar, the connection enables sequence performance and status of all prospects added to that sequence.<br>3. Full Connection: checks prospects added in 2026 with a tag that connects to a profiling tag, enabling prospect status info and sequence analysis for those prospects connected through the tag.</div>';
-  var _thDPdel="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0";
+  var _thDPdel="background:#00144A;color:#fff;padding:6px 8px;font-size:11px;font-weight:700;text-align:left;position:sticky;top:0;white-space:normal;word-break:break-word;max-width:80px";
+  html+='<div style="display:flex;gap:16px;align-items:stretch;margin-bottom:16px">';
+  html+='<div style="flex:0 0 60%;min-width:0;display:flex;flex-direction:column">';
   html+='<div class="sec" style="margin-bottom:6px">Connection</div>';
   html+=buildConnectionTable(_thDPdel,true,true);
-  html+='<div style="margin-top:16px"></div>';
-  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
-  html+='<div class="sec" style="margin-bottom:0">Connected Campaigns</div>';
-  html+='<label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox"'+(window._pdelConnectedOnly?' checked':'')+' onchange="window._pdelConnectedOnly=this.checked;renderPdel()"> Show connected only</label>';
   html+='</div>';
+  html+='<div style="flex:0 0 40%;min-width:0;display:flex;flex-direction:column">';
   html+=buildConnectedCampaignsTable(true,window._pdelConnectedOnly);
-
+  html+='</div>';
+  html+='</div>';
+  html+='<div style="display:flex;gap:16px;align-items:flex-start">';
+  html+='<div style="flex:1;min-width:0">';
   var pf=window.pdelFilter||{};
-  html+='<div style="margin-bottom:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
-  html+='<label style="font-size:12px;font-weight:600">Age &gt;:</label>';
-  html+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.age=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option><option value="25"'+(pf.age==="25"?" selected":"")+'>25 days</option><option value="50"'+(pf.age==="50"?" selected":"")+'>50 days</option><option value="100"'+(pf.age==="100"?" selected":"")+'>100 days</option></select>';
-  html+='<label style="font-size:12px;font-weight:600;margin-left:10px">Touched:</label>';
-  html+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.touched=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option><option value="yes"'+(pf.touched==="yes"?" selected":"")+'>Yes (date)</option><option value="in_sequence"'+(pf.touched==="in_sequence"?" selected":"")+'>In Sequence</option><option value="finished_sequence"'+(pf.touched==="finished_sequence"?" selected":"")+'>Finished Sequence</option><option value="no"'+(pf.touched==="no"?" selected":"")+'>No</option></select>';
+  html+='<div style="margin-bottom:10px;display:flex;flex-direction:column;gap:8px;flex-wrap:wrap">';
+  html+='<div style="display:flex;align-items:center;gap:8px"><label style="font-size:12px;font-weight:600;min-width:70px">Age &gt;:</label>';
+  html+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.age=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option><option value="25"'+(pf.age==="25"?" selected":"")+'>25 days</option><option value="50"'+(pf.age==="50"?" selected":"")+'>50 days</option><option value="100"'+(pf.age==="100"?" selected":"")+'>100 days</option></select></div>';
+  html+='<div style="display:flex;align-items:center;gap:8px"><label style="font-size:12px;font-weight:600;min-width:70px">Touched:</label>';
+  html+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.touched=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option><option value="yes"'+(pf.touched==="yes"?" selected":"")+'>Yes (date)</option><option value="in_sequence"'+(pf.touched==="in_sequence"?" selected":"")+'>In Sequence</option><option value="finished_sequence"'+(pf.touched==="finished_sequence"?" selected":"")+'>Finished Sequence</option><option value="no"'+(pf.touched==="no"?" selected":"")+'>No</option></select></div>';
   html+='<span id="pdel-conn-filter"></span>';
-  if(pf.campWBS){html+='<div style="margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="background:#D1EFFF;padding:3px 10px;border-radius:var(--r);font-size:11px;font-weight:600">Campaign: '+pf.campWBS+'</span><button onclick="window.pdelFilter.campWBS=null;renderPdel()" style="padding:3px 10px;background:#C62828;color:#fff;border:none;border-radius:var(--r);font-size:11px;cursor:pointer">Clear</button></div>';}
+  if(pf.campWBS){html+='<div style="display:flex;align-items:center;gap:8px"><span style="background:#D1EFFF;padding:3px 10px;border-radius:var(--r);font-size:11px;font-weight:600">Campaign: '+pf.campWBS+'</span><button onclick="window.pdelFilter.campWBS=null;renderPdel()" style="padding:3px 10px;background:#C62828;color:#fff;border:none;border-radius:var(--r);font-size:11px;cursor:pointer">Clear</button></div>';}
   html+='<span id="pdel-ct-filter"></span>';
   html+='<span id="pdel-src-filter"></span>';
   html+='<span id="pdel-exec-filter"></span>';
   html+='<span id="pdel-persona-filter"></span>';
+  html+='</div>';
+  html+='</div>';
   html+='</div>';
   html+='<div id="pdel-tbl"></div>';
   page.innerHTML=html;
@@ -3804,7 +3808,7 @@ function renderPdel(){
       if(p.touched&&p.touched!=="1970-01-01"&&p.touched!=="")_ts="yes";
       else if(activeSeq)_ts="in_sequence";
       else if(finishedSeq)_ts="finished_sequence";
-      rows.push({sid:sid,pid:p.pid,co:p.co||"",campName:campName,wbs:wbs,connType:connType,src:p.src||"",ct:p.ct||"",days:days,created:created,touched:p.touched||"",touchedStatus:_ts,executor:executor,persona:persona,activeSeq:activeSeq,finishedSeq:finishedSeq});
+      rows.push({sid:sid,pid:p.pid,co:p.co||"",campName:campName,wbs:wbs,connType:connType,src:p.src||"",ct:p.ct||"",cf51:p.cf51||"",days:days,created:created,touched:p.touched||"",touchedStatus:_ts,executor:executor,persona:persona,activeSeq:activeSeq,finishedSeq:finishedSeq});
     });
 
     rows.sort(function(a,b){return(b.days||0)-(a.days||0);});
@@ -3861,9 +3865,9 @@ function renderPdel(){
     tbl+="</div>";
     tbl+="<div style='overflow:auto;max-height:600px'><table style='width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed'>";
     var thS="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;white-space:nowrap;position:sticky;top:0";
-    tbl+="<colgroup><col style='width:12%'><col style='width:7%'><col style='width:10%'><col style='width:7%'><col style='width:6%'><col style='width:6%'><col style='width:6%'><col style='width:7%'><col style='width:7%'><col style='width:7%'><col style='width:7%'><col style='width:5%'></colgroup>";
+    tbl+="<colgroup><col style='width:11%'><col style='width:6%'><col style='width:9%'><col style='width:7%'><col style='width:6%'><col style='width:6%'><col style='width:6%'><col style='width:6%'><col style='width:7%'><col style='width:6%'><col style='width:7%'><col style='width:6%'><col style='width:5%'></colgroup>";
     tbl+="<thead><tr>";
-    ["Campaign Name","Sequence ID","Company","Prospect ID","Connection","Source","Company Type","Executor (Campaign Calendar)","Persona Name","Created","Touched/In/Finished Seq","Age (days)"].forEach(function(h){tbl+="<th style='"+thS+"'>"+h+"</th>";});
+    ["Campaign Name","Sequence ID","Company","Prospect ID","Connection","Source","Company Type","Custom Field 51","Executor (Campaign Calendar)","Persona Name","Created","Touched/In/Finished Seq","Age (days)"].forEach(function(h){tbl+="<th style='"+thS+"'>"+h+"</th>";});
     tbl+="</tr></thead><tbody>";
     rows.slice(0,500).forEach(function(r,i){
       tbl+="<tr style='border-bottom:1px solid #EBEBEB;background:"+(i%2===0?"#fff":"#F8FBFF")+"'>";
@@ -3874,6 +3878,7 @@ function renderPdel(){
       tbl+="<td style='padding:5px 8px'>"+r.connType+"</td>";
       tbl+="<td style='padding:5px 8px'>"+r.src+"</td>";
       tbl+="<td style='padding:5px 8px'>"+r.ct+"</td>";
+      tbl+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.cf51+"</td>";
       tbl+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.executor+"</td>";
       tbl+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.persona+"</td>";
       var touchedDisp=((r.touched&&r.touched!=="1970-01-01")?r.touched.substring(0,10):"");
@@ -3897,12 +3902,12 @@ function renderPdel(){
 
 window._exportPdel=function(){
   var rows=window._pdelRowsCache||[];
-  var headers=["Campaign Name","Sequence ID","Company","Prospect ID","Connection","Source","Company Type","Executor","Persona Name","Created","Touched","Age (days)"];
+  var headers=["Campaign Name","Sequence ID","Company","Prospect ID","Connection","Source","Company Type","Custom Field 51","Executor","Persona Name","Created","Touched","Age (days)"];
   function esc(v){v=String(v||"");return v.indexOf(",")>-1||v.indexOf('"')>-1?'"'+v.replace(/"/g,'""')+'"':v;}
   var csv=[headers.map(esc).join(",")];
   rows.forEach(function(r){
     var touched=(r.touched&&r.touched!=="1970-01-01")?r.touched.substring(0,10):(r.activeSeq?"In Sequence":(r.finishedSeq?"Finished":""));
-    csv.push([r.campName,r.sid,r.co,r.pid,r.connType,r.src,r.ct,r.executor,r.persona,r.created,touched,r.days].map(esc).join(","));
+    csv.push([r.campName,r.sid,r.co,r.pid,r.connType,r.src,r.ct,r.cf51,r.executor,r.persona,r.created,touched,r.days].map(esc).join(","));
   });
   var blob=new Blob([csv.join("\n")],{type:"text/csv"});
   var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="prospect_deletion.csv";a.click();
@@ -4019,15 +4024,14 @@ function buildConnectedCampaignsTable(compact,connectedOnly){
   var totProfSeq=new Set(rows.map(function(r){return r.profSeq;}).filter(Boolean)).size;
   var totWBSMatch=rows.filter(function(r){return r.profWBS&&r.profWBS===r.wbs;}).length;
   var totSeqMatch=rows.filter(function(r){return r.calSeq&&r.profSeq&&r.calSeq===r.profSeq;}).length;
-  var thC="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0";
-  html+='<div class="sec" style="margin-bottom:6px;margin-top:20px">Connected Campaigns</div>';
-  html+='<div class="cc"><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>'
-    +'<th style="'+thC+'">Campaign Name (Calendar)</th>'
+  var thC="background:#00144A;color:#fff;padding:6px 8px;font-size:11px;font-weight:700;text-align:left;position:sticky;top:0;white-space:normal;word-break:break-word;max-width:80px";
+  if(compact){html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;margin-top:20px"><div class="sec" style="margin-bottom:0">Connected Campaigns</div><label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox"'+(window._pdelConnectedOnly?' checked':'')+' onchange="window._pdelConnectedOnly=this.checked;renderPdel()"> Show connected only</label></div>';}
+  else{html+='<div class="sec" style="margin-bottom:6px;margin-top:20px">Connected Campaigns</div>';}
+  html+='<div class="cc" style="flex:1"><div style="overflow:auto;max-height:320px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>'    +'<th style="'+thC+'">Campaign Name (Calendar)</th>'
     +'<th style="'+thC+'">DCM</th>'
     +(compact?'<th style="'+thC+'">Connection Type</th>':'')
     +'<th style="'+thC+';text-align:right">Unique Prospects</th>'
-    +'<th style="'+thC+';text-align:right">Unique Accounts</th>'
-    +(compact?'':('<th style="'+thC+'">WBS (Calendar)</th>'
+    +'<th style="'+thC+';text-align:right">Unique Accounts</th>'    +(compact?'':('<th style="'+thC+'">WBS (Calendar)</th>'
     +'<th style="'+thC+'">WBS (Profiling)</th>'
     +'<th style="'+thC+'">WBS Match</th>'
     +'<th style="'+thC+'">Seq ID (Calendar)</th>'
@@ -4189,11 +4193,10 @@ function buildConnectionTable(thD,showExtras,skipYearFilter){
   });
   var totWBS=0,totSeq=0,totConn=0,totTagCamps=0,totProfReq=0,totCalCamp=0,totCompleteAll=0;
   function cell(n){return n.toLocaleString();}
-  out+='<div class="cc"><div style="overflow:auto;max-height:300px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
+  out+='<div class="cc" style="flex:1"><div style="overflow:auto;max-height:320px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
   out+='<th style="'+thD+'">DCM</th>';
-  if(showExtras){out+='<th style="'+thD+';text-align:right;white-space:nowrap">Profiling Reqs</th><th style="'+thD+';text-align:right;white-space:nowrap">Calendar Camps</th>';}
-  out+='<th style="'+thD+';text-align:right;white-space:nowrap">WBS Match</th><th style="'+thD+';text-align:right;white-space:nowrap">Sequence Match</th><th style="'+thD+';text-align:right;white-space:nowrap">Tag Match</th><th style="'+thD+';text-align:right;white-space:nowrap">Camps Connected</th><th style="'+thD+';text-align:right;white-space:nowrap">Complete Connection</th>';
-  if(showExtras){out+='<th style="'+thD+';text-align:right;white-space:nowrap">% Connected</th>';}
+  if(showExtras){out+='<th style="'+thD+';text-align:right">Profiling Reqs</th><th style="'+thD+';text-align:right">Calendar Camps</th>';}
+  out+='<th style="'+thD+';text-align:right">WBS Match</th><th style="'+thD+';text-align:right">Sequence Match</th><th style="'+thD+';text-align:right">Tag Match</th><th style="'+thD+';text-align:right">Camps Connected</th><th style="'+thD+';text-align:right">Complete Connection</th>';  if(showExtras){out+='<th style="'+thD+';text-align:right;white-space:nowrap">% Connected</th>';}
   out+='</tr></thead><tbody>';
   Object.entries(connMap).sort(function(a,b){return(b[1].wbsMatch+b[1].seqMatch)-(a[1].wbsMatch+a[1].seqMatch);}).forEach(function(e,i){
     var v=e[1];var totTagCamp=v.tagCalCamps||0;var dKey=e[0];var totComplete=v.completeConn||0;

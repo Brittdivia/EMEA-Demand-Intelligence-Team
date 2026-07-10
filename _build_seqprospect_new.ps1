@@ -48,6 +48,7 @@ $colFinished = $colMap["Finished Sequences"]
 $colAcctId   = $colMap["Account ID"]
 $colSource   = $colMap["Source"]
 $colCoType   = $colMap["Company Type"]
+$colCF51     = $colMap["Custom Field 51"]
 
 if (-not $colId)       { Write-Host "ERROR: 'ID' column not found"; $wb.Close($false); $excel.Quit(); exit 1 }
 if (-not $colActive)   { Write-Host "ERROR: 'Active Sequences' column not found"; $wb.Close($false); $excel.Quit(); exit 1 }
@@ -67,6 +68,7 @@ for ($r = 2; $r -le $lastRow; $r++) {
     $acctId  = $ws.Cells.Item($r, $colAcctId).Text.Trim()
     $source  = if ($colSource) { $ws.Cells.Item($r, $colSource).Text.Trim().Replace('\','\\').Replace('"','\"') } else { "" }
     $coType  = if ($colCoType) { $ws.Cells.Item($r, $colCoType).Text.Trim().Replace('\','\\').Replace('"','\"') } else { "" }
+    $cf51    = if ($colCF51)   { $ws.Cells.Item($r, $colCF51).Text.Trim().Replace('\','\\').Replace('"','\"') } else { "" }
 
     if (-not $prospId) { continue }
     $totalRows++
@@ -83,7 +85,7 @@ for ($r = 2; $r -le $lastRow; $r++) {
             $key = "$prospId|$sid"
             if (-not $seenPid.Contains($key)) {
                 $seenPid.Add($key) | Out-Null
-                $entries.Add("{""sid"":""$sid"",""pid"":""$prospId"",""co"":""$company"",""aid"":""$acctId"",""touched"":""$touched"",""src"":""$source"",""ct"":""$coType""}")
+                $entries.Add("{""sid"":""$sid"",""pid"":""$prospId"",""co"":""$company"",""aid"":""$acctId"",""touched"":""$touched"",""src"":""$source"",""ct"":""$coType"",""cf51"":""$cf51""}")
                 $matchedRows++
             }
         }
