@@ -3654,7 +3654,7 @@ function renderPdel(){
   if(!page)return;
   var html='<h2 style="color:var(--dk);margin:0 0 6px">Prospect Tracking</h2>';
   html+='<div style="font-size:11px;color:var(--mu);margin-bottom:12px">Prospects in tracked Outreach sequences connected to campaigns in the calendar.<br>1. Profiling connected to Pipeline: means a profiling request can be connected to a campaign in the campaign calendar via WBS code. Therefore, pipeline can be connected to Profiling request and Campaign Calendar.<br>2. Calendar Connected to Outreach: connects the WBS code in the profiling request to the WBS code in the Campaign Calendar, if there is a sequence in Calendar, the connection enables sequence performance and status of all prospects added to that sequence.<br>3. Full Connection: checks prospects added in 2026 with a tag that connects to a profiling tag, enabling prospect status info and sequence analysis for those prospects connected through the tag.</div>';
-  var _thDPdel="background:#00144A;color:#fff;padding:6px 8px;font-size:11px;font-weight:700;text-align:left;position:sticky;top:0;white-space:normal;word-break:break-word;max-width:80px";
+  var _thDPdel="background:#00144A;color:#fff;padding:5px 6px;font-size:10px;font-weight:700;text-align:left;position:sticky;top:0;white-space:normal;word-break:break-word;max-width:80px";
   html+='<div style="display:flex;gap:16px;align-items:stretch;margin-bottom:16px">';
   html+='<div style="flex:0 0 60%;min-width:0;display:flex;flex-direction:column">';
   html+='<div class="sec" style="margin-bottom:6px">Connection</div>';
@@ -4024,10 +4024,10 @@ function buildConnectedCampaignsTable(compact,connectedOnly){
   var totProfSeq=new Set(rows.map(function(r){return r.profSeq;}).filter(Boolean)).size;
   var totWBSMatch=rows.filter(function(r){return r.profWBS&&r.profWBS===r.wbs;}).length;
   var totSeqMatch=rows.filter(function(r){return r.calSeq&&r.profSeq&&r.calSeq===r.profSeq;}).length;
-  var thC="background:#00144A;color:#fff;padding:6px 8px;font-size:11px;font-weight:700;text-align:left;position:sticky;top:0;white-space:normal;word-break:break-word;max-width:80px";
-  if(compact){html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;margin-top:20px"><div class="sec" style="margin-bottom:0">Connected Campaigns</div><label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox"'+(window._pdelConnectedOnly?' checked':'')+' onchange="window._pdelConnectedOnly=this.checked;renderPdel()"> Show connected only</label></div>';}
+  var thC="background:#00144A;color:#fff;padding:5px 6px;font-size:10px;font-weight:700;text-align:left;position:sticky;top:0;white-space:normal;word-break:break-word;max-width:80px";
+  if(compact){html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div class="sec" style="margin-bottom:0">Connected Campaigns</div><label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox"'+(window._pdelConnectedOnly?' checked':'')+' onchange="window._pdelConnectedOnly=this.checked;renderPdel()"> Show connected only</label></div>';}
   else{html+='<div class="sec" style="margin-bottom:6px;margin-top:20px">Connected Campaigns</div>';}
-  html+='<div class="cc" style="flex:1"><div style="overflow:auto;max-height:320px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>'    +'<th style="'+thC+'">Campaign Name (Calendar)</th>'
+  html+='<div class="cc" style="flex:1"><div style="overflow-x:hidden;overflow-y:auto;max-height:320px"><table style="width:100%;border-collapse:collapse;font-size:10px"><thead><tr>'    +'<th style="'+thC+'">Campaign Name (Calendar)</th>'
     +'<th style="'+thC+'">DCM</th>'
     +(compact?'<th style="'+thC+'">Connection Type</th>':'')
     +'<th style="'+thC+';text-align:right">Unique Prospects</th>'
@@ -4044,8 +4044,8 @@ function buildConnectedCampaignsTable(compact,connectedOnly){
     var isSel=(window.pdelFilter&&window.pdelFilter.campWBS===r.wbs);
     var ewbs=r.wbs.replace(/"/g,'&quot;');
     html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(isSel?'#D1EFFF':(isConn?(i%2===0?'#fff':'#F8FBFF'):'#FFF8F8'))+';cursor:pointer" onclick="window._pdelClickCamp(\''+ewbs+'\')">'
-      +'<td style="padding:5px 10px;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.name+'">'+r.name+'</td>'
-      +'<td style="padding:5px 10px;font-size:11px">'+r.dm+'</td>';
+      +'<td style="padding:4px 6px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.name+'">'+r.name+'</td>'
+      +'<td style="padding:4px 6px;font-size:10px">'+r.dm+'</td>';
     if(compact){
       var _connTypes=[];
       var _isComplete=r.connWBS&&(r.connSeq||r.connTag);
@@ -4057,30 +4057,30 @@ function buildConnectedCampaignsTable(compact,connectedOnly){
       }
       var _connLabel=_connTypes.length>0?_connTypes.join(", "):"No Connection";
       var _connColor=_isComplete?'#1B7A34':(_connTypes.length>0?'#07838F':'#B0B0B0');
-      html+='<td style="padding:5px 10px;font-size:11px;font-weight:600;color:'+_connColor+'">'+_connLabel+'</td>';
+      html+='<td style="padding:4px 6px;font-size:10px;font-weight:600;color:'+_connColor+'">'+_connLabel+'</td>';
     }
-    html+='<td style="padding:5px 10px;font-size:11px;text-align:right;font-weight:600;color:'+(r.prosCount>0?'#07838F':'#B0B0B0')+'">'+( r.prosCount>0?r.prosCount.toLocaleString():"—")+'</td>'
-      +'<td style="padding:5px 10px;font-size:11px;text-align:right;color:'+(r.acctCount>0?'#07838F':'#B0B0B0')+'">'+( r.acctCount>0?r.acctCount.toLocaleString():"—")+'</td>'
-      +(compact?'':('<td style="padding:5px 10px;font-size:11px;font-family:monospace;color:var(--mu)">'+r.wbs+'</td>'
-      +'<td style="padding:5px 10px;font-size:11px;font-family:monospace;color:'+(r.profWBS?'#1B7A34':'#B0B0B0')+'">'+( r.profWBS||"—")+'</td>'
-      +'<td style="padding:5px 10px;font-size:11px;font-weight:600;color:'+(r.profWBS&&r.profWBS===r.wbs?'#1B7A34':'#B0B0B0')+'">'+(r.profWBS&&r.profWBS===r.wbs?'Match':'—')+'</td>'
-      +'<td style="padding:5px 10px;font-size:11px;color:var(--mu)">'+( r.calSeq||"—")+'</td>'
-      +'<td style="padding:5px 10px;font-size:11px;color:'+(r.profSeq?'#1B7A34':'#B0B0B0')+'">'+( r.profSeq||"—")+'</td>'
-      +'<td style="padding:5px 10px;font-size:11px;font-weight:600;color:'+(r.calSeq&&r.profSeq&&r.calSeq===r.profSeq?'#1B7A34':'#B0B0B0')+'">'+(r.calSeq&&r.profSeq&&r.calSeq===r.profSeq?'Match':'—')+'</td>'));
+    html+='<td style="padding:4px 6px;font-size:10px;text-align:right;font-weight:600;color:'+(r.prosCount>0?'#07838F':'#B0B0B0')+'">'+( r.prosCount>0?r.prosCount.toLocaleString():"—")+'</td>'
+      +'<td style="padding:4px 6px;font-size:10px;text-align:right;color:'+(r.acctCount>0?'#07838F':'#B0B0B0')+'">'+( r.acctCount>0?r.acctCount.toLocaleString():"—")+'</td>'
+      +(compact?'':('<td style="padding:4px 6px;font-size:10px;font-family:monospace;color:var(--mu)">'+r.wbs+'</td>'
+      +'<td style="padding:4px 6px;font-size:10px;font-family:monospace;color:'+(r.profWBS?'#1B7A34':'#B0B0B0')+'">'+( r.profWBS||"—")+'</td>'
+      +'<td style="padding:4px 6px;font-size:10px;font-weight:600;color:'+(r.profWBS&&r.profWBS===r.wbs?'#1B7A34':'#B0B0B0')+'">'+(r.profWBS&&r.profWBS===r.wbs?'Match':'—')+'</td>'
+      +'<td style="padding:4px 6px;font-size:10px;color:var(--mu)">'+( r.calSeq||"—")+'</td>'
+      +'<td style="padding:4px 6px;font-size:10px;color:'+(r.profSeq?'#1B7A34':'#B0B0B0')+'">'+( r.profSeq||"—")+'</td>'
+      +'<td style="padding:4px 6px;font-size:10px;font-weight:600;color:'+(r.calSeq&&r.profSeq&&r.calSeq===r.profSeq?'#1B7A34':'#B0B0B0')+'">'+(r.calSeq&&r.profSeq&&r.calSeq===r.profSeq?'Match':'—')+'</td>'));
     html+='</tr>';
   });
   html+='</tbody><tfoot style="position:sticky;bottom:0"><tr style="background:#00144A;color:#fff;font-weight:700">'
-    +'<td style="padding:5px 10px;font-size:11px">'+totCamps.toLocaleString()+' campaigns ('+totConnAny.toLocaleString()+' connected)</td>'
-    +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totDCMs.toLocaleString()+' DCMs</td>'
-    +(compact?'<td style="padding:5px 10px;font-size:11px"></td>':'')
-    +'<td style="padding:5px 10px;text-align:right;font-size:11px;font-weight:700">'+totProsCount.toLocaleString()+'</td>'
-    +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totAcctCount.toLocaleString()+'</td>'
-    +(compact?'':('<td style="padding:5px 10px;text-align:right;font-size:11px">'+totCalWBS.toLocaleString()+'</td>'
-    +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totProfWBS.toLocaleString()+'</td>'
-    +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totWBSMatch.toLocaleString()+' match</td>'
-    +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totCalSeq.toLocaleString()+'</td>'
-    +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totProfSeq.toLocaleString()+'</td>'
-    +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totSeqMatch.toLocaleString()+' match</td>'))
+    +'<td style="padding:4px 6px;font-size:10px">'+totCamps.toLocaleString()+' campaigns ('+totConnAny.toLocaleString()+' connected)</td>'
+    +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totDCMs.toLocaleString()+' DCMs</td>'
+    +(compact?'<td style="padding:4px 6px;font-size:10px"></td>':'')
+    +'<td style="padding:4px 6px;text-align:right;font-size:10px;font-weight:700">'+totProsCount.toLocaleString()+'</td>'
+    +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totAcctCount.toLocaleString()+'</td>'
+    +(compact?'':('<td style="padding:4px 6px;text-align:right;font-size:10px">'+totCalWBS.toLocaleString()+'</td>'
+    +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totProfWBS.toLocaleString()+'</td>'
+    +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totWBSMatch.toLocaleString()+' match</td>'
+    +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totCalSeq.toLocaleString()+'</td>'
+    +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totProfSeq.toLocaleString()+'</td>'
+    +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totSeqMatch.toLocaleString()+' match</td>'))
     +'</tr></tfoot></table></div></div>';
   return html;
 }
@@ -4193,7 +4193,7 @@ function buildConnectionTable(thD,showExtras,skipYearFilter){
   });
   var totWBS=0,totSeq=0,totConn=0,totTagCamps=0,totProfReq=0,totCalCamp=0,totCompleteAll=0;
   function cell(n){return n.toLocaleString();}
-  out+='<div class="cc" style="flex:1"><div style="overflow:auto;max-height:320px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
+  out+='<div class="cc" style="flex:1"><div style="overflow-x:hidden;overflow-y:auto;max-height:320px"><table style="width:100%;border-collapse:collapse;font-size:10px;table-layout:fixed"><colgroup><col style="width:17%"><col style="width:10%"><col style="width:10%"><col style="width:9%"><col style="width:11%"><col style="width:9%"><col style="width:11%"><col style="width:13%"><col style="width:10%"></colgroup><thead><tr>';
   out+='<th style="'+thD+'">DCM</th>';
   if(showExtras){out+='<th style="'+thD+';text-align:right">Profiling Reqs</th><th style="'+thD+';text-align:right">Calendar Camps</th>';}
   out+='<th style="'+thD+';text-align:right">WBS Match</th><th style="'+thD+';text-align:right">Sequence Match</th><th style="'+thD+';text-align:right">Tag Match</th><th style="'+thD+';text-align:right">Camps Connected</th><th style="'+thD+';text-align:right">Complete Connection</th>';  if(showExtras){out+='<th style="'+thD+';text-align:right;white-space:nowrap">% Connected</th>';}
@@ -4204,20 +4204,20 @@ function buildConnectionTable(thD,showExtras,skipYearFilter){
     var profReq=_dcmProfReqCount[dKey]||0;var calCamp=_dcmCalCampCount[dKey]||0;
     if(showExtras){totProfReq+=profReq;totCalCamp+=calCamp;}
     out+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
-      +'<td style="padding:6px 12px">'+(v.display||e[0])+'</td>';
-    if(showExtras){out+='<td style="padding:6px 12px;text-align:right">'+cell(profReq)+'</td><td style="padding:6px 12px;text-align:right">'+cell(calCamp)+'</td>';}
-    out+='<td style="padding:6px 12px;text-align:right;font-weight:700">'+cell(v.wbsMatch)+'</td>'
-      +'<td style="padding:6px 12px;text-align:right">'+cell(v.seqMatch)+'</td>'
-      +'<td style="padding:6px 12px;text-align:right">'+cell(totTagCamp)+'</td>'
-      +'<td style="padding:6px 12px;text-align:right;font-weight:700">'+cell(v.campConnected)+'</td>'
-      +'<td style="padding:6px 12px;text-align:right;font-weight:700;color:#1B7A34">'+cell(totComplete)+'</td>';
+      +'<td style="padding:4px 6px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(v.display||e[0])+'</td>';
+    if(showExtras){out+='<td style="padding:4px 6px;text-align:right;font-size:10px">'+cell(profReq)+'</td><td style="padding:4px 6px;text-align:right;font-size:10px">'+cell(calCamp)+'</td>';}
+    out+='<td style="padding:4px 6px;text-align:right;font-weight:700;font-size:10px">'+cell(v.wbsMatch)+'</td>'
+      +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+cell(v.seqMatch)+'</td>'
+      +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+cell(totTagCamp)+'</td>'
+      +'<td style="padding:4px 6px;text-align:right;font-weight:700;font-size:10px">'+cell(v.campConnected)+'</td>'
+      +'<td style="padding:4px 6px;text-align:right;font-weight:700;color:#1B7A34;font-size:10px">'+cell(totComplete)+'</td>';
     if(showExtras){var connPct=calCamp>0?Math.round(v.campConnected/calCamp*100)+"%":"—";out+='<td style="padding:6px 12px;text-align:right;color:var(--mu)">'+connPct+'</td>';}
     out+='</tr>';
   });
-  out+='</tbody><tfoot style="position:sticky;bottom:0"><tr style="background:#00144A;color:#fff;font-weight:700"><td style="padding:5px 10px;font-size:11px">TOTAL</td>';
-  if(showExtras){out+='<td style="padding:5px 10px;text-align:right;font-size:11px;white-space:nowrap">'+totProfReq.toLocaleString()+'</td><td style="padding:5px 10px;text-align:right;font-size:11px;white-space:nowrap">'+totCalCamp.toLocaleString()+'</td>';}
-  out+='<td style="padding:5px 10px;text-align:right;font-size:11px;white-space:nowrap">'+totWBS.toLocaleString()+'</td><td style="padding:5px 10px;text-align:right;font-size:11px;white-space:nowrap">'+totSeq.toLocaleString()+'</td><td style="padding:5px 10px;text-align:right;font-size:11px;white-space:nowrap">'+totTagCamps.toLocaleString()+'</td><td style="padding:5px 10px;text-align:right;font-size:11px;white-space:nowrap">'+_globalConnWBS.size.toLocaleString()+'</td><td style="padding:5px 10px;text-align:right;font-size:11px;white-space:nowrap;color:#2CE0BF">'+totCompleteAll.toLocaleString()+'</td>';
-  if(showExtras){var totConnPct=totCalCamp>0?Math.round(totConn/totCalCamp*100)+"%":"—";out+='<td style="padding:5px 10px;text-align:right;font-size:11px;white-space:nowrap">'+totConnPct+'</td>';}
+  out+='</tbody><tfoot style="position:sticky;bottom:0"><tr style="background:#00144A;color:#fff;font-weight:700"><td style="padding:4px 6px;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">TOTAL</td>';
+  if(showExtras){out+='<td style="padding:4px 6px;text-align:right;font-size:10px">'+totProfReq.toLocaleString()+'</td><td style="padding:4px 6px;text-align:right;font-size:10px">'+totCalCamp.toLocaleString()+'</td>';}
+  out+='<td style="padding:4px 6px;text-align:right;font-size:10px">'+totWBS.toLocaleString()+'</td><td style="padding:4px 6px;text-align:right;font-size:10px">'+totSeq.toLocaleString()+'</td><td style="padding:4px 6px;text-align:right;font-size:10px">'+totTagCamps.toLocaleString()+'</td><td style="padding:4px 6px;text-align:right;font-size:10px">'+_globalConnWBS.size.toLocaleString()+'</td><td style="padding:4px 6px;text-align:right;font-size:10px;color:#2CE0BF">'+totCompleteAll.toLocaleString()+'</td>';
+  if(showExtras){var totConnPct=totCalCamp>0?Math.round(totConn/totCalCamp*100)+"%":"—";out+='<td style="padding:4px 6px;text-align:right;font-size:10px">'+totConnPct+'</td>';}
   out+='</tr></tfoot></table></div></div>';
   return out;
 }
