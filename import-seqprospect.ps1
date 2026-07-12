@@ -72,9 +72,14 @@ foreach ($row in $seqStats) {
 }
 Write-Host "Sequence name->ID map: $($nameToId.Count) entries"
 
-# Build tracked sequence IDs from campaign calendar
-$campJs = [System.IO.File]::ReadAllText("$outDir\data-camp.js")
+# Build tracked sequence IDs — include ALL sequences from Sequence Stats
 $trackedSids = New-Object System.Collections.Generic.HashSet[string]
+foreach ($row in $seqStats) {
+    $sid = $row."Sequence ID".Trim()
+    if ($sid) { [void]$trackedSids.Add($sid) }
+}
+# Also add from campaign calendar
+$campJs = [System.IO.File]::ReadAllText("$outDir\data-camp.js")
 [regex]::Matches($campJs, '"Sequence ID":"([^"]+)"') | ForEach-Object { [void]$trackedSids.Add($_.Groups[1].Value.Trim()) }
 # Also from outreach.json
 if (Test-Path "$outDir\outreach.json") {
@@ -108,6 +113,7 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
     $source   = EscapeJson (GetByCol $rowVals 'Source')
     $coType   = EscapeJson (GetByCol $rowVals 'Company Type')
     $cf51     = EscapeJson (GetByCol $rowVals 'Custom Field 51')
+    $country  = EscapeJson (GetByCol $rowVals 'Country')
 
     $allSeqs = @()
     if ($active)   { $allSeqs += $active   -split '[,;]' | ForEach-Object { $_.Trim() } | Where-Object { $_ } }
@@ -120,7 +126,7 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
             $key = "$prospId|$sid"
             if (-not $seenPid.Contains($key)) {
                 $seenPid.Add($key) | Out-Null
-                $entries.Add("{""sid"":""$sid"",""pid"":""$prospId"",""co"":""$company"",""aid"":""$acctId"",""touched"":""$touched"",""src"":""$source"",""ct"":""$coType"",""cf51"":""$cf51""}")
+                $entries.Add("{""sid"":""$sid"",""pid"":""$prospId"",""co"":""$company"",""aid"":""$acctId"",""touched"":""$touched"",""src"":""$source"",""ct"":""$coType"",""cf51"":""$cf51"",""country"":""$country""}")
                 $matchedRows++
             }
         }

@@ -3664,22 +3664,19 @@ function renderPdel(){
   html+=buildConnectedCampaignsTable(true,window._pdelConnectedOnly);
   html+='</div>';
   html+='</div>';
-  html+='<div style="display:flex;gap:16px;align-items:flex-start">';
-  html+='<div style="flex:1;min-width:0">';
   var pf=window.pdelFilter||{};
-  html+='<div style="margin-bottom:10px;display:flex;flex-direction:column;gap:8px;flex-wrap:wrap">';
-  html+='<div style="display:flex;align-items:center;gap:8px"><label style="font-size:12px;font-weight:600;min-width:70px">Age &gt;:</label>';
-  html+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.age=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option><option value="25"'+(pf.age==="25"?" selected":"")+'>25 days</option><option value="50"'+(pf.age==="50"?" selected":"")+'>50 days</option><option value="100"'+(pf.age==="100"?" selected":"")+'>100 days</option></select></div>';
-  html+='<div style="display:flex;align-items:center;gap:8px"><label style="font-size:12px;font-weight:600;min-width:70px">Touched:</label>';
-  html+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.touched=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option><option value="yes"'+(pf.touched==="yes"?" selected":"")+'>Yes (date)</option><option value="in_sequence"'+(pf.touched==="in_sequence"?" selected":"")+'>In Sequence</option><option value="finished_sequence"'+(pf.touched==="finished_sequence"?" selected":"")+'>Finished Sequence</option><option value="no"'+(pf.touched==="no"?" selected":"")+'>No</option></select></div>';
+  html+='<div style="margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px">';
+  html+='<label style="font-size:12px;font-weight:600">Age &gt;:</label>';
+  html+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.age=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option><option value="25"'+(pf.age==="25"?" selected":"")+'>25 days</option><option value="50"'+(pf.age==="50"?" selected":"")+'>50 days</option><option value="100"'+(pf.age==="100"?" selected":"")+'>100 days</option></select>';
+  html+='<label style="font-size:12px;font-weight:600">Touched:</label>';
+  html+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.touched=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option><option value="yes"'+(pf.touched==="yes"?" selected":"")+'>Yes (date)</option><option value="in_sequence"'+(pf.touched==="in_sequence"?" selected":"")+'>In Sequence</option><option value="finished_sequence"'+(pf.touched==="finished_sequence"?" selected":"")+'>Finished Sequence</option><option value="no"'+(pf.touched==="no"?" selected":"")+'>No</option></select>';
   html+='<span id="pdel-conn-filter"></span>';
-  if(pf.campWBS){html+='<div style="display:flex;align-items:center;gap:8px"><span style="background:#D1EFFF;padding:3px 10px;border-radius:var(--r);font-size:11px;font-weight:600">Campaign: '+pf.campWBS+'</span><button onclick="window.pdelFilter.campWBS=null;renderPdel()" style="padding:3px 10px;background:#C62828;color:#fff;border:none;border-radius:var(--r);font-size:11px;cursor:pointer">Clear</button></div>';}
+  if(pf.campWBS){html+='<span style="background:#D1EFFF;padding:3px 10px;border-radius:var(--r);font-size:11px;font-weight:600">Campaign: '+pf.campWBS+'</span><button onclick="window.pdelFilter.campWBS=null;renderPdel()" style="padding:3px 10px;background:#C62828;color:#fff;border:none;border-radius:var(--r);font-size:11px;cursor:pointer">Clear</button>';}
+  html+='<span id="pdel-cf51-filter"></span>';
   html+='<span id="pdel-ct-filter"></span>';
   html+='<span id="pdel-src-filter"></span>';
   html+='<span id="pdel-exec-filter"></span>';
   html+='<span id="pdel-persona-filter"></span>';
-  html+='</div>';
-  html+='</div>';
   html+='</div>';
   html+='<div id="pdel-tbl"></div>';
   page.innerHTML=html;
@@ -3814,14 +3811,18 @@ function renderPdel(){
     rows.sort(function(a,b){return(b.days||0)-(a.days||0);});
 
     // Build and inject Company Type, Source, Executor, Persona filter dropdowns
-    var _ctSet=new Set();var _srcSet=new Set();var _execSet=new Set();var _personaSet=new Set();
-    rows.forEach(function(r){if(r.ct)_ctSet.add(r.ct);if(r.src)_srcSet.add(r.src);if(r.executor)_execSet.add(r.executor);if(r.persona)_personaSet.add(r.persona);});
+    var _ctSet=new Set();var _srcSet=new Set();var _execSet=new Set();var _personaSet=new Set();var _cf51Set=new Set();
+    rows.forEach(function(r){
+      if(r.ct)_ctSet.add(r.ct);if(r.src)_srcSet.add(r.src);if(r.executor)_execSet.add(r.executor);if(r.persona)_personaSet.add(r.persona);
+      if(r.cf51)r.cf51.split(",").forEach(function(v){v=v.trim();if(v)_cf51Set.add(v);});
+    });
     var ctOpts=Array.from(_ctSet).sort();var srcOpts=Array.from(_srcSet).sort();
     var execOpts=Array.from(_execSet).sort();var personaOpts=Array.from(_personaSet).sort();
     var ctEl=document.getElementById("pdel-ct-filter");
     var srcEl=document.getElementById("pdel-src-filter");
     var execEl=document.getElementById("pdel-exec-filter");
     var personaEl=document.getElementById("pdel-persona-filter");
+    var cf51El=document.getElementById("pdel-cf51-filter");
     function mkPdelDrop(el,label,key,opts){
       if(!el)return;
       var h='<label style="font-size:12px;font-weight:600;margin-left:10px">'+label+':</label>';
@@ -3845,72 +3846,147 @@ function renderPdel(){
     var connEl=document.getElementById("pdel-conn-filter");
     mkPdelDrop(connEl,"Connection Type","connType",Array.from(_connTypeSet).sort());
     mkPdelDrop(ctEl,"Company Type","ct",ctOpts);
-    mkPdelDrop(srcEl,"Source","src",srcOpts);
     mkPdelSearch(execEl,"Executor","executor",execOpts);
+    mkPdelDrop(srcEl,"Source","src",srcOpts);
     mkPdelDrop(personaEl,"Persona","persona",personaOpts);
+    mkPdelSearch(cf51El,"Custom Field 51","cf51",Array.from(_cf51Set).sort());
     // Apply all filters
     if(pf.campWBS){rows=rows.filter(function(r){return r.wbs===pf.campWBS;});}
-    if(pf.ct||pf.src||pf.executor||pf.persona||pf.touched||pf.connType){rows=rows.filter(function(r){
-      return(!pf.ct||r.ct===pf.ct)&&(!pf.src||r.src===pf.src)&&(!pf.executor||r.executor===pf.executor)&&(!pf.persona||r.persona===pf.persona)&&(!pf.touched||r.touchedStatus===pf.touched)&&(!pf.connType||r.connType===pf.connType);
+    if(pf.ct||pf.src||pf.executor||pf.persona||pf.touched||pf.connType||pf.cf51){rows=rows.filter(function(r){
+      return(!pf.ct||r.ct===pf.ct)&&(!pf.src||r.src===pf.src)&&(!pf.executor||r.executor===pf.executor)&&(!pf.persona||r.persona===pf.persona)&&(!pf.touched||r.touchedStatus===pf.touched)&&(!pf.connType||r.connType===pf.connType)&&(!pf.cf51||r.cf51.split(",").map(function(v){return v.trim();}).indexOf(pf.cf51)>-1);
     });}
 
     // Store full filtered rows for export
     window._pdelRowsCache=rows;
+    // Build connected pid set from rows
+    var _connPids=new Set(rows.map(function(r){return r.pid;}));
+    // Build pid->row map for connected prospect details
+    var _pidToRow={};rows.forEach(function(r){if(!_pidToRow[r.pid])_pidToRow[r.pid]=r;});
+    // When cf51 filter active: show ALL matching prospects from PROSPECT_DATA with Connected column
+    var displayRows=[];
+    if(pf.cf51){
+      var _pidToCf51={};
+      (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){if(p.pid&&p.cf51&&!_pidToCf51[p.pid])_pidToCf51[p.pid]=p.cf51;});
+      (window.PROSPECT_DATA||[]).forEach(function(p){
+        var cf51=_pidToCf51[p.id]||"";
+        if(!cf51)return;
+        if(cf51.split(",").map(function(v){return v.trim();}).indexOf(pf.cf51)<0)return;
+        var connRow=_pidToRow[p.id];
+        displayRows.push({
+          pid:p.id,co:p.co||"",created:p.created||"",touched:(p.touched&&p.touched!=="1970-01-01"?p.touched.substring(0,10):""),
+          stage:p.stage||"",tg:p.tg||"",cf51:cf51,
+          connected:!!connRow,
+          campName:connRow?connRow.campName:"",sid:connRow?connRow.sid:"",
+          connType:connRow?connRow.connType:"",src:connRow?connRow.src:"",ct:connRow?connRow.ct:"",
+          executor:connRow?connRow.executor:"",days:connRow?connRow.days:""
+        });
+      });
+      displayRows.sort(function(a,b){return(b.connected?1:0)-(a.connected?1:0)||a.co.localeCompare(b.co);});
+    } else {
+      displayRows=rows.map(function(r){return Object.assign({connected:true},r);});
+    }
+    // Build pid->country map from SEQ_PROSPECT_DATA
+    var _pidToCountry={};
+    (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){if(p.pid&&p.country&&!_pidToCountry[p.pid])_pidToCountry[p.pid]=p.country;});
+    window._pdelDisplayRows=displayRows;
+    var _pdelPageSize=25;
+    var _pdelPage=window._pdelPage||0;
+    var _pdelTotalPages=Math.ceil(displayRows.length/_pdelPageSize);
+    if(_pdelPage>=_pdelTotalPages)_pdelPage=0;
+    window._pdelPage=_pdelPage;
+    window._pdelNextPage=function(){window._pdelPage=Math.min(window._pdelPage+1,_pdelTotalPages-1);var el=document.getElementById("pdel-tbl-body");if(el){window._pdelRenderPage();}};
+    window._pdelPrevPage=function(){window._pdelPage=Math.max(window._pdelPage-1,0);var el=document.getElementById("pdel-tbl-body");if(el){window._pdelRenderPage();}};
+    window._pdelRenderPage=function(){
+      var pg=window._pdelPage||0;var ps=25;
+      var pageRows=window._pdelDisplayRows.slice(pg*ps,(pg+1)*ps);
+      var body=document.getElementById("pdel-tbl-body");if(!body)return;
+      var html2="";
+      pageRows.forEach(function(r,i){
+        var country=_pidToCountry[r.pid]||"";
+        var bg=pf.cf51?(r.connected?(i%2===0?"#fff":"#F8FBFF"):"#FFF8F8"):(i%2===0?"#fff":"#F8FBFF");
+        html2+="<tr style='border-bottom:1px solid #EBEBEB;background:"+bg+"'>";
+        if(pf.cf51){
+          html2+="<td style='padding:5px 8px;font-weight:600;color:"+(r.connected?"#1B7A34":"#B0B0B0")+"'>"+(r.connected?"Yes":"No")+"</td>";
+          html2+="<td style='padding:5px 8px;color:var(--mu)'>"+r.pid+"</td>";
+          html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.co+"</td>";
+          html2+="<td style='padding:5px 8px;color:var(--mu)'>"+country+"</td>";
+          html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.campName+"</td>";
+          html2+="<td style='padding:5px 8px;color:var(--mu)'>"+r.sid+"</td>";
+          html2+="<td style='padding:5px 8px'>"+r.connType+"</td>";
+          html2+="<td style='padding:5px 8px'>"+r.src+"</td>";
+          html2+="<td style='padding:5px 8px'>"+r.ct+"</td>";
+          html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.cf51+"</td>";
+          html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.executor+"</td>";
+          html2+="<td style='padding:5px 8px'>"+r.created+"</td>";
+          html2+="<td style='padding:5px 8px'>"+r.touched+"</td>";
+          html2+="<td style='padding:5px 8px;text-align:right'>"+r.days+"</td>";
+        } else {
+          var touchedDisp=((r.touched&&r.touched!=="1970-01-01")?r.touched.substring(0,10):"");
+          if(!touchedDisp&&r.activeSeq)touchedDisp="In Sequence: "+r.activeSeq.split(",")[0];
+          if(!touchedDisp&&r.finishedSeq)touchedDisp="Finished: "+r.finishedSeq.split(",")[0];
+          html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap' title='"+r.campName+"'>"+r.campName+"</td>";
+          html2+="<td style='padding:5px 8px;color:var(--mu)'>"+r.sid+"</td>";
+          html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.co+"</td>";
+          html2+="<td style='padding:5px 8px;color:var(--mu)'>"+country+"</td>";
+          html2+="<td style='padding:5px 8px;color:var(--mu)'>"+r.pid+"</td>";
+          html2+="<td style='padding:5px 8px'>"+r.connType+"</td>";
+          html2+="<td style='padding:5px 8px'>"+r.src+"</td>";
+          html2+="<td style='padding:5px 8px'>"+r.ct+"</td>";
+          html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.cf51+"</td>";
+          html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.executor+"</td>";
+          html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.persona+"</td>";
+          html2+="<td style='padding:5px 8px'>"+r.created+"</td>";
+          html2+="<td style='padding:5px 8px'>"+touchedDisp+"</td>";
+          html2+="<td style='padding:5px 8px;text-align:right;font-weight:700"+(r.days>25?";background:#FFF9C4":"")+"'>"+r.days+"</td>";
+        }
+        html2+="</tr>";
+      });
+      body.innerHTML=html2;
+      var pgEl=document.getElementById("pdel-pg-info");if(pgEl)pgEl.textContent="Page "+(pg+1)+" of "+Math.ceil(window._pdelDisplayRows.length/ps);
+    };
+    var _pdelCols=pf.cf51?
+      ["Connected","Prospect ID","Company","Country","Campaign Name","Sequence ID","Connection","Source","Company Type","Custom Field 51","Executor","Created","Touched","Age (days)"]:
+      ["Campaign Name","Sequence ID","Company","Country","Prospect ID","Connection","Source","Company Type","Custom Field 51","Executor","Persona Name","Created","Touched","Age (days)"];
     var _pdelUniqCamps=new Set(rows.map(function(r){return r.campName;}).filter(Boolean)).size;
     var tbl="";
     tbl+="<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px'>";
     tbl+="<div class='sec' style='margin-bottom:0'>Details</div>";
-    tbl+="<div style='font-size:11px;color:var(--mu)'>"+rows.length.toLocaleString()+" prospects</div>";
+    tbl+="<div style='display:flex;align-items:center;gap:8px'>";
+    tbl+="<span style='font-size:11px;color:var(--mu)'>"+displayRows.length.toLocaleString()+" prospects"+(pf.cf51?" ("+_connPids.size+" connected)":"")+"</span>";
+    tbl+="<button onclick='window._pdelPrevPage()' style='padding:2px 8px;font-size:11px;cursor:pointer;border:1px solid var(--bd);border-radius:var(--r)'>&#8592;</button>";
+    tbl+="<span id='pdel-pg-info' style='font-size:11px'>Page 1 of "+_pdelTotalPages+"</span>";
+    tbl+="<button onclick='window._pdelNextPage()' style='padding:2px 8px;font-size:11px;cursor:pointer;border:1px solid var(--bd);border-radius:var(--r)'>&#8594;</button>";
     tbl+="<button onclick=\"window._exportPdel()\" style='padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer'>&#11015; Export CSV</button>";
-    tbl+="</div>";
-    tbl+="<div style='overflow:auto;max-height:600px'><table style='width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed'>";
+    tbl+="</div></div>";
+    tbl+="<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:11px'><thead><tr>";
     var thS="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;white-space:nowrap;position:sticky;top:0";
-    tbl+="<colgroup><col style='width:11%'><col style='width:6%'><col style='width:9%'><col style='width:7%'><col style='width:6%'><col style='width:6%'><col style='width:6%'><col style='width:6%'><col style='width:7%'><col style='width:6%'><col style='width:7%'><col style='width:6%'><col style='width:5%'></colgroup>";
-    tbl+="<thead><tr>";
-    ["Campaign Name","Sequence ID","Company","Prospect ID","Connection","Source","Company Type","Custom Field 51","Executor (Campaign Calendar)","Persona Name","Created","Touched/In/Finished Seq","Age (days)"].forEach(function(h){tbl+="<th style='"+thS+"'>"+h+"</th>";});
-    tbl+="</tr></thead><tbody>";
-    rows.slice(0,500).forEach(function(r,i){
-      tbl+="<tr style='border-bottom:1px solid #EBEBEB;background:"+(i%2===0?"#fff":"#F8FBFF")+"'>";
-      tbl+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap' title='"+r.campName+"'>"+r.campName+"</td>";
-      tbl+="<td style='padding:5px 8px;color:var(--mu)'>"+r.sid+"</td>";
-      tbl+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.co+"</td>";
-      tbl+="<td style='padding:5px 8px;color:var(--mu)'>"+r.pid+"</td>";
-      tbl+="<td style='padding:5px 8px'>"+r.connType+"</td>";
-      tbl+="<td style='padding:5px 8px'>"+r.src+"</td>";
-      tbl+="<td style='padding:5px 8px'>"+r.ct+"</td>";
-      tbl+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.cf51+"</td>";
-      tbl+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.executor+"</td>";
-      tbl+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.persona+"</td>";
-      var touchedDisp=((r.touched&&r.touched!=="1970-01-01")?r.touched.substring(0,10):"");
-      var touchedStatus="no";
-      if(r.touched&&r.touched!=="1970-01-01"&&r.touched!=="")touchedStatus="yes";
-      else if(r.activeSeq)touchedStatus="in_sequence";
-      else if(r.finishedSeq)touchedStatus="finished_sequence";
-      if(!touchedDisp&&touchedStatus==="in_sequence")touchedDisp="In Sequence: "+r.activeSeq.split(",")[0];
-      if(!touchedDisp&&touchedStatus==="finished_sequence")touchedDisp="Finished: "+r.finishedSeq.split(",")[0];
-      tbl+="<td style='padding:5px 8px'>"+r.created+"</td>";
-      tbl+="<td style='padding:5px 8px'>"+touchedDisp+"</td>";
-      tbl+="<td style='padding:5px 8px;text-align:right;font-weight:700"+(r.days>25?";background:#FFF9C4":"")+"'>"+r.days+"</td>";
-      tbl+="</tr>";
-    });
-    if(rows.length>500)tbl+="<tr><td colspan='12' style='padding:8px;text-align:center;color:var(--mu);font-size:11px'>Showing 500 of "+rows.length.toLocaleString()+"</td></tr>";
-    tbl+="</tbody></table></div>";
+    _pdelCols.forEach(function(h){tbl+="<th style='"+thS+"'>"+h+"</th>";});
+    tbl+="</tr></thead><tbody id='pdel-tbl-body'></tbody></table></div>";
     var el=document.getElementById("pdel-tbl");
-    if(el)el.innerHTML=tbl;
+    if(el){el.innerHTML=tbl;window._pdelRenderPage();}
   },50);
 }
 
 window._exportPdel=function(){
-  var rows=window._pdelRowsCache||[];
-  var headers=["Campaign Name","Sequence ID","Company","Prospect ID","Connection","Source","Company Type","Custom Field 51","Executor","Persona Name","Created","Touched","Age (days)"];
+  var rows=window._pdelDisplayRows||window._pdelRowsCache||[];
+  var pf=window.pdelFilter||{};
+  var _pidToCountry={};
+  (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){if(p.pid&&p.country&&!_pidToCountry[p.pid])_pidToCountry[p.pid]=p.country;});
   function esc(v){v=String(v||"");return v.indexOf(",")>-1||v.indexOf('"')>-1?'"'+v.replace(/"/g,'""')+'"':v;}
+  var headers=pf.cf51?
+    ["Connected","Prospect ID","Company","Country","Campaign Name","Sequence ID","Connection","Source","Company Type","Custom Field 51","Executor","Created","Touched","Age (days)"]:
+    ["Campaign Name","Sequence ID","Company","Country","Prospect ID","Connection","Source","Company Type","Custom Field 51","Executor","Persona Name","Created","Touched","Age (days)"];
   var csv=[headers.map(esc).join(",")];
   rows.forEach(function(r){
+    var country=_pidToCountry[r.pid]||"";
     var touched=(r.touched&&r.touched!=="1970-01-01")?r.touched.substring(0,10):(r.activeSeq?"In Sequence":(r.finishedSeq?"Finished":""));
-    csv.push([r.campName,r.sid,r.co,r.pid,r.connType,r.src,r.ct,r.cf51,r.executor,r.persona,r.created,touched,r.days].map(esc).join(","));
+    var row=pf.cf51?
+      [r.connected?"Yes":"No",r.pid,r.co,country,r.campName,r.sid,r.connType,r.src,r.ct,r.cf51,r.executor,r.created,r.touched,r.days]:
+      [r.campName,r.sid,r.co,country,r.pid,r.connType,r.src,r.ct,r.cf51,r.executor,r.persona,r.created,touched,r.days];
+    csv.push(row.map(esc).join(","));
   });
   var blob=new Blob([csv.join("\n")],{type:"text/csv"});
-  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="prospect_deletion.csv";a.click();
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="prospect_tracking.csv";a.click();
 };
 
 function renderPip(){
@@ -4030,13 +4106,10 @@ function buildConnectedCampaignsTable(compact,connectedOnly){
   html+='<div class="cc" style="flex:1"><div style="overflow-x:hidden;overflow-y:auto;max-height:320px"><table style="width:100%;border-collapse:collapse;font-size:10px"><thead><tr>'    +'<th style="'+thC+'">Campaign Name (Calendar)</th>'
     +'<th style="'+thC+'">DCM</th>'
     +(compact?'<th style="'+thC+'">Connection Type</th>':'')
-    +'<th style="'+thC+';text-align:right">Unique Prospects</th>'
-    +'<th style="'+thC+';text-align:right">Unique Accounts</th>'    +(compact?'':('<th style="'+thC+'">WBS (Calendar)</th>'
+    +(compact?'<th style="'+thC+';text-align:right">Unique Prospects</th><th style="'+thC+';text-align:right">Unique Accounts</th>':'')    +(compact?'':('<th style="'+thC+'">WBS (Calendar)</th>'
     +'<th style="'+thC+'">WBS (Profiling)</th>'
-    +'<th style="'+thC+'">WBS Match</th>'
     +'<th style="'+thC+'">Seq ID (Calendar)</th>'
-    +'<th style="'+thC+'">Seq ID (Profiling)</th>'
-    +'<th style="'+thC+'">Seq Match</th>'))
+    +'<th style="'+thC+'">Seq ID (Profiling)</th>'))
     +'</tr></thead><tbody>';
   window._pdelClickCamp=function(wbs){var pf=window.pdelFilter=window.pdelFilter||{};pf.campWBS=(pf.campWBS===wbs)?null:wbs;renderPdel();};
   rows.forEach(function(r,i){
@@ -4059,28 +4132,24 @@ function buildConnectedCampaignsTable(compact,connectedOnly){
       var _connColor=_isComplete?'#1B7A34':(_connTypes.length>0?'#07838F':'#B0B0B0');
       html+='<td style="padding:4px 6px;font-size:10px;font-weight:600;color:'+_connColor+'">'+_connLabel+'</td>';
     }
-    html+='<td style="padding:4px 6px;font-size:10px;text-align:right;font-weight:600;color:'+(r.prosCount>0?'#07838F':'#B0B0B0')+'">'+( r.prosCount>0?r.prosCount.toLocaleString():"—")+'</td>'
-      +'<td style="padding:4px 6px;font-size:10px;text-align:right;color:'+(r.acctCount>0?'#07838F':'#B0B0B0')+'">'+( r.acctCount>0?r.acctCount.toLocaleString():"—")+'</td>'
-      +(compact?'':('<td style="padding:4px 6px;font-size:10px;font-family:monospace;color:var(--mu)">'+r.wbs+'</td>'
+    if(compact){html+='<td style="padding:4px 6px;font-size:10px;text-align:right;font-weight:600;color:'+(r.prosCount>0?'#07838F':'#B0B0B0')+'">'+( r.prosCount>0?r.prosCount.toLocaleString():"—")+'</td>'
+      +'<td style="padding:4px 6px;font-size:10px;text-align:right;color:'+(r.acctCount>0?'#07838F':'#B0B0B0')+'">'+( r.acctCount>0?r.acctCount.toLocaleString():"—")+'</td>';}
+    if(!compact){html+='<td style="padding:4px 6px;font-size:10px;font-family:monospace;color:var(--mu)">'+r.wbs+'</td>'
       +'<td style="padding:4px 6px;font-size:10px;font-family:monospace;color:'+(r.profWBS?'#1B7A34':'#B0B0B0')+'">'+( r.profWBS||"—")+'</td>'
-      +'<td style="padding:4px 6px;font-size:10px;font-weight:600;color:'+(r.profWBS&&r.profWBS===r.wbs?'#1B7A34':'#B0B0B0')+'">'+(r.profWBS&&r.profWBS===r.wbs?'Match':'—')+'</td>'
       +'<td style="padding:4px 6px;font-size:10px;color:var(--mu)">'+( r.calSeq||"—")+'</td>'
-      +'<td style="padding:4px 6px;font-size:10px;color:'+(r.profSeq?'#1B7A34':'#B0B0B0')+'">'+( r.profSeq||"—")+'</td>'
-      +'<td style="padding:4px 6px;font-size:10px;font-weight:600;color:'+(r.calSeq&&r.profSeq&&r.calSeq===r.profSeq?'#1B7A34':'#B0B0B0')+'">'+(r.calSeq&&r.profSeq&&r.calSeq===r.profSeq?'Match':'—')+'</td>'));
+      +'<td style="padding:4px 6px;font-size:10px;color:'+(r.profSeq?'#1B7A34':'#B0B0B0')+'">'+( r.profSeq||"—")+'</td>';}
     html+='</tr>';
   });
   html+='</tbody><tfoot style="position:sticky;bottom:0"><tr style="background:#00144A;color:#fff;font-weight:700">'
     +'<td style="padding:4px 6px;font-size:10px">'+totCamps.toLocaleString()+' campaigns ('+totConnAny.toLocaleString()+' connected)</td>'
     +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totDCMs.toLocaleString()+' DCMs</td>'
     +(compact?'<td style="padding:4px 6px;font-size:10px"></td>':'')
-    +'<td style="padding:4px 6px;text-align:right;font-size:10px;font-weight:700">'+totProsCount.toLocaleString()+'</td>'
-    +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totAcctCount.toLocaleString()+'</td>'
+    +(compact?'<td style="padding:4px 6px;text-align:right;font-size:10px;font-weight:700">'+totProsCount.toLocaleString()+'</td>':'')
+    +(compact?'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totAcctCount.toLocaleString()+'</td>':'')
     +(compact?'':('<td style="padding:4px 6px;text-align:right;font-size:10px">'+totCalWBS.toLocaleString()+'</td>'
     +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totProfWBS.toLocaleString()+'</td>'
-    +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totWBSMatch.toLocaleString()+' match</td>'
     +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totCalSeq.toLocaleString()+'</td>'
-    +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totProfSeq.toLocaleString()+'</td>'
-    +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totSeqMatch.toLocaleString()+' match</td>'))
+    +'<td style="padding:4px 6px;text-align:right;font-size:10px">'+totProfSeq.toLocaleString()+'</td>'))
     +'</tr></tfoot></table></div></div>';
   return html;
 }
@@ -4193,7 +4262,10 @@ function buildConnectionTable(thD,showExtras,skipYearFilter){
   });
   var totWBS=0,totSeq=0,totConn=0,totTagCamps=0,totProfReq=0,totCalCamp=0,totCompleteAll=0;
   function cell(n){return n.toLocaleString();}
-  out+='<div class="cc" style="flex:1"><div style="overflow-x:hidden;overflow-y:auto;max-height:320px"><table style="width:100%;border-collapse:collapse;font-size:10px;table-layout:fixed"><colgroup><col style="width:17%"><col style="width:10%"><col style="width:10%"><col style="width:9%"><col style="width:11%"><col style="width:9%"><col style="width:11%"><col style="width:13%"><col style="width:10%"></colgroup><thead><tr>';
+  out+='<div class="cc" style="flex:1"><div style="overflow-x:hidden;overflow-y:auto;max-height:320px"><table style="width:100%;border-collapse:collapse;font-size:10px;table-layout:fixed">';
+  if(showExtras){out+='<colgroup><col style="width:17%"><col style="width:10%"><col style="width:10%"><col style="width:9%"><col style="width:11%"><col style="width:9%"><col style="width:11%"><col style="width:13%"><col style="width:10%"></colgroup>';}
+  else{out+='<colgroup><col style="width:25%"><col style="width:15%"><col style="width:15%"><col style="width:13%"><col style="width:17%"><col style="width:15%"></colgroup>';}
+  out+='<thead><tr>';
   out+='<th style="'+thD+'">DCM</th>';
   if(showExtras){out+='<th style="'+thD+';text-align:right">Profiling Reqs</th><th style="'+thD+';text-align:right">Calendar Camps</th>';}
   out+='<th style="'+thD+';text-align:right">WBS Match</th><th style="'+thD+';text-align:right">Sequence Match</th><th style="'+thD+';text-align:right">Tag Match</th><th style="'+thD+';text-align:right">Camps Connected</th><th style="'+thD+';text-align:right">Complete Connection</th>';  if(showExtras){out+='<th style="'+thD+';text-align:right;white-space:nowrap">% Connected</th>';}
@@ -4272,7 +4344,7 @@ function renderDtr(){
   })();
   (function(){
     var _calWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
-    var dhAll=pipeData.filter(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim()==="Digital Hub"&&String(p["Create Quarter"]||"").trim().startsWith("2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline";});
+    var dhAll=pipeData.filter(function(p){return String(p["Create Quarter"]||"").trim().startsWith("2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline";});
     var dhConnected=dhAll.filter(function(p){return _calWBS.has(String(p["Opp Campaign ID"]||"").trim());});
     var totAll=dhAll.reduce(function(s,p){return s+(parseFloat(p["Eur"])||0);},0);
     var totConn=dhConnected.reduce(function(s,p){return s+(parseFloat(p["Eur"])||0);},0);
@@ -4363,41 +4435,56 @@ function renderDtr(){
   html+=buildConnectionTable(thD);
   html+='</div>';
   html+='</div>';
-  // Connected Campaigns table
-  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;margin-bottom:6px">';
-  html+='<div class="sec" style="margin-bottom:0">Connected Campaigns</div>';
-  html+='<label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox"'+(window._dtrConnectedOnly?' checked':'')+ ' onchange="window._dtrConnectedOnly=this.checked;renderDtr()"> Show connected only</label>';
+  // Connected Campaigns table (collapsible)
+  html+='<div style="margin-top:20px">';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:#012931;border-radius:var(--r);padding:6px 12px" onclick="window._dtrCampExpanded=!window._dtrCampExpanded;renderDtr()">';
+  html+='<div style="color:#fff;font-size:13px;font-weight:700">Connected Campaigns '+(window._dtrCampExpanded?'&#9650;':'&#9660;')+'</div>';
+  html+='<label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer;color:#fff" onclick="event.stopPropagation()"><input type="checkbox"'+(window._dtrConnectedOnly?' checked':'')+' onchange="window._dtrConnectedOnly=this.checked;renderDtr()"> Show connected only</label>';
   html+='</div>';
-  html+=buildConnectedCampaignsTable(false,window._dtrConnectedOnly);
+  if(window._dtrCampExpanded){html+=buildConnectedCampaignsTable(false,window._dtrConnectedOnly);}
+  html+='</div>';
   // Digital Hub Pipeline table
   (function(){
     var _calWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
     var _dhMmFilter=window._dhMmFilter||"";
+    var _dhSrcFilter=window._dhSrcFilter||"";
     var dhRows=pipeData.filter(function(p){
-      return String(p["TCP Pipeline Source Desc"]||"").trim()==="Digital Hub"
-        &&String(p["Create Quarter"]||"").trim().startsWith("2026")
+      return String(p["Create Quarter"]||"").trim().startsWith("2026")
         &&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline";
     });
     var _dhMmOpts=Array.from(new Set(dhRows.filter(function(p){return _calWBS.has(String(p["Opp Campaign ID"]||"").trim());}).map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean))).sort();
+    var _dhSrcOpts=Array.from(new Set(dhRows.map(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim();}).filter(Boolean))).sort();
+    if(_dhSrcFilter)dhRows=dhRows.filter(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim()===_dhSrcFilter;});
     if(_dhMmFilter)dhRows=dhRows.filter(function(p){return String(p["MM Identifier"]||"").trim()===_dhMmFilter;});
     dhRows.sort(function(a,b){return (String(a["Create Quarter"]||"")).localeCompare(String(b["Create Quarter"]||""))||(parseFloat(b["Eur"]||0)-parseFloat(a["Eur"]||0));});
     var totEur=dhRows.reduce(function(s,p){return s+(parseFloat(p["Eur"])||0);},0);
     var thD2="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0";
-    html+='<div class="sec" style="margin-top:20px">Digital Hub Pipeline Created in 2026</div>';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;margin-bottom:4px">';
+    html+='<div class="sec" style="margin-bottom:0">Pipeline Created in 2026</div>';
+    html+='<button onclick="window._exportDHPipeline()" style="padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">&#11015; Export CSV</button>';
+    html+='</div>';
     html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px">';
-    html+='<label style="font-weight:600;color:var(--dk)">GB Identifier:</label>';
+    html+='<label style="font-weight:600;color:var(--dk)">TCP Source:</label>';
+    html+='<select onchange="window._dhSrcFilter=this.value;renderDtr()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value=""'+(!_dhSrcFilter?" selected":"")+'>All</option>';
+    _dhSrcOpts.forEach(function(v){html+='<option value="'+v.replace(/"/g,'&quot;')+'"'+(v===_dhSrcFilter?" selected":"")+'>'+v+'</option>';});
+    html+='</select>';
+    if(_dhSrcFilter)html+='<button onclick="window._dhSrcFilter=\'\';renderDtr()" style="font-size:11px;padding:2px 8px;border:1px solid var(--rd);border-radius:var(--r);cursor:pointer;background:#fff;color:var(--rd)">Clear</button>';
+    html+='<label style="font-weight:600;color:var(--dk);margin-left:8px">GB Identifier:</label>';
     html+='<select onchange="window._dhMmFilter=this.value;renderDtr()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value=""'+(!_dhMmFilter?" selected":"")+'>All</option>';
     _dhMmOpts.forEach(function(v){html+='<option value="'+v.replace(/"/g,'&quot;')+'"'+(v===_dhMmFilter?" selected":"")+'>'+v+'</option>';});
     html+='</select>';
     if(_dhMmFilter)html+='<button onclick="window._dhMmFilter=\'\';renderDtr()" style="font-size:11px;padding:2px 8px;border:1px solid var(--rd);border-radius:var(--r);cursor:pointer;background:#fff;color:var(--rd)">Clear</button>';
     html+='</div>';
+    window._dhRowsCache=dhRows;
     html+='<div style="font-size:11px;color:var(--mu);margin-bottom:6px">'+dhRows.length.toLocaleString()+' opportunities &middot; <b>'+totEur.toLocaleString(undefined,{maximumFractionDigits:0})+'</b> EUR total</div>';
-    html+='<div class="cc" style="margin-bottom:20px"><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:9%"><col style="width:8%"><col style="width:15%"><col style="width:8%"><col style="width:15%"><col style="width:20%"><col style="width:8%"><col style="width:9%"><col style="width:8%"></colgroup><thead><tr>';
-    html+='<th style="'+thD2+'">TCP Pipeline Source</th><th style="'+thD2+'">Create Quarter</th><th style="'+thD2+'">Campaign WBS Code</th><th style="'+thD2+'">Opp ID</th><th style="'+thD2+'">GB Identifier</th><th style="'+thD2+'">Opp Description</th><th style="'+thD2+';text-align:right">EUR</th><th style="'+thD2+'">In Calendar</th></tr></thead><tbody>';
+    html+='<div class="cc" style="margin-bottom:20px"><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:7%"><col style="width:7%"><col style="width:12%"><col style="width:6%"><col style="width:6%"><col style="width:6%"><col style="width:12%"><col style="width:15%"><col style="width:7%"><col style="width:8%"><col style="width:7%"><col style="width:7%"></colgroup><thead><tr>';
+    html+='<th style="'+thD2+'">Region L2</th><th style="'+thD2+'">Region L3</th><th style="'+thD2+'">TCP Pipeline Source</th><th style="'+thD2+'">Create Quarter</th><th style="'+thD2+'">Campaign WBS Code</th><th style="'+thD2+'">Opp ID</th><th style="'+thD2+'">GB Identifier</th><th style="'+thD2+'">Opp Description</th><th style="'+thD2+';text-align:right">EUR</th><th style="'+thD2+'">DRM Category</th><th style="'+thD2+'">In Calendar</th></tr></thead><tbody>';
     dhRows.forEach(function(p,i){
       var wbs=String(p["Opp Campaign ID"]||"").trim();
       var inCal=_calWBS.has(wbs);
       html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
+        +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["Region Lvl 2"]||"").trim()+'</td>'
+        +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["Region Lvl 3"]||"").trim()+'</td>'
         +'<td style="padding:5px 10px">'+String(p["TCP Pipeline Source Desc"]||"").trim()+'</td>'
         +'<td style="padding:5px 10px">'+String(p["Create Quarter"]||"").trim()+'</td>'
         +'<td style="padding:5px 10px;font-family:monospace">'+wbs+'</td>'
@@ -4405,18 +4492,35 @@ function renderDtr(){
         +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["MM Identifier"]||"").trim()+'</td>'
         +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["Opp Description"]||"").trim()+'</td>'
         +'<td style="padding:5px 10px;text-align:right;font-weight:600">'+(parseFloat(p["Eur"])||0).toLocaleString(undefined,{maximumFractionDigits:0})+'</td>'
+        +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["DRM Category"]||"").trim()+'</td>'
         +'<td style="padding:5px 10px;font-weight:600;color:'+(inCal?'#1B7A34':'#B0B0B0')+'">'+(inCal?'Yes':'No')+'</td>'
         +'</tr>';
     });
     html+='</tbody><tfoot><tr style="background:#00144A;color:#fff;font-weight:700">'
-      +'<td style="padding:5px 10px;font-size:11px" colspan="6">TOTAL</td>'
+      +'<td style="padding:5px 10px;font-size:11px" colspan="8">TOTAL</td>'
       +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totEur.toLocaleString(undefined,{maximumFractionDigits:0})+'</td>'
+      +'<td></td>'
       +'<td></td>'
       +'</tr></tfoot></table></div></div>';
   })();
   page.innerHTML=html;
 }
 
+window._exportDHPipeline=function(){
+  var rows=window._dhRowsCache||[];
+  function esc(v){return'"'+String(v||"").replace(/"/g,'""')+'"';}
+  var headers=["Region L2","Region L3","TCP Pipeline Source","Create Quarter","Campaign WBS Code","Opp ID","GB Identifier","Opp Description","EUR","DRM Category","In Calendar"];
+  var calWBS=new Set((filtered||[]).map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
+  var csv=headers.map(esc).join(",")+"\n"+rows.map(function(p){
+    var wbs=String(p["Opp Campaign ID"]||"").trim();
+    return[
+      p["Region Lvl 2"],p["Region Lvl 3"],p["TCP Pipeline Source Desc"],p["Create Quarter"],
+      wbs,p["Opportunity ID"],p["MM Identifier"],p["Opp Description"],
+      (parseFloat(p["Eur"])||0).toFixed(2),p["DRM Category"],calWBS.has(wbs)?"Yes":"No"
+    ].map(esc).join(",");
+  }).join("\n");
+  var a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);a.download="dh_pipeline_2026.csv";a.click();
+};
 function exportDtrTable(){
   var rows=[["Index","Campaign Name","Demand Manager","Executor","Starting Quarter","WBS Campaign Code","Sequence ID(s)"]];
   document.querySelectorAll("#dtrPage table tbody tr").forEach(function(tr){
