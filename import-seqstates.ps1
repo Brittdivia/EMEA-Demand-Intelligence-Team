@@ -14,16 +14,55 @@ if (-not (Test-Path $csvPath)) {
 }
 
 Write-Host "Reading $csvPath..."
-$rows = Import-Csv -Path $csvPath -Encoding UTF8
+# Read all lines and parse manually to handle duplicate column headers
+$allLines = [System.IO.File]::ReadAllLines($csvPath, [System.Text.Encoding]::UTF8)
+Write-Host "Total lines: $($allLines.Count)"
+
+# Parse header — make unique
+$rawHeaders = $allLines[0].Split(',') | ForEach-Object { $_.Trim('"').Trim() }
+$seenH = @{}; $uniqueHeaders = @()
+foreach ($h in $rawHeaders) {
+    if ($seenH.ContainsKey($h)) { $seenH[$h]++; $uniqueHeaders += "${h}_$($seenH[$h])" }
+    else { $seenH[$h] = 0; $uniqueHeaders += $h }
+}
+
+# File has no header row — use fixed column positions based on Outreach Sequence States export format
+$colSid  = 0   # Sequence ID
+$colPid  = 2   # Prospect ID
+$colTags = 17  # Tags (quoted, comma-separated)
+$colEm   = 20  # Emailed?
+$colOp   = 21  # Opened?
+$colCl   = 22  # Clicked?
+$colRe   = 23  # Replied?
+Write-Host "Using fixed columns: SID=$colSid PID=$colPid Tags=$colTags Em=$colEm Op=$colOp Cl=$colCl Re=$colRe"
+
+function ParseCsvLine($line) {
+    $result = @()
+    $inQuote = $false; $current = ""
+    foreach ($ch in $line.ToCharArray()) {
+        if ($ch -eq '"') { $inQuote = !$inQuote }
+        elseif ($ch -eq ',' -and -not $inQuote) { $result += $current; $current = "" }
+        else { $current += $ch }
+    }
+    $result += $current
+    return $result
+}
+
+$rows = [System.Collections.Generic.List[string[]]]::new()
+for ($i = 0; $i -lt $allLines.Count; $i++) {
+    if ([string]::IsNullOrWhiteSpace($allLines[$i])) { continue }
+    $rows.Add((ParseCsvLine $allLines[$i]))
+}
 Write-Host "Rows: $($rows.Count)"
 
 # 1. Build tag -> Set of sequence IDs
 $tagToSids = [System.Collections.Generic.Dictionary[string, System.Collections.Generic.HashSet[string]]]::new()
 
 foreach ($row in $rows) {
-    $sid = $row."Sequence ID".Trim()
+    $sid = if ($colSid -ge 0 -and $colSid -lt $row.Count) { $row[$colSid].Trim() } else { "" }
     if (-not $sid) { continue }
-    foreach ($t in $row."Tags".Split(',')) {
+    $tags = if ($colTags -ge 0 -and $colTags -lt $row.Count) { $row[$colTags] } else { "" }
+    foreach ($t in $tags.Split(',')) {
         $t = $t.Trim()
         if (-not $t) { continue }
         if (-not $tagToSids.ContainsKey($t)) { $tagToSids[$t] = [System.Collections.Generic.HashSet[string]]::new() }
@@ -50,15 +89,15 @@ $flags = [System.Collections.Generic.List[string]]::new()
 $seen  = [System.Collections.Generic.HashSet[string]]::new()
 
 foreach ($row in $rows) {
-    $sid = $row."Sequence ID".Trim()
-    $prospId = $row."Prospect ID".Trim()
+    $sid    = if ($colSid -ge 0 -and $colSid -lt $row.Count) { $row[$colSid].Trim() } else { "" }
+    $prospId = if ($colPid -ge 0 -and $colPid -lt $row.Count) { $row[$colPid].Trim() } else { "" }
     if (-not $sid -or -not $prospId) { continue }
     $key = "$sid|$prospId"
     if (-not $seen.Add($key)) { continue }
-    $em = if ($row."Emailed?"  -eq "Yes") { "1" } else { "0" }
-    $op = if ($row."Opened?"   -eq "Yes") { "1" } else { "0" }
-    $cl = if ($row."Clicked?"  -eq "Yes") { "1" } else { "0" }
-    $re = if ($row."Replied?"  -eq "Yes") { "1" } else { "0" }
+    $em = if ($colEm -ge 0 -and $colEm -lt $row.Count -and $row[$colEm] -eq "Yes") { "1" } else { "0" }
+    $op = if ($colOp -ge 0 -and $colOp -lt $row.Count -and $row[$colOp] -eq "Yes") { "1" } else { "0" }
+    $cl = if ($colCl -ge 0 -and $colCl -lt $row.Count -and $row[$colCl] -eq "Yes") { "1" } else { "0" }
+    $re = if ($colRe -ge 0 -and $colRe -lt $row.Count -and $row[$colRe] -eq "Yes") { "1" } else { "0" }
     $flags.Add("{""sid"":""$(EscJ $sid)"",""pid"":""$(EscJ $prospId)"",""em"":$em,""op"":$op,""cl"":$cl,""re"":$re}")
 }
 
