@@ -226,7 +226,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
   <div class="ht">EMEA Campaign Insights</div>
   <div class="hsp"></div>
   <div class="hm">
-    <span class="hu">Last updated: 07 Jul 2026</span>
+    <span class="hu">Last updated: 14 Jul 2026</span>
     <span class="hc" id="hcount">2,798 campaigns</span>
   </div>
 </header>
@@ -1516,7 +1516,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     
     
     
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000000?(totEur/1000000).toFixed(0)+"M":totEur>=1000?(totEur/1000).toFixed(0)+"K":Math.round(totEur).toLocaleString())+"</div><div class=\"ks\">Week 26 &middot; 29 Jun 2026</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000000?(totEur/1000000).toFixed(0)+"M":totEur>=1000?(totEur/1000).toFixed(0)+"K":Math.round(totEur).toLocaleString())+"</div><div class=\"ks\">Week 28 &middot; 14 Jul 2026</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">2026 Pipeline Share</div><div class=\"kv\">"+camp2026Pct+"</div><div class=\"ks\">campaign-linked vs all 2026</div></div>";
 
@@ -1565,7 +1565,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+(targetPipe>=1000000?(targetPipe/1000000).toFixed(0)+"M":targetPipe>=1000?(targetPipe/1000).toFixed(0)+"K":Math.round(targetPipe).toLocaleString())+"</div><div class=\"ks\">from campaign calendar</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
     html3+="<div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px;margin-left:8px\">Results</div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000000?(totEur/1000000).toFixed(0)+"M":totEur>=1000?(totEur/1000).toFixed(0)+"K":Math.round(totEur).toLocaleString())+"</div><div class=\"ks\">Week 26 &middot; 29 Jun 2026</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000000?(totEur/1000000).toFixed(0)+"M":totEur>=1000?(totEur/1000).toFixed(0)+"K":Math.round(totEur).toLocaleString())+"</div><div class=\"ks\">Week 28 &middot; 14 Jul 2026</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Distinct Opps Created</div><div class=\"kv\">"+totOpps.toLocaleString()+"</div><div class=\"ks\">connected to WBS/Campaign code</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\"># Opp Win Rate</div><div class=\"kv\">"+oppWinRate+"</div><div class=\"ks\">Won / Total opps</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Won+Live Pipeline</div><div class=\"kv\">"+qualOppRate+"</div><div class=\"ks\">Won+Live / Total</div></div>";
@@ -1831,7 +1831,7 @@ if(pageId!=="ovwPage"){html3+="<div class=\"cc\" style=\"margin-bottom:28px;widt
   html3+="</div>";
     
   }
-   html3+="<div class=\"sec\">Pipeline Detail - Week 26</div>";
+   html3+="<div class=\"sec\">Pipeline Detail - Week 28</div>";
   html3+="<div class=\"cc\" style=\"margin-bottom:28px\">";
   html3+="<div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between\">";
   html3+="<span>"+pdet.length.toLocaleString()+" rows &middot; "+totOpps.toLocaleString()+" distinct opps</span>";
