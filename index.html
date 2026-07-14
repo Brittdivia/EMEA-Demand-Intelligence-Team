@@ -4344,7 +4344,7 @@ function renderDtr(){
   })();
   (function(){
     var _calWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
-    var dhAll=pipeData.filter(function(p){return String(p["Create Quarter"]||"").trim().startsWith("2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline";});
+    var dhAll=pipeData.filter(function(p){return String(p["Create Quarter"]||"").trim().startsWith("2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"&&String(p["TCP Pipeline Source Desc"]||"").trim()!=="Sales";});
     var dhConnected=dhAll.filter(function(p){return _calWBS.has(String(p["Opp Campaign ID"]||"").trim());});
     var totAll=dhAll.reduce(function(s,p){return s+(parseFloat(p["Eur"])||0);},0);
     var totConn=dhConnected.reduce(function(s,p){return s+(parseFloat(p["Eur"])||0);},0);
@@ -4450,7 +4450,8 @@ function renderDtr(){
     var _dhSrcFilter=window._dhSrcFilter||"";
     var dhRows=pipeData.filter(function(p){
       return String(p["Create Quarter"]||"").trim().startsWith("2026")
-        &&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline";
+        &&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"
+        &&String(p["TCP Pipeline Source Desc"]||"").trim()!=="Sales";
     });
     var _dhMmOpts=Array.from(new Set(dhRows.filter(function(p){return _calWBS.has(String(p["Opp Campaign ID"]||"").trim());}).map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean))).sort();
     var _dhSrcOpts=Array.from(new Set(dhRows.map(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim();}).filter(Boolean))).sort();
