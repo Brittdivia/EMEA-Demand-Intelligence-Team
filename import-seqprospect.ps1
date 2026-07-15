@@ -109,7 +109,6 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
     $finished = [string](GetByCol $rowVals 'Finished Sequences')
     $company  = EscapeJson (GetByCol $rowVals 'Company')
     $touched  = EscapeJson (GetByCol $rowVals 'Touched At')
-    $acctId   = EscapeJson (GetByCol $rowVals 'Account ID')
     $source   = EscapeJson (GetByCol $rowVals 'Source')
     $coType   = EscapeJson (GetByCol $rowVals 'Company Type')
     $cf51     = EscapeJson (GetByCol $rowVals 'Custom Field 51')
@@ -126,7 +125,7 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
             $key = "$prospId|$sid"
             if (-not $seenPid.Contains($key)) {
                 $seenPid.Add($key) | Out-Null
-                $entries.Add("{""sid"":""$sid"",""pid"":""$prospId"",""co"":""$company"",""aid"":""$acctId"",""touched"":""$touched"",""src"":""$source"",""ct"":""$coType"",""cf51"":""$cf51"",""country"":""$country""}")
+                $entries.Add("{""sid"":""$sid"",""pid"":""$prospId"",""co"":""$company"",""touched"":""$touched"",""src"":""$source"",""ct"":""$coType"",""cf51"":""$cf51"",""country"":""$country""}")
                 $matchedRows++
             }
         }
