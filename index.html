@@ -209,7 +209,7 @@ window.addEventListener('beforeprint',function(){
   });
 });
 window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});</script>
-<script src="data-camp.js?v=20260621c"></script>
+<script src="data-camp.js?v=20260716"></script>
 <script src="data-pipe.js?v=20260624"></script>
 <script src="data-out.js?v=20260619"></script>
 <script src="data-seqco.js?v=20260619"></script>
@@ -233,7 +233,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
   </div>
 </header>
 <div class="tbar">
-  <button class="tbtn on" onclick="switchTab(&#39;exe&#39;)">Executive Summary</button>
+  <button class="tbtn on" onclick="switchTab(&#39;exe&#39;)">Pipeline Creation</button>
   <button class="tbtn" onclick="switchTab(&#39;ovw&#39;)">Strategy Overview</button>
   <button class="tbtn" onclick="switchTab(&#39;bud&#39;)">Budget</button>
   <button class="tbtn" onclick="switchTab(&#39;cal&#39;)">EMEA Campaign Calendar</button>
@@ -293,8 +293,7 @@ var anaFilter={};
 var orCol="Prospects - Total",orDir=-1;
 var PAL=["#0070F2","#1B90FF","#89D1FF","#D1EFFF","#002A86","#00144A","#07838F","#049F9A","#2CE0BF","#C2FCEE","#02414C","#012931"];
 var PALA=PAL.map(function(c){return c+"CC";});
-function fmtReg(r){return String(r||"").replace(/^CS /,"").replace(/^Southern Europe$/,"Spain").replace(/^Turkiye$/i,"Türkiye").replace(/^Turkey$/i,"Türkiye");}
-function fmtReg(r){return String(r||"").replace(/^CS /,"").replace(/^Southern Europe$/,"Spain").replace(/^Turkiye$/i,"Türkiye").replace(/^Turkey$/i,"Türkiye");}
+function fmtReg(r){return String(r||"").replace(/^CS /,"").replace(/^Turkiye$/i,"Türkiye").replace(/^Turkey$/i,"Türkiye");}
 var VAL_DISPLAY={"Partner-Driven":"PLT","Finance and Spend Management":"F&SM","Customer Experience":"CX","Human Capital Management":"HCM","Business Technology Platform":"BTP","Business Transformation Management":"BTM","Cloud ERP Private":"Cloud ERP","Supply Chain Management":"SCM","Cross and Corporate Areas":"Cross & Corp","Data & AI":"Data & AI","Cross Industry":"Cross","Cross-Industry":"Cross","Professional Services":"Prof. Services"};
 function fmtVal(s){return VAL_DISPLAY[s]!==undefined?VAL_DISPLAY[s]:s;}
 function hasHod(v){return v&&v!==""&&v!=="(No Value)"&&v!=="(no value)";}
@@ -927,6 +926,17 @@ function renderExe(){try{
   var p=document.getElementById("exePage");if(!p)return;
   var _validWbsSet=new Set(filtered.map(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var reg=String(r["Region Name (level 2)"]||"").trim();return(w&&reg)?w:null;}).filter(Boolean));
   var pr=getPipeRows(filtered).filter(function(r){return _validWbsSet.has(String(r["Opp Campaign ID"]||"").trim());});
+  // Total 2026 pipeline across all sources (not just calendar-linked)
+  var _allPipe2026=pipeData.filter(function(p){return String(p["Create Quarter"]||"").startsWith("2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline";});
+  if(window._pipeQtrSet&&window._pipeQtrSet.size)_allPipe2026=_allPipe2026.filter(function(p){return window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim());});
+  if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _regF2=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim();}));_allPipe2026=_allPipe2026.filter(function(p){return _regF2.has(String(p["Region Lvl 2"]||"").trim());});}
+  var allPipe2026Eur=_allPipe2026.reduce(function(a,r){return a+(parseFloat(r["Eur"]||0)||0);},0);
+  var allPipe2026Opps=new Set(_allPipe2026.map(function(r){return String(r["Opportunity ID"]||"");}).filter(Boolean)).size;
+  // Total TCP Target 2026
+  var _tcpTgt2026=(window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");});
+  if(window._pipeQtrSet&&window._pipeQtrSet.size)_tcpTgt2026=_tcpTgt2026.filter(function(t){return window._pipeQtrSet.has(String(t.qtr||"").trim());});
+  if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size)_tcpTgt2026=_tcpTgt2026.filter(function(t){return filters["Region Name (level 2)"].has(String(t.mu||"").trim());});
+  var tcpTgt2026Total=_tcpTgt2026.reduce(function(a,t){return a+(parseFloat(t.target)||0);},0);
   var totEur=pr.reduce(function(a,r){return a+(parseFloat(r["Eur"]||0)||0);},0);
   var oppSet=new Set(pr.map(function(r){return String(r["Opportunity ID"]||"");}).filter(Boolean));
   var totOpps=oppSet.size;
@@ -969,30 +979,29 @@ function renderExe(){try{
   var fnote=filtered.length<campData.length?buildFilterBanner(filtered.length,null):"";
   var SL='<div '+'style="display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px">';
   var html='<div class="ap">';
-  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Executive Summary</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="display:flex;align-items:center;gap:12px"><h2 style="color:var(--dk);margin:0">Pipeline Creation</h2><button onclick="window._exeDCMDetail=!window._exeDCMDetail;renderExe();" style="padding:4px 12px;border:1px solid var(--bd);border-radius:20px;font-size:12px;cursor:pointer;background:'+(window._exeDCMDetail?'#00144A':'#fff')+';color:'+(window._exeDCMDetail?'#fff':'var(--tx)')+'">DCM Detail '+(window._exeDCMDetail?'&#10003;':'+')+'</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
   html+='<p style="font-size:12px;color:var(--mu);margin-bottom:14px">Shows ACV € Contribution from Campaigns executed using EMEA Campaign Calendar, connected via WBS/Marketing Code</p>';
   html+=fnote;
   // Pipeline row
   html+='<div class="krow">';
   html+=SL+'PIPELINE</div>';
-  html+='<div class="kpi kb"><div class="kl">Total Pipeline</div><div class="kv" id="exe-total-pipeline-v">&euro;'+fmtE(totEur)+'</div><div class="ks">'+totOpps.toLocaleString()+' opportunities<br>all sources</div></div>';
-  html+='<div class="kpi ko"><div class="kl">Probable</div><div class="kv">&euro;'+fmtE(probEur)+'</div><div class="ks">'+probOpps+' opps</div></div>';
-  html+='<div class="kpi kg"><div class="kl">Booked / Won</div><div class="kv">&euro;'+fmtE(wonEur)+'</div><div class="ks">'+wonOpps+' opps</div></div>';
-  html+='<div class="kpi kb"><div class="kl">HO Rate</div><div class="kv">'+hoRate+'</div><div class="ks">'+hodOpps.toLocaleString()+' handed over &middot; &euro;'+fmtE(hodEur)+'</div></div>';
-  html+='<div class="kpi kb"><div class="kl">2026 Pipeline Share</div><div class="kv">'+camp2026Pct+'</div><div class="ks">campaign-linked vs all 2026</div></div>';
-  html+='<div class="kpi kr"><div class="kl">Demand Managers</div><div class="kv">'+(new Set(filtered.map(function(r){return r["Demand Manager"];}).filter(Boolean))).size+'</div><div class="ks">tracked in EMEA Campaign Calendar</div></div>';
-  html+='</div>';
-  // Outreach row
-  html+='<div class="krow" style="margin-top:6px">';
-  html+=SL+'OUTREACH</div>';
-  html+='<div class="kpi kb"><div class="kl">Unique Accounts Touched</div><div class="kv">'+acctTouched.toLocaleString()+'</div><div class="ks">Distinct accounts across sequences</div></div>';
-  html+='<div class="kpi kb"><div class="kl">Unique Prospects Contacted</div><div class="kv">'+prospContacted.toLocaleString()+'</div><div class="ks">Distinct prospects across sequences</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Total Pipeline Created 2026</div><div class="kv">&euro;'+fmtE(allPipe2026Eur)+'</div><div class="ks">'+allPipe2026Opps.toLocaleString()+' opps &middot; all sources, excl. Excluded</div></div>';
+  html+='<div class="kpi kb"><div class="kl">2026 TCP Target</div><div class="kv">&euro;'+fmtE(tcpTgt2026Total)+'</div><div class="ks">'+(tcpTgt2026Total>0?(allPipe2026Eur/tcpTgt2026Total*100).toFixed(0)+'% pipeline vs target':'n/a')+'</div></div>';
+  if(window._exeDCMDetail){
+    html+='<div class="kpi kb"><div class="kl">2026 Pipeline Contribution from DCMs</div><div class="kv" id="exe-total-pipeline-v">&euro;'+fmtE(totEur)+'</div><div class="ks">'+totOpps.toLocaleString()+' opportunities<br>all sources</div></div>';
+    html+='<div class="kpi ko"><div class="kl">2026 Probable Pipeline Contribution from DCMs</div><div class="kv">&euro;'+fmtE(probEur)+'</div><div class="ks">'+probOpps+' opps</div></div>';
+    html+='<div class="kpi kg"><div class="kl">2026 Booked / Won Contribution from DCMs</div><div class="kv">&euro;'+fmtE(wonEur)+'</div><div class="ks">'+wonOpps+' opps</div></div>';
+    html+='<div class="kpi kb"><div class="kl">HO Rate Contribution from DCMs</div><div class="kv">'+hoRate+'</div><div class="ks">'+hodOpps.toLocaleString()+' handed over &middot; &euro;'+fmtE(hodEur)+'</div></div>';
+    html+='<div class="kpi kb"><div class="kl">2026 Pipeline Creation Share from DCMs</div><div class="kv">'+camp2026Pct+'</div><div class="ks">campaign-linked vs all 2026</div></div>';
+  }
+  if(window._exeDCMDetail){
+    html+='<div class="kpi kr"><div class="kl">Demand Managers</div><div class="kv">'+(new Set(filtered.map(function(r){return r["Demand Manager"];}).filter(Boolean))).size+'</div><div class="ks">tracked in EMEA Campaign Calendar</div></div>';
+  }
   html+='</div>';
   html+='</div>';
   p.innerHTML=html;
   // Charts: build canvases in html, then render after DOM update
-  html+='<div class="cc" style="margin-top:16px"><div class="ch">Pipeline Created by Region — Calendar vs Non-Calendar Contribution</div><div style="padding:8px;height:320px"><canvas id="exe-reg-pipeline"></canvas></div></div>';
-  html+='<div class="cc" style="margin-top:16px"><div class="ch">2026 TCP Target kEUR — by Market Unit</div><div style="padding:8px;height:280px"><canvas id="exe-tcp-targets-mu"></canvas></div></div>';
+  html+='<div class="cc" style="margin-top:16px"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>Total Pipeline Created 2026 vs TCP Target — by Region</div><div style="display:flex;gap:3px"><button id="exe-pipe-btn-l2" onclick="window.pipeRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-pipe-btn-l3" onclick="window.pipeRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:340px"><canvas id="exe-reg-pipeline"></canvas></div></div>';
   html+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px">';
   // Chart 2: Product breakdown by region  
   html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>Product Breakdown &mdash; by Sales Bag<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) by Sub Sales Bag &middot; product family stacked</span><br><span id="exe-prod-info" style="font-size:10px;font-weight:400;color:var(--mu)"></span></div><div style="display:flex;gap:3px"><button id="exe-prod-btn-l2" onclick="window.prodRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-prod-btn-l3" onclick="window.prodRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:260px"><canvas id="exe-prod-mu"></canvas></div></div>';
@@ -1335,27 +1344,38 @@ function renderExe(){try{
           scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
-    // Pipeline Created by Region — Calendar vs Non-Calendar
-    var _calWBSSet=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
+    // Pipeline Created by Region vs TCP Target
+    var _pipeRegMode=window.pipeRegMode||"l2";
+    var btnPL2=document.getElementById("exe-pipe-btn-l2"),btnPL3=document.getElementById("exe-pipe-btn-l3");
+    if(btnPL2){btnPL2.style.background=_pipeRegMode==="l2"?"#00144A":"";btnPL2.style.color=_pipeRegMode==="l2"?"#fff":"";}
+    if(btnPL3){btnPL3.style.background=_pipeRegMode==="l3"?"#00144A":"";btnPL3.style.color=_pipeRegMode==="l3"?"#fff":"";}
     var regPipe={};
     pipeData.forEach(function(p){
       if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+      if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
       if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
-      var wbs=String(p["Opp Campaign ID"]||"").trim();
-      var regRaw=String(p["Region Lvl 2"]||"").trim();if(!regRaw)return;
-      // Calendar-linked rows: use calendar L2 (finer breakdown); non-calendar: use pipeline L2
-      var inCal=_calWBSSet.has(wbs);
-      var reg=inCal?(wbsToReg[wbs]||regRaw):regRaw;
-      // Match non-calendar regions to calendar keys where possible
-      if(!inCal&&drmRegData["CS "+regRaw])reg="CS "+regRaw;
-      else if(!inCal&&drmRegData[regRaw])reg=regRaw;
+      var regRaw=_pipeRegMode==="l3"?String(p["Region Lvl 3"]||p["Region Lvl 2"]||"").trim():String(p["Region Lvl 2"]||"").trim();
+      if(!regRaw)return;
+      if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){
+        var _rf=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim();}));
+        var l2=String(p["Region Lvl 2"]||"").trim();
+        if(!_rf.has(l2))return;
+      }
       var eur=parseFloat(p["Eur"]||0)||0;if(!eur)return;
-      if(!regPipe[reg])regPipe[reg]={cal:0,other:0};
-      if(inCal)regPipe[reg].cal+=eur;else regPipe[reg].other+=eur;
+      regPipe[regRaw]=(regPipe[regRaw]||0)+eur;
     });
-    // Use same region order as ACV by DRM chart, then append any pipeline-only regions
-    var regPipeOrder=regOrder7.filter(function(r){return regPipe[r];});
-    Object.keys(regPipe).forEach(function(r){if(regPipeOrder.indexOf(r)===-1)regPipeOrder.push(r);});
+    var regPipeOrder=Object.keys(regPipe).sort(function(a,b){return regPipe[b]-regPipe[a];});
+    // TCP targets — only available at L2 level
+    var tgtDetail=(window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");});
+    if(window._pipeQtrSet&&window._pipeQtrSet.size)tgtDetail=tgtDetail.filter(function(t){return window._pipeQtrSet.has(String(t.qtr||"").trim());});
+    if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size)tgtDetail=tgtDetail.filter(function(t){return filters["Region Name (level 2)"].has(String(t.mu||"").trim());});
+    var regTgt={};
+    tgtDetail.forEach(function(t){
+      var mu=String(t.mu||"").trim();if(!mu)return;
+      // Strip "CS " to match pipeline L2 keys
+      var key=mu.replace(/^CS /,"");
+      regTgt[key]=(regTgt[key]||0)+(parseFloat(t.target)||0);
+    });
     var cRegPipe=document.getElementById("exe-reg-pipeline");
     if(cRegPipe){
       if(charts["exe-reg-pipeline"])charts["exe-reg-pipeline"].destroy();
@@ -1364,79 +1384,45 @@ function renderExe(){try{
         data:{
           labels:regPipeOrder.map(fmtReg),
           datasets:[
-            {label:"Calendar-linked",data:regPipeOrder.map(function(r){return regPipe[r]?regPipe[r].cal:0;}),backgroundColor:PAL[0],borderWidth:0},
-            {label:"Not in Calendar",data:regPipeOrder.map(function(r){return regPipe[r]?regPipe[r].other:0;}),backgroundColor:PAL[3],borderWidth:0}
-          ]
-        },
-        options:{responsive:true,maintainAspectRatio:false,
-          plugins:{legend:{display:true,position:"top",labels:{font:{size:11},boxWidth:12}},
-            datalabels:{display:true,anchor:"center",align:"center",formatter:function(v,ctx){
-              var total=ctx.chart.data.datasets.reduce(function(s,ds){return s+(ds.data[ctx.dataIndex]||0);},0);
-              if(!total||v===0)return"";
-              var pct=v/total*100;return pct>=15?pct.toFixed(0)+"%":"";
-            },font:{size:9,weight:"bold"},color:"#fff"}},
-          scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},
-            y:{stacked:true,ticks:{callback:function(v){return"€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
-      });
-    }
-    // TCP Targets by MU chart — target vs pipeline built
-    var tgtDetail=(window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");});
-    if(window._pipeQtrSet&&window._pipeQtrSet.size)tgtDetail=tgtDetail.filter(function(t){return window._pipeQtrSet.has(String(t.qtr||"").trim());});
-    var muTgt={};
-    tgtDetail.forEach(function(t){
-      var mu=String(t.mu||"").trim();if(!mu)return;
-      muTgt[mu]=(muTgt[mu]||0)+(parseFloat(t.target)||0);
-    });
-    // Build pipeline by MU — match "CS UKI" target to "UKI" pipeline Region Lvl 2
-    var muPipe={};
-    pipeData.forEach(function(p){
-      if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
-      if(!String(p["Create Quarter"]||"").trim().startsWith("2026"))return;
-      if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
-      var regRaw=String(p["Region Lvl 2"]||"").trim();if(!regRaw)return;
-      var mu="CS "+regRaw;
-      var eur=parseFloat(p["Eur"]||0)||0;if(!eur)return;
-      muPipe[mu]=(muPipe[mu]||0)+eur;
-    });
-    var muOrder=Object.keys(muTgt).sort(function(a,b){return muTgt[b]-muTgt[a];});
-    var cTgt=document.getElementById("exe-tcp-targets-mu");
-    if(cTgt){
-      if(charts["exe-tcp-targets-mu"])charts["exe-tcp-targets-mu"].destroy();
-      charts["exe-tcp-targets-mu"]=new Chart(cTgt.getContext("2d"),{
-        type:"bar",
-        data:{
-          labels:muOrder,
-          datasets:[
-            {label:"2026 Pipeline Built",data:muOrder.map(function(m){return Math.round(muPipe[m]||0);}),backgroundColor:PAL[0],borderWidth:0,order:1,
+            {label:"Pipeline Created 2026",data:regPipeOrder.map(function(r){return Math.round(regPipe[r]||0);}),backgroundColor:PAL[0],borderWidth:0,
               datalabels:{display:true,anchor:"center",align:"center",formatter:function(v,ctx){
-                var tgt=muTgt[muOrder[ctx.dataIndex]]||0;
-                if(!tgt||!v)return"";
-                var pct=v/tgt*100;return pct>=8?pct.toFixed(0)+"%":"";
+                var r=regPipeOrder[ctx.dataIndex];
+                var tgt=regTgt[r]||0;
+                if(!v||!tgt)return"";
+                var pct=(v/tgt*100).toFixed(0)+"%";
+                return pct;
               },font:{size:9,weight:"bold"},color:"#fff"}},
-            {label:"Remaining to Target",data:muOrder.map(function(m){var t=muTgt[m]||0,p=muPipe[m]||0;return Math.round(Math.max(0,t-p));}),backgroundColor:"rgba(0,0,0,0.10)",borderWidth:0,order:2,
-              datalabels:{display:false}}
+            {label:"TCP Target",data:regPipeOrder.map(function(r){return regTgt[r]?Math.round(regTgt[r]):null;}),
+              type:"line",borderColor:PAL[1],backgroundColor:"transparent",borderWidth:2,pointRadius:4,pointBackgroundColor:PAL[1],
+              order:0,datalabels:{display:true,anchor:"end",align:"top",formatter:function(v){return v?fmtE(v):"";},font:{size:9,weight:"bold"},color:PAL[1]}}
           ]
         },
         options:{responsive:true,maintainAspectRatio:false,
           plugins:{legend:{display:true,position:"top",labels:{font:{size:11},boxWidth:12}},
             datalabels:{display:true},
             tooltip:{callbacks:{label:function(ctx){
-              var mu=muOrder[ctx.dataIndex];
-              var tgt=muTgt[mu]||0,pipe=muPipe[mu]||0;
-              var pct=tgt>0?(pipe/tgt*100).toFixed(1)+"%":"n/a";
-              if(ctx.datasetIndex===0)return"Pipeline: €"+fmtE(pipe)+" ("+pct+" of target)";
-              return"Remaining: €"+fmtE(Math.max(0,tgt-pipe));
+              var r=regPipeOrder[ctx.dataIndex];
+              if(ctx.dataset.label==="TCP Target")return"TCP Target: €"+fmtE(regTgt[r]||0);
+              var tgt=regTgt[r]||0;
+              return"Pipeline: €"+fmtE(regPipe[r]||0)+(tgt>0?" ("+((regPipe[r]||0)/tgt*100).toFixed(0)+"% of target)":"");
             }}}},
-          scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},
-            y:{stacked:true,ticks:{callback:function(v){return"€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
+          scales:{x:{grid:{display:false},ticks:{font:{size:10}}},
+            y:{ticks:{callback:function(v){return"€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
+    // Clean up old separate targets chart if it exists
+    if(charts["exe-tcp-targets-mu"]){charts["exe-tcp-targets-mu"].destroy();delete charts["exe-tcp-targets-mu"];}
   })();
 }catch(e){var _ep=document.getElementById("exePage");if(_ep)_ep.innerHTML="<div class=\"nr\"><p><b>Error:</b> "+e.message+"</p></div>";console.error(e);}
 }
 function renderBud(){
   var page=document.getElementById("budPage");if(!page)return;
-  var data=(window.BUDGET_DATA||[]).filter(function(r){return String(r.qtr||"").startsWith("2026");});
+  // Normalise region names to title case to handle "Mea South" vs "MEA South" etc.
+  var _regNorm={"mea north":"MEA North","mea south":"MEA South","benelux":"Benelux","france":"France","italy":"Italy","nordic":"Nordic","southern europe":"Southern Europe","uki":"UKI"};
+  var data=(window.BUDGET_DATA||[]).filter(function(r){return String(r.qtr||"").startsWith("2026");}).map(function(r){
+    var rn=_regNorm[String(r.reg||"").toLowerCase().trim()];
+    return rn?Object.assign({},r,{reg:rn}):r;
+  });
   if(!data.length){page.innerHTML='<div class="ap"><div class="nr"><p>Budget data not loaded.</p></div></div>';return;}
 
   var REGS=["Benelux","France","Italy","MEA North","MEA South","Nordic","Southern Europe","UKI"];
