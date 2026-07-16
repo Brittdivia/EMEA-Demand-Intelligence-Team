@@ -1488,6 +1488,8 @@ function renderExe(){try{
 }
 function renderBud(){
   var page=document.getElementById("budPage");if(!page)return;
+  try{
+  page.innerHTML='<div class="ap"><div class="nr"><p>Rendering...</p></div></div>';
   // Normalise region names to title case to handle "Mea South" vs "MEA South" etc.
   var _regNorm={"mea north":"MEA North","mea south":"MEA South","benelux":"Benelux","france":"France","italy":"Italy","nordic":"Nordic","southern europe":"Southern Europe","uki":"UKI"};
   var data=(window.BUDGET_DATA||[]).filter(function(r){return String(r.qtr||"").startsWith("2026");}).map(function(r){
@@ -1711,8 +1713,169 @@ function renderBud(){
   html+='</tr></tbody></table></div></div>';
   html+='</div>';
 
+  // Sales Bag tables
+  var SBS=["Business Technology Platform","Data & AI","Business Transformation Management","Cloud ERP Private","Finance and Spend Management","Human Capital Management","Supply Chain Management","Customer Experience","Other"];
+  var _pipeSolMap={"BAIP - Data & AI":"Data & AI","BAIP - Technology Foundation":"Business Technology Platform","Business Transformation Management":"Business Transformation Management","Cloud ERP Private":"Cloud ERP Private","Finance and Spend Management":"Finance and Spend Management","Human Capital Management":"Human Capital Management","Supply Chain Management":"Supply Chain Management","Customer Experience":"Customer Experience","Other":"Other"};
+  // Map sol2 codes → SA group
+  var _sol2ToSA={
+    "Business Technology Platform":"Business Technology Platform","Data & AI":"Data & AI",
+    "Business Transformation Management":"Business Transformation Management",
+    "Cloud ERP Private":"Cloud ERP Private","Finance and Spend Management":"Finance and Spend Management",
+    "Human Capital Management":"Human Capital Management","Supply Chain Management":"Supply Chain Management",
+    "Customer Experience":"Customer Experience","Other":"Other",
+    "SAP Business Suite Cross":"Cloud ERP Private",
+    "SAAI":"Data & AI","SABLD":"Business Technology Platform","SABPI":"Business Technology Platform",
+    "SABTPADI":"Business Technology Platform","SABTPCDC":"Business Technology Platform",
+    "SABTPEA":"Business Technology Platform","SABTPPRI":"Data & AI","SABUSN":"Business Technology Platform",
+    "SACHRPAY2":"Human Capital Management","SACSA":"Customer Experience",
+    "SACXCOMM":"Customer Experience","SACXSS":"Customer Experience",
+    "SADABDC":"Data & AI","SADABDCPR":"Data & AI","SADADBCL":"Data & AI","SADBDM":"Data & AI",
+    "SADSC":"Supply Chain Management","SADSCMD":"Supply Chain Management",
+    "SADSCP":"Supply Chain Management","SADSCPL":"Supply Chain Management","SADSCS4":"Supply Chain Management",
+    "SAEM":"Cloud ERP Private",
+    "SAFFPA":"Finance and Spend Management","SAFGRC":"Finance and Spend Management",
+    "SAFIELDGL":"Human Capital Management","SAFQ2C":"Finance and Spend Management",
+    "SAFQP":"Finance and Spend Management","SAFTR":"Finance and Spend Management",
+    "SAHCMCPP":"Human Capital Management","SAHXMLR2":"Human Capital Management",
+    "SAHXMLRSR":"Human Capital Management","SAHXMSPM2":"Human Capital Management",
+    "SAHXMX2":"Human Capital Management",
+    "SAINS":"Business Technology Platform","SALEAX":"Business Technology Platform",
+    "SAPROC":"Supply Chain Management",
+    "SAS4EMP":"Cloud ERP Private","SAS4FQ":"Cloud ERP Private",
+    "SATAUL1":"Finance and Spend Management","SATOOLCH":"Business Technology Platform",
+    "SAWME":"Business Technology Platform","PFLEARH1":"Human Capital Management","PFMKTGEMA":"Customer Experience"
+  };
+  var sbBW={},sbLv={},sbCP={},sbYTD={},sbTcpTgt={};
+  var sbBW_q={},sbLv_q={};
+  // sol3-level accumulators keyed by SA+sol3
+  var sbSol3Tgt={},sbSol3YTD={},sbSol3Bud={},sbSol3BW={},sbSol3Lv={},sbSol3CP={},sbSol3BW_q={},sbSol3Lv_q={};
+  SBS.forEach(function(s){sbBW[s]=0;sbLv[s]=0;sbCP[s]=0;sbYTD[s]=0;sbTcpTgt[s]=0;sbBW_q[s]={};sbLv_q[s]={};sbSol3Tgt[s]={};sbSol3YTD[s]={};sbSol3Bud[s]={};sbSol3BW[s]={};sbSol3Lv[s]={};sbSol3CP[s]={};sbSol3BW_q[s]={};sbSol3Lv_q[s]={};QTRS.forEach(function(q){sbBW_q[s][q]=0;sbLv_q[s][q]=0;});});
+  pipeData.forEach(function(p){
+    if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+    var eur=parseFloat(p["Eur"]||0)||0;
+    var drm=String(p["DRM Category"]||"").trim();
+    var createQ=String(p["Create Quarter"]||"");
+    var closeQ=String(p["Closing Qtr"]||"");
+    var solRaw=String(p["Solution Area (L1)"]||"").trim();
+    var sb=_pipeSolMap[solRaw];if(!sb)return;
+    var sol3=String(p["Sub-Solution Area (L2)"]||"").trim();
+    if(createQ.startsWith("2026")){sbYTD[sb]=(sbYTD[sb]||0)+eur;if(sol3)sbSol3YTD[sb][sol3]=(sbSol3YTD[sb][sol3]||0)+eur;}
+    if(createQ.startsWith("2026")&&drm==="Booked/Won"){sbBW[sb]=(sbBW[sb]||0)+eur;if(sol3)sbSol3BW[sb][sol3]=(sbSol3BW[sb][sol3]||0)+eur;}
+    if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable"||drm==="Upside")){sbLv[sb]=(sbLv[sb]||0)+eur;if(sol3)sbSol3Lv[sb][sol3]=(sbSol3Lv[sb][sol3]||0)+eur;}
+    if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable")){sbCP[sb]=(sbCP[sb]||0)+eur;if(sol3)sbSol3CP[sb][sol3]=(sbSol3CP[sb][sol3]||0)+eur;}
+    if(QTRS.indexOf(closeQ)>-1){
+      if(drm==="Booked/Won"){sbBW_q[sb][closeQ]=(sbBW_q[sb][closeQ]||0)+eur;if(sol3){if(!sbSol3BW_q[sb][sol3])sbSol3BW_q[sb][sol3]={};sbSol3BW_q[sb][sol3][closeQ]=(sbSol3BW_q[sb][sol3][closeQ]||0)+eur;}}
+      if(drm==="Committed"||drm==="Probable"||drm==="Upside"){sbLv_q[sb][closeQ]=(sbLv_q[sb][closeQ]||0)+eur;if(sol3){if(!sbSol3Lv_q[sb][sol3])sbSol3Lv_q[sb][sol3]={};sbSol3Lv_q[sb][sol3][closeQ]=(sbSol3Lv_q[sb][sol3][closeQ]||0)+eur;}}
+    }
+  });
+  var sbBudget={};SBS.forEach(function(s){sbBudget[s]=0;});
+  data.forEach(function(r){
+    var sb=_sol2ToSA[r.sol2];if(!sb)return;
+    sbBudget[sb]=(sbBudget[sb]||0)+(r.eur||0);
+    var s3=String(r.sol3||"").trim();
+    if(s3)sbSol3Bud[sb][s3]=(sbSol3Bud[sb][s3]||0)+(r.eur||0);
+  });
+  (window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");}).forEach(function(t){
+    var sa=String(t.sa||"").trim();if(!sa||SBS.indexOf(sa)===-1)return;
+    sbTcpTgt[sa]=(sbTcpTgt[sa]||0)+(parseFloat(t.target)||0);
+    var ssa=String(t.ssa||"").trim();if(ssa)sbSol3Tgt[sa][ssa]=(sbSol3Tgt[sa][ssa]||0)+(parseFloat(t.target)||0);
+  });
+
+  // Coverage table by Sales Bag
+  var thSW=thS.replace("white-space:nowrap","white-space:normal")+";max-width:60px;line-height:1.2";
+  html+='<div style="display:flex;gap:16px;margin-bottom:20px;align-items:flex-start;margin-top:20px">';
+  html+='<div class="cc" style="flex:0 0 65%;min-width:0"><div class="ch">2026 Budget by Sales Bag (kEUR)</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:24%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr>';
+  html+='<th style="'+thL+'">Sales Bag</th>';
+  html+='<th style="'+thSW+'">Budget</th>';
+  html+='<th style="'+thSW+'">Won 2026</th>';
+  html+='<th style="'+thSW+'">Fcst Cvg</th>';
+  QTRS.forEach(function(q){html+='<th style="'+thSW+'">Live Cvg '+fmtQtr(q)+'</th>';});
+  html+='<th style="'+thSW+'">Live Cvg 2026</th>';
+  html+='</tr></thead><tbody>';
+  var gsbTot=0,gsbBW=0,gsbLv=0,gsbCP=0;
+  SBS.forEach(function(sb){
+    var bud=sbBudget[sb]||0,bw=sbBW[sb]||0,lv=sbLv[sb]||0,cp=sbCP[sb]||0;
+    var rem=bud-bw;var fcst=rem>0?(cp/rem).toFixed(1)+"X":"—";var live=rem>0?(lv/rem).toFixed(1)+"X":"—";
+    gsbTot+=bud;gsbBW+=bw;gsbLv+=lv;gsbCP+=cp;
+    var sbId='bud-sb-'+sb.replace(/\W+/g,'_');
+    html+='<tr style="font-weight:700;background:#f0f4f8"><td style="'+tdL+'">';
+    html+='<button onclick="(function(el){var rows=document.querySelectorAll(\'.\'+\''+sbId+'\');var open=rows[0]&&rows[0].style.display!==\'none\';rows.forEach(function(r){r.style.display=open?\'none\':\'\';});el.textContent=open?\'+\':\'−\';})(this)" style="width:18px;height:18px;line-height:1;font-size:13px;font-weight:700;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;margin-right:5px;padding:0">+</button>';
+    html+=sb+'</td>';
+    html+='<td style="'+td+'">'+(bud?fmtE(bud):"—")+'</td>';
+    html+='<td style="'+td+'">'+(bw?fmtE(bw):"—")+'</td>';
+    html+='<td style="'+td+';font-weight:700">'+fcst+'</td>';
+    QTRS.forEach(function(q){var qBW=sbBW_q[sb][q]||0,qLv=sbLv_q[sb][q]||0,qRem=bud-qBW;html+='<td style="'+td+';font-weight:700">'+(qRem>0?(qLv/qRem).toFixed(1)+"X":"—")+'</td>';});
+    html+='<td style="'+td+';font-weight:700">'+live+'</td></tr>';
+    // sol3 sub-rows — union of budget sol3, TCP ssa, pipeline sub-sol
+    var sol3Set=new Set(Object.keys(sbSol3Tgt[sb]||{}).concat(Object.keys(sbSol3YTD[sb]||{})).concat(Object.keys(sbSol3Bud[sb]||{})));
+    var sol3s=Array.from(sol3Set).sort();
+    sol3s.forEach(function(s3){
+      var s3tgt=sbSol3Tgt[sb][s3]||0,s3ytd=sbSol3YTD[sb][s3]||0,s3bud=sbSol3Bud[sb][s3]||0;
+      var s3bw=sbSol3BW[sb][s3]||0,s3lv=sbSol3Lv[sb][s3]||0,s3cp=sbSol3CP[sb][s3]||0;
+      var s3rem=s3bud-s3bw;var s3fcst=s3rem>0?(s3cp/s3rem).toFixed(1)+"X":"—";var s3live=s3rem>0?(s3lv/s3rem).toFixed(1)+"X":"—";
+      html+='<tr class="'+sbId+'" style="display:none;background:#fafcff"><td style="padding:3px 6px 3px 34px;font-size:11px;color:var(--mu);border-bottom:1px solid #f0f0f0">'+s3+'</td>';
+      html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(s3bud?fmtE(s3bud):"—")+'</td>';
+      html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(s3bw?fmtE(s3bw):"—")+'</td>';
+      html+='<td style="'+td+';font-size:11px">'+s3fcst+'</td>';
+      QTRS.forEach(function(q){
+        var qBW=sbSol3BW_q[sb][s3]?sbSol3BW_q[sb][s3][q]||0:0;
+        var qLv=sbSol3Lv_q[sb][s3]?sbSol3Lv_q[sb][s3][q]||0:0;
+        var qRem=s3bud-qBW;
+        html+='<td style="'+td+';font-size:11px">'+(qRem>0?(qLv/qRem).toFixed(1)+"X":"—")+'</td>';
+      });
+      html+='<td style="'+td+';font-size:11px">'+s3live+'</td></tr>';
+    });
+  });
+  var gsbRem=gsbTot-gsbBW;
+  html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td>';
+  html+='<td style="'+td+';font-weight:700">'+fmtE(gsbTot)+'</td>';
+  html+='<td style="'+td+';font-weight:700">'+fmtE(gsbBW)+'</td>';
+  html+='<td style="'+td+';font-weight:700">'+(gsbRem>0?(gsbCP/gsbRem).toFixed(1)+"X":"—")+'</td>';
+  QTRS.forEach(function(q){var qBW=SBS.reduce(function(s,sb){return s+(sbBW_q[sb][q]||0);},0);var qLv=SBS.reduce(function(s,sb){return s+(sbLv_q[sb][q]||0);},0);var qRem=gsbTot-qBW;html+='<td style="'+td+';font-weight:700">'+(qRem>0?(qLv/qRem).toFixed(1)+"X":"—")+'</td>';});
+  html+='<td style="'+td+';font-weight:700">'+(gsbRem>0?(gsbLv/gsbRem).toFixed(1)+"X":"—")+'</td>';
+  html+='</tr></tbody></table></div></div>';
+
+  // TCP Attainment by Sales Bag
+  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch">2026 TCP Target Attainment by Sales Bag (kEUR)</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:40%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup><thead><tr>';
+  html+='<th style="'+thL+'">Sales Bag</th>';
+  html+='<th style="'+thS+'">TCP Target</th>';
+  html+='<th style="'+thS+'">YTD Pipeline Created</th>';
+  html+='<th style="'+thS+'">Attainment</th>';
+  html+='</tr></thead><tbody>';
+  var gsbTcp=0,gsbYTD=0;
+  SBS.forEach(function(sb){
+    var tcp=sbTcpTgt[sb]||0,ytd=sbYTD[sb]||0;
+    var att=tcp>0?(ytd/tcp*100).toFixed(0)+"%":"—";
+    gsbTcp+=tcp;gsbYTD+=ytd;
+    var sbId2='bud-sb2-'+sb.replace(/\W+/g,'_');
+    html+='<tr style="font-weight:700;background:#f0f4f8"><td style="'+tdL+'">';
+    html+='<button onclick="(function(el){var rows=document.querySelectorAll(\'.\'+\''+sbId2+'\');var open=rows[0]&&rows[0].style.display!==\'none\';rows.forEach(function(r){r.style.display=open?\'none\':\'\';});el.textContent=open?\'+\':\'−\';})(this)" style="width:18px;height:18px;line-height:1;font-size:13px;font-weight:700;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;margin-right:5px;padding:0">+</button>';
+    html+=sb+'</td>';
+    html+='<td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td>';
+    html+='<td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td>';
+    html+='<td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td></tr>';
+    var sol3Set2=new Set(Object.keys(sbSol3Tgt[sb]||{}).concat(Object.keys(sbSol3YTD[sb]||{})).concat(Object.keys(sbSol3Bud[sb]||{})));
+    var sol3s=Array.from(sol3Set2).sort();
+    sol3s.forEach(function(s3){
+      var s3tgt=sbSol3Tgt[sb][s3]||0,s3ytd=sbSol3YTD[sb][s3]||0;
+      var s3att=s3tgt>0?(s3ytd/s3tgt*100).toFixed(0)+"%":"—";
+      html+='<tr class="'+sbId2+'" style="display:none;background:#fafcff">';
+      html+='<td style="padding:3px 6px 3px 34px;font-size:11px;color:var(--mu);border-bottom:1px solid #f0f0f0">'+s3+'</td>';
+      html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(s3tgt?fmtE(s3tgt):"—")+'</td>';
+      html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(s3ytd?fmtE(s3ytd):"—")+'</td>';
+      html+='<td style="'+td+';font-size:11px;font-weight:700;color:'+(s3tgt>0&&s3ytd/s3tgt>=1?'#0a6640':s3ytd/s3tgt>=0.75?'#804000':'#8B0000')+'">'+s3att+'</td></tr>';
+    });
+  });
+  html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td>';
+  html+='<td style="'+td+';font-weight:700">'+fmtE(gsbTcp)+'</td>';
+  html+='<td style="'+td+';font-weight:700">'+fmtE(gsbYTD)+'</td>';
+  html+='<td style="'+td+';font-weight:700">'+(gsbTcp>0?(gsbYTD/gsbTcp*100).toFixed(0)+"%":"—")+'</td>';
+  html+='</tr></tbody></table></div></div>';
+  html+='</div>';
+
   html+='</div>';
   page.innerHTML=html;
+  }catch(e){page.innerHTML='<div class="ap"><div class="nr"><p><b>Error:</b> '+e.message+'</p></div></div>';console.error(e);}
 }
 function renderOvw(){try{renderAnaTo("ovwPage",false,"o");}catch(e){var p=document.getElementById("ovwPage");if(p)p.innerHTML="<div class=\"nr\"><p><b>Error:</b> "+e.message+"</p></div>";console.error(e);}setTimeout(scaleContent,100);}
 function renderAna(){try{renderAnaTo("anaPage",true,"a");}catch(e){var p=document.getElementById("anaPage");if(p)p.innerHTML="<div class=\"nr\"><p><b>Error:</b> "+e.message+"</p></div>";console.error(e);}setTimeout(scaleContent,100);}
