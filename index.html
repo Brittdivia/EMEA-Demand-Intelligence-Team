@@ -936,6 +936,8 @@ function renderExe(){try{
   var _tcpTgt2026=(window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");});
   if(window._pipeQtrSet&&window._pipeQtrSet.size)_tcpTgt2026=_tcpTgt2026.filter(function(t){return window._pipeQtrSet.has(String(t.qtr||"").trim());});
   if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size)_tcpTgt2026=_tcpTgt2026.filter(function(t){return filters["Region Name (level 2)"].has(String(t.mu||"").trim());});
+  if(filters["Sales Bag"]&&filters["Sales Bag"].size)_tcpTgt2026=_tcpTgt2026.filter(function(t){var sa=String(t.sa||"").trim();return Array.from(filters["Sales Bag"]).some(function(sb){return sa===sb;});});
+  if(filters["Sub Sales Bag"]&&filters["Sub Sales Bag"].size)_tcpTgt2026=_tcpTgt2026.filter(function(t){var ssa=String(t.ssa||"").trim();return Array.from(filters["Sub Sales Bag"]).some(function(sb){return ssa===sb||ssa===sb.replace(/^.*? - /,"");});});
   var tcpTgt2026Total=_tcpTgt2026.reduce(function(a,t){return a+(parseFloat(t.target)||0);},0);
   var totEur=pr.reduce(function(a,r){return a+(parseFloat(r["Eur"]||0)||0);},0);
   var oppSet=new Set(pr.map(function(r){return String(r["Opportunity ID"]||"");}).filter(Boolean));
@@ -985,7 +987,7 @@ function renderExe(){try{
   // Pipeline row
   html+='<div class="krow">';
   html+=SL+'PIPELINE</div>';
-  html+='<div class="kpi kb"><div class="kl">Total Pipeline Created 2026</div><div class="kv">&euro;'+fmtE(allPipe2026Eur)+'</div><div class="ks">'+allPipe2026Opps.toLocaleString()+' opps &middot; all sources, excl. Excluded</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Total Pipeline Created 2026</div><div class="kv">&euro;'+fmtE(allPipe2026Eur)+'</div><div class="ks">'+allPipe2026Opps.toLocaleString()+' opportunities</div></div>';
   html+='<div class="kpi kb"><div class="kl">2026 TCP Target</div><div class="kv">&euro;'+fmtE(tcpTgt2026Total)+'</div><div class="ks">'+(tcpTgt2026Total>0?(allPipe2026Eur/tcpTgt2026Total*100).toFixed(0)+'% pipeline vs target':'n/a')+'</div></div>';
   if(window._exeDCMDetail){
     html+='<div class="kpi kb"><div class="kl">2026 Pipeline Contribution from DCMs</div><div class="kv" id="exe-total-pipeline-v">&euro;'+fmtE(totEur)+'</div><div class="ks">'+totOpps.toLocaleString()+' opportunities<br>all sources</div></div>';
@@ -1001,22 +1003,22 @@ function renderExe(){try{
   html+='</div>';
   p.innerHTML=html;
   // Charts: build canvases in html, then render after DOM update
-  html+='<div class="cc" style="margin-top:16px"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>Total Pipeline Created 2026 vs TCP Target — by Region</div><div style="display:flex;gap:3px"><button id="exe-pipe-btn-l2" onclick="window.pipeRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-pipe-btn-l3" onclick="window.pipeRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:340px"><canvas id="exe-reg-pipeline"></canvas></div></div>';
+  html+='<div style="display:flex;gap:16px;margin-top:16px">';
+  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>Total Pipeline Created 2026 vs TCP Target — by Region</div><div style="display:flex;gap:3px"><button id="exe-pipe-btn-l2" onclick="window.pipeRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-pipe-btn-l3" onclick="window.pipeRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:320px"><canvas id="exe-reg-pipeline"></canvas></div></div>';
+  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch">Total Pipeline Created 2026 vs TCP Target — by TCP Source</div><div style="padding:8px;height:320px"><canvas id="exe-src-pipeline"></canvas></div></div>';
+  html+='</div>';
   html+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px">';
   // Chart 2: Product breakdown by region  
   html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>Product Breakdown &mdash; by Sales Bag<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) by Sub Sales Bag &middot; product family stacked</span><br><span id="exe-prod-info" style="font-size:10px;font-weight:400;color:var(--mu)"></span></div><div style="display:flex;gap:3px"><button id="exe-prod-btn-l2" onclick="window.prodRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-prod-btn-l3" onclick="window.prodRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:260px"><canvas id="exe-prod-mu"></canvas></div></div>';
   html+='</div>';
   html+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px">';
-  html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>IAC &mdash; by Market Unit<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) by IAC classification per MU</span></div><div style="display:flex;gap:3px"><button id="exe-iac-btn-l2" onclick="window.iacRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-iac-btn-l3" onclick="window.iacRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:260px"><canvas id="exe-iac-mu"></canvas></div></div>';
+  html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>IAC / DRM &mdash; by Market Unit<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) by classification per MU</span></div><div style="display:flex;gap:3px"><button id="exe-iac-btn-iac" onclick="window.iacViewMode=\'iac\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">IAC</button><button id="exe-iac-btn-drm" onclick="window.iacViewMode=\'drm\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">DRM</button><button id="exe-iac-btn-l2" onclick="window.iacRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-iac-btn-l3" onclick="window.iacRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:260px"><canvas id="exe-iac-mu"></canvas></div></div>';
   html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>Handovers - by Market Unit (with HO rate)<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Handed over vs pending HO pipeline (k&euro;)</span></div><div style="display:flex;gap:3px"><button id="exe-hod-btn-l2" onclick="window.hodRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-hod-btn-l3" onclick="window.hodRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:260px"><canvas id="exe-hod-mu"></canvas></div></div>';
   html+='</div>';
   html+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px">';
   html+='<div class="cc" style="flex:0 0 35%;min-width:300px"><div class="ch">ACV &euro; - by TCP Source of Demand<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline ACV (k&euro;) by TCP source stacked per Market Unit</span></div><div style="padding:8px;height:280px"><canvas id="exe-sde-mu"></canvas></div></div>';
   html+='<div class="cc" style="flex:0 0 30%;min-width:260px"><div class="ch">ACV &euro; - SDE Engaged vs Not Engaged<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline ACV (k&euro;) SDE sourced vs other per Market Unit</span></div><div style="padding:8px;height:280px"><canvas id="exe-sde-split"></canvas></div></div>';
   html+='<div class="cc" style="flex:1;min-width:240px"><div class="ch">ACV € - by SDE Engagement Type<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline ACV by engagement type &mdash; all stages (k&euro;)</span></div><div style="padding:8px;height:280px"><canvas id="exe-tcp-pie"></canvas></div></div>';
-  html+='</div>';
-  html+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px">';
-  html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch">ACV &euro; - by DRM<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline breakdown by DRM stage per MU</span></div><div style="padding:8px;height:280px"><canvas id="exe-drm-mu"></canvas></div></div>';
   html+='</div>';
   p.innerHTML=html;
   // Now render charts
@@ -1121,13 +1123,18 @@ function renderExe(){try{
         options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},plugins:{legend:{display:true,position:"bottom",labels:{font:{size:9},boxWidth:10}},datalabels:{display:true}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
-    // Chart 3: C-Field vs C-Digital by Market Unit
+    // Chart 3: IAC or DRM by Market Unit
     var _iacRegMode=window.iacRegMode||"l2";
+    var _iacViewMode=window.iacViewMode||"iac";
+    var btnIacIAC=document.getElementById("exe-iac-btn-iac");var btnIacDRM=document.getElementById("exe-iac-btn-drm");
     var btnIacL2=document.getElementById("exe-iac-btn-l2");var btnIacL3=document.getElementById("exe-iac-btn-l3");
+    if(btnIacIAC){btnIacIAC.style.background=_iacViewMode==="iac"?"#00144A":"";btnIacIAC.style.color=_iacViewMode==="iac"?"#fff":"";}
+    if(btnIacDRM){btnIacDRM.style.background=_iacViewMode==="drm"?"#00144A":"";btnIacDRM.style.color=_iacViewMode==="drm"?"#fff":"";}
     if(btnIacL2){btnIacL2.style.background=_iacRegMode==="l2"?"#00144A":"";btnIacL2.style.color=_iacRegMode==="l2"?"#fff":"";}
     if(btnIacL3){btnIacL3.style.background=_iacRegMode==="l3"?"#00144A":"";btnIacL3.style.color=_iacRegMode==="l3"?"#fff":"";}
     var iacRegs={};
-    var iacOrder=["C-Field","C-Digital","E-High Touch","Partner-Driven"];
+    var iacOrder=_iacViewMode==="drm"?drmOrder:["C-Field","C-Digital","E-High Touch","Partner-Driven"];
+    var iacColors=_iacViewMode==="drm"?drmOrder.map(function(d){return drmColors[d]||PAL[2];}): [PAL[4],PAL[0],PAL[6],PAL[2]];
     pr2.forEach(function(p){
       var w=String(p["Opp Campaign ID"]||"").trim();
       var oppL2p=String(p["Region Lvl 2"]||"").trim();
@@ -1135,14 +1142,20 @@ function renderExe(){try{
       var reg=_iacRegMode==="l3"?(oppL3p||oppL2p):wbsToReg[w];if(!reg)return;
       if(_activeCalRegs.size){if(_iacRegMode==="l2"&&!_activeCalRegs.has(reg))return;if(_iacRegMode==="l3"&&!_activeCalRegs.has(oppL2p))return;}
       var eur=parseFloat(p["Eur"]||0)||0;
-      var campRow=filtered.find(function(r){return String(r["Campaign/WBS Code"]||"").trim()===w;});
-      var iac=campRow?String(campRow["IAC"]||""):"";
-      var iacs=iac.split(",").map(function(s){return s.trim();}).filter(Boolean);
-      iacs.forEach(function(iv){
-        if(iacOrder.indexOf(iv)===-1)return;
+      if(_iacViewMode==="drm"){
+        var drm=String(p["DRM Category"]||"").trim();if(!drm||iacOrder.indexOf(drm)===-1)return;
         if(!iacRegs[reg])iacRegs[reg]={};
-        iacRegs[reg][iv]=(iacRegs[reg][iv]||0)+eur;
-      });
+        iacRegs[reg][drm]=(iacRegs[reg][drm]||0)+eur;
+      } else {
+        var campRow=filtered.find(function(r){return String(r["Campaign/WBS Code"]||"").trim()===w;});
+        var iac=campRow?String(campRow["IAC"]||""):"";
+        var iacs=iac.split(",").map(function(s){return s.trim();}).filter(Boolean);
+        iacs.forEach(function(iv){
+          if(iacOrder.indexOf(iv)===-1)return;
+          if(!iacRegs[reg])iacRegs[reg]={};
+          iacRegs[reg][iv]=(iacRegs[reg][iv]||0)+eur;
+        });
+      }
     });
     var regOrder3=Object.keys(iacRegs).sort(function(a,b){
       var ta=Object.values(iacRegs[a]).reduce(function(s,v){return s+v;},0);
@@ -1150,14 +1163,13 @@ function renderExe(){try{
       return tb-ta;
     });
     var regLabels3=regOrder3.map(fmtReg);
-    var iacColors=[PAL[4],PAL[0],PAL[6],PAL[2]];
     var c3=document.getElementById("exe-iac-mu");
     if(c3){
       if(charts["exe-iac-mu"])charts["exe-iac-mu"].destroy();
       charts["exe-iac-mu"]=new Chart(c3.getContext("2d"),{
         type:"bar",
-        data:{labels:regLabels3,datasets:iacOrder.map(function(iac,si){
-          return{label:iac,data:regOrder3.map(function(reg){return iacRegs[reg]?iacRegs[reg][iac]||0:0;}),backgroundColor:iacColors[si],borderWidth:0};
+        data:{labels:regLabels3,datasets:iacOrder.map(function(cat,si){
+          return{label:cat,data:regOrder3.map(function(reg){return iacRegs[reg]?iacRegs[reg][cat]||0:0;}),backgroundColor:iacColors[si],borderWidth:0};
         })},
         options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
@@ -1369,6 +1381,8 @@ function renderExe(){try{
     var tgtDetail=(window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");});
     if(window._pipeQtrSet&&window._pipeQtrSet.size)tgtDetail=tgtDetail.filter(function(t){return window._pipeQtrSet.has(String(t.qtr||"").trim());});
     if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size)tgtDetail=tgtDetail.filter(function(t){return filters["Region Name (level 2)"].has(String(t.mu||"").trim());});
+    if(filters["Sales Bag"]&&filters["Sales Bag"].size)tgtDetail=tgtDetail.filter(function(t){var sa=String(t.sa||"").trim();return Array.from(filters["Sales Bag"]).some(function(sb){return sa===sb;});});
+    if(filters["Sub Sales Bag"]&&filters["Sub Sales Bag"].size)tgtDetail=tgtDetail.filter(function(t){var ssa=String(t.ssa||"").trim();return Array.from(filters["Sub Sales Bag"]).some(function(sb){return ssa===sb||ssa===sb.replace(/^.*? - /,"");});});
     var regTgt={};
     tgtDetail.forEach(function(t){
       var mu=String(t.mu||"").trim();if(!mu)return;
@@ -1412,6 +1426,63 @@ function renderExe(){try{
     }
     // Clean up old separate targets chart if it exists
     if(charts["exe-tcp-targets-mu"]){charts["exe-tcp-targets-mu"].destroy();delete charts["exe-tcp-targets-mu"];}
+    // Pipeline vs TCP Target by TCP Source
+    var SRC_MAP={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};
+    var SRC_ORDER=["SDE","Marketing","Sales","Partner","CSM"];
+    var srcPipe={},srcTgt={};
+    SRC_ORDER.forEach(function(s){srcPipe[s]=0;srcTgt[s]=0;});
+    pipeData.forEach(function(p){
+      if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+      if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
+      if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
+      if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){
+        var _rf3=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim();}));
+        if(!_rf3.has(String(p["Region Lvl 2"]||"").trim()))return;
+      }
+      var raw=String(p["TCP Pipeline Source Desc"]||"").trim();
+      var src=SRC_MAP[raw];if(!src)return;
+      srcPipe[src]=(srcPipe[src]||0)+(parseFloat(p["Eur"]||0)||0);
+    });
+    var tgtDetailSrc=(window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");});
+    if(window._pipeQtrSet&&window._pipeQtrSet.size)tgtDetailSrc=tgtDetailSrc.filter(function(t){return window._pipeQtrSet.has(String(t.qtr||"").trim());});
+    if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size)tgtDetailSrc=tgtDetailSrc.filter(function(t){return filters["Region Name (level 2)"].has(String(t.mu||"").trim());});
+    if(filters["Sales Bag"]&&filters["Sales Bag"].size)tgtDetailSrc=tgtDetailSrc.filter(function(t){var sa=String(t.sa||"").trim();return Array.from(filters["Sales Bag"]).some(function(sb){return sa===sb;});});
+    if(filters["Sub Sales Bag"]&&filters["Sub Sales Bag"].size)tgtDetailSrc=tgtDetailSrc.filter(function(t){var ssa=String(t.ssa||"").trim();return Array.from(filters["Sub Sales Bag"]).some(function(sb){return ssa===sb||ssa===sb.replace(/^.*? - /,"");});});
+    tgtDetailSrc.forEach(function(t){
+      var src=String(t.src||"").trim();if(!src||SRC_ORDER.indexOf(src)===-1)return;
+      srcTgt[src]=(srcTgt[src]||0)+(parseFloat(t.target)||0);
+    });
+    var cSrcPipe=document.getElementById("exe-src-pipeline");
+    if(cSrcPipe){
+      if(charts["exe-src-pipeline"])charts["exe-src-pipeline"].destroy();
+      charts["exe-src-pipeline"]=new Chart(cSrcPipe.getContext("2d"),{
+        type:"bar",
+        data:{
+          labels:SRC_ORDER,
+          datasets:[
+            {label:"Pipeline Created 2026",data:SRC_ORDER.map(function(s){return Math.round(srcPipe[s]||0);}),backgroundColor:PAL[0],borderWidth:0,
+              datalabels:{display:true,anchor:"center",align:"center",formatter:function(v,ctx){
+                var tgt=srcTgt[SRC_ORDER[ctx.dataIndex]]||0;
+                if(!v||!tgt)return"";return(v/tgt*100).toFixed(0)+"%";
+              },font:{size:9,weight:"bold"},color:"#fff"}},
+            {label:"TCP Target",data:SRC_ORDER.map(function(s){return srcTgt[s]?Math.round(srcTgt[s]):null;}),
+              type:"line",borderColor:PAL[1],backgroundColor:"transparent",borderWidth:2,pointRadius:4,pointBackgroundColor:PAL[1],
+              order:0,datalabels:{display:true,anchor:"end",align:"top",formatter:function(v){return v?fmtE(v):"";},font:{size:9,weight:"bold"},color:PAL[1]}}
+          ]
+        },
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:true,position:"top",labels:{font:{size:11},boxWidth:12}},
+            datalabels:{display:true},
+            tooltip:{callbacks:{label:function(ctx){
+              var s=SRC_ORDER[ctx.dataIndex];
+              if(ctx.dataset.label==="TCP Target")return"TCP Target: €"+fmtE(srcTgt[s]||0);
+              var tgt=srcTgt[s]||0;
+              return"Pipeline: €"+fmtE(srcPipe[s]||0)+(tgt>0?" ("+((srcPipe[s]||0)/tgt*100).toFixed(0)+"% of target)":"");
+            }}}},
+          scales:{x:{grid:{display:false},ticks:{font:{size:11}}},
+            y:{ticks:{callback:function(v){return"€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
+      });
+    }
   })();
 }catch(e){var _ep=document.getElementById("exePage");if(_ep)_ep.innerHTML="<div class=\"nr\"><p><b>Error:</b> "+e.message+"</p></div>";console.error(e);}
 }
