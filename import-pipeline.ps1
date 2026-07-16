@@ -108,6 +108,7 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
     $fields += ',"Solution Area (L1)":"'     + (EscapeJson (GetByHeader 'Solution Area (L1)'))        + '"'
     $fields += ',"Sub-Solution Area (L2)":"' + (EscapeJson (GetByHeader 'Sub-Solution Area (L2)'))    + '"'
     $fields += ',"IAC (Engagement Model)":"' + (EscapeJson (GetByHeader 'IAC (Engagement Model)'))    + '"'
+    $fields += ',"SDE Engagement Type":"'    + (EscapeJson (GetByHeader 'SDE Engagement Type'))       + '"'
     $fields += ',"Opp Description":"'        + (EscapeJson (GetByHeader 'Opp Description'))           + '"'
 
     $pipeRows.Add('{' + $fields + '}')
