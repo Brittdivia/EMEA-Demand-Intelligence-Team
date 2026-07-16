@@ -220,6 +220,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
 <script src="data-seqstates-tags.js?v=20260706"></script>
 <script src="data-seqstates-flags.js?v=20260706"></script>
 <script src="data-targets.js?v=20260714"></script>
+<script src="data-budget.js?v=20260716"></script>
 </head>
 <body>
 <header>
@@ -234,6 +235,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
 <div class="tbar">
   <button class="tbtn on" onclick="switchTab(&#39;exe&#39;)">Executive Summary</button>
   <button class="tbtn" onclick="switchTab(&#39;ovw&#39;)">Strategy Overview</button>
+  <button class="tbtn" onclick="switchTab(&#39;bud&#39;)">Budget</button>
   <button class="tbtn" onclick="switchTab(&#39;cal&#39;)">EMEA Campaign Calendar</button>
 </div>
 <div class="tbar-sub" id="tbar-sub">
@@ -255,6 +257,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
 <div class="panel" id="p-pdel"><div class="ap" id="pdelPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-pip"><div class="ap" id="pipPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-dtr"><div class="ap" id="dtrPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
+<div class="panel" id="p-bud"><div class="ap" id="budPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-cal">
   <div class="tb2">
     
@@ -366,7 +369,7 @@ var _accFiltersSaved=null;
 var DETAIL_TABS={"ana":"Campaign and Pipeline Details","pip":"Pipeline Details","out":"Outreach Details","pdel":"Prospect Tracking","cal":"EMEA Campaign Calendar","dtr":"Data Tracking"};
 function switchTab(t){
   activeTab=t;
-  var tabs=["exe","ovw","cal"];document.querySelectorAll(".tbtn").forEach(function(b,i){b.classList.toggle("on",tabs[i]===t);});
+  var tabs=["exe","ovw","bud","cal"];document.querySelectorAll(".tbtn").forEach(function(b,i){b.classList.toggle("on",tabs[i]===t);});
   var subTabs=["ana","out","pdel","dtr"];document.querySelectorAll(".tbtn-sub").forEach(function(b,i){b.classList.toggle("on",subTabs[i]===t);});
   document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
   var pnl=document.getElementById("p-"+t);if(pnl)pnl.classList.add("on");
@@ -378,6 +381,7 @@ function switchTab(t){
   if(t==="pdel")renderPdel();
   if(t==="pip")renderPip();
   if(t==="dtr")renderDtr();
+  if(t==="bud")renderBud();
   setTimeout(function(){FD.forEach(function(f){syncBtn(f.k);});syncDrmBtn();syncEurBtn();},50);
 }
 
@@ -411,7 +415,18 @@ function buildFbar(){
     +"<div style=\"padding:10px 12px\"><input type=\"number\" id=\"eur-input\" placeholder=\"e.g. 1\" value=\""+(eurMinFilter||"")+"\" style=\"width:100%;border:1px solid var(--bd);border-radius:var(--r);padding:5px 8px;font-size:12px;outline:none\"/><button onclick=\"applyEurFilter()\" style=\"margin-top:8px;width:100%;padding:6px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-size:12px\">Apply</button></div>"
     +"</div>";
   div.parentNode.insertBefore(eurBtn,div);
-  FD.forEach(function(f){syncBtn(f.k);});syncEurBtn();
+  // Pipeline Creation Quarter filter (multi-select, 2026 only)
+  if(!window._pipeQtrSet)window._pipeQtrSet=new Set();
+  var pipeQtrs=Array.from(new Set(pipeData.map(function(p){return String(p["Create Quarter"]||"").trim();}).filter(function(q){return q.startsWith("2026");}))). sort();
+  var pqN=window._pipeQtrSet.size;
+  var pqBtn=document.createElement("div");pqBtn.className="fbi";pqBtn.id="pipeqtr-fbi";
+  var pqLabel="Pipeline Quarter"+(pqN?" ("+pqN+")":"");
+  pqBtn.innerHTML="<button class=\"fbtn"+(pqN?" on":"")+"\" id=\"pipeqtr-fbtn\" onclick=\"togglePipeQtrDD()\">"+pqLabel+" <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
+    +"<div class=\"fdd\" id=\"pipeqtr-fdd\"><div class=\"fdh\"><span class=\"fdt\">Pipeline Creation Quarter</span><button class=\"fdc\" onclick=\"window._pipeQtrSet=new Set();if(activeTab==='exe')renderExe();buildFbar();\">Clear</button></div>"
+    +"<div class=\"fdo\" id=\"pipeqtr-fdo\">"
+    +pipeQtrs.map(function(q){var chk=window._pipeQtrSet.has(q)?"checked":"";return"<label class=\"dopt\"><input type=\"checkbox\" "+chk+" value=\""+q+"\" onchange=\"if(this.checked)window._pipeQtrSet.add(this.value);else window._pipeQtrSet.delete(this.value);if(activeTab==='exe')renderExe();buildFbar();\"/><span class=\"ot\">"+q+"</span></label>";}).join("")
+    +"</div></div>";
+  div.parentNode.insertBefore(pqBtn,div);
 }
 
 function buildOpts(key){
@@ -565,6 +580,11 @@ function removeTag(key,val){
 }
 
 // DRM filter
+function togglePipeQtrDD(){
+  var dd=document.getElementById("pipeqtr-fdd"),btn=document.getElementById("pipeqtr-fbtn");
+  var was=dd.classList.contains("on");closeAllDD();
+  if(!was){dd.classList.add("on");btn.classList.add("on");}
+}
 function toggleEurFilter(){
   var dd=document.getElementById("eur-fdd"),btn=document.getElementById("eur-fbtn");
   var was=dd.classList.contains("on");closeAllDD();
@@ -971,7 +991,9 @@ function renderExe(){try{
   html+='</div>';
   p.innerHTML=html;
   // Charts: build canvases in html, then render after DOM update
-  html+='<div style="display:flex;gap:16px;flex-wrap:wrap">';
+  html+='<div class="cc" style="margin-top:16px"><div class="ch">Pipeline Created by Region — Calendar vs Non-Calendar Contribution</div><div style="padding:8px;height:320px"><canvas id="exe-reg-pipeline"></canvas></div></div>';
+  html+='<div class="cc" style="margin-top:16px"><div class="ch">2026 TCP Target kEUR — by Market Unit</div><div style="padding:8px;height:280px"><canvas id="exe-tcp-targets-mu"></canvas></div></div>';
+  html+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px">';
   // Chart 2: Product breakdown by region  
   html+='<div class="cc" style="flex:1;min-width:340px"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>Product Breakdown &mdash; by Sales Bag<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) by Sub Sales Bag &middot; product family stacked</span><br><span id="exe-prod-info" style="font-size:10px;font-weight:400;color:var(--mu)"></span></div><div style="display:flex;gap:3px"><button id="exe-prod-btn-l2" onclick="window.prodRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-prod-btn-l3" onclick="window.prodRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:260px"><canvas id="exe-prod-mu"></canvas></div></div>';
   html+='</div>';
@@ -1313,8 +1335,207 @@ function renderExe(){try{
           scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
+    // Pipeline Created by Region — Calendar vs Non-Calendar
+    var _calWBSSet=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
+    var regPipe={};
+    pipeData.forEach(function(p){
+      if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+      if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
+      var wbs=String(p["Opp Campaign ID"]||"").trim();
+      var regRaw=String(p["Region Lvl 2"]||"").trim();if(!regRaw)return;
+      // Calendar-linked rows: use calendar L2 (finer breakdown); non-calendar: use pipeline L2
+      var inCal=_calWBSSet.has(wbs);
+      var reg=inCal?(wbsToReg[wbs]||regRaw):regRaw;
+      // Match non-calendar regions to calendar keys where possible
+      if(!inCal&&drmRegData["CS "+regRaw])reg="CS "+regRaw;
+      else if(!inCal&&drmRegData[regRaw])reg=regRaw;
+      var eur=parseFloat(p["Eur"]||0)||0;if(!eur)return;
+      if(!regPipe[reg])regPipe[reg]={cal:0,other:0};
+      if(inCal)regPipe[reg].cal+=eur;else regPipe[reg].other+=eur;
+    });
+    // Use same region order as ACV by DRM chart, then append any pipeline-only regions
+    var regPipeOrder=regOrder7.filter(function(r){return regPipe[r];});
+    Object.keys(regPipe).forEach(function(r){if(regPipeOrder.indexOf(r)===-1)regPipeOrder.push(r);});
+    var cRegPipe=document.getElementById("exe-reg-pipeline");
+    if(cRegPipe){
+      if(charts["exe-reg-pipeline"])charts["exe-reg-pipeline"].destroy();
+      charts["exe-reg-pipeline"]=new Chart(cRegPipe.getContext("2d"),{
+        type:"bar",
+        data:{
+          labels:regPipeOrder.map(fmtReg),
+          datasets:[
+            {label:"Calendar-linked",data:regPipeOrder.map(function(r){return regPipe[r]?regPipe[r].cal:0;}),backgroundColor:PAL[0],borderWidth:0},
+            {label:"Not in Calendar",data:regPipeOrder.map(function(r){return regPipe[r]?regPipe[r].other:0;}),backgroundColor:PAL[3],borderWidth:0}
+          ]
+        },
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:true,position:"top",labels:{font:{size:11},boxWidth:12}},
+            datalabels:{display:true,anchor:"center",align:"center",formatter:function(v,ctx){
+              var total=ctx.chart.data.datasets.reduce(function(s,ds){return s+(ds.data[ctx.dataIndex]||0);},0);
+              if(!total||v===0)return"";
+              var pct=v/total*100;return pct>=15?pct.toFixed(0)+"%":"";
+            },font:{size:9,weight:"bold"},color:"#fff"}},
+          scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},
+            y:{stacked:true,ticks:{callback:function(v){return"€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
+      });
+    }
+    // TCP Targets by MU chart — target vs pipeline built
+    var tgtDetail=(window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");});
+    if(window._pipeQtrSet&&window._pipeQtrSet.size)tgtDetail=tgtDetail.filter(function(t){return window._pipeQtrSet.has(String(t.qtr||"").trim());});
+    var muTgt={};
+    tgtDetail.forEach(function(t){
+      var mu=String(t.mu||"").trim();if(!mu)return;
+      muTgt[mu]=(muTgt[mu]||0)+(parseFloat(t.target)||0);
+    });
+    // Build pipeline by MU — match "CS UKI" target to "UKI" pipeline Region Lvl 2
+    var muPipe={};
+    pipeData.forEach(function(p){
+      if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+      if(!String(p["Create Quarter"]||"").trim().startsWith("2026"))return;
+      if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
+      var regRaw=String(p["Region Lvl 2"]||"").trim();if(!regRaw)return;
+      var mu="CS "+regRaw;
+      var eur=parseFloat(p["Eur"]||0)||0;if(!eur)return;
+      muPipe[mu]=(muPipe[mu]||0)+eur;
+    });
+    var muOrder=Object.keys(muTgt).sort(function(a,b){return muTgt[b]-muTgt[a];});
+    var cTgt=document.getElementById("exe-tcp-targets-mu");
+    if(cTgt){
+      if(charts["exe-tcp-targets-mu"])charts["exe-tcp-targets-mu"].destroy();
+      charts["exe-tcp-targets-mu"]=new Chart(cTgt.getContext("2d"),{
+        type:"bar",
+        data:{
+          labels:muOrder,
+          datasets:[
+            {label:"2026 Pipeline Built",data:muOrder.map(function(m){return Math.round(muPipe[m]||0);}),backgroundColor:PAL[0],borderWidth:0,order:1,
+              datalabels:{display:true,anchor:"center",align:"center",formatter:function(v,ctx){
+                var tgt=muTgt[muOrder[ctx.dataIndex]]||0;
+                if(!tgt||!v)return"";
+                var pct=v/tgt*100;return pct>=8?pct.toFixed(0)+"%":"";
+              },font:{size:9,weight:"bold"},color:"#fff"}},
+            {label:"Remaining to Target",data:muOrder.map(function(m){var t=muTgt[m]||0,p=muPipe[m]||0;return Math.round(Math.max(0,t-p));}),backgroundColor:"rgba(0,0,0,0.10)",borderWidth:0,order:2,
+              datalabels:{display:false}}
+          ]
+        },
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:true,position:"top",labels:{font:{size:11},boxWidth:12}},
+            datalabels:{display:true},
+            tooltip:{callbacks:{label:function(ctx){
+              var mu=muOrder[ctx.dataIndex];
+              var tgt=muTgt[mu]||0,pipe=muPipe[mu]||0;
+              var pct=tgt>0?(pipe/tgt*100).toFixed(1)+"%":"n/a";
+              if(ctx.datasetIndex===0)return"Pipeline: €"+fmtE(pipe)+" ("+pct+" of target)";
+              return"Remaining: €"+fmtE(Math.max(0,tgt-pipe));
+            }}}},
+          scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},
+            y:{stacked:true,ticks:{callback:function(v){return"€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
+      });
+    }
   })();
 }catch(e){var _ep=document.getElementById("exePage");if(_ep)_ep.innerHTML="<div class=\"nr\"><p><b>Error:</b> "+e.message+"</p></div>";console.error(e);}
+}
+function renderBud(){
+  var page=document.getElementById("budPage");if(!page)return;
+  var data=(window.BUDGET_DATA||[]).filter(function(r){return String(r.qtr||"").startsWith("2026");});
+  if(!data.length){page.innerHTML='<div class="ap"><div class="nr"><p>Budget data not loaded.</p></div></div>';return;}
+
+  var REGS=["Benelux","France","Italy","MEA North","MEA South","Nordic","Southern Europe","UKI"];
+  var QTRS=["2026-Q1","2026-Q2","2026-Q3","2026-Q4"];
+  var IAC_ORDER=["C-Field","C-Digital","E-High Touch","Partner-Driven"];
+  var PAL2=["#0070F2","#1ABC9C","#F0AB00","#C87000","#8B0000","#7B61FF","#00B8F5","#E8175D"];
+
+  // KPIs
+  var total2026=data.reduce(function(s,r){return s+(r.eur||0);},0);
+  var byQtr={};QTRS.forEach(function(q){byQtr[q]=data.filter(function(r){return r.qtr===q;}).reduce(function(s,r){return s+(r.eur||0);},0);});
+
+  // By Region x Quarter table
+  var regQtr={};
+  REGS.forEach(function(rg){regQtr[rg]={};QTRS.forEach(function(q){regQtr[rg][q]=0;});});
+  data.forEach(function(r){if(regQtr[r.reg])regQtr[r.reg][r.qtr]=(regQtr[r.reg][r.qtr]||0)+(r.eur||0);});
+
+  // By Region x IAC table
+  var regIac={};
+  REGS.forEach(function(rg){regIac[rg]={};IAC_ORDER.forEach(function(i){regIac[rg][i]=0;});});
+  data.forEach(function(r){if(regIac[r.reg]&&r.iac)regIac[r.reg][r.iac]=(regIac[r.reg][r.iac]||0)+(r.eur||0);});
+
+  var thS="background:#012931;color:#fff;padding:6px 10px;text-align:right;font-size:11px;font-weight:700;white-space:nowrap;border-right:1px solid #1B4F5A";
+  var thL="background:#012931;color:#fff;padding:6px 10px;text-align:left;font-size:11px;font-weight:700;white-space:nowrap;border-right:1px solid #1B4F5A";
+  var td="padding:5px 10px;text-align:right;font-size:12px;border-bottom:1px solid #f0f0f0";
+  var tdL="padding:5px 10px;text-align:left;font-size:12px;font-weight:600;border-bottom:1px solid #f0f0f0";
+  var totRow="background:#f7f7f7;font-weight:700";
+
+  var html='<div class="ap"><h2 style="color:var(--dk);margin:0 0 12px">2026 Budget</h2>';
+
+  // KPI boxes
+  html+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">';
+  html+='<div class="kpi kb"><div class="kl">Total 2026 Budget</div><div class="kv">€'+fmtE(total2026*1000)+'</div><div class="ks">kEUR ×1000 = €'+fmtE(total2026)+'k</div></div>';
+  QTRS.forEach(function(q){html+='<div class="kpi kb"><div class="kl">'+q+'</div><div class="kv">€'+fmtE(byQtr[q]*1000)+'</div><div class="ks">kEUR</div></div>';});
+  html+='</div>';
+
+  // Budget by Region × Quarter
+  html+='<div class="cc" style="margin-bottom:20px"><div class="ch">2026 Budget by Region &amp; Quarter (kEUR)</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<th style="'+thL+'">Region</th>';
+  QTRS.forEach(function(q){html+='<th style="'+thS+'">'+q+'</th>';});
+  html+='<th style="'+thS+'">Total</th></tr></thead><tbody>';
+  var colTotals={};QTRS.forEach(function(q){colTotals[q]=0;});var grandTot=0;
+  REGS.forEach(function(rg){
+    var rowTot=QTRS.reduce(function(s,q){return s+(regQtr[rg][q]||0);},0);
+    QTRS.forEach(function(q){colTotals[q]=(colTotals[q]||0)+(regQtr[rg][q]||0);});
+    grandTot+=rowTot;
+    html+='<tr><td style="'+tdL+'">'+rg+'</td>';
+    QTRS.forEach(function(q){html+='<td style="'+td+'">'+(regQtr[rg][q]?fmtE(regQtr[rg][q]):"—")+'</td>';});
+    html+='<td style="'+td+';font-weight:700">'+fmtE(rowTot)+'</td></tr>';
+  });
+  html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td>';
+  QTRS.forEach(function(q){html+='<td style="'+td+';font-weight:700">'+fmtE(colTotals[q])+'</td>';});
+  html+='<td style="'+td+';font-weight:700">'+fmtE(grandTot)+'</td></tr>';
+  html+='</tbody></table></div></div>';
+
+  // Budget by Region × IAC
+  html+='<div class="cc" style="margin-bottom:20px"><div class="ch">2026 Budget by Region &amp; IAC Classification (kEUR)</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<th style="'+thL+'">Region</th>';
+  IAC_ORDER.forEach(function(i){html+='<th style="'+thS+'">'+i+'</th>';});
+  html+='<th style="'+thS+'">Total</th></tr></thead><tbody>';
+  var iacColTots={};IAC_ORDER.forEach(function(i){iacColTots[i]=0;});var iacGrand=0;
+  REGS.forEach(function(rg){
+    var rowTot=IAC_ORDER.reduce(function(s,i){return s+(regIac[rg][i]||0);},0);
+    IAC_ORDER.forEach(function(i){iacColTots[i]=(iacColTots[i]||0)+(regIac[rg][i]||0);});
+    iacGrand+=rowTot;
+    html+='<tr><td style="'+tdL+'">'+rg+'</td>';
+    IAC_ORDER.forEach(function(i){html+='<td style="'+td+'">'+(regIac[rg][i]?fmtE(regIac[rg][i]):"—")+'</td>';});
+    html+='<td style="'+td+';font-weight:700">'+fmtE(rowTot)+'</td></tr>';
+  });
+  html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td>';
+  IAC_ORDER.forEach(function(i){html+='<td style="'+td+';font-weight:700">'+fmtE(iacColTots[i])+'</td>';});
+  html+='<td style="'+td+';font-weight:700">'+fmtE(iacGrand)+'</td></tr>';
+  html+='</tbody></table></div></div>';
+
+  // Chart: Budget by Region stacked by Quarter
+  html+='<div class="cc" style="margin-bottom:20px"><div class="ch">2026 Budget by Region (kEUR) — stacked by Quarter</div><div style="padding:8px;height:320px"><canvas id="bud-reg-qtr"></canvas></div></div>';
+
+  html+='</div>';
+  page.innerHTML=html;
+
+  // Render chart
+  var ctx=document.getElementById("bud-reg-qtr");
+  if(ctx){
+    if(charts["bud-reg-qtr"])charts["bud-reg-qtr"].destroy();
+    var qtrColors=[PAL[0],PAL[2],PAL[1],PAL[3]];
+    charts["bud-reg-qtr"]=new Chart(ctx.getContext("2d"),{
+      type:"bar",
+      data:{
+        labels:REGS,
+        datasets:QTRS.map(function(q,i){
+          return{label:q,data:REGS.map(function(rg){return Math.round(regQtr[rg][q]||0);}),backgroundColor:qtrColors[i],borderWidth:0,
+            datalabels:{display:false}};
+        })
+      },
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:true,position:"top",labels:{font:{size:11},boxWidth:12}},datalabels:{display:false}},
+        scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:11}}},
+          y:{stacked:true,ticks:{callback:function(v){return fmtE(v)+"k";}},grid:{color:"#f0f0f0"}}}}
+    });
+  }
 }
 function renderOvw(){try{renderAnaTo("ovwPage",false,"o");}catch(e){var p=document.getElementById("ovwPage");if(p)p.innerHTML="<div class=\"nr\"><p><b>Error:</b> "+e.message+"</p></div>";console.error(e);}setTimeout(scaleContent,100);}
 function renderAna(){try{renderAnaTo("anaPage",true,"a");}catch(e){var p=document.getElementById("anaPage");if(p)p.innerHTML="<div class=\"nr\"><p><b>Error:</b> "+e.message+"</p></div>";console.error(e);}setTimeout(scaleContent,100);}

@@ -23,7 +23,7 @@ function Get-CellValue($cell) {
     return $v
 }
 
-# Sheet1 = Region summary
+# Sheet1 = Region summary (pivot) = sheet1.xml
 $sh1 = New-Object System.Xml.XmlDocument
 $sh1.Load("$extPath\xl\worksheets\sheet1.xml")
 $rows1 = $sh1.worksheet.sheetData.row
@@ -44,7 +44,7 @@ for ($i = 1; $i -lt $rows1.Count; $i++) {
 
 Write-Host "Sheet1 targets: $($entries.Count) regions"
 
-# Sheet2 = Detailed breakdown (Region/MU/SA/SSA/Quarter/Source)
+# Sheet2 = Detailed breakdown = sheet2.xml
 $sh2 = New-Object System.Xml.XmlDocument
 $sh2.Load("$extPath\xl\worksheets\sheet2.xml")
 $rows2 = $sh2.worksheet.sheetData.row
