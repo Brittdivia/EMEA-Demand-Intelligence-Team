@@ -1492,9 +1492,11 @@ function renderExe(){try{
         var eur=parseFloat(p["Eur"]||0)||0;
         _srcTotals[src]=(_srcTotals[src]||0)+eur;
         if(hasHod(p["SDE Handover Date"]))_srcHO[src]=(_srcHO[src]||0)+eur;
+        // SDE Engagement Type drill-down for all sources — skip blank/No Value
         var eng=String(p["SDE Engagement Type"]||"").trim();
-        eng=(eng===""||eng==="(No Value)"||eng==="(no value)")?"Not Set":eng;
-        if(!_srcEngType[src])_srcEngType[src]={};_srcEngType[src][eng]=(_srcEngType[src][eng]||0)+eur;
+        if(eng&&eng!=="(No Value)"&&eng!=="(no value)"){
+          if(!_srcEngType[src])_srcEngType[src]={};_srcEngType[src][eng]=(_srcEngType[src][eng]||0)+eur;
+        }
       });
       var _srcOrder=["SDE","Marketing","Sales","Partner","CSM","Other"].filter(function(s){return _srcTotals[s];});
       var _srcGrand=_srcOrder.reduce(function(s,k){return s+_srcTotals[k];},0);
@@ -1502,6 +1504,7 @@ function renderExe(){try{
       var thT="background:#012931;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap";
       var thTR=thT+";text-align:right";
       var tdT="padding:5px 10px;font-size:12px;border-bottom:1px solid #f0f0f0";
+      function fmtT(n){return n>=1000?(n/1000).toFixed(1)+"M":n>=1?n.toFixed(0)+"K":n.toFixed(0);}
       var tbl='<div class="cc"><div class="ch">Total Pipeline Created 2026 — by TCP Source</div><table style="width:100%;border-collapse:collapse"><thead><tr>';
       tbl+='<th style="'+thT+'">TCP Source</th><th style="'+thTR+'">Pipeline Created (kEUR)</th><th style="'+thTR+'">% of Total</th><th style="'+thTR+'">Handed Over (kEUR)</th><th style="'+thTR+'">HO %</th></tr></thead><tbody>';
       _srcOrder.forEach(function(s){
@@ -1511,14 +1514,14 @@ function renderExe(){try{
         var engTypes=_srcEngType[s]?Object.keys(_srcEngType[s]).sort():[];
         var srcId='pipe-src-'+s.replace(/\W+/g,'_');
         var btn=engTypes.length?'<button onclick="(function(el){var rows=document.querySelectorAll(\'.\'+\''+srcId+'\');var open=rows[0]&&rows[0].style.display!==\'none\';rows.forEach(function(r){r.style.display=open?\'none\':\'\';});el.textContent=open?\'+\':\'−\';})(this)" style="width:16px;height:16px;line-height:1;font-size:12px;font-weight:700;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;margin-right:4px;padding:0">+</button>':'';
-        tbl+='<tr><td style="'+tdT+'">'+btn+s+'</td><td style="'+tdT+';text-align:right">'+fmtE(v)+'</td><td style="'+tdT+';text-align:right">'+pct+'</td><td style="'+tdT+';text-align:right">'+(ho?fmtE(ho):"—")+'</td><td style="'+tdT+';text-align:right">'+hoPct+'</td></tr>';
+        tbl+='<tr><td style="'+tdT+'">'+btn+s+'</td><td style="'+tdT+';text-align:right">'+fmtT(v)+'</td><td style="'+tdT+';text-align:right">'+pct+'</td><td style="'+tdT+';text-align:right">'+(ho?fmtT(ho):"—")+'</td><td style="'+tdT+';text-align:right">'+hoPct+'</td></tr>';
         engTypes.forEach(function(eng){
           var ev=_srcEngType[s][eng]||0;
           var epct=v>0?(ev/v*100).toFixed(1)+"%":"—";
-          tbl+='<tr class="'+srcId+'" style="display:none;background:#fafcff"><td style="padding:3px 6px 3px 28px;font-size:11px;color:var(--mu);border-bottom:1px solid #f0f0f0">'+eng+'</td><td style="'+tdT+';font-size:11px;text-align:right">'+fmtE(ev)+'</td><td style="'+tdT+';font-size:11px;text-align:right">'+epct+'</td><td style="'+tdT+';font-size:11px;text-align:right">—</td><td style="'+tdT+';font-size:11px;text-align:right">—</td></tr>';
+          tbl+='<tr class="'+srcId+'" style="display:none;background:#fafcff"><td style="padding:3px 6px 3px 28px;font-size:11px;color:var(--mu);border-bottom:1px solid #f0f0f0">'+eng+'</td><td style="'+tdT+';font-size:11px;text-align:right">'+fmtT(ev)+'</td><td style="'+tdT+';font-size:11px;text-align:right">'+epct+'</td><td style="'+tdT+';font-size:11px;text-align:right">—</td><td style="'+tdT+';font-size:11px;text-align:right">—</td></tr>';
         });
       });
-      tbl+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT+'">Total</td><td style="'+tdT+';text-align:right">'+fmtE(_srcGrand)+'</td><td style="'+tdT+';text-align:right">100%</td><td style="'+tdT+';text-align:right">'+fmtE(_srcHOGrand)+'</td><td style="'+tdT+';text-align:right">'+(_srcGrand>0?(_srcHOGrand/_srcGrand*100).toFixed(0)+"%":"—")+'</td></tr>';
+      tbl+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT+'">Total</td><td style="'+tdT+';text-align:right">'+fmtT(_srcGrand)+'</td><td style="'+tdT+';text-align:right">100%</td><td style="'+tdT+';text-align:right">'+fmtT(_srcHOGrand)+'</td><td style="'+tdT+';text-align:right">'+(_srcGrand>0?(_srcHOGrand/_srcGrand*100).toFixed(0)+"%":"—")+'</td></tr>';
       tbl+='</tbody></table></div>';
       _srcTbl.innerHTML=tbl;
     }
