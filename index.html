@@ -1498,6 +1498,7 @@ function renderBud(){
 
   var REGS=["Benelux","France","Italy","MEA North","MEA South","Nordic","Southern Europe","UKI"];
   var QTRS=["2026-Q1","2026-Q2","2026-Q3","2026-Q4"];
+  function fmtQtr(q){var m=String(q).match(/(\d{4})-Q(\d)/);return m?"Q"+m[2]+m[1].slice(2):q;}
   var IAC_ORDER=["C-Field","C-Digital","E-High Touch","Partner-Driven"];
   var PAL2=["#0070F2","#1ABC9C","#F0AB00","#C87000","#8B0000","#7B61FF","#00B8F5","#E8175D"];
 
@@ -1521,50 +1522,90 @@ function renderBud(){
   var tdL="padding:5px 10px;text-align:left;font-size:12px;font-weight:600;border-bottom:1px solid #f0f0f0";
   var totRow="background:#f7f7f7;font-weight:700";
 
-  var html='<div class="ap"><h2 style="color:var(--dk);margin:0 0 12px">2026 Budget</h2>';
-
-  // KPI boxes
-  html+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">';
-  html+='<div class="kpi kb"><div class="kl">Total 2026 Budget</div><div class="kv">€'+fmtE(total2026)+'</div><div class="ks">kEUR</div></div>';
-  QTRS.forEach(function(q){html+='<div class="kpi kb"><div class="kl">'+q+'</div><div class="kv">€'+fmtE(byQtr[q])+'</div><div class="ks">kEUR</div></div>';});
-  html+='</div>';
-
-  // Budget by Region — Total + Booked/Won + TCP Target
+  // Pipeline metrics — by region and by region+source
+  var _pipeRegNorm={"benelux":"Benelux","france":"France","italy":"Italy","mea north":"MEA North","mea south":"MEA South","nordic":"Nordic","southern europe":"Southern Europe","uki":"UKI"};
+  var SRCS=["SDE","Marketing","Sales","Partner","CSM"];
+  var _pipeSrcMap2={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};
   var regBW={},regPipeYTD={},regForecast={},regLive={},regCommProb={};
+  var regBW_q={},regLive_q={};
+  var rsBW={},rsLv={},rsCP={},rsBW_q={},rsLv_q={};
+  REGS.forEach(function(rg){
+    regBW_q[rg]={};regLive_q[rg]={};
+    rsBW[rg]={};rsLv[rg]={};rsCP[rg]={};rsBW_q[rg]={};rsLv_q[rg]={};
+    SRCS.forEach(function(s){rsBW[rg][s]=0;rsLv[rg][s]=0;rsCP[rg][s]=0;rsBW_q[rg][s]={};rsLv_q[rg][s]={};
+      QTRS.forEach(function(q){regBW_q[rg][q]=0;regLive_q[rg][q]=0;rsBW_q[rg][s][q]=0;rsLv_q[rg][s][q]=0;});
+    });
+  });
   pipeData.forEach(function(p){
     if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
-    var reg=String(p["Region Lvl 2"]||"").trim();if(!reg)return;
+    var regRaw=String(p["Region Lvl 2"]||"").trim();if(!regRaw)return;
+    var reg=_pipeRegNorm[regRaw.toLowerCase()]||regRaw;
     var eur=parseFloat(p["Eur"]||0)||0;
     var drm=String(p["DRM Category"]||"").trim();
     var createQ=String(p["Create Quarter"]||"");
     var closeQ=String(p["Closing Qtr"]||"");
-    // YTD Pipeline Created 2026
+    var srcRaw=String(p["TCP Pipeline Source Desc"]||"").trim();
+    var src=_pipeSrcMap2[srcRaw];
     if(createQ.startsWith("2026"))regPipeYTD[reg]=(regPipeYTD[reg]||0)+eur;
-    // Booked/Won created 2026
     if(createQ.startsWith("2026")&&drm==="Booked/Won")regBW[reg]=(regBW[reg]||0)+eur;
-    // Forecast closing 2026 (Booked/Won + Probable + Committed)
     if(closeQ.startsWith("2026")&&(drm==="Booked/Won"||drm==="Probable"||drm==="Committed"))regForecast[reg]=(regForecast[reg]||0)+eur;
-    // Live closing 2026 (Committed + Probable + Upside)
     if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable"||drm==="Upside"))regLive[reg]=(regLive[reg]||0)+eur;
-    // Committed + Probable only (for forecast coverage numerator)
     if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable"))regCommProb[reg]=(regCommProb[reg]||0)+eur;
+    if(QTRS.indexOf(closeQ)>-1){
+      if(!regBW_q[reg])regBW_q[reg]={};if(!regLive_q[reg])regLive_q[reg]={};
+      if(drm==="Booked/Won")regBW_q[reg][closeQ]=(regBW_q[reg][closeQ]||0)+eur;
+      if(drm==="Committed"||drm==="Probable"||drm==="Upside")regLive_q[reg][closeQ]=(regLive_q[reg][closeQ]||0)+eur;
+    }
+    // Region+source accumulators
+    if(src&&rsBW[reg]){
+      if(closeQ.startsWith("2026")&&drm==="Booked/Won")rsBW[reg][src]=(rsBW[reg][src]||0)+eur;
+      if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable"||drm==="Upside"))rsLv[reg][src]=(rsLv[reg][src]||0)+eur;
+      if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable"))rsCP[reg][src]=(rsCP[reg][src]||0)+eur;
+      if(QTRS.indexOf(closeQ)>-1){
+        if(drm==="Booked/Won")rsBW_q[reg][src][closeQ]=(rsBW_q[reg][src][closeQ]||0)+eur;
+        if(drm==="Committed"||drm==="Probable"||drm==="Upside")rsLv_q[reg][src][closeQ]=(rsLv_q[reg][src][closeQ]||0)+eur;
+      }
+    }
   });
-  var regTcpTgt={};
+  var regTcpTgt={},rsTcpTgt={},rsYTD={};
+  REGS.forEach(function(rg){rsTcpTgt[rg]={};rsYTD[rg]={};SRCS.forEach(function(s){rsTcpTgt[rg][s]=0;rsYTD[rg][s]=0;});});
   (window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");}).forEach(function(t){
-    var mu=String(t.mu||"").trim().replace(/^CS /,"");if(!mu)return;
+    var muRaw=String(t.mu||"").trim().replace(/^CS /,"");if(!muRaw)return;
+    var mu=_pipeRegNorm[muRaw.toLowerCase()]||muRaw;
     regTcpTgt[mu]=(regTcpTgt[mu]||0)+(parseFloat(t.target)||0);
+    var src=String(t.src||"").trim();
+    if(src&&rsTcpTgt[mu])rsTcpTgt[mu][src]=(rsTcpTgt[mu][src]||0)+(parseFloat(t.target)||0);
   });
-  html+='<div class="cc" style="margin-bottom:20px"><div class="ch">2026 Budget by Region (kEUR)</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  // Per region+source YTD pipeline
+  pipeData.forEach(function(p){
+    if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+    if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
+    var regRaw=String(p["Region Lvl 2"]||"").trim();if(!regRaw)return;
+    var reg=_pipeRegNorm[regRaw.toLowerCase()]||regRaw;
+    var srcRaw=String(p["TCP Pipeline Source Desc"]||"").trim();
+    var src=_pipeSrcMap2[srcRaw];if(!src)return;
+    if(rsYTD[reg])rsYTD[reg][src]=(rsYTD[reg][src]||0)+(parseFloat(p["Eur"]||0)||0);
+  });
+
+  var html='<div class="ap"><h2 style="color:var(--dk);margin:0 0 12px">2026 Budget</h2>';
+
+  // KPI boxes
+  var _totalFc=Object.values(regForecast).reduce(function(s,v){return s+v;},0);
+  var _totalLv=Object.values(regLive).reduce(function(s,v){return s+v;},0);
+  html+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">';
+  html+='<div class="kpi kb"><div class="kl">Total 2026 Budget</div><div class="kv">€'+fmtE(total2026)+'</div><div class="ks">kEUR</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Total Forecast Closing 2026</div><div class="kv">€'+fmtE(_totalFc)+'</div><div class="ks">Booked/Won + Probable + Committed</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Total Live Closing 2026</div><div class="kv">€'+fmtE(_totalLv)+'</div><div class="ks">Committed + Probable + Upside</div></div>';
+  html+='</div>';
+  html+='<div style="display:flex;gap:16px;margin-bottom:20px;align-items:flex-start">';
+  html+='<div class="cc" style="flex:0 0 65%;min-width:0"><div class="ch">2026 Budget by Region (kEUR)</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
   html+='<th style="'+thL+'">Region</th>';
   html+='<th style="'+thS+'">Budget</th>';
-  html+='<th style="'+thS+'">Booked / Won 2026</th>';
-  html+='<th style="'+thS+'">Forecast Closing 2026</th>';
-  html+='<th style="'+thS+'">Live Closing 2026</th>';
-  html+='<th style="'+thS+'">TCP Target</th>';
-  html+='<th style="'+thS+'">YTD Pipeline Created</th>';
-  html+='<th style="'+thS+'">Attainment</th>';
+  html+='<th style="'+thS+'">Won 2026</th>';
   html+='<th style="'+thS+'">Fcst Cvg</th>';
-  html+='<th style="'+thS+'">Live Cvg</th></tr></thead><tbody>';
+  QTRS.forEach(function(q){html+='<th style="'+thS+'">Live Cvg '+fmtQtr(q)+'</th>';});
+  html+='<th style="'+thS+'">Live Cvg 2026</th>';
+  html+='</tr></thead><tbody>';
   var grandTot=0,grandBW=0,grandTcp=0,grandYTD=0,grandFc=0,grandLv=0,grandCP=0;
   REGS.forEach(function(rg){
     var rowTot=QTRS.reduce(function(s,q){return s+(regQtr[rg][q]||0);},0);
@@ -1575,33 +1616,100 @@ function renderBud(){
     var fc=regForecast[pipeReg]||0;
     var lv=regLive[pipeReg]||0;
     var cp=regCommProb[pipeReg]||0;
-    var att=tcp>0?(ytd/tcp*100).toFixed(0)+"%":"—";
     var rem=rowTot-bw;var fcstCvg=rem>0?(cp/rem).toFixed(1)+"X":"—";
     var liveCvg=rem>0?(lv/rem).toFixed(1)+"X":"—";
     grandTot+=rowTot;grandBW+=bw;grandTcp+=tcp;grandYTD+=ytd;grandFc+=fc;grandLv+=lv;grandCP+=cp;
-    html+='<tr><td style="'+tdL+'">'+rg+'</td>';
+    var rgId='bud-src-'+rg.replace(/\s+/g,'_');
+    html+='<tr style="font-weight:700;background:#f0f4f8"><td style="'+tdL+'">';
+    html+='<button onclick="(function(el){var rows=document.querySelectorAll(\'.\'+\''+rgId+'\');var open=rows[0]&&rows[0].style.display!==\'none\';rows.forEach(function(r){r.style.display=open?\'none\':\'\';});el.textContent=open?\'+\':\'−\';})(this)" style="width:18px;height:18px;line-height:1;font-size:13px;font-weight:700;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;margin-right:5px;padding:0">+</button>';
+    html+=rg+'</td>';
     html+='<td style="'+td+';font-weight:700">'+fmtE(rowTot)+'</td>';
-    html+='<td style="'+td+'">'+(bw?fmtE(bw):"—")+'</td>';
-    html+='<td style="'+td+'">'+(fc?fmtE(fc):"—")+'</td>';
-    html+='<td style="'+td+'">'+(lv?fmtE(lv):"—")+'</td>';
-    html+='<td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td>';
-    html+='<td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td>';
-    html+='<td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td>';
+    html+='<td style="'+td+';font-weight:700">'+(bw?fmtE(bw):"—")+'</td>';
     html+='<td style="'+td+';font-weight:700">'+fcstCvg+'</td>';
-    html+='<td style="'+td+';font-weight:700">'+liveCvg+'</td></tr>';
+    QTRS.forEach(function(q){
+      var qBW=regBW_q[pipeReg]?regBW_q[pipeReg][q]||0:0;
+      var qLv=regLive_q[pipeReg]?regLive_q[pipeReg][q]||0:0;
+      var qBudget=regQtr[rg][q]||0;
+      var qRem=qBudget-qBW;
+      html+='<td style="'+td+';font-weight:700">'+(qRem>0?(qLv/qRem).toFixed(1)+"X":"—")+'</td>';
+    });
+    html+='<td style="'+td+';font-weight:700">'+liveCvg+'</td>';
+    html+='</tr>';
+    // Source sub-rows — hidden by default
+    SRCS.forEach(function(src,si){
+      var sbw=rsBW[rg]?rsBW[rg][src]||0:0;
+      var slv=rsLv[rg]?rsLv[rg][src]||0:0;
+      var scp=rsCP[rg]?rsCP[rg][src]||0:0;
+      var sRem=rowTot-sbw;
+      var sFcst=sRem>0?(scp/sRem).toFixed(1)+"X":"—";
+      var sLive=sRem>0?(slv/sRem).toFixed(1)+"X":"—";
+      html+='<tr class="'+rgId+'" style="display:none;background:#fafcff"><td style="padding:3px 6px 3px 34px;font-size:11px;color:var(--mu);border-bottom:1px solid #f0f0f0">'+src+'</td>';
+      html+='<td style="'+td+';font-size:11px;color:var(--mu)">—</td>';
+      html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(sbw?fmtE(sbw):"—")+'</td>';
+      html+='<td style="'+td+';font-size:11px">'+sFcst+'</td>';
+      QTRS.forEach(function(q){
+        var sqBW=rsBW_q[rg]&&rsBW_q[rg][src]?rsBW_q[rg][src][q]||0:0;
+        var sqLv=rsLv_q[rg]&&rsLv_q[rg][src]?rsLv_q[rg][src][q]||0:0;
+        var sqRem=rowTot-sqBW;
+        html+='<td style="'+td+';font-size:11px">'+(sqRem>0?(sqLv/sqRem).toFixed(1)+"X":"—")+'</td>';
+      });
+      html+='<td style="'+td+';font-size:11px">'+sLive+'</td>';
+      html+='</tr>';
+    });
   });
+  var grandRem=grandTot-grandBW;
   html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td>';
   html+='<td style="'+td+';font-weight:700">'+fmtE(grandTot)+'</td>';
   html+='<td style="'+td+';font-weight:700">'+fmtE(grandBW)+'</td>';
-  html+='<td style="'+td+';font-weight:700">'+fmtE(grandFc)+'</td>';
-  html+='<td style="'+td+';font-weight:700">'+fmtE(grandLv)+'</td>';
-  html+='<td style="'+td+';font-weight:700">'+fmtE(grandTcp)+'</td>';
-  html+='<td style="'+td+';font-weight:700">'+fmtE(grandYTD)+'</td>';
-  html+='<td style="'+td+';font-weight:700">'+(grandTcp>0?(grandYTD/grandTcp*100).toFixed(0)+"%":"—")+'</td>';
-  var grandRem=grandTot-grandBW;
   html+='<td style="'+td+';font-weight:700">'+(grandRem>0?(grandCP/grandRem).toFixed(1)+"X":"—")+'</td>';
-  html+='<td style="'+td+';font-weight:700">'+(grandRem>0?(grandLv/grandRem).toFixed(1)+"X":"—")+'</td></tr>';
-  html+='</tbody></table></div></div>';
+  QTRS.forEach(function(q){
+    var qBW=REGS.reduce(function(s,rg){var k=rg.replace(/^CS /,"");return s+(regBW_q[k]?regBW_q[k][q]||0:0);},0);
+    var qLv=REGS.reduce(function(s,rg){var k=rg.replace(/^CS /,"");return s+(regLive_q[k]?regLive_q[k][q]||0:0);},0);
+    var qBudget=REGS.reduce(function(s,rg){return s+(regQtr[rg][q]||0);},0);
+    var qRem=qBudget-qBW;
+    html+='<td style="'+td+';font-weight:700">'+(qRem>0?(qLv/qRem).toFixed(1)+"X":"—")+'</td>';
+  });
+  html+='<td style="'+td+';font-weight:700">'+(grandRem>0?(grandLv/grandRem).toFixed(1)+"X":"—")+'</td>';
+  html+='</tr></tbody></table></div></div>';
+
+  // TCP Attainment table
+  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch">2026 TCP Target Attainment by Region (kEUR)</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<th style="'+thL+'">Region</th>';
+  html+='<th style="'+thS+'">TCP Target</th>';
+  html+='<th style="'+thS+'">YTD Pipeline Created</th>';
+  html+='<th style="'+thS+'">Attainment</th>';
+  html+='</tr></thead><tbody>';
+  var grandTcp2=0,grandYTD2=0;
+  REGS.forEach(function(rg){
+    var pipeReg=rg.replace(/^CS /,"");
+    var tcp=regTcpTgt[pipeReg]||0;
+    var ytd=regPipeYTD[pipeReg]||0;
+    var att=tcp>0?(ytd/tcp*100).toFixed(0)+"%":"—";
+    grandTcp2+=tcp;grandYTD2+=ytd;
+    var rgId2='bud-att-'+rg.replace(/\s+/g,'_');
+    html+='<tr style="font-weight:700;background:#f0f4f8"><td style="'+tdL+'">';
+    html+='<button onclick="(function(el){var rows=document.querySelectorAll(\'.\'+\''+rgId2+'\');var open=rows[0]&&rows[0].style.display!==\'none\';rows.forEach(function(r){r.style.display=open?\'none\':\'\';});el.textContent=open?\'+\':\'−\';})(this)" style="width:18px;height:18px;line-height:1;font-size:13px;font-weight:700;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;margin-right:5px;padding:0">+</button>';
+    html+=rg+'</td>';
+    html+='<td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td>';
+    html+='<td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td>';
+    html+='<td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td></tr>';
+    SRCS.forEach(function(src){
+      var stcp=rsTcpTgt[rg]?rsTcpTgt[rg][src]||0:0;
+      var sytd=rsYTD[rg]?rsYTD[rg][src]||0:0;
+      var satt=stcp>0?(sytd/stcp*100).toFixed(0)+"%":"—";
+      html+='<tr class="'+rgId2+'" style="display:none;background:#fafcff">';
+      html+='<td style="padding:3px 6px 3px 34px;font-size:11px;color:var(--mu);border-bottom:1px solid #f0f0f0">'+src+'</td>';
+      html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(stcp?fmtE(stcp):"—")+'</td>';
+      html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(sytd?fmtE(sytd):"—")+'</td>';
+      html+='<td style="'+td+';font-size:11px;font-weight:700;color:'+(stcp>0&&sytd/stcp>=1?'#0a6640':sytd/stcp>=0.75?'#804000':'#8B0000')+'">'+satt+'</td></tr>';
+    });
+  });
+  html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td>';
+  html+='<td style="'+td+';font-weight:700">'+fmtE(grandTcp2)+'</td>';
+  html+='<td style="'+td+';font-weight:700">'+fmtE(grandYTD2)+'</td>';
+  html+='<td style="'+td+';font-weight:700">'+(grandTcp2>0?(grandYTD2/grandTcp2*100).toFixed(0)+"%":"—")+'</td>';
+  html+='</tr></tbody></table></div></div>';
+  html+='</div>';
 
   html+='</div>';
   page.innerHTML=html;
