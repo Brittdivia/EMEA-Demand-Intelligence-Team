@@ -2390,8 +2390,8 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
   }
   html3+=(pageId!=="ovwPage"?"<div class=\"sec\">Campaign and Pipeline Details</div>":"");
   html3+=(pageId!=="ovwPage"?"<div style=\"display:flex;gap:12px;margin-bottom:20px;align-items:stretch\">"
-    +"<div class=\"cc\" id=\"card-"+pfx+"-re2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span id=\"re2-title\" style=\"font-size:12px;font-weight:600;white-space:nowrap\">Pipeline Results - by Region</span><div style=\"display:flex;gap:3px;flex-wrap:wrap;flex-shrink:0\"><button id=\"re2-vm-reg\" onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Region</button><button id=\"re2-vm-sb\" onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sales Bag</button><button id=\"re2-vm-mc\" onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Mastercode</button><button id=\"re2-vm-sod\" onclick=\"window.re2ViewMode=&apos;sod&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">SoD</button><button id=\"re2-vm-dat\" onclick=\"window.re2ViewMode=&apos;dat&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DAT</button><button id=\"re2-vm-dg\" onclick=\"window.re2ViewMode=&apos;dg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DG Program</button><button id=\"re2-vm-type\" onclick=\"window.re2ViewMode=&apos;type&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Type</button><button id=\"re2-sort-eur\" onclick=\"window.re2Sort=&apos;eur&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort &euro;</button><button id=\"re2-sort-opps\" onclick=\"window.re2Sort=&apos;opps&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort Opps</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2\"></canvas></div></div>"
-    +"<div class=\"cc\" id=\"card-"+pfx+"-re2SB2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span id=\"roc-title\" style=\"font-size:12px;font-weight:600;white-space:nowrap\">Return on Campaign - by Region</span><div style=\"display:flex;gap:3px;flex-shrink:0\"><button id=\"roc-dim-reg\" onclick=\"window.rocDim=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Region</button><button id=\"roc-dim-sb\" onclick=\"window.rocDim=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sales Bag</button><button id=\"roc-dim-mc\" onclick=\"window.rocDim=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Mastercode</button><button id=\"roc-dim-sod\" onclick=\"window.rocDim=&apos;sod&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">SoD</button><button id=\"roc-dim-dat\" onclick=\"window.rocDim=&apos;dat&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DAT</button><button id=\"roc-dim-dg\" onclick=\"window.rocDim=&apos;dg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DG Program</button><button id=\"roc-dim-type\" onclick=\"window.rocDim=&apos;type&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Type</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2SB2\"></canvas></div></div>"
+    +"<div class=\"cc\" id=\"card-"+pfx+"-re2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;flex-direction:column;gap:4px\"><div style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span id=\"re2-title\" style=\"font-size:12px;font-weight:600;white-space:nowrap\">Pipeline Results - by Region</span><div style=\"display:flex;gap:3px;flex-shrink:0\"><button id=\"re2-vm-acv\" onclick=\"window.re2DataMode=&apos;acv&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">ACV/Opps</button><button id=\"re2-vm-tgt\" onclick=\"window.re2DataMode=&apos;tgt&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Target Pipeline</button></div></div><div style=\"display:flex;gap:3px;flex-wrap:wrap\"><button id=\"re2-vm-reg\" onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Region</button><button id=\"re2-vm-sb\" onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sales Bag</button><button id=\"re2-vm-mc\" onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Mastercode</button><button id=\"re2-vm-sod\" onclick=\"window.re2ViewMode=&apos;sod&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">SoD</button><button id=\"re2-vm-dat\" onclick=\"window.re2ViewMode=&apos;dat&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DAT</button><button id=\"re2-vm-dg\" onclick=\"window.re2ViewMode=&apos;dg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DG Program</button><button id=\"re2-vm-type\" onclick=\"window.re2ViewMode=&apos;type&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Type</button><button id=\"re2-sort-eur\" onclick=\"window.re2Sort=&apos;eur&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort &euro;</button><button id=\"re2-sort-opps\" onclick=\"window.re2Sort=&apos;opps&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort Opps</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2\"></canvas></div></div>"
+    +"<div class=\"cc\" id=\"card-"+pfx+"-re2SB2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div class=\"ch\"><span id=\"roc-title\" style=\"font-size:12px;font-weight:600\">Return on Campaign - by Region</span></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2SB2\"></canvas></div></div>"
     +"</div>":"");
   // DAT Support chart removed - accessible via Type chart toggle
   // All 5 charts only on anaPage
@@ -2729,7 +2729,12 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
   }
   var rEr=Object.entries(rE).sort(function(a,b){return b[1]-a[1];});
   var re2ViewMode=window.re2ViewMode||"reg";
+  var re2DataMode=window.re2DataMode||"acv";
   var re2SortMode=window.re2Sort||"eur";
+  var btnAcv=document.getElementById("re2-vm-acv");var btnTgt=document.getElementById("re2-vm-tgt");
+  if(btnAcv){btnAcv.style.background=re2DataMode==="acv"?"#012931":"";btnAcv.style.color=re2DataMode==="acv"?"#fff":"";}
+  if(btnTgt){btnTgt.style.background=re2DataMode==="tgt"?"#012931":"";btnTgt.style.color=re2DataMode==="tgt"?"#fff":"";}
+
   // Build re2 data for any dimension
   var re2Eur2={},re2Ops2={},re2Camp2={};
   data.forEach(function(r){
@@ -2775,17 +2780,45 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
   var re2Camps=re2Sorted2.map(function(r){return re2Camp2[r[0]]||0;});
   var re2YW=Math.min(Math.max(re2Labs.reduce(function(a,l){return Math.max(a,String(l).length);},0)*7,100),180);
   var re2LabsWithCamps=re2Labs.map(function(l,i){return l+"  ("+re2Camps[i]+")";});
+  // Build # Accounts by dimension for target pipeline mode
+  var re2AcctsMap={};
+  if(re2DataMode==="tgt"){
+    data.forEach(function(r){
+      var keys=[];
+      if(re2ViewMode==="reg")keys=[String(r["Region Name (level 2)"]||"").trim()];
+      else if(re2ViewMode==="sb")keys=String(r["Sales Bag"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);
+      else if(re2ViewMode==="sod")keys=String(r["SoD"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);
+      else if(re2ViewMode==="dat")keys=[String(r["Digital Assets team support"]||"").trim()];
+      else if(re2ViewMode==="dg")keys=[String(r["DG Program"]||"").trim()];
+      else if(re2ViewMode==="type")keys=[String(r["Campaign Type"]||"").trim()];
+      var accts=parseFloat(r["# Accounts"]||0)||0;
+      keys.forEach(function(k){if(k)re2AcctsMap[k]=(re2AcctsMap[k]||0)+accts;});
+    });
+  }
   var re2TgtData=re2Sorted2.map(function(r){return _re2TcpTgt[r[0]]||null;});
-  mkC(pfx+"-re2",{type:"bar",data:{labels:re2LabsWithCamps,datasets:[
+  var re2AcctsData=re2Sorted2.map(function(r){return re2AcctsMap[r[0]]||0;});
+  // Predicted opp count = TCP Target / avg deal size per dimension
+  var re2PredOpps=re2Sorted2.map(function(r){
+    var tgt=_re2TcpTgt[r[0]]||0;
+    var eur=re2Eur2[r[0]]||0;
+    var opps=re2Ops2[r[0]]?re2Ops2[r[0]].size:0;
+    var avgDeal=opps>0?eur/opps:0;
+    return avgDeal>0?Math.round(tgt/avgDeal):null;
+  });
+  var re2Datasets=re2DataMode==="tgt"?[
+    {label:"TCP Target (kEUR)",data:re2TgtData,backgroundColor:PAL[3]+"88",borderColor:PAL[3],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v?fmtE(v):"";},font:{size:11},color:PAL[3]}},
+    {label:"Predicted Opps",data:re2PredOpps,backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v?v.toLocaleString()+" opps (pred.)":"";},font:{size:10},color:"#000"}},
+    {label:"# Accounts Targeted",data:re2AcctsData,backgroundColor:PAL[0]+"88",borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v?v.toLocaleString()+" accts":"";},font:{size:10},color:PAL[0]}}
+  ]:[
     {label:"Pipeline €",data:re2Eur,backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:11},color:"#07838F"}},
-    {label:"# Opps",data:re2Opps,backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v+" opps";},font:{size:11},color:"#000"}},
-    re2ViewMode==="reg"?{label:"TCP Target",data:re2TgtData,type:"scatter",backgroundColor:PAL[3],borderColor:PAL[3],pointRadius:6,pointStyle:"triangle",datalabels:{display:true,anchor:"end",align:"right",formatter:function(v){return v?fmtE(v):"";},font:{size:9},color:PAL[3]}}:null
-  ].filter(Boolean)},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
+    {label:"# Opps",data:re2Opps,backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v+" opps";},font:{size:11},color:"#000"}}
+  ];
+  mkC(pfx+"-re2",{type:"bar",data:{labels:re2LabsWithCamps,datasets:re2Datasets},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
     plugins:{legend:{display:true,position:"top",labels:{font:{size:10},boxWidth:10,padding:8}},datalabels:{display:true}},
     layout:{padding:{right:60,bottom:0,top:4}},
     scales:{x:{display:false},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:12},autoSkip:false},afterFit:function(s){s.width=re2YW+40;}}}}},re2ViewMode==="reg"?"Region Name (level 2)":null);
   // Return on Campaign - by Region/SB/MC/SoD/DAT/DG/Type: ACV/camps and opps/camps
-  var rocDim=window.rocDim||"reg";
+  var rocDim=window.re2ViewMode||"reg";
   var rocDimLabels={"reg":"Region","sb":"Sales Bag","mc":"Mastercode","sod":"SoD","dat":"DAT Support","dg":"DG Program","type":"Type"};
   ["reg","sb","mc","sod","dat","dg","type"].forEach(function(d){var b=document.getElementById("roc-dim-"+d);if(b){b.style.background=rocDim===d?"#012931":"";b.style.color=rocDim===d?"#fff":"";}});
   var rocTitleEl=document.getElementById("roc-title");
