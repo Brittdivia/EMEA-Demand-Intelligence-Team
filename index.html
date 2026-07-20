@@ -4180,7 +4180,7 @@ function renderPdel(){
     // Apply all filters
     if(pf.campWBS){rows=rows.filter(function(r){return r.wbs===pf.campWBS;});}
     if(pf.ct||pf.src||pf.executor||pf.persona||pf.touched||pf.connType||pf.cf51){rows=rows.filter(function(r){
-      return(!pf.ct||r.ct===pf.ct)&&(!pf.src||r.src===pf.src)&&(!pf.executor||r.executor===pf.executor)&&(!pf.persona||r.persona===pf.persona)&&(!pf.touched||r.touchedStatus===pf.touched)&&(!pf.connType||r.connType===pf.connType)&&(!pf.cf51||r.cf51.split(",").map(function(v){return v.trim();}).indexOf(pf.cf51)>-1);
+      return(!pf.ct||r.ct===pf.ct)&&(!pf.src||r.src===pf.src)&&(!pf.executor||r.executor===pf.executor)&&(!pf.persona||r.persona===pf.persona)&&(!pf.touched||(pf.touched==="no"?r.touchedStatus!=="yes":r.touchedStatus===pf.touched))&&(!pf.connType||r.connType===pf.connType)&&(!pf.cf51||r.cf51.split(",").map(function(v){return v.trim();}).indexOf(pf.cf51)>-1);
     });}
 
     // Store full filtered rows for export
