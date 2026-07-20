@@ -244,6 +244,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
   <button class="tbtn-sub" onclick="switchTab('pdel')">Prospect Tracking</button>
   <button class="tbtn-sub" onclick="switchTab('dtr')">Data Tracking</button>
   <button class="tbtn-sub" onclick="switchTab('ovw')">Extra Insights</button>
+  <button class="tbtn-sub" onclick="switchTab('sde')">SDE Insights</button>
 </div>
 <div class="fbar" id="fbar">
   <span class="flbl">Filter by:</span>
@@ -254,6 +255,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
 <div class="panel" id="p-exe"><div class="ap" id="exePage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="wbar" id="wbar" style="display:none"><span id="wbar-content2"></span></div>
 <div class="panel" id="p-ovw"><div class="ap" id="ovwPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
+<div class="panel" id="p-sde"><div class="ap" id="sdePage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-ana"><div class="ap" id="anaPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-out"><div class="ap" id="outPage"><div class="nr"><div class="ni">Ã¢Å’â€º</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-pdel"><div class="ap" id="pdelPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
@@ -372,7 +374,7 @@ var DETAIL_TABS={"ana":"Campaign and Pipeline Details","pip":"Pipeline Details",
 function switchTab(t){
   activeTab=t;
   var tabs=["bud","exe","cal"];document.querySelectorAll(".tbtn").forEach(function(b,i){b.classList.toggle("on",tabs[i]===t);});
-  var subTabs=["ana","out","pdel","dtr","ovw"];document.querySelectorAll(".tbtn-sub").forEach(function(b,i){b.classList.toggle("on",subTabs[i]===t);});
+  var subTabs=["ana","out","pdel","dtr","ovw","sde"];document.querySelectorAll(".tbtn-sub").forEach(function(b,i){b.classList.toggle("on",subTabs[i]===t);});
   document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
   var pnl=document.getElementById("p-"+t);if(pnl)pnl.classList.add("on");
   buildFbar();buildWbar();
@@ -384,6 +386,7 @@ function switchTab(t){
   if(t==="pip")renderPip();
   if(t==="dtr")renderDtr();
   if(t==="bud")renderBud();
+  if(t==="sde")renderSde();
   setTimeout(function(){FD.forEach(function(f){syncBtn(f.k);});syncDrmBtn();syncEurBtn();},50);
 }
 
@@ -430,6 +433,13 @@ function buildFbar(){
     +pipeQtrs.map(function(q){var chk=window._pipeQtrSet.has(q)?"checked":"";return"<label class=\"dopt\"><input type=\"checkbox\" "+chk+" value=\""+q+"\" onchange=\"if(this.checked)window._pipeQtrSet.add(this.value);else window._pipeQtrSet.delete(this.value);if(activeTab==='exe')renderExe();buildFbar();\"/><span class=\"ot\">"+q+"</span></label>";}).join("")
     +"</div></div>";
   div.parentNode.insertBefore(pqBtn,div);
+  // MM Identifier filter (pipeline)
+  var curMmId=window._mmIdFilter||"";
+  var mmBtn=document.createElement("div");mmBtn.className="fbi";mmBtn.id="mmid-fbi";
+  var mmSel='<input type="text" id="mmid-inp" placeholder="MM Identifier..." value="'+curMmId.replace(/"/g,'&quot;')+'" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);width:160px" oninput="var _v=this.value.trim();window._mmIdFilter=_v;if(activeTab===\'exe\')renderExe();if(activeTab===\'ana\')renderAna();if(activeTab===\'out\')renderOut();">';
+  if(curMmId)mmSel+=' <button onclick="window._mmIdFilter=\'\';document.getElementById(\'mmid-inp\').value=\'\';if(activeTab===\'exe\')renderExe();if(activeTab===\'ana\')renderAna();" style="font-size:11px;padding:2px 8px;border:1px solid var(--rd);border-radius:var(--r);cursor:pointer;background:#fff;color:var(--rd)">Clear</button>';
+  mmBtn.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px"><span class="flbl">MM Identifier:</span>'+mmSel+'</span>';
+  div.parentNode.insertBefore(mmBtn,div);
 }
 
 function buildOpts(key){
@@ -499,7 +509,7 @@ function toggleF(key,val,checked){
   if(key==="Demand Manager"&&window.outFilter){window.outFilter.reg=null;window.outFilter.owner=null;window.outFilter.wbs=null;window.outFilter.sb=null;}
   if(key==="Demand Manager"){anaFilter.reg=null;anaFilter.wbs=null;anaFilter.combo=null;}
   pg=1;applyFilters();syncBtn(key);updateTags();syncCab();buildWbar();if(activeTab==="dtr")renderDtr();
-  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="bud")renderBud();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="bud")renderBud();if(activeTab==="sde")renderSde();if(activeTab==="exe")renderExe();
 }
 function clearFilter(key){
   filters[key].clear();
@@ -507,7 +517,7 @@ function clearFilter(key){
   if(key==="Demand Manager"){anaFilter.reg=null;anaFilter.wbs=null;anaFilter.combo=null;}
   pg=1;applyFilters();syncBtn(key);updateTags();syncCab();buildWbar();if(activeTab==="dtr")renderDtr();
   document.getElementById("fdo_"+sk(key)).innerHTML=buildOpts(key);
-  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="bud")renderBud();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="bud")renderBud();if(activeTab==="sde")renderSde();if(activeTab==="exe")renderExe();
 }
 function clearAll(){
   FD.forEach(function(f){filters[f.k].clear();});
@@ -579,7 +589,7 @@ function updateTags(){
 function removeTag(key,val){
   filters[key].delete(val);pg=1;applyFilters();syncBtn(key);updateTags();syncCab();
   document.getElementById("fdo_"+sk(key)).innerHTML=buildOpts(key);
-  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="bud")renderBud();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="bud")renderBud();if(activeTab==="sde")renderSde();if(activeTab==="exe")renderExe();
 }
 
 // DRM filter
@@ -689,8 +699,10 @@ function renderTable(){
 }
 function statusBadge(s){
   if(!s)return"";
-  var display=s==="RunningExecuted"?"Executed":s;
-  var l=s.toLowerCase(),c="bx";
+  // Handle comma-separated composite values — take first
+  var first=s.split(",")[0].trim();
+  var display=first==="RunningExecuted"?"Executed":first==="Canceled"?"Cancelled":first;
+  var l=display.toLowerCase(),c="bx";
   if(l==="runningexecuted"||l.indexOf("execut")>=0||l.indexOf("active")>=0||l.indexOf("approv")>=0||l.indexOf("complet")>=0||l.indexOf("live")>=0)c="bg";
   else if(l.indexOf("progress")>=0||l.indexOf("review")>=0||l.indexOf("running")>=0)c="bb";
   else if(l.indexOf("plan")>=0||l.indexOf("draft")>=0||l.indexOf("pending")>=0||l.indexOf("commit")>=0)c="bo";
@@ -931,8 +943,9 @@ function renderExe(){try{
   var _validWbsSet=new Set(filtered.map(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var reg=String(r["Region Name (level 2)"]||"").trim();return(w&&reg)?w:null;}).filter(Boolean));
   var pr=getPipeRows(filtered).filter(function(r){return _validWbsSet.has(String(r["Opp Campaign ID"]||"").trim());});
     var _iacFilter=filters["IAC"]&&filters["IAC"].size?filters["IAC"]:null;
+  var _mmIdFilter=window._mmIdFilter?window._mmIdFilter.toLowerCase():null;
     // Total 2026 pipeline — apply IAC filter
-    var _allPipe2026=pipeData.filter(function(p){return String(p["Create Quarter"]||"").startsWith("2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"&&(!_iacFilter||_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()));});
+    var _allPipe2026=pipeData.filter(function(p){return String(p["Create Quarter"]||"").startsWith("2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"&&(!_iacFilter||_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))&&(!_mmIdFilter||String(p["MM Identifier"]||"").toLowerCase().indexOf(_mmIdFilter)>-1);});
   if(window._pipeQtrSet&&window._pipeQtrSet.size)_allPipe2026=_allPipe2026.filter(function(p){return window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim());});
   if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _regF2=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim();}));_allPipe2026=_allPipe2026.filter(function(p){return _regF2.has(String(p["Region Lvl 2"]||"").trim());});}
   var allPipe2026Eur=_allPipe2026.reduce(function(a,r){return a+(parseFloat(r["Eur"]||0)||0);},0);
@@ -961,7 +974,7 @@ function renderExe(){try{
   var hodOpps=new Set(pr.filter(function(r){return hasHod(r["SDE Handover Date"]);}).map(function(r){return String(r["Opportunity ID"]||"");})).size;
   var hodEur=pr.filter(function(r){return hasHod(r["SDE Handover Date"]);}).reduce(function(a,r){return a+(parseFloat(r["Eur"]||0)||0);},0);
   var hoRate=totOpps>0?(hodOpps/totOpps*100).toFixed(0)+"%":"0%";
-  var camp2026Eur=pr.filter(function(p){return String(p["Create Quarter"]||"").indexOf("2026")===0;}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
+  var camp2026Eur=pr.filter(function(p){return String(p["Create Quarter"]||"").indexOf("2026")===0&&(!window._pipeQtrSet||!window._pipeQtrSet.size||window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()));}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
   var _all2026Eur=pipeData.reduce(function(a,p){return String(p["Create Quarter"]||"").indexOf("2026")===0&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"&&(!window._pipeQtrSet||!window._pipeQtrSet.size||window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))?a+(parseFloat(p["Eur"]||0)||0):a;},0);
   var camp2026Pct=_all2026Eur>0?(camp2026Eur/_all2026Eur*100).toFixed(0)+"%":"0%";
   var activeCamps=filtered.filter(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).length;
@@ -1073,7 +1086,7 @@ function renderExe(){try{
       if(!String(p["Create Quarter"]||"").startsWith("2026"))return false;
       if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return false;
       if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return false;
-      if(_activeCalRegs.size&&!_activeCalRegs.has(String(p["Region Lvl 2"]||"").trim()))return false;
+      if(_mmIdFilter&&String(p["MM Identifier"]||"").toLowerCase().indexOf(_mmIdFilter)===-1)return false;
       return true;
     });
     // Use pr2 (calendar-connected) or pr2All depending on mode
@@ -1816,7 +1829,6 @@ function renderBud(){
     html+=cvgCell(liveCvg);
     html+=cvgCell(q1Cvg27);
     html+=cvgCell(q2Cvg27);
-    html+=cvgCell(liveCvg);
     html+='</tr>';
     // Source sub-rows — hidden by default
     SRCS.forEach(function(src,si){
@@ -1830,13 +1842,15 @@ function renderBud(){
       html+='<td style="'+td+';font-size:11px;color:var(--mu)">—</td>';
       html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(sbw?fmtE(sbw):"—")+'</td>';
       html+=cvgCell(sFcst,"font-size:11px;");
-      QTRS.forEach(function(q){
+      ["2026-Q3","2026-Q4"].forEach(function(q){
         var sqBW=rsBW_q[rg]&&rsBW_q[rg][src]?rsBW_q[rg][src][q]||0:0;
         var sqLv=rsLv_q[rg]&&rsLv_q[rg][src]?rsLv_q[rg][src][q]||0:0;
         var sqRem=rowTot-sqBW;
         var sqCvgV=sqRem>0?(sqLv/sqRem).toFixed(1)+"X":"—";html+=cvgCell(sqCvgV,"font-size:11px;");
       });
       html+=cvgCell(sLive,"font-size:11px;");
+      html+='<td style="'+td+';font-size:11px;color:var(--mu)">—</td>';
+      html+='<td style="'+td+';font-size:11px;color:var(--mu)">—</td>';
       html+='</tr>';
     });
   });
@@ -1960,6 +1974,10 @@ function renderBud(){
       if(drm==="Booked/Won"){sbBW_q[sb][closeQ]=(sbBW_q[sb][closeQ]||0)+eur;if(sol3){if(!sbSol3BW_q[sb][sol3])sbSol3BW_q[sb][sol3]={};sbSol3BW_q[sb][sol3][closeQ]=(sbSol3BW_q[sb][sol3][closeQ]||0)+eur;}if(src){if(!sbSrcBW_q[sb][src])sbSrcBW_q[sb][src]={};sbSrcBW_q[sb][src][closeQ]=(sbSrcBW_q[sb][src][closeQ]||0)+eur;}}
       if(drm==="Committed"||drm==="Probable"||drm==="Upside"){sbLv_q[sb][closeQ]=(sbLv_q[sb][closeQ]||0)+eur;if(sol3){if(!sbSol3Lv_q[sb][sol3])sbSol3Lv_q[sb][sol3]={};sbSol3Lv_q[sb][sol3][closeQ]=(sbSol3Lv_q[sb][sol3][closeQ]||0)+eur;}if(src){if(!sbSrcLv_q[sb][src])sbSrcLv_q[sb][src]={};sbSrcLv_q[sb][src][closeQ]=(sbSrcLv_q[sb][src][closeQ]||0)+eur;}}
     }
+    // 2027 Q1/Q2 live pipeline for Sales Bag
+    if((closeQ==="2027-Q1"||closeQ==="2027-Q2")&&(drm==="Committed"||drm==="Probable"||drm==="Upside")){
+      sbLv_q[sb][closeQ]=(sbLv_q[sb][closeQ]||0)+eur;
+    }
   });
   var sbBudget={};SBS.forEach(function(s){sbBudget[s]=0;});
   data.forEach(function(r){
@@ -1985,8 +2003,11 @@ function renderBud(){
   html+='<th style="'+thSW+'">Budget</th>';
   html+='<th style="'+thSW+'">Won 2026</th>';
   html+='<th style="'+thSW+'">Fcst Cvg</th>';
-  QTRS.forEach(function(q){html+='<th style="'+thSW+'">Live Cvg '+fmtQtr(q)+'</th>';});
+  html+='<th style="'+thSW+'">Live Cvg Q326</th>';
+  html+='<th style="'+thSW+'">Live Cvg Q426</th>';
   html+='<th style="'+thSW+'">Live Cvg 2026</th>';
+  html+='<th style="'+thSW+'">Live Cvg Q127</th>';
+  html+='<th style="'+thSW+'">Live Cvg Q227</th>';
   html+='</tr></thead><tbody>';
   var gsbTot=0,gsbBW=0,gsbLv=0,gsbCP=0;
   SBS.forEach(function(sb){
@@ -2000,8 +2021,15 @@ function renderBud(){
     html+='<td style="'+td+'">'+(bud?fmtE(bud):"—")+'</td>';
     html+='<td style="'+td+'">'+(bw?fmtE(bw):"—")+'</td>';
     html+=cvgCell(fcst);
-    QTRS.forEach(function(q){var qBW=sbBW_q[sb][q]||0,qLv=sbLv_q[sb][q]||0,qRem=bud-qBW;html+='<td style="'+td+';font-weight:700">'+(qRem>0?(qLv/qRem).toFixed(1)+"X":"—")+'</td>';});
-    html+=cvgCell(live)+'</tr>';
+    ["2026-Q3","2026-Q4"].forEach(function(q){var qBW=sbBW_q[sb][q]||0,qLv=sbLv_q[sb][q]||0,qRem=bud-qBW;html+=cvgCell(qRem>0?(qLv/qRem).toFixed(1)+"X":"—");});
+    html+=cvgCell(live);
+    var sbQ1Bud27=(sbBudget[sb]||0)*1.3/QTRS.length; // Q1 approx = total budget/4 * 1.3
+    var sbQ1Live27=sbLv_q[sb]["2027-Q1"]||0;
+    var sbQ2Bud27=sbQ1Bud27;
+    var sbQ2Live27=sbLv_q[sb]["2027-Q2"]||0;
+    html+=cvgCell(sbQ1Bud27>0?(sbQ1Live27/sbQ1Bud27).toFixed(1)+"X":"—");
+    html+=cvgCell(sbQ2Bud27>0?(sbQ2Live27/sbQ2Bud27).toFixed(1)+"X":"—");
+    html+='</tr>';
     // Sub-rows — either sol3 or TCP source depending on drill mode
     var drillItems=[];
     if(_sbDrillMode==="src"){
@@ -2024,11 +2052,14 @@ function renderBud(){
       html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(ibud&&_sbDrillMode!=="src"?fmtE(ibud):"—")+'</td>';
       html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(ibw?fmtE(ibw):"—")+'</td>';
       html+=cvgCell(ifcst,"font-size:11px;");
-      QTRS.forEach(function(q){
+      ["2026-Q3","2026-Q4"].forEach(function(q){
         var qBW=ibw_q[q]||0,qLv=ilv_q[q]||0,qRem=ibud-qBW;
         var qSbCvgV=qRem>0?(qLv/qRem).toFixed(1)+"X":"—";html+=cvgCell(qSbCvgV,"font-size:11px;");
       });
-      html+=cvgCell(ilive,"font-size:11px;")+'</tr>';
+      html+=cvgCell(ilive,"font-size:11px;");
+      html+='<td style="'+td+';font-size:11px;color:var(--mu)">—</td>';
+      html+='<td style="'+td+';font-size:11px;color:var(--mu)">—</td>';
+      html+='</tr>';
     });
   });
   var gsbRem=gsbTot-gsbBW;
@@ -2036,8 +2067,13 @@ function renderBud(){
   html+='<td style="'+td+';font-weight:700">'+fmtE(gsbTot)+'</td>';
   html+='<td style="'+td+';font-weight:700">'+fmtE(gsbBW)+'</td>';
   html+=cvgCell(gsbRem>0?(gsbCP/gsbRem).toFixed(1)+"X":"—");
-  QTRS.forEach(function(q){var qBW=SBS.reduce(function(s,sb){return s+(sbBW_q[sb][q]||0);},0);var qLv=SBS.reduce(function(s,sb){return s+(sbLv_q[sb][q]||0);},0);var qRem=gsbTot-qBW;html+='<td style="'+td+';font-weight:700">'+(qRem>0?(qLv/qRem).toFixed(1)+"X":"—")+'</td>';});
+  ["2026-Q3","2026-Q4"].forEach(function(q){var qBW=SBS.reduce(function(s,sb){return s+(sbBW_q[sb][q]||0);},0);var qLv=SBS.reduce(function(s,sb){return s+(sbLv_q[sb][q]||0);},0);var qRem=gsbTot-qBW;html+=cvgCell(qRem>0?(qLv/qRem).toFixed(1)+"X":"—");});
   html+=cvgCell(gsbRem>0?(gsbLv/gsbRem).toFixed(1)+"X":"—");
+  var gsbQ1Bud27=gsbTot*1.3/QTRS.length;
+  var gsbQ1Live27=SBS.reduce(function(s,sb){return s+(sbLv_q[sb]["2027-Q1"]||0);},0);
+  var gsbQ2Live27=SBS.reduce(function(s,sb){return s+(sbLv_q[sb]["2027-Q2"]||0);},0);
+  html+=cvgCell(gsbQ1Bud27>0?(gsbQ1Live27/gsbQ1Bud27).toFixed(1)+"X":"—");
+  html+=cvgCell(gsbQ1Bud27>0?(gsbQ2Live27/gsbQ1Bud27).toFixed(1)+"X":"—");
   html+='</tr></tbody></table></div></div>';
 
   // TCP Attainment by Sales Bag
@@ -2085,6 +2121,95 @@ function renderBud(){
   }catch(e){page.innerHTML='<div class="ap"><div class="nr"><p><b>Error:</b> '+e.message+'</p></div></div>';console.error(e);}
 }
 function renderOvw(){try{renderAnaTo("ovwPage",false,"o");}catch(e){var p=document.getElementById("ovwPage");if(p)p.innerHTML="<div class=\"nr\"><p><b>Error:</b> "+e.message+"</p></div>";console.error(e);}setTimeout(scaleContent,100);}
+function renderSde(){
+  var page=document.getElementById("sdePage");if(!page)return;
+  try{
+  var _mmF=window._mmIdFilter?window._mmIdFilter.toLowerCase():null;
+  var _iacF=filters["IAC"]&&filters["IAC"].size?filters["IAC"]:null;
+  var _regF2=filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size?new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim();})):null;
+  // Filter to SDE (Digital Hub) pipeline 2026
+  var sdeRows=pipeData.filter(function(p){
+    if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return false;
+    if(!String(p["Create Quarter"]||"").startsWith("2026"))return false;
+    if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return false;
+    if(String(p["TCP Pipeline Source Desc"]||"").trim()!=="Digital Hub")return false;
+    if(_iacF&&!_iacF.has(String(p["IAC (Engagement Model)"]||"").trim()))return false;
+    if(_regF2&&!_regF2.has(String(p["Region Lvl 2"]||"").trim()))return false;
+    if(_mmF&&String(p["MM Identifier"]||"").toLowerCase().indexOf(_mmF)===-1)return false;
+    return true;
+  });
+  var thS2="background:#012931;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap";
+  var thR2=thS2+";text-align:right";
+  var td2="padding:5px 10px;font-size:12px;border-bottom:1px solid #f0f0f0";
+  var totRow2="background:#f7f7f7;font-weight:700";
+  // KPIs
+  var totEur=sdeRows.reduce(function(s,p){return s+(parseFloat(p["Eur"]||0)||0);},0);
+  var totOpps=new Set(sdeRows.map(function(p){return String(p["Opportunity ID"]||"");})).size;
+  var hoEur=sdeRows.filter(function(p){return hasHod(p["SDE Handover Date"]);}).reduce(function(s,p){return s+(parseFloat(p["Eur"]||0)||0);},0);
+  var uniqMM=new Set(sdeRows.map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean)).size;
+  var hoRate=totEur>0?(hoEur/totEur*100).toFixed(0)+"%":"0%";
+  var html='<div class="ap"><h2 style="color:var(--dk);margin:0 0 12px">SDE Insights</h2>';
+  html+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">';
+  html+='<div class="kpi kb"><div class="kl">SDE Pipeline 2026</div><div class="kv">€'+fmtE(totEur)+'</div><div class="ks">'+totOpps.toLocaleString()+' opportunities</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Active MM Identifiers</div><div class="kv">'+uniqMM.toLocaleString()+'</div><div class="ks">with Digital Hub pipeline</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Handed Over</div><div class="kv">€'+fmtE(hoEur)+'</div><div class="ks">'+hoRate+' of SDE pipeline</div></div>';
+  html+='</div>';
+  // Table 1: By MM Identifier
+  var mmMap={},mmOpps={},mmHO={},mmEngType={};
+  sdeRows.forEach(function(p){
+    var mm=String(p["MM Identifier"]||"").trim()||"(Blank)";
+    var eur=parseFloat(p["Eur"]||0)||0;
+    var oid=String(p["Opportunity ID"]||"");
+    var eng=String(p["SDE Engagement Type"]||"").trim();
+    mmMap[mm]=(mmMap[mm]||0)+eur;
+    if(!mmOpps[mm])mmOpps[mm]=new Set();if(oid)mmOpps[mm].add(oid);
+    if(hasHod(p["SDE Handover Date"]))mmHO[mm]=(mmHO[mm]||0)+eur;
+    if(eng&&eng!=="(No Value)"){if(!mmEngType[mm])mmEngType[mm]={};mmEngType[mm][eng]=(mmEngType[mm][eng]||0)+eur;}
+  });
+  var mmOrder=Object.keys(mmMap).sort(function(a,b){return mmMap[b]-mmMap[a];});
+  html+='<div class="cc" style="margin-bottom:20px"><div class="ch">Pipeline by MM Identifier</div><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<th style="'+thS2+'">MM Identifier</th><th style="'+thR2+'">Pipeline (kEUR)</th><th style="'+thR2+'"># Opps</th><th style="'+thR2+'">Handed Over (kEUR)</th><th style="'+thR2+'">HO %</th><th style="'+thR2+'">Top Eng. Type</th></tr></thead><tbody>';
+  var gMM=0,gMMHO=0;
+  mmOrder.forEach(function(mm){
+    var v=mmMap[mm]||0,opps=mmOpps[mm]?mmOpps[mm].size:0,ho=mmHO[mm]||0;
+    var hoPct=v>0?(ho/v*100).toFixed(0)+"%":"—";
+    var topEng=mmEngType[mm]?Object.entries(mmEngType[mm]).sort(function(a,b){return b[1]-a[1];})[0][0]:"—";
+    gMM+=v;gMMHO+=ho;
+    var mmId='sde-mm-'+mm.replace(/\W+/g,'_');
+    html+='<tr><td style="'+td2+'">'+mm+'</td>';
+    html+='<td style="'+td2+';text-align:right">'+fmtE(v)+'</td>';
+    html+='<td style="'+td2+';text-align:right">'+opps.toLocaleString()+'</td>';
+    html+='<td style="'+td2+';text-align:right">'+(ho?fmtE(ho):"—")+'</td>';
+    html+='<td style="'+td2+';text-align:right">'+hoPct+'</td>';
+    html+='<td style="'+td2+'">'+topEng+'</td></tr>';
+  });
+  html+='<tr style="'+totRow2+'"><td style="'+td2+'">Total</td><td style="'+td2+';text-align:right">'+fmtE(gMM)+'</td><td style="'+td2+';text-align:right">'+totOpps.toLocaleString()+'</td><td style="'+td2+';text-align:right">'+fmtE(gMMHO)+'</td><td style="'+td2+';text-align:right">'+(gMM>0?(gMMHO/gMM*100).toFixed(0)+"%":"—")+'</td><td style="'+td2+'">—</td></tr>';
+  html+='</tbody></table></div></div>';
+  // Table 2: By SDE Engagement Type
+  var engMap={},engOpps={};
+  sdeRows.forEach(function(p){
+    var eng=String(p["SDE Engagement Type"]||"").trim();
+    if(!eng||eng==="(No Value)")return;
+    var eur=parseFloat(p["Eur"]||0)||0;
+    var oid=String(p["Opportunity ID"]||"");
+    engMap[eng]=(engMap[eng]||0)+eur;
+    if(!engOpps[eng])engOpps[eng]=new Set();if(oid)engOpps[eng].add(oid);
+  });
+  var engOrder=Object.keys(engMap).sort(function(a,b){return engMap[b]-engMap[a];});
+  var engGrand=engOrder.reduce(function(s,e){return s+(engMap[e]||0);},0);
+  html+='<div class="cc" style="margin-bottom:20px"><div class="ch">Pipeline by SDE Engagement Type</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<th style="'+thS2+'">SDE Engagement Type</th><th style="'+thR2+'">Pipeline (kEUR)</th><th style="'+thR2+'"># Opps</th><th style="'+thR2+'">% of SDE Total</th></tr></thead><tbody>';
+  engOrder.forEach(function(e){
+    var v=engMap[e]||0,opps=engOpps[e]?engOpps[e].size:0;
+    var pct=engGrand>0?(v/engGrand*100).toFixed(1)+"%":"—";
+    html+='<tr><td style="'+td2+'">'+e+'</td><td style="'+td2+';text-align:right">'+fmtE(v)+'</td><td style="'+td2+';text-align:right">'+opps.toLocaleString()+'</td><td style="'+td2+';text-align:right">'+pct+'</td></tr>';
+  });
+  html+='<tr style="'+totRow2+'"><td style="'+td2+'">Total</td><td style="'+td2+';text-align:right">'+fmtE(engGrand)+'</td><td style="'+td2+';text-align:right">'+new Set(sdeRows.map(function(p){return String(p["Opportunity ID"]||"");})).size.toLocaleString()+'</td><td style="'+td2+';text-align:right">100%</td></tr>';
+  html+='</tbody></table></div></div>';
+  html+='</div>';
+  page.innerHTML=html;
+  }catch(e){page.innerHTML='<div class="ap"><div class="nr"><p><b>Error:</b> '+e.message+'</p></div></div>';console.error(e);}
+}
 function renderAna(){try{renderAnaTo("anaPage",true,"a");}catch(e){var p=document.getElementById("anaPage");if(p)p.innerHTML="<div class=\"nr\"><p><b>Error:</b> "+e.message+"</p></div>";console.error(e);}setTimeout(scaleContent,100);}
 
 function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
@@ -2101,7 +2226,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
   var qualifiedDRM=["Booked/Won","Committed","Upside","Probable"];
   var qualOppsSet=new Set(pr.filter(function(p){return qualifiedDRM.indexOf(String(p["DRM Category"]||"").trim())>-1;}).map(function(p){return String(p["Opportunity ID"]||"");}).filter(Boolean));
   var qualOppRate=totOpps>0?(qualOppsSet.size/totOpps*100).toFixed(0)+"%":"0%";
-  var camp2026Eur=pr.filter(function(p){return String(p["Create Quarter"]||"").indexOf("2026")===0;}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
+  var camp2026Eur=pr.filter(function(p){return String(p["Create Quarter"]||"").indexOf("2026")===0&&(!window._pipeQtrSet||!window._pipeQtrSet.size||window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()));}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
   var _all2026Eur=pipeData.reduce(function(a,p){return String(p["Create Quarter"]||"").indexOf("2026")===0&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"&&(!window._pipeQtrSet||!window._pipeQtrSet.size||window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))?a+(parseFloat(p["Eur"]||0)||0):a;},0);
   var camp2026Pct=_all2026Eur>0?(camp2026Eur/_all2026Eur*100).toFixed(0)+"%":"0%";
   var closing2026Eur=pr.filter(function(p){return String(p["Closing Qtr"]||"").indexOf("2026")===0;}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
@@ -2297,7 +2422,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     html3+="<div style=\"flex:1 1 0%;max-width:11%;visibility:hidden\"></div>";
     html3+="</div>";
     // Status count table â€” below last krow
-    var staCounts={};data.forEach(function(r){var s=String(r["Status"]||"").trim();s=s==="RunningExecuted"?"Executed":s==="Canceled"?"Cancelled":s;if(s)staCounts[s]=(staCounts[s]||0)+1;});
+    var staCounts={};data.forEach(function(r){var s=String(r["Status"]||"").trim();s.split(",").forEach(function(p){p=p.trim();p=p==="RunningExecuted"?"Executed":p==="Canceled"?"Cancelled":p;if(p)staCounts[p]=(staCounts[p]||0)+1;});});
     var staEntries=Object.entries(staCounts).sort(function(a,b){return b[1]-a[1];});
     html3+="<div style=\"display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;margin-top:4px\">";
     html3+="<div style=\"display:inline-block;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;font-size:12px\">";
@@ -2649,7 +2774,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
   }
 
   var staRaw=countBy("Status");
-  var staMerged={};staRaw.forEach(function(r){var k=r[0]==="RunningExecuted"?"Executed":r[0]==="Canceled"?"Cancelled":r[0];staMerged[k]=(staMerged[k]||0)+r[1];});
+  var staMerged={};staRaw.forEach(function(r){r[0].split(",").forEach(function(p){p=p.trim();var k=p==="RunningExecuted"?"Executed":p==="Canceled"?"Cancelled":p;if(k)staMerged[k]=(staMerged[k]||0)+r[1];});});
   var sta=Object.entries(staMerged).sort(function(a,b){return b[1]-a[1];});
   // sta available for reference; canvas removed - status shown as table above
   var qtrRaw=countBy("Starting Quarter").sort(function(a,b){return String(a[0]).localeCompare(String(b[0]));});
@@ -2806,8 +2931,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
     return avgDeal>0?Math.round(tgt/avgDeal):null;
   });
   var re2Datasets=re2DataMode==="tgt"?[
-    {label:"TCP Target (kEUR)",data:re2TgtData,backgroundColor:PAL[3]+"88",borderColor:PAL[3],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v?fmtE(v):"";},font:{size:11},color:PAL[3]}},
-    {label:"Predicted Opps",data:re2PredOpps,backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v?v.toLocaleString()+" opps (pred.)":"";},font:{size:10},color:"#000"}},
+    {label:"TCP Target (kEUR)",data:re2TgtData,backgroundColor:"#C87000",borderColor:"#7A4500",borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v?fmtE(v):"";},font:{size:11},color:"#7A4500"}},
     {label:"# Accounts Targeted",data:re2AcctsData,backgroundColor:PAL[0]+"88",borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v?v.toLocaleString()+" accts":"";},font:{size:10},color:PAL[0]}}
   ]:[
     {label:"Pipeline €",data:re2Eur,backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:11},color:"#07838F"}},
@@ -2869,9 +2993,8 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
   var rocTgtData=rocDim==="reg"?rocEntries.map(function(r){return _re2TcpTgt[r[0]]||null;}):null;
   mkC(pfx+"-re2SB2",{type:"bar",data:{labels:rocLabs,datasets:[
     {label:"ACV € / Campaign",data:rocEurVals,backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,xAxisID:"roc1",datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:10},color:"#07838F"}},
-    {label:"Opps / Campaign",data:rocOppVals,backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,xAxisID:"roc2",datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toFixed(1);},font:{size:10},color:"#000"}},
-    rocDim==="reg"?{label:"TCP Target",data:rocTgtData,type:"scatter",backgroundColor:PAL[3],borderColor:PAL[3],pointRadius:6,pointStyle:"triangle",xAxisID:"roc1",datalabels:{display:true,anchor:"end",align:"right",formatter:function(v){return v?fmtE(v):"";},font:{size:9},color:PAL[3]}}:null
-  ].filter(Boolean)},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
+    {label:"Opps / Campaign",data:rocOppVals,backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,xAxisID:"roc2",datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toFixed(1);},font:{size:10},color:"#000"}}
+  ]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
     plugins:{legend:{display:true,position:"top",labels:{font:{size:10},boxWidth:10,padding:8}},datalabels:{display:true}},
     layout:{padding:{right:55,bottom:0,top:4}},
     scales:{
