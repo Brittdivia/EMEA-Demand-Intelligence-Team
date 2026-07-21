@@ -154,7 +154,7 @@ tbody td.wc{white-space:normal;word-break:break-word;max-width:260px;line-height
 .ch{padding:12px 16px 10px;border-bottom:1px solid #000;font-size:13px;font-weight:600;color:var(--dk);}
 .cb{padding:8px 8px 4px 8px;}.cb canvas{max-height:none;}
 .pnote{font-size:11px;color:var(--mu);margin-bottom:16px;padding:8px 12px;background:#F7F9FF;border:1px solid #D0E4FF;border-radius:var(--r);}
-#anaPage .kpi{flex:1 1 0%;min-width:0;max-width:11%;}
+#anaPage .kpi{flex:1 1 0%;min-width:0;max-width:none;}
 #anaPage .krow:nth-of-type(2) .kpi{flex:0 0 8%;max-width:8%;}
 #anaPage .krow:nth-of-type(2){justify-content:flex-start;}
 #ovwPage .kpi{height:110px;min-width:0;flex:1 1 0%;max-width:160px;}
@@ -573,8 +573,20 @@ function buildWbar(){
     if(curVal){var clrFn="filters['"+ek+"']=new Set();pg=1;applyFilters();updateTags();syncCab();buildWbar();if(activeTab==='ana')renderAna();if(activeTab==='out')renderOut();if(activeTab==='cal')renderCal();if(activeTab==='dtr')renderDtr();";s+=' <button onclick="'+clrFn+'" style="font-size:11px;padding:2px 8px;border:1px solid var(--rd);border-radius:var(--r);cursor:pointer;background:#fff;color:var(--rd)">Clear</button>';}
     return '<span style="display:inline-flex;align-items:center;gap:6px"><span class="flbl">'+label+':</span>'+s+'</span>';
   }
-  var html=mkTextSearch("Campaign/WBS Code","WBS Code");
-  html+=" "+mkTextSearch("Campaign Name","Campaign Name");
+  function mkComboSearch(key,label){
+    var curVal=filters[key]&&filters[key].size===1?Array.from(filters[key])[0]:"";
+    var ek=key.replace(/'/g,"\\'");
+    var dlId='dl_'+key.replace(/[^a-zA-Z0-9]/g,'_');
+    // Build option list from all values
+    var allOpts=Array.from(new Set(campData.map(function(r){var v=String(r[key]||"").trim();return v;}).filter(Boolean))).sort();
+    var dlHtml='<datalist id="'+dlId+'">'+allOpts.map(function(o){return'<option value="'+o.replace(/"/g,'&quot;')+'"></option>';}).join('')+'</datalist>';
+    var onChange="(function(v){v=v.trim();if(v){filters['"+ek+"']=new Set([v]);}else{filters['"+ek+"']=new Set();}pg=1;applyFilters();updateTags();syncCab();buildWbar();if(activeTab==='ana')renderAna();if(activeTab==='out')renderOut();if(activeTab==='cal')renderCal();if(activeTab==='dtr')renderDtr();})";
+    var s=dlHtml+'<input type="text" list="'+dlId+'" value="'+curVal.replace(/"/g,'&quot;')+'" placeholder="Type or select '+label+'..." style="font-size:12px;padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);width:200px" oninput="var _el=this;clearTimeout(window._sfT2);window._sfT2=setTimeout(function(){('+onChange+')(_el.value);},300)">';
+    if(curVal){var clrFn="filters['"+ek+"']=new Set();pg=1;applyFilters();updateTags();syncCab();buildWbar();if(activeTab==='ana')renderAna();if(activeTab==='out')renderOut();if(activeTab==='cal')renderCal();if(activeTab==='dtr')renderDtr();";s+=' <button onclick="'+clrFn+'" style="font-size:11px;padding:2px 8px;border:1px solid var(--rd);border-radius:var(--r);cursor:pointer;background:#fff;color:var(--rd)">Clear</button>';}
+    return '<span style="display:inline-flex;align-items:center;gap:6px"><span class="flbl">'+label+':</span>'+s+'</span>';
+  }
+  var html=mkComboSearch("Campaign/WBS Code","WBS Code");
+  html+=" "+mkComboSearch("Campaign Name","Campaign Name");
   html+=" "+mkDrop("Executor","Executor",filterExcept("Executor"));
   html+=" "+mkDrop("Digital Assets team support","DAT Support",filterExcept("Digital Assets team support"));
   html+=" "+mkDrop("DG Program","DG Program",filterExcept("DG Program"));
@@ -1990,6 +2002,8 @@ function renderBud(){
   SBS.forEach(function(s){sbBW[s]=0;sbLv[s]=0;sbCP[s]=0;sbYTD[s]=0;sbTcpTgt[s]=0;sbBW_q[s]={};sbLv_q[s]={};sbSol3Tgt[s]={};sbSol3YTD[s]={};sbSol3Bud[s]={};sbSol3BW[s]={};sbSol3Lv[s]={};sbSol3CP[s]={};sbSol3BW_q[s]={};sbSol3Lv_q[s]={};sbSrcBW[s]={};sbSrcLv[s]={};sbSrcCP[s]={};sbSrcYTD[s]={};sbSrcBW_q[s]={};sbSrcLv_q[s]={};QTRS.forEach(function(q){sbBW_q[s][q]=0;sbLv_q[s][q]=0;});});
   pipeData.forEach(function(p){
     if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+    if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfSB=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim();}));if(!_rfSB.has(String(p["Region Lvl 2"]||"").trim()))return;}
+    if(filters["IAC"]&&filters["IAC"].size&&!filters["IAC"].has(String(p["IAC (Engagement Model)"]||"").trim()))return;
     var eur=parseFloat(p["Eur"]||0)||0;
     var drm=String(p["DRM Category"]||"").trim();
     var createQ=String(p["Create Quarter"]||"");
@@ -2175,9 +2189,9 @@ function renderBud(){
   var _sbDrillMode2="sol3";
   html+='<div class="cc" style="flex:1;min-width:0"><div class="ch"><span>2026 TCP Target Attainment by Sales Bag (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:40%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup><thead><tr>';
   html+='<th style="'+thL+'">Sales Bag</th>';
-  html+='<th style="'+thS+'">TCP Target</th>';
-  html+='<th style="'+thS+'">YTD Pipeline Created</th>';
-  html+='<th style="'+thS+'">Attainment</th>';
+  html+='<th style="'+thSW+'">TCP Target</th>';
+  html+='<th style="'+thSW+'">YTD Pipeline Created</th>';
+  html+='<th style="'+thSW+'">Attainment</th>';
   html+='</tr></thead><tbody>';
   var gsbTcp=0,gsbYTD=0;
   SBS.forEach(function(sb){
@@ -2608,7 +2622,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
   }
   html3+=(pageId!=="ovwPage"?"<div class=\"sec\">Campaign and Pipeline Details</div>":"");
   html3+=(pageId!=="ovwPage"?"<div style=\"display:flex;gap:12px;margin-bottom:20px;align-items:stretch\">"
-    +"<div class=\"cc\" id=\"card-"+pfx+"-re2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;flex-direction:column;gap:4px\"><div style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span id=\"re2-title\" style=\"font-size:12px;font-weight:600;white-space:nowrap\">Pipeline Results - by Region</span><div style=\"display:flex;gap:3px;flex-shrink:0\"><button id=\"re2-vm-acv\" onclick=\"window.re2DataMode=&apos;acv&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">ACV/Opps</button><button id=\"re2-vm-tgt\" onclick=\"window.re2DataMode=&apos;tgt&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Target Pipeline</button></div></div><div style=\"display:flex;gap:3px;flex-wrap:wrap\"><button id=\"re2-vm-reg\" onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Region</button><button id=\"re2-vm-sb\" onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sales Bag</button><button id=\"re2-vm-mc\" onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Mastercode</button><button id=\"re2-vm-sod\" onclick=\"window.re2ViewMode=&apos;sod&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">SoD</button><button id=\"re2-vm-dat\" onclick=\"window.re2ViewMode=&apos;dat&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DAT</button><button id=\"re2-vm-dg\" onclick=\"window.re2ViewMode=&apos;dg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DG Program</button><button id=\"re2-vm-type\" onclick=\"window.re2ViewMode=&apos;type&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Type</button><button id=\"re2-sort-eur\" onclick=\"window.re2Sort=&apos;eur&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort &euro;</button><button id=\"re2-sort-opps\" onclick=\"window.re2Sort=&apos;opps&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort Opps</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2\"></canvas></div></div>"
+    +"<div class=\"cc\" id=\"card-"+pfx+"-re2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;flex-direction:column;gap:4px\"><div style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span id=\"re2-title\" style=\"font-size:12px;font-weight:600;white-space:nowrap\">Pipeline Results - by Region</span><div style=\"display:flex;gap:3px;flex-shrink:0\"><button id=\"re2-vm-acv\" onclick=\"window.re2DataMode=&apos;acv&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">ACV/Opps</button><button id=\"re2-vm-tgt\" onclick=\"window.re2DataMode=&apos;tgt&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Target Pipeline</button><button id=\"re2-vm-tbl\" onclick=\"window.re2DataMode=&apos;tbl&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Table</button></div></div><div style=\"display:flex;gap:3px;flex-wrap:wrap\"><button id=\"re2-vm-reg\" onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Region</button><button id=\"re2-vm-sb\" onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sales Bag</button><button id=\"re2-vm-mc\" onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Mastercode</button><button id=\"re2-vm-sod\" onclick=\"window.re2ViewMode=&apos;sod&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">SoD</button><button id=\"re2-vm-dat\" onclick=\"window.re2ViewMode=&apos;dat&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DAT</button><button id=\"re2-vm-dg\" onclick=\"window.re2ViewMode=&apos;dg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DG Program</button><button id=\"re2-vm-type\" onclick=\"window.re2ViewMode=&apos;type&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Type</button><button id=\"re2-sort-eur\" onclick=\"window.re2Sort=&apos;eur&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort &euro;</button><button id=\"re2-sort-opps\" onclick=\"window.re2Sort=&apos;opps&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort Opps</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2\"></canvas></div></div>"
     +"<div class=\"cc\" id=\"card-"+pfx+"-re2SB2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div class=\"ch\"><span id=\"roc-title\" style=\"font-size:12px;font-weight:600\">Return on Campaign - by Region</span></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2SB2\"></canvas></div></div>"
     +"</div>":"");
   // DAT Support chart removed - accessible via Type chart toggle
@@ -2828,7 +2842,7 @@ if(pageId!=="ovwPage"){html3+="<div class=\"cc\" style=\"margin-bottom:28px;widt
   }).join("");
   html3+="</tbody></table></div></div>";
   page.innerHTML=html3;
-  if(pageId!=="ovwPage"){(function(){var rv=window.re2ViewMode||"reg";var re2DimLabels={"reg":"Region","sb":"Sales Bag","mc":"Mastercode","sod":"SoD","dat":"DAT Support","dg":"DG Program","type":"Type"};var titleEl=document.getElementById("re2-title");if(titleEl)titleEl.textContent="Pipeline Results - by "+(re2DimLabels[rv]||"Region")+" & # Campaigns";["reg","sb","mc","sod","dat","dg","type"].forEach(function(d){var b=document.getElementById("re2-vm-"+d);if(b){b.style.background=d===rv?"#012931":"";b.style.color=d===rv?"#fff":"";}});var re2SortMode=window.re2Sort||"eur";var bEur=document.getElementById("re2-sort-eur");var bOpps=document.getElementById("re2-sort-opps");if(bEur){bEur.style.background=re2SortMode==="eur"?"#012931":"";bEur.style.color=re2SortMode==="eur"?"#fff":"";}if(bOpps){bOpps.style.background=re2SortMode==="opps"?"#012931":"";bOpps.style.color=re2SortMode==="opps"?"#fff":"";}})();}
+  if(pageId!=="ovwPage"){(function(){var rv=window.re2ViewMode||"reg";var re2DimLabels={"reg":"Region","sb":"Sales Bag","mc":"Mastercode","sod":"SoD","dat":"DAT Support","dg":"DG Program","type":"Type"};var titleEl=document.getElementById("re2-title");if(titleEl)titleEl.textContent="Pipeline Results - by "+(re2DimLabels[rv]||"Region");["reg","sb","mc","sod","dat","dg","type"].forEach(function(d){var b=document.getElementById("re2-vm-"+d);if(b){b.style.background=d===rv?"#012931":"";b.style.color=d===rv?"#fff":"";}});var re2SortMode=window.re2Sort||"eur";var bEur=document.getElementById("re2-sort-eur");var bOpps=document.getElementById("re2-sort-opps");if(bEur){bEur.style.background=re2SortMode==="eur"?"#012931":"";bEur.style.color=re2SortMode==="eur"?"#fff":"";}if(bOpps){bOpps.style.background=re2SortMode==="opps"?"#012931":"";bOpps.style.color=re2SortMode==="opps"?"#fff":"";}})();}
 
   function mkC(id,cfg,filterKey){
   if(charts[id])charts[id].destroy();
@@ -2949,9 +2963,10 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
   var re2ViewMode=window.re2ViewMode||"reg";
   var re2DataMode=window.re2DataMode||"acv";
   var re2SortMode=window.re2Sort||"eur";
-  var btnAcv=document.getElementById("re2-vm-acv");var btnTgt=document.getElementById("re2-vm-tgt");
+  var btnAcv=document.getElementById("re2-vm-acv");var btnTgt=document.getElementById("re2-vm-tgt");var btnTbl=document.getElementById("re2-vm-tbl");
   if(btnAcv){btnAcv.style.background=re2DataMode==="acv"?"#012931":"";btnAcv.style.color=re2DataMode==="acv"?"#fff":"";}
   if(btnTgt){btnTgt.style.background=re2DataMode==="tgt"?"#012931":"";btnTgt.style.color=re2DataMode==="tgt"?"#fff":"";}
+  if(btnTbl){btnTbl.style.background=re2DataMode==="tbl"?"#012931":"";btnTbl.style.color=re2DataMode==="tbl"?"#fff":"";}
 
   // Build re2 data for any dimension
   var re2Eur2={},re2Ops2={},re2Camp2={};
@@ -3027,13 +3042,44 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
     {label:"TCP Target (kEUR)",data:re2TgtData,backgroundColor:"#C87000",borderColor:"#7A4500",borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v?fmtE(v):"";},font:{size:11},color:"#7A4500"}},
     {label:"# Accounts Targeted",data:re2AcctsData,backgroundColor:PAL[0]+"88",borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v?v.toLocaleString()+" accts":"";},font:{size:10},color:PAL[0]}}
   ]:[
-    {label:"Pipeline —",data:re2Eur,backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:11},color:"#07838F"}},
+    {label:"Pipeline €",data:re2Eur,backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:11},color:"#07838F"}},
     {label:"# Opps",data:re2Opps,backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v+" opps";},font:{size:11},color:"#000"}}
   ];
-  mkC(pfx+"-re2",{type:"bar",data:{labels:re2LabsWithCamps,datasets:re2Datasets},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:true,position:"top",labels:{font:{size:10},boxWidth:10,padding:8}},datalabels:{display:true}},
-    layout:{padding:{right:60,bottom:0,top:4}},
-    scales:{x:{display:false},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:12},autoSkip:false},afterFit:function(s){s.width=re2YW+40;}}}}},re2ViewMode==="reg"?"Region Name (level 2)":null);
+  if(re2DataMode==="tbl"){
+    var card=document.getElementById("card-"+pfx+"-re2");
+    if(card){
+      var cb=card.querySelector(".cb");if(cb){
+        var totalEur=re2Eur.reduce(function(s,v){return s+v;},0);
+        var thT2="background:#012931;color:#fff;padding:5px 8px;font-size:11px;font-weight:700;white-space:nowrap";
+        var tdT2="padding:5px 8px;font-size:12px;border-bottom:1px solid #f0f0f0";
+        var _re2DimLabels={"reg":"Region","sb":"Sales Bag","mc":"Mastercode","sod":"SoD","dat":"DAT Support","dg":"DG Program","type":"Type"};
+        var tblH='<div style="overflow:auto;height:366px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>'
+          +'<th style="'+thT2+'">'+(_re2DimLabels[re2ViewMode]||re2ViewMode)+'</th>'
+          +'<th style="'+thT2+';text-align:right">Pipeline &euro;</th>'
+          +'<th style="'+thT2+';text-align:right">Opps</th>'
+          +'<th style="'+thT2+';text-align:right">% Share</th>'
+          +'</tr></thead><tbody>';
+        re2Sorted2.forEach(function(r,i){
+          var lbl=re2ViewMode==="reg"?fmtReg(r[0]):fmtVal(r[0]);
+          var eur=re2Eur[i],opps=re2Opps[i],camps=re2Camps[i];
+          var pct=totalEur>0?(eur/totalEur*100).toFixed(1)+"%":"—";
+          tblH+='<tr><td style="'+tdT2+'">'+lbl+'</td>'
+            +'<td style="'+tdT2+';text-align:right">€'+fmtE(eur)+'</td>'
+            +'<td style="'+tdT2+';text-align:right">'+opps+'</td>'
+            +'<td style="'+tdT2+';text-align:right">'+pct+'</td></tr>';
+        });
+        tblH+='</tbody></table></div>';
+        cb.innerHTML=tblH;
+      }
+    }
+  } else {
+    var card2=document.getElementById("card-"+pfx+"-re2");
+    if(card2){var cb2=card2.querySelector(".cb");if(cb2&&!cb2.querySelector("canvas")){cb2.innerHTML='<canvas id="'+pfx+'-re2"></canvas>';}}
+    mkC(pfx+"-re2",{type:"bar",data:{labels:re2LabsWithCamps,datasets:re2Datasets},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:"top",labels:{font:{size:10},boxWidth:10,padding:8}},datalabels:{display:true}},
+      layout:{padding:{right:60,bottom:0,top:4}},
+      scales:{x:{display:false},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:12},autoSkip:false},afterFit:function(s){s.width=re2YW+40;}}}}},re2ViewMode==="reg"?"Region Name (level 2)":null);
+  }
   // Return on Campaign - by Region/SB/MC/SoD/DAT/DG/Type: ACV/camps and opps/camps
   var rocDim=window.re2ViewMode||"reg";
   var rocDimLabels={"reg":"Region","sb":"Sales Bag","mc":"Mastercode","sod":"SoD","dat":"DAT Support","dg":"DG Program","type":"Type"};
@@ -3120,7 +3166,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
   var re2SBCard=document.getElementById("card-"+pfx+"-re2SB");
   if(re2SBCard){var re2SBCh=re2SBCard.querySelector(".ch");if(re2SBCh)re2SBCh.innerHTML="<div style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span style=\"font-size:12px;font-weight:600;white-space:nowrap\">"+re2SBTitle+(window.re2SBDrill[re2SBKey]?" <button onclick=\"window.re2SBDrill['"+re2SBKey+"']=null;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px;background:#fff\">&larr; Back</button>":"")+"</span><div style=\"display:flex;gap:3px;flex-shrink:0\"><button onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Region</button><button onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sales Bag</button><button onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Mastercode</button>"+(!window.re2SBDrill[re2SBKey]?"<button id=\"re2SB-sort-eur\" onclick=\"window.re2SBSort='eur';renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by &euro;</button><button id=\"re2SB-sort-opps\" onclick=\"window.re2SBSort='opps';renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort by Opps</button>":"")+"</div></div>";}
   var re2SBCfg={type:"bar",data:{labels:re2SBLabs,datasets:[
-    {label:"Pipeline —",data:re2SBEur,backgroundColor:PALA[0],borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:11},color:"#32363A"}},
+    {label:"Pipeline €",data:re2SBEur,backgroundColor:PALA[0],borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:11},color:"#32363A"}},
     {label:"# Opps",data:re2SBOpps,backgroundColor:PALA[1],borderColor:PAL[1],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v+" opps";},font:{size:11},color:PAL[1]}}
   ]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"top",labels:{font:{size:10},boxWidth:10,padding:8}},datalabels:{display:true}},layout:{padding:{right:40,bottom:0,top:4}},scales:{x:{display:false},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:12},autoSkip:false},afterFit:function(s){s.width=re2SBYW;}}}}};
   if(!window.re2SBDrill[re2SBKey]){re2SBCfg.options.onClick=function(evt,elements){if(!elements||!elements.length)return;var label=this.data.labels[elements[0].index];if(!label)return;window.re2SBDrill[re2SBKey]=label;renderAna();};re2SBCfg.options.onHover=function(evt,elements){evt.native.target.style.cursor=elements.length?"pointer":"default";};}
@@ -3135,7 +3181,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
     var mcOpps=mcSorted.map(function(r){return mcO[r[0]]?mcO[r[0]].size:0;});
     var mcYW=Math.min(Math.max(mcLabs.reduce(function(a,l){return Math.max(a,String(l).length);},0)*7,100),240);
     mkC(pfx+"-re2MC",{type:"bar",data:{labels:mcLabs,datasets:[
-      {label:"Pipeline —",data:mcEur,backgroundColor:PALA[0],borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:10},color:"#32363A"}},
+      {label:"Pipeline €",data:mcEur,backgroundColor:PALA[0],borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:10},color:"#32363A"}},
       {label:"# Opps",data:mcOpps,backgroundColor:PALA[1],borderColor:PAL[1],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v+" opps";},font:{size:10},color:PAL[1]}}
     ]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"top",labels:{font:{size:10},boxWidth:10,padding:8}},datalabels:{display:true}},layout:{padding:{right:60,bottom:0,top:4}},scales:{x:{display:false},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:11},autoSkip:false},afterFit:function(s){s.width=mcYW;}}}}});
   }
@@ -3226,11 +3272,11 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
     var oppTCPCount={};var seenOppTCP={};
     pr.forEach(function(p){var oid=String(p["Opportunity ID"]||"");if(!oid||seenOppTCP[oid])return;seenOppTCP[oid]=true;var tcp=String(p["TCP Pipeline Source Desc"]||"").trim();if(tcp)oppTCPCount[tcp]=(oppTCPCount[tcp]||0)+1;});
     var oppTCPEur={};pr.forEach(function(p){var tcp=String(p["TCP Pipeline Source Desc"]||"").trim();if(tcp)oppTCPEur[tcp]=(oppTCPEur[tcp]||0)+(parseFloat(p["Eur"]||0)||0);});var oppTCPRows=Object.entries(oppTCPCount).sort(function(a,b){return b[1]-a[1];});
-    mkC(pfx+"-oppTCP",{type:"bar",data:{labels:oppTCPRows.map(function(r){return r[0];}),datasets:[{label:"# Opps",data:oppTCPRows.map(function(r){return r[1];}),backgroundColor:PALA[0],borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString();},font:{size:9},color:"#32363A"}},{label:"Pipeline —",data:oppTCPRows.map(function(r){return oppTCPEur[r[0]]||0;}),backgroundColor:PALA[4],borderColor:PAL[4],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:9},color:PAL[4]}}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"top",labels:{font:{size:9},boxWidth:10}},datalabels:{display:true}},layout:{padding:{right:40}},scales:{x:{display:false},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:10},autoSkip:false},afterFit:function(s){s.width=80;}}}}});
-  if(pageId!=="ovwPage"){var hodEl=document.getElementById(pfx+"-hod");if(hodEl){if(charts[pfx+"-hod"])charts[pfx+"-hod"].destroy();charts[pfx+"-hod"]=new Chart(hodEl.getContext("2d"),{type:"bar",data:{labels:["Handed Over","Not Handed Over"],datasets:[{label:"# Opps",data:[hodOpps,notHodOpps],backgroundColor:["#000","#32363A"],borderWidth:0,datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString()+" opps";},font:{size:10},color:"#000"}},{label:"Pipeline —",data:[hodEur2,notHodEur],backgroundColor:[PALA[4],PALA[5]],borderWidth:0,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:10},color:"#000"}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"top",labels:{font:{size:10},boxWidth:12}},datalabels:{display:true}},layout:{padding:{top:20,right:60}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{display:false}}}});}}
+    mkC(pfx+"-oppTCP",{type:"bar",data:{labels:oppTCPRows.map(function(r){return r[0];}),datasets:[{label:"# Opps",data:oppTCPRows.map(function(r){return r[1];}),backgroundColor:PALA[0],borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString();},font:{size:9},color:"#32363A"}},{label:"Pipeline €",data:oppTCPRows.map(function(r){return oppTCPEur[r[0]]||0;}),backgroundColor:PALA[4],borderColor:PAL[4],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:9},color:PAL[4]}}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"top",labels:{font:{size:9},boxWidth:10}},datalabels:{display:true}},layout:{padding:{right:40}},scales:{x:{display:false},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:10},autoSkip:false},afterFit:function(s){s.width=80;}}}}});
+  if(pageId!=="ovwPage"){var hodEl=document.getElementById(pfx+"-hod");if(hodEl){if(charts[pfx+"-hod"])charts[pfx+"-hod"].destroy();charts[pfx+"-hod"]=new Chart(hodEl.getContext("2d"),{type:"bar",data:{labels:["Handed Over","Not Handed Over"],datasets:[{label:"# Opps",data:[hodOpps,notHodOpps],backgroundColor:["#000","#32363A"],borderWidth:0,datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString()+" opps";},font:{size:10},color:"#000"}},{label:"Pipeline €",data:[hodEur2,notHodEur],backgroundColor:[PALA[4],PALA[5]],borderWidth:0,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:10},color:"#000"}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"top",labels:{font:{size:10},boxWidth:12}},datalabels:{display:true}},layout:{padding:{top:20,right:60}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{display:false}}}});}}
   }
   var drmC={};var drmOpps={};var seenDrmOpp={};pr.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(!v)return;drmC[v]=(drmC[v]||0)+(parseFloat(p["Eur"]||0)||0);var oid=String(p["Opportunity ID"]||"");if(oid&&!seenDrmOpp[oid]){seenDrmOpp[oid]=true;drmOpps[v]=(drmOpps[v]||0)+1;}});
-  var drmRows=Object.entries(drmC).sort(function(a,b){return b[1]-a[1];});mkC(pfx+"-drm",{type:"bar",data:{labels:drmRows.map(function(r){return r[0];}),datasets:[{label:"Pipeline —",data:drmRows.map(function(r){return r[1];}),backgroundColor:PALA[0],borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:9},color:"#32363A"}},{label:"# Opps",data:drmRows.map(function(r){return drmOpps[r[0]]||0;}),backgroundColor:PALA[4],borderColor:PAL[4],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString();},font:{size:9},color:PAL[4]}}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"top",labels:{font:{size:9},boxWidth:10}},datalabels:{display:true}},layout:{padding:{right:40}},scales:{x:{display:false},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:10},autoSkip:false},afterFit:function(s){s.width=80;}}}}});
+  var drmRows=Object.entries(drmC).sort(function(a,b){return b[1]-a[1];});mkC(pfx+"-drm",{type:"bar",data:{labels:drmRows.map(function(r){return r[0];}),datasets:[{label:"Pipeline €",data:drmRows.map(function(r){return r[1];}),backgroundColor:PALA[0],borderColor:PAL[0],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:9},color:"#32363A"}},{label:"# Opps",data:drmRows.map(function(r){return drmOpps[r[0]]||0;}),backgroundColor:PALA[4],borderColor:PAL[4],borderWidth:1,datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString();},font:{size:9},color:PAL[4]}}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"top",labels:{font:{size:9},boxWidth:10}},datalabels:{display:true}},layout:{padding:{right:40}},scales:{x:{display:false},y:{grid:{display:false},ticks:{color:"#32363A",font:{size:10},autoSkip:false},afterFit:function(s){s.width=80;}}}}});
 
   // Opps by SoD - count distinct opps per SoD value from pipeline data
   var oppSodMap={};
