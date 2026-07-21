@@ -1034,7 +1034,7 @@ function renderExe(){try{
   var SL='<div '+'style="display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px">';
   var html='<div class="ap">';
   html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="display:flex;align-items:center;gap:12px"><h2 style="color:var(--dk);margin:0">TCP</h2><span style="font-size:11px;color:var(--mu);font-style:italic">TCP Target at region level 3 is not available</span><button onclick="window._exeCalMode=!window._exeCalMode;renderExe();" style="padding:4px 12px;border:1px solid var(--bd);border-radius:20px;font-size:12px;cursor:pointer;background:'+(window._exeCalMode?'#00144A':'#fff')+';color:'+(window._exeCalMode?'#fff':'var(--tx)')+'">&#128279; Connected to DCM Calendar '+(window._exeCalMode?'&#10003;':'')+'</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
-  html+='<p style="font-size:12px;color:var(--mu);margin-bottom:14px">Shows ACV — Contribution from Campaigns executed using EMEA Campaign Calendar, connected via WBS/Marketing Code</p>';
+  html+='<p style="font-size:12px;color:var(--mu);margin-bottom:14px">Shows ACV € Contribution from Campaigns executed using EMEA Campaign Calendar, connected via WBS/Marketing Code</p>';
   html+=fnote;
   // Pipeline row
   html+='<div class="krow">';
@@ -1087,7 +1087,7 @@ function renderExe(){try{
     // Recalculate totEur to match only rows with valid wbsToReg (same as chart)
     var _chartEur=pr2.reduce(function(a,r){var w=String(r["Opp Campaign ID"]||"").trim();return wbsToReg[w]?a+(parseFloat(r["Eur"]||0)||0):a;},0);
     var _kpiTp=document.getElementById("exe-total-pipeline-v");
-    if(_kpiTp)_kpiTp.textContent="—"+fmtE(_chartEur);
+    if(_kpiTp)_kpiTp.textContent="€"+fmtE(_chartEur);
     // Chart 1: BTP vs Data & AI — EUR per region per salesbag (only BTP and Data & AI)
     // Chart 2: Product breakdown by Sub Sales Bag product name — EUR per region
     // Use pipeline's own Region Lvl 2 directly so each row is counted in its actual region
@@ -1177,10 +1177,10 @@ function renderExe(){try{
           datasets:prodList.map(function(prod,si){
             var isLast=si===prodList.length-1;
             return{label:prod,data:regOrder2.map(function(reg){return prodRegs[reg]?prodRegs[reg][prod]||0:0;}),backgroundColor:prodColors[si%prodColors.length],borderWidth:0,
-              datalabels:isLast?{anchor:"end",align:"end",display:true,formatter:function(v,ctx){return "—"+fmtE(prodTotals[ctx.dataIndex]);},font:{size:9,weight:"600"},color:"#32363A"}:{display:false}};
+              datalabels:isLast?{anchor:"end",align:"end",display:true,formatter:function(v,ctx){return "€"+fmtE(prodTotals[ctx.dataIndex]);},font:{size:9,weight:"600"},color:"#32363A"}:{display:false}};
           })
         },
-        options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},plugins:{legend:{display:true,position:"bottom",labels:{font:{size:9},boxWidth:10}},datalabels:{display:true}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "—"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
+        options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},plugins:{legend:{display:true,position:"bottom",labels:{font:{size:9},boxWidth:10}},datalabels:{display:true}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
     // Chart 3: IAC or DRM by Market Unit
@@ -1231,7 +1231,7 @@ function renderExe(){try{
         data:{labels:regLabels3,datasets:iacOrder.map(function(cat,si){
           return{label:cat,data:regOrder3.map(function(reg){return iacRegs[reg]?iacRegs[reg][cat]||0:0;}),backgroundColor:iacColors[si],borderWidth:0};
         })},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "—"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
     // Chart 4: Handovers - by Market Unit
@@ -1285,10 +1285,10 @@ function renderExe(){try{
           {label:"Handed Over",data:regOrder4.map(function(r){return hodRegHO[r]||0;}),backgroundColor:PAL[0],borderWidth:0,datalabels:{display:false}},
           {label:"Not HO yet",data:regOrder4.map(function(r){return hodRegNo[r]||0;}),backgroundColor:PALA[1],borderWidth:0,datalabels:{anchor:"end",align:"end",display:true,formatter:function(v,ctx){return hodRateLabels[ctx.dataIndex];},font:{size:10,weight:"600"},color:"#32363A"}}
         ]},
-        options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "—"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
+        options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:false}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
-    // Chart 6: ACV — - by SDE Engagement Type pie — pipeline EUR by TCP source
+    // Chart 6: ACV € - by SDE Engagement Type pie — pipeline EUR by TCP source
     var tcpMap={"Digital Hub":"SDE Sourced","Marketing":"Marketing Nurtured","Partner":"Partner Nurtured","Sales":"Sales Nurtured"};
     var tcpEur={};
     _chartPipe.forEach(function(p){
@@ -1307,13 +1307,13 @@ function renderExe(){try{
         data:{
           labels:tcpOrder,
           datasets:[{data:tcpOrder.map(function(l){return tcpEur[l]||0;}),backgroundColor:tcpColors,borderWidth:2,borderColor:"#fff",
-            datalabels:{formatter:function(v){return v>0?"—"+fmtE(v):"";},font:{size:10},color:"#fff"}}]
+            datalabels:{formatter:function(v){return v>0?"€"+fmtE(v):"";},font:{size:10},color:"#fff"}}]
         },
         options:{responsive:true,maintainAspectRatio:false,
           plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:true}}}
       });
     }
-    // Chart 7: ACV — & DRM - by Market Unit — stacked bar EUR by DRM stage per region
+    // Chart 7: ACV € & DRM - by Market Unit — stacked bar EUR by DRM stage per region
     var drmOrder=["Booked/Won","Probable","Upside","Excluded from Pipeline","Disc/Lost"];
     var drmColors={"Booked/Won":PAL[6],"Probable":PAL[0],"Upside":PAL[2],"Excluded from Pipeline":"#CFD8DC","Disc/Lost":"#C62828"};
     var drmRegData={};
@@ -1341,7 +1341,7 @@ function renderExe(){try{
       charts["exe-drm-mu"]=new Chart(c7.getContext("2d"),{
         type:"bar",
         data:{labels:regOrder7.map(fmtReg),datasets:drmDatasets},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:true}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "—"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:true}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
     // Chart 9: Pipeline by TCP Source of Demand — stacked bar per region
@@ -1377,7 +1377,7 @@ function renderExe(){try{
         },
         options:{responsive:true,maintainAspectRatio:false,
           plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:true}},
-          scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "—"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
+          scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
     // Chart 9b: SDE Engaged vs Not Engaged — stacked bar per region
@@ -1413,7 +1413,7 @@ function renderExe(){try{
         },
         options:{responsive:true,maintainAspectRatio:false,
           plugins:{legend:{display:true,position:"bottom",labels:{font:{size:10},boxWidth:12}},datalabels:{display:true}},
-          scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "—"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
+          scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
     // Pipeline Created by Region vs TCP Target
@@ -1484,7 +1484,7 @@ function renderExe(){try{
               return"Pipeline: —"+fmtE(regPipe[r]||0)+(tgt>0?" ("+((regPipe[r]||0)/tgt*100).toFixed(0)+"% of target)":"");
             }}}},
           scales:{x:{grid:{display:false},ticks:{font:{size:10}}},
-            y:{ticks:{callback:function(v){return"—"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
+            y:{ticks:{callback:function(v){return"€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
     // Clean up old separate targets chart if it exists
@@ -1671,7 +1671,7 @@ function renderExe(){try{
               return"Pipeline: —"+fmtE(srcPipe[s]||0)+(tgt>0?" ("+((srcPipe[s]||0)/tgt*100).toFixed(0)+"% of target)":"");
             }}}},
           scales:{x:{grid:{display:false},ticks:{font:{size:11}}},
-            y:{ticks:{callback:function(v){return"—"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
+            y:{ticks:{callback:function(v){return"€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
   })();
@@ -2458,8 +2458,8 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     html3+="<div class=\"kpi kr\"><div class=\"kl\">Demand Managers</div><div class=\"kv\">"+uniqMgr+"</div><div class=\"ks\">tracked in campaign calendar</div></div>";
 
 
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+(targetPipe>=1000000?(targetPipe/1000000).toFixed(0)+"M":targetPipe>=1000?(targetPipe/1000).toFixed(0)+"K":Math.round(targetPipe).toLocaleString())+"</div><div class=\"ks\">from campaign calendar</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000000?(totEur/1000000).toFixed(0)+"M":totEur>=1000?(totEur/1000).toFixed(0)+"K":Math.round(totEur).toLocaleString())+"</div><div class=\"ks\">Week 29 &middot; 20 Jul 2026</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+fmtE(targetPipe/1000)+"</div><div class=\"ks\">from campaign calendar</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur>=1?totEur.toFixed(0)+"K":"0")+"</div><div class=\"ks\">Week 29 &middot; 20 Jul 2026</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">2026 Pipeline Share</div><div class=\"kv\">"+camp2026Pct+"</div><div class=\"ks\">campaign-linked vs all 2026</div></div>";
 
@@ -2500,8 +2500,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     html3='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Campaign and Pipeline Details</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>'+html3;
     html3+="<div class=\"krow\"><div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px\">Campaigns</div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Campaigns</div><div class=\"kv\">"+(new Set(data.map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean))).size.toLocaleString()+"</div><div class=\"ks\">Distinct Campaign names tracked in Campaign Calendar</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Campaigns</div><div class=\"kv\">"+(new Set(data.filter(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean))).size.toLocaleString()+"</div><div class=\"ks\">tracked in Calendar via WBS code</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+(targetPipe>=1000000?(targetPipe/1000000).toFixed(0)+"M":targetPipe>=1000?(targetPipe/1000).toFixed(0)+"K":Math.round(targetPipe).toLocaleString())+"</div><div class=\"ks\">from campaign calendar</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+fmtE(targetPipe/1000)+"</div><div class=\"ks\">from campaign calendar</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
     html3+="<div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px;margin-left:8px\">Results</div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000000?(totEur/1000000).toFixed(0)+"M":totEur>=1000?(totEur/1000).toFixed(0)+"K":Math.round(totEur).toLocaleString())+"</div><div class=\"ks\">Week 29 &middot; 20 Jul 2026</div></div>";
@@ -2531,24 +2530,6 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     // Status count table — below last krow
     var staCounts={};data.forEach(function(r){var s=String(r["Status"]||"").trim();s.split(",").forEach(function(p){p=p.trim();p=p==="RunningExecuted"?"Executed":p==="Canceled"?"Cancelled":p;if(p)staCounts[p]=(staCounts[p]||0)+1;});});
     var staEntries=Object.entries(staCounts).sort(function(a,b){return b[1]-a[1];});
-    html3+="<div style=\"display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;margin-top:4px\">";
-    html3+="<div style=\"display:inline-block;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;font-size:12px\">";
-    html3+="<div style=\"padding:4px 14px;background:var(--bl);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#fff;border-bottom:1px solid var(--bd)\">Campaign Status</div>";
-    html3+="<table style=\"border-collapse:collapse\"><thead><tr>";
-    staEntries.forEach(function(e){html3+="<th style=\"padding:5px 14px;background:#00144A;color:#fff;font-size:11px;font-weight:600;border-right:1px solid #2a3a5a;white-space:nowrap\">"+e[0]+"</th>";});
-    html3+="</tr></thead><tbody><tr>";
-    staEntries.forEach(function(e){html3+="<td style=\"padding:6px 14px;text-align:center;font-size:14px;font-weight:700;color:var(--dk);border-right:1px solid var(--bd)\">"+e[1].toLocaleString()+"</td>";});
-    html3+="</tr></tbody></table></div>";
-    var qtrInline2=countBy("Starting Quarter").sort(function(a,b){return String(a[0]).localeCompare(String(b[0]));});
-    html3+="<div style=\"display:inline-block;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;font-size:12px\">";
-    html3+="<div style=\"padding:4px 12px;background:var(--bl);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#fff;border-bottom:1px solid var(--bd)\">Starting Quarter</div>";
-    html3+="<table style=\"border-collapse:collapse\"><thead><tr>";
-    qtrInline2.forEach(function(r){html3+="<th style=\"padding:5px 12px;background:#00144A;color:#fff;font-size:11px;font-weight:600;border-right:1px solid #2a3a5a;white-space:nowrap\">"+(r[0]||"(none)")+"</th>";});
-    html3+="</tr></thead><tbody><tr>";
-    qtrInline2.forEach(function(r){html3+="<td style=\"padding:6px 12px;text-align:center;font-size:14px;font-weight:700;color:var(--dk);border-right:1px solid var(--bd)\">"+r[1].toLocaleString()+"</td>";});
-    html3+="</tr></tbody></table></div>";
-    html3+="</div>";
-
   }
   
   {
@@ -2949,7 +2930,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
     if(btnOpps){btnOpps.style.background=comboSortMode==="opps"?"#00144A":"";btnOpps.style.color=comboSortMode==="opps"?"#fff":"";}
     mkC(pfx+"-combo",{type:"bar",data:{labels:comboLabels.slice(0,13),datasets:[
       {label:"# Campaigns",data:comboVals.slice(0,13),backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,xAxisID:"x1",datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toLocaleString();},font:{size:10},color:"#32363A"}},
-      {label:"ACV — / Campaign",data:comboEurVals.slice(0,13),backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,xAxisID:"x2",datalabels:{anchor:"end",align:"end",formatter:function(v){return v>0?"—"+fmtE(v):"";},font:{size:9},color:"#07838F"}},
+      {label:"ACV € / Campaign",data:comboEurVals.slice(0,13),backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,xAxisID:"x2",datalabels:{anchor:"end",align:"end",formatter:function(v){return v>0?"€"+fmtE(v):"";},font:{size:9},color:"#07838F"}},
       {label:"Opps / Campaign",data:comboOppVals.slice(0,13),backgroundColor:"#32363A",borderColor:"#32363A",borderWidth:1,xAxisID:"x3",datalabels:{anchor:"end",align:"end",formatter:function(v){return v>0?v.toFixed(1)+" opps":"";},font:{size:9},color:"#32363A"}}
     ]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:true}},layout:{padding:{right:70}},
       scales:{
@@ -3131,7 +3112,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
   var rocYW=Math.min(Math.max(rocLabs.reduce(function(a,l){return Math.max(a,String(l).length);},0)*7,80),180);
   var rocTgtData=rocDim==="reg"?rocEntries.map(function(r){return _re2TcpTgt[r[0]]||null;}):null;
   mkC(pfx+"-re2SB2",{type:"bar",data:{labels:rocLabs,datasets:[
-    {label:"ACV — / Campaign",data:rocEurVals,backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,xAxisID:"roc1",datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:10},color:"#07838F"}},
+    {label:"ACV € / Campaign",data:rocEurVals,backgroundColor:"#07838F88",borderColor:"#07838F",borderWidth:1,xAxisID:"roc1",datalabels:{anchor:"end",align:"end",formatter:function(v){return fmtE(v);},font:{size:10},color:"#07838F"}},
     {label:"Opps / Campaign",data:rocOppVals,backgroundColor:"#00144A",borderColor:"#00144A",borderWidth:1,xAxisID:"roc2",datalabels:{anchor:"end",align:"end",formatter:function(v){return v.toFixed(1);},font:{size:10},color:"#000"}}
   ]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
     plugins:{legend:{display:true,position:"top",labels:{font:{size:10},boxWidth:10,padding:8}},datalabels:{display:true}},
