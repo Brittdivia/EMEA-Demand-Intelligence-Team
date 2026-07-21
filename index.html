@@ -2604,7 +2604,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
   }
   html3+=(pageId!=="ovwPage"?"<div class=\"sec\">Campaign Insights</div>":"");
   html3+=(pageId!=="ovwPage"?"<div style=\"display:flex;gap:12px;margin-bottom:20px;align-items:stretch\">"
-    +"<div class=\"cc\" id=\"card-"+pfx+"-re2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;flex-direction:column;gap:4px\"><div style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span id=\"re2-title\" style=\"font-size:12px;font-weight:600;white-space:nowrap\">Pipeline Results - by Region</span><div style=\"display:flex;gap:3px;flex-shrink:0\"><button id=\"re2-vm-acv\" onclick=\"window.re2DataMode=&apos;acv&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">ACV/Opps</button><button id=\"re2-vm-tgt\" onclick=\"window.re2DataMode=&apos;tgt&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Target Pipeline</button><button id=\"re2-vm-tbl\" onclick=\"window.re2DataMode=&apos;tbl&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Table</button></div></div><div style=\"display:flex;gap:3px;flex-wrap:wrap\"><button id=\"re2-vm-reg\" onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Region</button><button id=\"re2-vm-sb\" onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sales Bag</button><button id=\"re2-vm-mc\" onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Mastercode</button><button id=\"re2-vm-sod\" onclick=\"window.re2ViewMode=&apos;sod&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">SoD</button><button id=\"re2-vm-dat\" onclick=\"window.re2ViewMode=&apos;dat&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DAT</button><button id=\"re2-vm-dg\" onclick=\"window.re2ViewMode=&apos;dg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DG Program</button><button id=\"re2-vm-type\" onclick=\"window.re2ViewMode=&apos;type&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Type</button><button id=\"re2-sort-eur\" onclick=\"window.re2Sort=&apos;eur&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort &euro;</button><button id=\"re2-sort-opps\" onclick=\"window.re2Sort=&apos;opps&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort Opps</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2\"></canvas></div></div>"
+    +"<div class=\"cc\" id=\"card-"+pfx+"-re2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;flex-direction:column;gap:4px\"><div style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span id=\"re2-title\" style=\"font-size:12px;font-weight:600;white-space:nowrap\">Pipeline Results - by Region</span><div style=\"display:flex;gap:3px;flex-shrink:0\"><button id=\"re2-vm-acv\" onclick=\"window.re2DataMode=&apos;acv&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">ACV/Opps</button><button id=\"re2-vm-tbl\" onclick=\"window.re2DataMode=&apos;tbl&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Table</button></div></div><div style=\"display:flex;gap:3px;flex-wrap:wrap\"><button id=\"re2-vm-reg\" onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Region</button><button id=\"re2-vm-sb\" onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sales Bag</button><button id=\"re2-vm-mc\" onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Mastercode</button><button id=\"re2-vm-sod\" onclick=\"window.re2ViewMode=&apos;sod&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">SoD</button><button id=\"re2-vm-dat\" onclick=\"window.re2ViewMode=&apos;dat&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DAT</button><button id=\"re2-vm-dg\" onclick=\"window.re2ViewMode=&apos;dg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DG Program</button><button id=\"re2-vm-type\" onclick=\"window.re2ViewMode=&apos;type&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Type</button><button id=\"re2-sort-eur\" onclick=\"window.re2Sort=&apos;eur&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort &euro;</button><button id=\"re2-sort-opps\" onclick=\"window.re2Sort=&apos;opps&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sort Opps</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2\"></canvas></div></div>"
     +"<div class=\"cc\" id=\"card-"+pfx+"-re2SB2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div class=\"ch\"><span id=\"roc-title\" style=\"font-size:12px;font-weight:600\">Return on Campaign - by Region</span></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2SB2\"></canvas></div></div>"
     +"</div>":"");
   // DAT Support chart removed - accessible via Type chart toggle
@@ -2943,11 +2943,10 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
   }
   var rEr=Object.entries(rE).sort(function(a,b){return b[1]-a[1];});
   var re2ViewMode=window.re2ViewMode||"reg";
-  var re2DataMode=window.re2DataMode||"acv";
+  var re2DataMode=window.re2DataMode==="tgt"?"acv":(window.re2DataMode||"acv");
   var re2SortMode=window.re2Sort||"eur";
-  var btnAcv=document.getElementById("re2-vm-acv");var btnTgt=document.getElementById("re2-vm-tgt");var btnTbl=document.getElementById("re2-vm-tbl");
+  var btnAcv=document.getElementById("re2-vm-acv");var btnTbl=document.getElementById("re2-vm-tbl");
   if(btnAcv){btnAcv.style.background=re2DataMode==="acv"?"#012931":"";btnAcv.style.color=re2DataMode==="acv"?"#fff":"";}
-  if(btnTgt){btnTgt.style.background=re2DataMode==="tgt"?"#012931":"";btnTgt.style.color=re2DataMode==="tgt"?"#fff":"";}
   if(btnTbl){btnTbl.style.background=re2DataMode==="tbl"?"#012931":"";btnTbl.style.color=re2DataMode==="tbl"?"#fff":"";}
 
   // Build re2 data for any dimension
@@ -3034,19 +3033,15 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
         var totalEur=re2Eur.reduce(function(s,v){return s+v;},0);
         // Build target pipeline per dimension from calendar data — deduplicated by WBS (same as targetPipe KPI)
         var _re2TgtPipe={};
-        var _tpWBSSeen2={};
-        data.forEach(function(r){
-          var wbs=String(r["Campaign/WBS Code"]||"").trim().replace(/[\r\n]/g,"");
-          if(!wbs||_tpWBSSeen2[wbs])return;
-          _tpWBSSeen2[wbs]=true;
+        campData.forEach(function(r){
           var tpVal=parseFloat(r["Target Pipeline - value kEUR"]||0)||0;if(!tpVal)return;
           var keys=[];
-          if(re2ViewMode==="reg")keys=[String(r["Region Name (level 2)"]||"").trim()];
+          if(re2ViewMode==="reg"){var rk=String(r["Region Name (level 2)"]||"").replace(/^CS /,"").trim();if(rk)keys=[rk];}
           else if(re2ViewMode==="sb")keys=String(r["Sales Bag"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);
           else if(re2ViewMode==="sod")keys=String(r["SoD"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);
-          else if(re2ViewMode==="dat")keys=[String(r["Digital Assets team support"]||"").trim()];
-          else if(re2ViewMode==="dg")keys=[String(r["DG Program"]||"").trim()];
-          else if(re2ViewMode==="type")keys=[String(r["Campaign Type"]||"").trim()];
+          else if(re2ViewMode==="dat"){var dk=String(r["Digital Assets team support"]||"").trim();if(dk)keys=[dk];}
+          else if(re2ViewMode==="dg"){var dgk=String(r["DG Program"]||"").trim();if(dgk)keys=[dgk];}
+          else if(re2ViewMode==="type"){var tk=String(r["Campaign Type"]||"").trim();if(tk)keys=[tk];}
           keys.forEach(function(k){if(k)_re2TgtPipe[k]=(_re2TgtPipe[k]||0)+tpVal;});
         });
         var thT2="background:#012931;color:#fff;padding:5px 8px;font-size:11px;font-weight:700;white-space:nowrap";
