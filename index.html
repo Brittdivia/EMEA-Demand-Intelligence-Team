@@ -397,12 +397,15 @@ function sk(k){return k.replace(/[^a-zA-Z0-9]/g,"_");}
 
 function buildFbar(){
   var bar=document.getElementById("fbar"),div=document.getElementById("fdiv");
+  var _subTabs=new Set(["ana","out","pdel","dtr","ovw","sde"]);
   var WBS_TABS=new Set(["cal","out","ana","acc","pdel","dtr"]);
   bar.querySelectorAll(".fbi").forEach(function(e){e.remove();});
   FD.forEach(function(fd){
-    if(fd.k==="Campaign/WBS Code"||fd.k==="Executor"||fd.k==="Digital Assets team support"||fd.k==="DG Program")return;
+    // WBS Code, Executor, DAT, DG Program only on sub-tabs
+    if((fd.k==="Campaign/WBS Code"||fd.k==="Executor"||fd.k==="Digital Assets team support"||fd.k==="DG Program")&&!_subTabs.has(activeTab))return;
     if((activeTab==="bud"||activeTab==="exe")&&(fd.k==="Demand Manager"||fd.k==="Status"||fd.k==="SoD"))return;
     if(activeTab==="exe"&&fd.k==="Region Name (level 3)")return;
+    if(!_subTabs.has(activeTab)&&fd.k==="Starting Quarter")return;
     var s=sk(fd.k),n=filters[fd.k].size;
     var w=document.createElement("div");w.className="fbi";
     w.innerHTML="<button class=\"fbtn"+(n?" on":"")+"\" id=\"fb_"+s+"\" onclick=\"toggleDD('"+fd.k.replace(/'/g,"\'")+"')\">"+(fd.l)+" <span class=\"fc\" id=\"fc_"+s+"\">"+(n)+"</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
@@ -425,7 +428,8 @@ function buildFbar(){
     +"<div style=\"padding:10px 12px\"><input type=\"number\" id=\"eur-input\" placeholder=\"e.g. 1\" value=\""+(eurMinFilter||"")+"\" style=\"width:100%;border:1px solid var(--bd);border-radius:var(--r);padding:5px 8px;font-size:12px;outline:none\"/><button onclick=\"applyEurFilter()\" style=\"margin-top:8px;width:100%;padding:6px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-size:12px\">Apply</button></div>"
     +"</div>";
   div.parentNode.insertBefore(eurBtn,div);
-  // Pipeline Creation Quarter filter (multi-select, 2026 only)
+  // Pipeline Creation Quarter filter — only on sub-tabs
+  if(_subTabs.has(activeTab)){
   if(!window._pipeQtrSet)window._pipeQtrSet=new Set();
   var pipeQtrs=Array.from(new Set(pipeData.map(function(p){return String(p["Create Quarter"]||"").trim();}).filter(function(q){return q.startsWith("2026");}))). sort();
   var pqN=window._pipeQtrSet.size;
@@ -437,8 +441,13 @@ function buildFbar(){
     +pipeQtrs.map(function(q){var chk=window._pipeQtrSet.has(q)?"checked":"";return"<label class=\"dopt\"><input type=\"checkbox\" "+chk+" value=\""+q+"\" onchange=\"if(this.checked)window._pipeQtrSet.add(this.value);else window._pipeQtrSet.delete(this.value);if(activeTab==='exe')renderExe();buildFbar();\"/><span class=\"ot\">"+q+"</span></label>";}).join("")
     +"</div></div>";
   div.parentNode.insertBefore(pqBtn,div);
-  // MM Identifier filter (pipeline) — dropdown
-  var mmIds=Array.from(new Set(pipeData.map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean))).sort();
+  } // end pipeline quarter sub-tabs only
+  // WBS, Campaign Name, Executor, DAT, DG Program — already in FD loop, no extra needed
+  if(false){_subTabs;} // keep _subTabs reference live
+  if(_subTabs.has(activeTab)){
+  // Filter MM Identifiers by active region filter
+  var _mmRegF=filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size?new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim();})):null;
+  var mmIds=Array.from(new Set(pipeData.filter(function(p){return !_mmRegF||_mmRegF.has(String(p["Region Lvl 2"]||"").trim());}).map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean))).sort();
   var curMmId=window._mmIdFilter||"";
   var mmBtn=document.createElement("div");mmBtn.className="fbi";mmBtn.id="mmid-fbi";
   var mmSel='<select id="mmid-sel" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);cursor:pointer;max-width:200px" onchange="window._mmIdFilter=this.value.toLowerCase();if(activeTab===\'exe\')renderExe();if(activeTab===\'ana\')renderAna();if(activeTab===\'out\')renderOut();if(activeTab===\'sde\')renderSde();buildFbar();">';
@@ -448,6 +457,7 @@ function buildFbar(){
   if(curMmId)mmSel+=' <button onclick="window._mmIdFilter=\'\';if(activeTab===\'exe\')renderExe();if(activeTab===\'ana\')renderAna();if(activeTab===\'sde\')renderSde();buildFbar();" style="font-size:11px;padding:2px 8px;border:1px solid var(--rd);border-radius:var(--r);cursor:pointer;background:#fff;color:var(--rd)">Clear</button>';
   mmBtn.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px"><span class="flbl">MM Identifier:</span>'+mmSel+'</span>';
   div.parentNode.insertBefore(mmBtn,div);
+  } // end sub-tabs only
 }
 
 function buildOpts(key){
@@ -516,14 +526,14 @@ function toggleF(key,val,checked){
   if(checked)filters[key].add(val);else filters[key].delete(val);
   if(key==="Demand Manager"&&window.outFilter){window.outFilter.reg=null;window.outFilter.owner=null;window.outFilter.wbs=null;window.outFilter.sb=null;}
   if(key==="Demand Manager"){anaFilter.reg=null;anaFilter.wbs=null;anaFilter.combo=null;}
-  pg=1;applyFilters();syncBtn(key);updateTags();syncCab();buildWbar();if(activeTab==="dtr")renderDtr();
+  pg=1;applyFilters();syncBtn(key);updateTags();syncCab();buildWbar();buildFbar();if(activeTab==="dtr")renderDtr();
   if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="bud")renderBud();if(activeTab==="sde")renderSde();if(activeTab==="exe")renderExe();
 }
 function clearFilter(key){
   filters[key].clear();
   if(key==="Demand Manager"&&window.outFilter){window.outFilter.reg=null;window.outFilter.owner=null;window.outFilter.wbs=null;window.outFilter.sb=null;}
   if(key==="Demand Manager"){anaFilter.reg=null;anaFilter.wbs=null;anaFilter.combo=null;}
-  pg=1;applyFilters();syncBtn(key);updateTags();syncCab();buildWbar();if(activeTab==="dtr")renderDtr();
+  pg=1;applyFilters();syncBtn(key);updateTags();syncCab();buildWbar();buildFbar();if(activeTab==="dtr")renderDtr();
   document.getElementById("fdo_"+sk(key)).innerHTML=buildOpts(key);
   if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="ovw")renderOvw();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="bud")renderBud();if(activeTab==="sde")renderSde();if(activeTab==="exe")renderExe();
 }
@@ -595,8 +605,8 @@ function buildWbar(){
   html+=" "+mkDrop("DG Program","DG Program",filterExcept("DG Program"));
   // Tag filter — shown on acc tab
   wc.innerHTML=html;
-  if(wb&&!isCal){wb.style.display="flex";document.body.classList.add("wbar-active");}
-  if(wb&&isCal){wb.style.display="none";document.body.classList.remove("wbar-active");}
+  // Always hide wbar since filters are now in main fbar
+  if(wb){wb.style.display="none";document.body.classList.remove("wbar-active");}
 }
 function syncCab(){
   var any=srchQ||drmFilters.size>0||eurMinFilter!==null||FD.some(function(f){return filters[f.k].size>0;});
@@ -1939,7 +1949,7 @@ function renderBud(){
   html+='</tr></tbody></table></div></div>';
 
   // TCP Attainment table
-  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch">2026 TCP Target Attainment by Region (kEUR)</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch">2026 TCP Target Attainment by Region (kEUR) <span style="font-size:10px;font-weight:400;color:var(--mu)">— No TCP for Region level 3</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
   html+='<th style="'+thL+'">Region</th>';
   html+='<th style="'+thS+'">TCP Target</th>';
   html+='<th style="'+thS+'">YTD Pipeline Created</th>';
@@ -2508,7 +2518,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     html3+="<div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px;margin-left:8px\">Results</div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 29 &middot; 20 Jul 2026</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Distinct Opps Created</div><div class=\"kv\">"+totOpps.toLocaleString()+"</div><div class=\"ks\">connected to WBS/Campaign code</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Won+Live Pipeline</div><div class=\"kv\">"+qualOppRate+"</div><div class=\"ks\">Won+Live / Total</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Won+Live Pipeline</div><div class=\"kv\">"+qualOppRate+"</div><div class=\"ks\">"+qualOppsSet.size.toLocaleString()+" opps &middot; Won+Live / Total</div></div>";
     var hodEur=pr.filter(function(p){return hasHod(p["SDE Handover Date"]);}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);var hodPct=totEur>0?(hodEur/totEur*100).toFixed(0)+"%":"0%";
     var hodOppsSet=new Set(pr.filter(function(p){return hasHod(p["SDE Handover Date"]);}).map(function(p){return String(p["Opportunity ID"]||"");}));
     var hodOpps=hodOppsSet.size;    var hodEur2=pr.filter(function(p){return hasHod(p["SDE Handover Date"]);}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
@@ -3033,7 +3043,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
         var totalEur=re2Eur.reduce(function(s,v){return s+v;},0);
         // Build target pipeline per dimension from calendar data
         var _re2TgtPipe={};
-        campData.forEach(function(r){
+        data.forEach(function(r){
           var tpVal=parseFloat(r["Target Pipeline - value kEUR"]||0)||0;if(!tpVal)return;
           var keys=[];
           if(re2ViewMode==="reg"){var rk=String(r["Region Name (level 2)"]||"").trim();if(rk)keys=[rk];}
