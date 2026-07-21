@@ -1782,9 +1782,9 @@ function renderBud(){
   var _totalFc=Object.values(regForecast).reduce(function(s,v){return s+v;},0);
   var _totalLv=Object.values(regLive).reduce(function(s,v){return s+v;},0);
   html+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">';
-  html+='<div class="kpi kb"><div class="kl">Total 2026 Budget</div><div class="kv">—'+fmtE(total2026)+'</div></div>';
-  html+='<div class="kpi kb"><div class="kl">Total Forecast Closing 2026</div><div class="kv">—'+fmtE(_totalFc)+'</div><div class="ks">Booked/Won + Probable + Committed</div></div>';
-  html+='<div class="kpi kb"><div class="kl">Total Live Closing 2026</div><div class="kv">—'+fmtE(_totalLv)+'</div><div class="ks">Committed + Probable + Upside</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Total 2026 Budget</div><div class="kv">&euro;'+fmtE(total2026)+'</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Total Forecast Closing 2026</div><div class="kv">&euro;'+fmtE(_totalFc)+'</div><div class="ks">Booked/Won + Probable + Committed</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Total Live Closing 2026</div><div class="kv">&euro;'+fmtE(_totalLv)+'</div><div class="ks">Committed + Probable + Upside</div></div>';
   html+='</div>';
   html+='<div style="display:flex;gap:16px;margin-bottom:20px;align-items:flex-start">';
   html+='<div class="cc" style="flex:0 0 65%;min-width:0"><div class="ch">RQ4 Budget by Region (kEUR)</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
@@ -2163,9 +2163,9 @@ function renderSde(){
   var hoRate=totEur>0?(hoEur/totEur*100).toFixed(0)+"%":"0%";
   var html='<div class="ap"><h2 style="color:var(--dk);margin:0 0 12px">SDE Insights</h2>';
   html+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">';
-  html+='<div class="kpi kb"><div class="kl">SDE Pipeline 2026</div><div class="kv">—'+fmtE(totEur)+'</div><div class="ks">'+totOpps.toLocaleString()+' opportunities</div></div>';
+  html+='<div class="kpi kb"><div class="kl">SDE Pipeline 2026</div><div class="kv">&euro;'+fmtE(totEur)+'</div><div class="ks">'+totOpps.toLocaleString()+' opportunities</div></div>';
   html+='<div class="kpi kb"><div class="kl">Active MM Identifiers</div><div class="kv">'+uniqMM.toLocaleString()+'</div><div class="ks">with Digital Hub pipeline</div></div>';
-  html+='<div class="kpi kb"><div class="kl">Handed Over</div><div class="kv">—'+fmtE(hoEur)+'</div><div class="ks">'+hoRate+' of SDE pipeline</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Handed Over</div><div class="kv">&euro;'+fmtE(hoEur)+'</div><div class="ks">'+hoRate+' of SDE pipeline</div></div>';
   html+='</div>';
   // Table 1: By MM Identifier
   var mmMap={},mmOpps={},mmHO={},mmEngType={};
@@ -4386,7 +4386,7 @@ function renderPdel(){
     // Apply all filters
     if(pf.campWBS){rows=rows.filter(function(r){return r.wbs===pf.campWBS;});}
     if(pf.ct||pf.src||pf.executor||pf.persona||pf.touched||pf.connType||pf.cf51){rows=rows.filter(function(r){
-      return(!pf.ct||r.ct===pf.ct)&&(!pf.src||r.src===pf.src)&&(!pf.executor||r.executor===pf.executor)&&(!pf.persona||r.persona===pf.persona)&&(!pf.touched||(pf.touched==="no"?r.touchedStatus!=="yes":r.touchedStatus===pf.touched))&&(!pf.connType||r.connType===pf.connType)&&(!pf.cf51||r.cf51.split(",").map(function(v){return v.trim();}).indexOf(pf.cf51)>-1);
+      return(!pf.ct||r.ct===pf.ct)&&(!pf.src||r.src===pf.src)&&(!pf.executor||r.executor===pf.executor)&&(!pf.persona||r.persona===pf.persona)&&(!pf.touched||(pf.touched==="no"?r.touchedStatus==="no":r.touchedStatus===pf.touched))&&(!pf.connType||r.connType===pf.connType)&&(!pf.cf51||r.cf51.split(",").map(function(v){return v.trim();}).indexOf(pf.cf51)>-1);
     });}
 
     // Store full filtered rows for export
