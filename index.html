@@ -2033,7 +2033,8 @@ function renderBud(){
   var _sbDrillMode="sol3";
   var thSW=thS.replace("white-space:nowrap","white-space:normal")+";max-width:60px;line-height:1.2";
   html+='<div style="display:flex;gap:16px;margin-bottom:20px;align-items:flex-start;margin-top:20px">';
-  html+='<div class="cc" style="flex:0 0 65%;min-width:0"><div class="ch"><span>R4Q Budget by Sales Bag (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:24%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr>';
+  html+='<div style="flex:0 0 65%;min-width:0;display:flex;flex-direction:column;gap:16px">';
+  html+='<div class="cc"><div class="ch"><span>R4Q Budget by Sales Bag (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:24%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr>';
   html+='<th style="'+thL+'">Sales Bag</th>';
   html+='<th style="'+thSW+'">Budget</th>';
   html+='<th style="'+thSW+'">Won 2026</th>';
@@ -2113,7 +2114,64 @@ function renderBud(){
   html+=cvgCell(gsbQ1Bud27>0?(gsbQ2Live27/gsbQ1Bud27).toFixed(1)+"X":"—");
   html+='</tr></tbody></table></div></div>';
 
-  // TCP Attainment by Sales Bag
+  // R4Q Budget by TCP Source — stacked below Sales Bag in same column
+  html+='<div class="cc"><div class="ch"><span>R4Q Budget by TCP Source (kEUR)</span><span style="font-size:10px;font-weight:400;color:var(--mu);margin-left:8px">— shows each source contribution to total budget</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:18%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"></colgroup><thead><tr>';
+  html+='<th style="'+thL+'">TCP Source</th>';
+  html+='<th style="'+thSW+'">Budget</th>';
+  html+='<th style="'+thSW+'">Won 2026</th>';
+  html+='<th style="'+thSW+'">Fcst Cvg</th>';
+  html+='<th style="'+thSW+'">Live Cvg Q326</th>';
+  html+='<th style="'+thSW+'">Live Cvg Q426</th>';
+  html+='<th style="'+thSW+'">Live Cvg 2026</th>';
+  html+='<th style="'+thSW+'">Live Cvg Q127</th>';
+  html+='<th style="'+thSW+'">Live Cvg Q227</th>';
+  html+='</tr></thead><tbody>';
+  var gsrcTot2=0,gsrcBW2=0,gsrcLv2=0,gsrcCP2=0;
+  SRCS.forEach(function(src){
+    // TCP source budget: use sbSrcTcpTgt as proxy for budget (no direct budget by source)
+    var bud=0; // no budget data by source — show TCP target as budget proxy
+    var bw=0,lv=0,cp=0;
+    // Sum across all sales bags
+    SBS.forEach(function(sb){
+      bw+=(sbSrcBW[sb]&&sbSrcBW[sb][src]?sbSrcBW[sb][src]:0);
+      lv+=(sbSrcLv[sb]&&sbSrcLv[sb][src]?sbSrcLv[sb][src]:0);
+      cp+=(sbSrcCP[sb]&&sbSrcCP[sb][src]?sbSrcCP[sb][src]:0);
+    });
+    var tcpTgt=0;SBS.forEach(function(sb){tcpTgt+=(sbSrcTcpTgt[sb]&&sbSrcTcpTgt[sb][src]?sbSrcTcpTgt[sb][src]:0);});
+    // Show total budget (from data) when filter active — not TCP target
+    var _hasFilter=(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size)||(filters["Sales Bag"]&&filters["Sales Bag"].size);
+    var _totalBudget=REGS.reduce(function(s,rg){return s+QTRS.reduce(function(q2,q){return q2+(regQtr[rg][q]||0);},0);},0);
+    bud=_hasFilter?_totalBudget:0;
+    var rem=bud>0?bud-bw:0;var fcst=rem>0?(cp/rem).toFixed(1)+"X":"—";var live=rem>0?(lv/rem).toFixed(1)+"X":"—";
+    gsrcTot2+=bud;gsrcBW2+=bw;gsrcLv2+=lv;gsrcCP2+=cp;
+    var srcId2='bud-src2-'+src.replace(/\W+/g,'_');
+    html+='<tr style="font-weight:700;background:#f0f4f8"><td style="'+tdL+'">'+src+'</td>';
+    html+='<td style="'+td+'">'+(bud?fmtE(bud):"—")+'</td>';
+    html+='<td style="'+td+'">'+(bw?fmtE(bw):"—")+'</td>';
+    html+=cvgCell(fcst);
+    ["2026-Q3","2026-Q4"].forEach(function(q){
+      var qBW=0,qLv=0;
+      SBS.forEach(function(sb){qBW+=(sbSrcBW_q[sb]&&sbSrcBW_q[sb][src]?sbSrcBW_q[sb][src][q]||0:0);qLv+=(sbSrcLv_q[sb]&&sbSrcLv_q[sb][src]?sbSrcLv_q[sb][src][q]||0:0);});
+      var qRem=bud-qBW;html+=cvgCell(qRem>0?(qLv/qRem).toFixed(1)+"X":"—");
+    });
+    html+=cvgCell(live);
+    var sQ1L27=0,sQ2L27=0;
+    SBS.forEach(function(sb){sQ1L27+=(sbSrcLv_q[sb]&&sbSrcLv_q[sb][src]?sbSrcLv_q[sb][src]["2027-Q1"]||0:0);sQ2L27+=(sbSrcLv_q[sb]&&sbSrcLv_q[sb][src]?sbSrcLv_q[sb][src]["2027-Q2"]||0:0);});
+    var srcQ1Bud27=bud*1.3/QTRS.length;
+    html+=cvgCell(srcQ1Bud27>0?(sQ1L27/srcQ1Bud27).toFixed(1)+"X":"—");
+    html+=cvgCell(srcQ1Bud27>0?(sQ2L27/srcQ1Bud27).toFixed(1)+"X":"—");
+    html+='</tr>';
+  });
+  var gsrcRem2=gsrcTot2-gsrcBW2;
+  html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td>';
+  html+='<td style="'+td+';font-weight:700">'+fmtE(gsrcTot2)+'</td>';
+  html+='<td style="'+td+';font-weight:700">'+fmtE(gsrcBW2)+'</td>';
+  html+=cvgCell(gsrcRem2>0?(gsrcCP2/gsrcRem2).toFixed(1)+"X":"—");
+  ["2026-Q3","2026-Q4"].forEach(function(q){var qBW=0,qLv=0;SBS.forEach(function(sb){qBW+=SBS.reduce(function(s){return s;},0);});html+=cvgCell("—");});
+  html+=cvgCell(gsrcRem2>0?(gsrcLv2/gsrcRem2).toFixed(1)+"X":"—");
+  html+=cvgCell("—");html+=cvgCell("—");
+  html+='</tr></tbody></table></div></div>';
+  html+='</div>';  // close left column
   var _sbDrillMode2="sol3";
   html+='<div class="cc" style="flex:1;min-width:0"><div class="ch"><span>2026 TCP Target Attainment by Sales Bag (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:40%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup><thead><tr>';
   html+='<th style="'+thL+'">Sales Bag</th>';
