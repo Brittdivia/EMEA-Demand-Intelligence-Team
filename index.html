@@ -399,6 +399,7 @@ function buildFbar(){
   FD.forEach(function(fd){
     if(fd.k==="Campaign/WBS Code"||fd.k==="Executor"||fd.k==="Digital Assets team support"||fd.k==="DG Program")return;
     if((activeTab==="bud"||activeTab==="exe")&&(fd.k==="Demand Manager"||fd.k==="Status"||fd.k==="SoD"))return;
+    if(activeTab==="exe"&&fd.k==="Region Name (level 3)")return;
     var s=sk(fd.k),n=filters[fd.k].size;
     var w=document.createElement("div");w.className="fbi";
     w.innerHTML="<button class=\"fbtn"+(n?" on":"")+"\" id=\"fb_"+s+"\" onclick=\"toggleDD('"+fd.k.replace(/'/g,"\'")+"')\">"+(fd.l)+" <span class=\"fc\" id=\"fc_"+s+"\">"+(n)+"</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
@@ -1020,7 +1021,7 @@ function renderExe(){try{
   var _dispHodEur=_calMode?hodEur:allHodEur;
   var SL='<div '+'style="display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px">';
   var html='<div class="ap">';
-  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="display:flex;align-items:center;gap:12px"><h2 style="color:var(--dk);margin:0">TCP</h2><button onclick="window._exeCalMode=!window._exeCalMode;renderExe();" style="padding:4px 12px;border:1px solid var(--bd);border-radius:20px;font-size:12px;cursor:pointer;background:'+(window._exeCalMode?'#00144A':'#fff')+';color:'+(window._exeCalMode?'#fff':'var(--tx)')+'">&#128279; Connected to DCM Calendar '+(window._exeCalMode?'&#10003;':'')+'</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="display:flex;align-items:center;gap:12px"><h2 style="color:var(--dk);margin:0">TCP</h2><span style="font-size:11px;color:var(--mu);font-style:italic">TCP Target at region level 3 is not available</span><button onclick="window._exeCalMode=!window._exeCalMode;renderExe();" style="padding:4px 12px;border:1px solid var(--bd);border-radius:20px;font-size:12px;cursor:pointer;background:'+(window._exeCalMode?'#00144A':'#fff')+';color:'+(window._exeCalMode?'#fff':'var(--tx)')+'">&#128279; Connected to DCM Calendar '+(window._exeCalMode?'&#10003;':'')+'</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
   html+='<p style="font-size:12px;color:var(--mu);margin-bottom:14px">Shows ACV — Contribution from Campaigns executed using EMEA Campaign Calendar, connected via WBS/Marketing Code</p>';
   html+=fnote;
   // Pipeline row
@@ -1038,6 +1039,10 @@ function renderExe(){try{
   html+='<div style="display:flex;gap:16px;margin-top:16px">';
   html+='<div class="cc" style="flex:1;min-width:0;height:200px;display:flex;flex-direction:column"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>Total Pipeline Created 2026 vs TCP Target — by Region</div><div style="display:flex;gap:3px"><button id="exe-pipe-btn-l2" onclick="window.pipeRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-pipe-btn-l3" onclick="window.pipeRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;flex:1;position:relative"><canvas id="exe-reg-pipeline"></canvas></div></div>';
   html+='<div id="exe-pipe-reg-tbl" style="flex:1;min-width:0"></div>';
+  html+='</div>';
+  html+='<div style="display:flex;gap:16px;margin-top:16px">';
+  html+='<div id="exe-prod-cal-tbl" style="flex:1;min-width:0"></div>';
+  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>Product Breakdown &mdash; by Sales Bag<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) stacked by product family</span><br><span id="exe-prod-info" style="font-size:10px;font-weight:400;color:var(--mu)"></span></div><div style="display:flex;gap:3px"><button id="exe-prod-btn-sb" onclick="window.prodStackMode=\'sb\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">Sales Bag</button><button id="exe-prod-btn-ssb" onclick="window.prodStackMode=\'ssb\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">Sub Sales Bag</button><button id="exe-prod-btn-l2" onclick="window.prodRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-prod-btn-l3" onclick="window.prodRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:200px"><canvas id="exe-prod-mu"></canvas></div></div>';
   html+='</div>';
   html+='<div id="exe-prod-cal-row" style="display:flex;gap:16px;margin-top:16px"></div>';
   p.innerHTML=html;
@@ -1592,12 +1597,11 @@ function renderExe(){try{
       tbl3+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td><td style="'+tdT2+';text-align:right">'+fmtE(_regAllGrand)+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_regCalGrand)+'</td><td style="'+tdT2+';text-align:right">'+(_regAllGrand>0?(_regCalGrand/_regAllGrand*100).toFixed(1)+"%":"—")+'</td></tr>';
       tbl3+='</tbody></table></div></div>';
       _regTbl.innerHTML=tbl2;
-      // Product Breakdown row — same height as % contribution table
+      // Contribution table goes into dedicated div
+      var _prodCalTbl=document.getElementById("exe-prod-cal-tbl");
+      if(_prodCalTbl)_prodCalTbl.innerHTML=tbl3;
       var _prodRow=document.getElementById("exe-prod-cal-row");
-      if(_prodRow){
-        _prodRow.innerHTML='<div style="flex:1;min-width:0">'+tbl3+'</div>'
-          +'<div class="cc" style="flex:1;min-width:0"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>Product Breakdown &mdash; by Sales Bag<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) stacked by product family</span><br><span id="exe-prod-info" style="font-size:10px;font-weight:400;color:var(--mu)"></span></div><div style="display:flex;gap:3px"><button id="exe-prod-btn-sb" onclick="window.prodStackMode=\'sb\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">Sales Bag</button><button id="exe-prod-btn-ssb" onclick="window.prodStackMode=\'ssb\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">Sub Sales Bag</button><button id="exe-prod-btn-l2" onclick="window.prodRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-prod-btn-l3" onclick="window.prodRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:200px"><canvas id="exe-prod-mu"></canvas></div></div>';
-      }
+      if(_prodRow)_prodRow.innerHTML='';
     }
     // Pipeline vs TCP Target by TCP Source
     var SRC_MAP={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};
@@ -1672,9 +1676,19 @@ function renderBud(){
     return rn?Object.assign({},r,{reg:rn}):r;
   });
   if(filters["IAC"]&&filters["IAC"].size)data=data.filter(function(r){return filters["IAC"].has(String(r.iac||"").trim());});
+  // Apply region L2 filter — strip "CS " to match budget region names
+  if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){
+    var _budRegF=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return (_regNorm[r.replace(/^CS /,"").toLowerCase().trim()])||r.replace(/^CS /,"").trim();}));
+    data=data.filter(function(r){return _budRegF.has(String(r.reg||"").trim());});
+  }
   if(!data.length){page.innerHTML='<div class="ap"><div class="nr"><p>Budget data not loaded.</p></div></div>';return;}
 
   var REGS=["Benelux","France","Italy","MEA North","MEA South","Nordic","Southern Europe","UKI"];
+  // Filter REGS to selected regions if filter active
+  if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){
+    var _selRegs=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return (_regNorm[r.replace(/^CS /,"").toLowerCase().trim()])||r.replace(/^CS /,"").trim();}));
+    REGS=REGS.filter(function(rg){return _selRegs.has(rg);});
+  }
   var QTRS=["2026-Q1","2026-Q2","2026-Q3","2026-Q4"];
   function fmtQtr(q){var m=String(q).match(/(\d{4})-Q(\d)/);return m?"Q"+m[2]+m[1].slice(2):q;}
   var IAC_ORDER=["C-Field","C-Digital","E-High Touch","Partner-Driven"];
@@ -1688,6 +1702,16 @@ function renderBud(){
   var regQtr={};
   REGS.forEach(function(rg){regQtr[rg]={};QTRS.forEach(function(q){regQtr[rg][q]=0;});});
   data.forEach(function(r){if(regQtr[r.reg])regQtr[r.reg][r.qtr]=(regQtr[r.reg][r.qtr]||0)+(r.eur||0);});
+  // By Region L3 (Profit Center) budget — also by quarter
+  var regPCBud={},regPCBudQ={};
+  data.forEach(function(r){
+    var pc=String(r.pc||"").trim();if(!pc||!regQtr[r.reg])return;
+    if(!regPCBud[r.reg])regPCBud[r.reg]={};
+    if(!regPCBudQ[r.reg])regPCBudQ[r.reg]={};
+    if(!regPCBudQ[r.reg][pc])regPCBudQ[r.reg][pc]={};
+    regPCBud[r.reg][pc]=(regPCBud[r.reg][pc]||0)+(r.eur||0);
+    if(r.qtr)regPCBudQ[r.reg][pc][r.qtr]=(regPCBudQ[r.reg][pc][r.qtr]||0)+(r.eur||0);
+  });
 
   // By Region x IAC table
   var regIac={};
@@ -1709,8 +1733,10 @@ function renderBud(){
   var regBW={},regPipeYTD={},regForecast={},regLive={},regCommProb={};
   var regBW_q={},regLive_q={};
   var rsBW={},rsLv={},rsCP={},rsBW_q={},rsLv_q={};
+  // Region L3 accumulators
+  var regL3BW={},regL3Lv={},regL3CP={},regL3BW_q={},regL3Lv_q={};
   REGS.forEach(function(rg){
-    regBW_q[rg]={};regLive_q[rg]={};
+    regBW_q[rg]={};regLive_q[rg]={};regL3BW[rg]={};regL3Lv[rg]={};regL3CP[rg]={};regL3BW_q[rg]={};regL3Lv_q[rg]={};
     rsBW[rg]={};rsLv[rg]={};rsCP[rg]={};rsBW_q[rg]={};rsLv_q[rg]={};
     SRCS.forEach(function(s){rsBW[rg][s]=0;rsLv[rg][s]=0;rsCP[rg][s]=0;rsBW_q[rg][s]={};rsLv_q[rg][s]={};
       QTRS.forEach(function(q){regBW_q[rg][q]=0;regLive_q[rg][q]=0;rsBW_q[rg][s][q]=0;rsLv_q[rg][s][q]=0;});
@@ -1727,10 +1753,18 @@ function renderBud(){
     var closeQ=String(p["Closing Qtr"]||"");
     var srcRaw=String(p["TCP Pipeline Source Desc"]||"").trim();
     var src=_pipeSrcMap2[srcRaw];
+    var l3=String(p["Region Lvl 3"]||"").trim();
     if(createQ.startsWith("2026"))regPipeYTD[reg]=(regPipeYTD[reg]||0)+eur;
     if(drm==="Booked/Won")regBW[reg]=(regBW[reg]||0)+eur;
     if(closeQ.startsWith("2026")&&(drm==="Booked/Won"||drm==="Probable"||drm==="Committed"))regForecast[reg]=(regForecast[reg]||0)+eur;
     if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable"||drm==="Upside"))regLive[reg]=(regLive[reg]||0)+eur;
+    // L3 accumulators
+    if(l3&&regL3BW[reg]!==undefined){
+      if(closeQ.startsWith("2026")&&drm==="Booked/Won"){regL3BW[reg][l3]=(regL3BW[reg][l3]||0)+eur;}
+      if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable"||drm==="Upside")){regL3Lv[reg][l3]=(regL3Lv[reg][l3]||0)+eur;}
+      if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable")){regL3CP[reg][l3]=(regL3CP[reg][l3]||0)+eur;}
+      if(QTRS.indexOf(closeQ)>-1){if(!regL3BW_q[reg][l3])regL3BW_q[reg][l3]={};if(!regL3Lv_q[reg][l3])regL3Lv_q[reg][l3]={};if(drm==="Booked/Won")regL3BW_q[reg][l3][closeQ]=(regL3BW_q[reg][l3][closeQ]||0)+eur;if(drm==="Committed"||drm==="Probable"||drm==="Upside")regL3Lv_q[reg][l3][closeQ]=(regL3Lv_q[reg][l3][closeQ]||0)+eur;}
+    }
     if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable"))regCommProb[reg]=(regCommProb[reg]||0)+eur;
     if(QTRS.indexOf(closeQ)>-1){
       if(!regBW_q[reg])regBW_q[reg]={};if(!regLive_q[reg])regLive_q[reg]={};
@@ -1778,9 +1812,9 @@ function renderBud(){
 
   var html='<div class="ap"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h2 style="color:var(--dk);margin:0">Coverage Overview</h2><a href="https://launcher.value-experience-hub.for.sap/experiences/dmd/pages/pipeline-motion" target="_blank" style="padding:6px 14px;background:#00144A;color:#fff;border-radius:var(--r);font-size:12px;font-weight:600;text-decoration:none">&#128279; DMD - Pipeline Motion</a></div>';
 
-  // KPI boxes
-  var _totalFc=Object.values(regForecast).reduce(function(s,v){return s+v;},0);
-  var _totalLv=Object.values(regLive).reduce(function(s,v){return s+v;},0);
+  // KPI boxes — sum only REGS that pass filter
+  var _totalFc=REGS.reduce(function(s,rg){return s+(regForecast[rg]||0);},0);
+  var _totalLv=REGS.reduce(function(s,rg){return s+(regLive[rg]||0);},0);
   html+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">';
   html+='<div class="kpi kb"><div class="kl">Total 2026 Budget</div><div class="kv">&euro;'+fmtE(total2026)+'</div></div>';
   html+='<div class="kpi kb"><div class="kl">Total Forecast Closing 2026</div><div class="kv">&euro;'+fmtE(_totalFc)+'</div><div class="ks">Booked/Won + Probable + Committed</div></div>';
@@ -1837,29 +1871,32 @@ function renderBud(){
     html+=cvgCell(q1Cvg27);
     html+=cvgCell(q2Cvg27);
     html+='</tr>';
-    // Source sub-rows — hidden by default
-    SRCS.forEach(function(src,si){
-      var sbw=rsBW[rg]?rsBW[rg][src]||0:0;
-      var slv=rsLv[rg]?rsLv[rg][src]||0:0;
-      var scp=rsCP[rg]?rsCP[rg][src]||0:0;
-      var sRem=rowTot-sbw;
+    // L3 sub-rows — union of all L3 values with any pipeline data
+    var l3Set=new Set(Object.keys(regL3Lv[pipeReg]||{}).concat(Object.keys(regL3BW[pipeReg]||{})).concat(Object.keys(regL3CP[pipeReg]||{})));
+    if(regPCBud[pipeReg])Object.keys(regPCBud[pipeReg]).forEach(function(k){l3Set.add(k);});
+    var l3Items=Array.from(l3Set).sort();
+    l3Items.forEach(function(l3){
+      var sbw=regL3BW[pipeReg]?regL3BW[pipeReg][l3]||0:0;
+      var slv=regL3Lv[pipeReg]?regL3Lv[pipeReg][l3]||0:0;
+      var scp=regL3CP[pipeReg]?regL3CP[pipeReg][l3]||0:0;
+      var l3Bud=regPCBud[pipeReg]&&regPCBud[pipeReg][l3]?regPCBud[pipeReg][l3]:0;
+      var sRem=l3Bud>0?l3Bud-sbw:rowTot-sbw;  // use L3 budget if available, else region budget
       var sFcst=sRem>0?(scp/sRem).toFixed(1)+"X":"—";
       var sLive=sRem>0?(slv/sRem).toFixed(1)+"X":"—";
-      html+='<tr class="'+rgId+'" style="display:none;background:#fafcff"><td style="padding:3px 6px 3px 34px;font-size:11px;color:var(--mu);border-bottom:1px solid #f0f0f0">'+src+'</td>';
-      html+='<td style="'+td+';font-size:11px;color:var(--mu)">—</td>';
+      html+='<tr class="'+rgId+'" style="display:none;background:#fafcff"><td style="padding:3px 6px 3px 34px;font-size:11px;color:var(--mu);border-bottom:1px solid #f0f0f0">'+l3+'</td>';
+      html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(l3Bud?fmtE(l3Bud):"—")+'</td>';
       html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(sbw?fmtE(sbw):"—")+'</td>';
       html+=cvgCell(sFcst,"font-size:11px;");
       ["2026-Q3","2026-Q4"].forEach(function(q){
-        var sqBW=rsBW_q[rg]&&rsBW_q[rg][src]?rsBW_q[rg][src][q]||0:0;
-        var sqLv=rsLv_q[rg]&&rsLv_q[rg][src]?rsLv_q[rg][src][q]||0:0;
-        var sqRem=rowTot-sqBW;
-        var sqCvgV=sqRem>0?(sqLv/sqRem).toFixed(1)+"X":"—";html+=cvgCell(sqCvgV,"font-size:11px;");
+        var sqBW=regL3BW_q[pipeReg]&&regL3BW_q[pipeReg][l3]?regL3BW_q[pipeReg][l3][q]||0:0;
+        var sqLv=regL3Lv_q[pipeReg]&&regL3Lv_q[pipeReg][l3]?regL3Lv_q[pipeReg][l3][q]||0:0;
+        var sqBudget=regPCBudQ[pipeReg]&&regPCBudQ[pipeReg][l3]?regPCBudQ[pipeReg][l3][q]||0:regQtr[rg][q]||0;
+        var sqRem=sqBudget-sqBW;
+        html+=cvgCell(sqRem>0?(sqLv/sqRem).toFixed(1)+"X":"—","font-size:11px;");
       });
       html+=cvgCell(sLive,"font-size:11px;");
-      var sQ1L27=rsLv_q[rg]&&rsLv_q[rg][src]?rsLv_q[rg][src]["2027-Q1"]||0:0;
-      var sQ2L27=rsLv_q[rg]&&rsLv_q[rg][src]?rsLv_q[rg][src]["2027-Q2"]||0:0;
-      html+=cvgCell(q1Bud27>0?(sQ1L27/q1Bud27).toFixed(1)+"X":"—","font-size:11px;");
-      html+=cvgCell(q2Bud27>0?(sQ2L27/q2Bud27).toFixed(1)+"X":"—","font-size:11px;");
+      html+=cvgCell(q1Bud27>0?(slv/q1Bud27).toFixed(1)+"X":"—","font-size:11px;");
+      html+=cvgCell(q2Bud27>0?(slv/q2Bud27).toFixed(1)+"X":"—","font-size:11px;");
       html+='</tr>';
     });
   });
@@ -1900,23 +1937,10 @@ function renderBud(){
     var ytd=regPipeYTD[pipeReg]||0;
     var att=tcp>0?(ytd/tcp*100).toFixed(0)+"%":"—";
     grandTcp2+=tcp;grandYTD2+=ytd;
-    var rgId2='bud-att-'+rg.replace(/\s+/g,'_');
-    html+='<tr style="font-weight:700;background:#f0f4f8"><td style="'+tdL+'">';
-    html+='<button onclick="(function(el){var rows=document.querySelectorAll(\'.\'+\''+rgId2+'\');var open=rows[0]&&rows[0].style.display!==\'none\';rows.forEach(function(r){r.style.display=open?\'none\':\'\';});el.textContent=open?\'+\':\'-\';})(this)" style="width:18px;height:18px;line-height:1;font-size:13px;font-weight:700;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;margin-right:5px;padding:0">+</button>';
-    html+=rg+'</td>';
+    html+='<tr><td style="'+tdL+'">'+rg+'</td>';
     html+='<td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td>';
     html+='<td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td>';
     html+='<td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td></tr>';
-    SRCS.forEach(function(src){
-      var stcp=rsTcpTgt[rg]?rsTcpTgt[rg][src]||0:0;
-      var sytd=rsYTD[rg]?rsYTD[rg][src]||0:0;
-      var satt=stcp>0?(sytd/stcp*100).toFixed(0)+"%":"—";
-      html+='<tr class="'+rgId2+'" style="display:none;background:#fafcff">';
-      html+='<td style="padding:3px 6px 3px 34px;font-size:11px;color:var(--mu);border-bottom:1px solid #f0f0f0">'+src+'</td>';
-      html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(stcp?fmtE(stcp):"—")+'</td>';
-      html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(sytd?fmtE(sytd):"—")+'</td>';
-      html+='<td style="'+td+';font-size:11px;font-weight:700;color:'+(stcp>0&&sytd/stcp>=1?'#0a6640':sytd/stcp>=0.75?'#804000':'#8B0000')+'">'+satt+'</td></tr>';
-    });
   });
   html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td>';
   html+='<td style="'+td+';font-weight:700">'+fmtE(grandTcp2)+'</td>';
@@ -2006,10 +2030,10 @@ function renderBud(){
   });
 
   // Coverage table by Sales Bag
-  var _sbDrillMode=window._sbDrillMode||"sol3";
+  var _sbDrillMode="sol3";
   var thSW=thS.replace("white-space:nowrap","white-space:normal")+";max-width:60px;line-height:1.2";
   html+='<div style="display:flex;gap:16px;margin-bottom:20px;align-items:flex-start;margin-top:20px">';
-  html+='<div class="cc" style="flex:0 0 65%;min-width:0"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><span>R4Q Budget by Sales Bag (kEUR)</span><div style="display:flex;gap:3px"><button onclick="window._sbDrillMode=\'sol3\';renderBud()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px;background:'+(_sbDrillMode==="sol3"?"#00144A":"#fff")+';color:'+(_sbDrillMode==="sol3"?"#fff":"var(--tx)")+'">Sub SA</button><button onclick="window._sbDrillMode=\'src\';renderBud()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px;background:'+(_sbDrillMode==="src"?"#00144A":"#fff")+';color:'+(_sbDrillMode==="src"?"#fff":"var(--tx)")+'">TCP Source</button></div></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:24%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr>';
+  html+='<div class="cc" style="flex:0 0 65%;min-width:0"><div class="ch"><span>R4Q Budget by Sales Bag (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:24%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr>';
   html+='<th style="'+thL+'">Sales Bag</th>';
   html+='<th style="'+thSW+'">Budget</th>';
   html+='<th style="'+thSW+'">Won 2026</th>';
@@ -2090,8 +2114,8 @@ function renderBud(){
   html+='</tr></tbody></table></div></div>';
 
   // TCP Attainment by Sales Bag
-  var _sbDrillMode2=window._sbDrillMode2||"sol3";
-  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><span>2026 TCP Target Attainment by Sales Bag (kEUR)</span><div style="display:flex;gap:3px"><button onclick="window._sbDrillMode2=\'sol3\';renderBud()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px;background:'+(_sbDrillMode2==="sol3"?"#00144A":"#fff")+';color:'+(_sbDrillMode2==="sol3"?"#fff":"var(--tx)")+'">Sub SA</button><button onclick="window._sbDrillMode2=\'src\';renderBud()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px;background:'+(_sbDrillMode2==="src"?"#00144A":"#fff")+';color:'+(_sbDrillMode2==="src"?"#fff":"var(--tx)")+'">TCP Source</button></div></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:40%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup><thead><tr>';
+  var _sbDrillMode2="sol3";
+  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch"><span>2026 TCP Target Attainment by Sales Bag (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:40%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup><thead><tr>';
   html+='<th style="'+thL+'">Sales Bag</th>';
   html+='<th style="'+thS+'">TCP Target</th>';
   html+='<th style="'+thS+'">YTD Pipeline Created</th>';
@@ -2110,10 +2134,9 @@ function renderBud(){
     html+='<td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td>';
     html+='<td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td></tr>';
     var sol3Set2=new Set(Object.keys(sbSol3Tgt[sb]||{}).concat(Object.keys(sbSol3YTD[sb]||{})).concat(Object.keys(sbSol3Bud[sb]||{})));
-    var drillItems2=_sbDrillMode2==="src"?SRCS.filter(function(s){return sbSrcTcpTgt[sb][s]||sbSrcYTD[sb][s];}):Array.from(sol3Set2).sort();
-    drillItems2.forEach(function(item){
-      var itcp=_sbDrillMode2==="src"?(sbSrcTcpTgt[sb][item]||0):(sbSol3Tgt[sb][item]||0);
-      var iytd=_sbDrillMode2==="src"?(sbSrcYTD[sb][item]||0):(sbSol3YTD[sb][item]||0);
+    Array.from(sol3Set2).sort().forEach(function(item){
+      var itcp=sbSol3Tgt[sb][item]||0;
+      var iytd=sbSol3YTD[sb][item]||0;
       var iatt=itcp>0?(iytd/itcp*100).toFixed(0)+"%":"—";
       html+='<tr class="'+sbId2+'" style="display:none;background:#fafcff">';
       html+='<td style="padding:3px 6px 3px 34px;font-size:11px;color:var(--mu);border-bottom:1px solid #f0f0f0">'+item+'</td>';
