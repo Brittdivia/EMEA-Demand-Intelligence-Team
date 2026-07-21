@@ -64,6 +64,7 @@ $fieldMap = @{
 
 Write-Host "Processing $($rows.Count - 1) rows..."
 $entries = [System.Collections.Generic.List[string]]::new()
+$seenIds = [System.Collections.Generic.HashSet[string]]::new()
 
 for ($i = 1; $i -lt $rows.Count; $i++) {
     $rowVals = @{}
@@ -74,7 +75,7 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
 
     $id = ''
     foreach ($h in $fieldMap.Keys) { if ($colIdx[$h]) { $v = $rowVals[$colIdx[$h]]; if ($h -eq 'ID' -and $v) { $id = $v } } }
-    if (-not $id) { continue }
+    if (-not $id -or -not $seenIds.Add($id)) { continue }
 
     $parts = [System.Collections.Generic.List[string]]::new()
     foreach ($h in @('ID','Company','Touched At','Stage Changed At','Created At','Tags','Stage Name','Email','Assigned Users','Persona Name','Active Sequences','Finished Sequences')) {
