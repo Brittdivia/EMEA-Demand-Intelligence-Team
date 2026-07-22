@@ -248,7 +248,6 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
   <button class="tbtn-sub" onclick="switchTab('pdel')">Prospect Tracking</button>
   <button class="tbtn-sub" onclick="switchTab('dtr')">Data Tracking</button>
   <button class="tbtn-sub" onclick="switchTab('ovw')">Extra Insights</button>
-  <button class="tbtn-sub" onclick="switchTab('sde')">SDE Insights</button>
 </div>
 <div class="fbar" id="fbar">
   <span class="flbl">Filter by:</span>
@@ -259,7 +258,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
 <div class="panel" id="p-exe"><div class="ap" id="exePage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="wbar" id="wbar" style="display:none"><span id="wbar-content2"></span></div>
 <div class="panel" id="p-ovw"><div class="ap" id="ovwPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
-<div class="panel" id="p-sde"><div class="ap" id="sdePage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
+<div class="panel" id="p-sde" style="display:none"><div class="ap" id="sdePage"></div></div>
 <div class="panel" id="p-ana"><div class="ap" id="anaPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-out"><div class="ap" id="outPage"><div class="nr"><div class="ni">âŒ›</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-pdel"><div class="ap" id="pdelPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
@@ -378,7 +377,7 @@ var DETAIL_TABS={"ana":"Campaign Insights","pip":"Pipeline Details","out":"Outre
 function switchTab(t){
   activeTab=t;
   var tabs=["bud","exe","cal"];document.querySelectorAll(".tbtn").forEach(function(b,i){b.classList.toggle("on",tabs[i]===t);});
-  var subTabs=["ana","out","pdel","dtr","ovw","sde"];document.querySelectorAll(".tbtn-sub").forEach(function(b,i){b.classList.toggle("on",subTabs[i]===t);});
+  var subTabs=["ana","out","pdel","dtr","ovw"];document.querySelectorAll(".tbtn-sub").forEach(function(b,i){b.classList.toggle("on",subTabs[i]===t);});
   document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
   var pnl=document.getElementById("p-"+t);if(pnl)pnl.classList.add("on");
   buildFbar();buildWbar();
@@ -3304,10 +3303,20 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
     else if(re2ViewMode==="dat")keys=[String(camp["Digital Assets team support"]||"").trim()];
     else if(re2ViewMode==="dg")keys=[String(camp["DG Program"]||"").trim()];
     else if(re2ViewMode==="type")keys=[String(camp["Campaign Type"]||"").trim()];
-    else if(re2ViewMode==="l3")keys=String(p["Region Lvl 3"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);
+    else if(re2ViewMode==="l3"){var _l3raw=String(p["Region Lvl 3"]||"").trim();if(_l3raw&&_re2ValidL3&&!_re2ValidL3.has(_l3raw))return;keys=_l3raw?[_l3raw]:[];}
     var eur=parseFloat(p["Eur"]||0)||0;var oid=String(p["Opportunity ID"]||"");
     keys.forEach(function(k){if(!k)return;re2Eur2[k]=(re2Eur2[k]||0)+eur;if(!re2Ops2[k])re2Ops2[k]=new Set();if(oid)re2Ops2[k].add(oid);});
   });
+  // For L3 mode: build valid L3 set from campData (already filtered by L2)
+  var _re2ValidL3=null;
+  if(re2ViewMode==="l3"){
+    _re2ValidL3=new Set();
+    data.forEach(function(r){
+      String(r["Region Name (level 3)"]||"").split(",").forEach(function(s){
+        var v=s.trim().replace(/^CS /,"");if(v)_re2ValidL3.add(v);
+      });
+    });
+  }
   if(re2ViewMode==="mc"){re2Camp2={};pr.forEach(function(p){var mc=String(p["SAP Mastercode"]||"").trim();if(mc)re2Camp2[mc]=(re2Camp2[mc]||0)+1;});}
   if(re2ViewMode==="l3"){re2Camp2={};pr.forEach(function(p){var l3=String(p["Region Lvl 3"]||"").trim();if(l3)re2Camp2[l3]=(re2Camp2[l3]||0)+1;});}
   // Build TCP target per dimension for re2/roc charts
