@@ -93,6 +93,7 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
     $fields += ',"Eur":'                     + $eur
     $fields += ',"DRM Category":"'           + (EscapeJson (GetByHeader 'DRM Category'))              + '"'
     $fields += ',"SDE Handover Date":"'      + (EscapeJson (ConvertTo-DateStr (GetByHeader 'SDE Handover Date'))) + '"'
+    $fields += ',"SDE Handover Role":"'      + (EscapeJson (GetByHeader 'SDE Handover Role'))                    + '"'
     $fields += ',"Create Date":"'            + (EscapeJson (ConvertTo-DateStr (GetByHeader 'Create Date')))       + '"'
     $fields += ',"Create Quarter":"'         + (EscapeJson (GetByHeader 'Create Quarter'))            + '"'
     $fields += ',"Closing Qtr":"'            + (EscapeJson (GetByHeader 'Closing Qtr'))               + '"'
@@ -110,6 +111,9 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
     $fields += ',"IAC (Engagement Model)":"' + (EscapeJson (GetByHeader 'IAC (Engagement Model)'))    + '"'
     $fields += ',"SDE Engagement Type":"'    + (EscapeJson (GetByHeader 'SDE Engagement Type'))       + '"'
     $fields += ',"SDE Initial Engagement Role":"' + (EscapeJson (GetByHeader 'SDE Initial Engagement Role')) + '"'
+    $fields += ',"SDE Initial Engagement Name":"' + (EscapeJson (GetByHeader 'SDE Initial Engagement Name')) + '"'
+    $fields += ',"SDE Primary Engagement Name":"' + (EscapeJson (GetByHeader 'SDE Primary Engagement Name')) + '"'
+    $fields += ',"SDE Secondary Engagement Name":"' + (EscapeJson (GetByHeader 'SDE Secondary Engagement Name')) + '"'
     $fields += ',"SDE Territory Owner":"'    + (EscapeJson (GetByHeader 'SDE Current Territory Owner Name')) + '"'
     $fields += ',"Opp Description":"'        + (EscapeJson (GetByHeader 'Opp Description'))           + '"'
 
