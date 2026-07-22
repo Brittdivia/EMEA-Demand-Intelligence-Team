@@ -453,7 +453,7 @@ function buildFbar(){
   var pipeQtrs=Array.from(new Set(pipeData.map(function(p){return String(p["Create Quarter"]||"").trim();}).filter(function(q){return q.startsWith("2026");}))). sort();
   var pqN=window._pipeQtrSet.size;
   var pqBtn=document.createElement("div");pqBtn.className="fbi";pqBtn.id="pipeqtr-fbi";
-  var pqLabel="Pipeline Quarter"+(pqN?" ("+pqN+")":"");
+  var pqLabel="Pipeline Creation Quarter"+(pqN?" ("+pqN+")":"");
   pqBtn.innerHTML="<button class=\"fbtn"+(pqN?" on":"")+"\" id=\"pipeqtr-fbtn\" onclick=\"togglePipeQtrDD()\">"+pqLabel+" <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
     +"<div class=\"fdd\" id=\"pipeqtr-fdd\"><div class=\"fdh\"><span class=\"fdt\">Pipeline Creation Quarter</span><button class=\"fdc\" onclick=\"window._pipeQtrSet=new Set();if(activeTab==='exe')renderExe();buildFbar();\">Clear</button></div>"
     +"<div class=\"fdo\" id=\"pipeqtr-fdo\">"
@@ -2654,7 +2654,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
   html3+=(pageId!=="ovwPage"?"<div class=\"sec\">Campaign Insights</div>":"");
   html3+=(pageId!=="ovwPage"?"<div style=\"display:flex;gap:12px;margin-bottom:20px;align-items:stretch\">"
     +"<div class=\"cc\" id=\"card-"+pfx+"-re2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;flex-direction:column;gap:4px\"><div style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span id=\"re2-title\" style=\"font-size:12px;font-weight:600;white-space:nowrap\">Pipeline Results - by Region</span><div style=\"display:flex;gap:3px;flex-shrink:0\"><button id=\"re2-vm-acv\" onclick=\"window.re2DataMode=&apos;acv&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">ACV/Opps</button><button id=\"re2-vm-tbl\" onclick=\"window.re2DataMode=&apos;tbl&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Table</button></div></div><div style=\"display:flex;gap:3px;flex-wrap:wrap\"><button id=\"re2-vm-reg\" onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Region</button><button id=\"re2-vm-sb\" onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sales Bag</button><button id=\"re2-vm-mc\" onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Mastercode</button><button id=\"re2-vm-sod\" onclick=\"window.re2ViewMode=&apos;sod&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">SoD</button><button id=\"re2-vm-dat\" onclick=\"window.re2ViewMode=&apos;dat&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DAT</button><button id=\"re2-vm-dg\" onclick=\"window.re2ViewMode=&apos;dg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DG Program</button><button id=\"re2-vm-type\" onclick=\"window.re2ViewMode=&apos;type&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Type</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2\"></canvas></div></div>"
-    +"<div class=\"cc\" id=\"card-"+pfx+"-re2SB2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div class=\"ch\"><span id=\"roc-title\" style=\"font-size:12px;font-weight:600\">Return on Campaign - by Region</span></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2SB2\"></canvas></div></div>"
+    +"<div class=\"cc\" id=\"card-"+pfx+"-re2SB2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div id=\"ana-drm-tcp-tables\"></div></div>"
     +"</div>":"");
   // DAT Support chart removed - accessible via Type chart toggle
   // All 5 charts only on anaPage
@@ -2873,7 +2873,40 @@ if(pageId!=="ovwPage"){html3+="<div class=\"cc\" style=\"margin-bottom:28px;widt
   }).join("");
   html3+="</tbody></table></div></div>";
   page.innerHTML=html3;
-  if(pageId!=="ovwPage"){(function(){var rv=window.re2ViewMode||"reg";var re2DimLabels={"reg":"Region","sb":"Sales Bag","mc":"Mastercode","sod":"SoD","dat":"DAT Support","dg":"DG Program","type":"Type"};var titleEl=document.getElementById("re2-title");if(titleEl)titleEl.textContent="Pipeline Results - by "+(re2DimLabels[rv]||"Region")+(rv==="sod"?" (totals differ due to multiple sources of demands listed in campaigns)":"");["reg","sb","mc","sod","dat","dg","type"].forEach(function(d){var b=document.getElementById("re2-vm-"+d);if(b){b.style.background=d===rv?"#012931":"";b.style.color=d===rv?"#fff":"";}});var re2SortMode=window.re2Sort||"eur";var bEur=document.getElementById("re2-sort-eur");var bOpps=document.getElementById("re2-sort-opps");if(bEur){bEur.style.background=re2SortMode==="eur"?"#012931":"";bEur.style.color=re2SortMode==="eur"?"#fff":"";}if(bOpps){bOpps.style.background=re2SortMode==="opps"?"#012931":"";bOpps.style.color=re2SortMode==="opps"?"#fff":"";}})();}
+  // Populate DRM + TCP source tables in the right panel
+  if(pageId!=="ovwPage"){
+    var _anaDrmTcp=document.getElementById("ana-drm-tcp-tables");
+    if(_anaDrmTcp){
+      var thD2="background:#012931;color:#fff;padding:5px 8px;font-size:10px;font-weight:700;text-align:left;white-space:nowrap";
+      var thDR2=thD2+";text-align:right";
+      var tdD2="padding:4px 8px;font-size:11px;border-bottom:1px solid #f0f0f0";
+      var sdeRows2=pipeData.filter(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim()==="Digital Hub"&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline";});
+      var mmMap2={},mmOpps2={},mmHO2={},mmEng2={};
+      sdeRows2.forEach(function(p){
+        var mm=String(p["MM Identifier"]||"").trim()||"(Blank)";
+        var eur=parseFloat(p["Eur"]||0)||0,oid=String(p["Opportunity ID"]||"").trim();
+        var eng=String(p["SDE Engagement Type"]||"").trim();
+        mmMap2[mm]=(mmMap2[mm]||0)+eur;
+        if(!mmOpps2[mm])mmOpps2[mm]=new Set();if(oid)mmOpps2[mm].add(oid);
+        if(hasHod(p["SDE Handover Date"]))mmHO2[mm]=(mmHO2[mm]||0)+eur;
+        if(eng&&eng!=="(No Value)"){if(!mmEng2[mm])mmEng2[mm]={};mmEng2[mm][eng]=(mmEng2[mm][eng]||0)+eur;}
+      });
+      var mmOrder2=Object.keys(mmMap2).sort(function(a,b){return mmMap2[b]-mmMap2[a];});
+      var tMM='<div class="cc"><div class="ch" style="padding:4px 8px;font-size:11px">Pipeline by MM Identifier</div><div style="overflow:auto;max-height:370px"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+thD2+'">MM Identifier</th><th style="'+thDR2+'">Pipeline (k€)</th><th style="'+thDR2+'"># Opps</th><th style="'+thDR2+'">Handed Over</th><th style="'+thDR2+'">HO %</th><th style="'+thDR2+'">Top Eng. Type</th></tr></thead><tbody>';
+      var gMM2=0,gMMHO2=0;
+      mmOrder2.forEach(function(mm){
+        var v=mmMap2[mm]||0,opps=mmOpps2[mm]?mmOpps2[mm].size:0,ho=mmHO2[mm]||0;
+        var hoPct=v>0?(ho/v*100).toFixed(0)+"%":"—";
+        var topEng=mmEng2[mm]?Object.entries(mmEng2[mm]).sort(function(a,b){return b[1]-a[1];})[0][0]:"—";
+        gMM2+=v;gMMHO2+=ho;
+        tMM+='<tr><td style="'+tdD2+'">'+mm+'</td><td style="'+tdD2+';text-align:right">'+fmtE(v)+'</td><td style="'+tdD2+';text-align:right">'+opps+'</td><td style="'+tdD2+';text-align:right">'+(ho?fmtE(ho):"—")+'</td><td style="'+tdD2+';text-align:right">'+hoPct+'</td><td style="'+tdD2+'">'+topEng+'</td></tr>';
+      });
+      tMM+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdD2+'">Total</td><td style="'+tdD2+';text-align:right">'+fmtE(gMM2)+'</td><td style="'+tdD2+';text-align:right">'+new Set(sdeRows2.map(function(p){return String(p["Opportunity ID"]||"");})).size+'</td><td style="'+tdD2+';text-align:right">'+fmtE(gMMHO2)+'</td><td style="'+tdD2+';text-align:right">'+(gMM2>0?(gMMHO2/gMM2*100).toFixed(0)+"%":"—")+'</td><td style="'+tdD2+'">—</td></tr>';
+      tMM+='</tbody></table></div></div>';
+      _anaDrmTcp.innerHTML='<div style="padding:8px">'+tMM+'</div>';
+    }
+  }
+  if(pageId!=="ovwPage"){(function(){var rv=window.re2ViewMode||"reg";var re2DimLabels={"reg":"Region","sb":"Sales Bag","mc":"Mastercode","sod":"SoD","dat":"DAT Support","dg":"DG Program","type":"Type"};var titleEl=document.getElementById("re2-title");if(titleEl)titleEl.textContent="Pipeline Results - by "+(re2DimLabels[rv]||"Region")+((rv==="sod"||rv==="sb"||rv==="mc")?" (totals differ due to multiple entries listed in campaign calendars)":"");["reg","sb","mc","sod","dat","dg","type"].forEach(function(d){var b=document.getElementById("re2-vm-"+d);if(b){b.style.background=d===rv?"#012931":"";b.style.color=d===rv?"#fff":"";}});var re2SortMode=window.re2Sort||"eur";var bEur=document.getElementById("re2-sort-eur");var bOpps=document.getElementById("re2-sort-opps");if(bEur){bEur.style.background=re2SortMode==="eur"?"#012931":"";bEur.style.color=re2SortMode==="eur"?"#fff":"";}if(bOpps){bOpps.style.background=re2SortMode==="opps"?"#012931":"";bOpps.style.color=re2SortMode==="opps"?"#fff":"";}})();}
 
   function mkC(id,cfg,filterKey){
   if(charts[id])charts[id].destroy();
@@ -3087,6 +3120,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
           var keys=[];
           if(re2ViewMode==="reg"){var rk=String(r["Region Name (level 2)"]||"").trim();if(rk)keys=[rk];}
           else if(re2ViewMode==="sb")keys=String(r["Sales Bag"]||"").split(",").map(function(s){var t=s.trim();return t.indexOf(" - ")>-1?t.substring(t.indexOf(" - ")+3).trim():t;}).filter(Boolean);
+          else if(re2ViewMode==="mc"){var mk=String(r["SAP Mastercode"]||"").trim();if(mk)keys=[mk];}
           else if(re2ViewMode==="sod")keys=String(r["SoD"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);
           else if(re2ViewMode==="dat"){var dk=String(r["Digital Assets team support"]||"").trim();if(dk)keys=[dk];}
           else if(re2ViewMode==="dg"){var dgk=String(r["DG Program"]||"").trim();if(dgk)keys=[dgk];}
