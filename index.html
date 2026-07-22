@@ -265,8 +265,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
 <div class="panel" id="p-pip"><div class="ap" id="pipPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-dtr"><div class="ap" id="dtrPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-cal">
-  <div class="tb2">
-    
+  <div class="tb2" id="cal-tb2" style="display:none">
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;width:100%;justify-content:flex-start"><span id="wbar-content"></span></div>
   </div>
   <div id="cal-infobar" style="padding:6px 16px;background:#F7F9FF;border-bottom:1px solid #D0E4FF;font-size:12px;color:var(--mu);display:flex;gap:24px;flex-shrink:0;">
@@ -315,6 +314,7 @@ var FD=[
   {k:"Starting Quarter",l:"Starting Quarter"},
   {k:"Status",l:"Status"},
   {k:"Campaign/WBS Code",l:"WBS Code"},
+  {k:"Campaign Name",l:"Campaign Name"},
   {k:"Executor",l:"Executor"},
   {k:"Digital Assets team support",l:"DAT Support"},
   {k:"DG Program",l:"DG Program"}
@@ -397,7 +397,7 @@ function sk(k){return k.replace(/[^a-zA-Z0-9]/g,"_");}
 
 function buildFbar(){
   var bar=document.getElementById("fbar"),div=document.getElementById("fdiv");
-  var _subTabs=new Set(["ana","out","pdel","dtr","ovw","sde"]);
+  var _subTabs=new Set(["ana","out","pdel","dtr","ovw","sde","cal"]);
   var WBS_TABS=new Set(["cal","out","ana","acc","pdel","dtr"]);
   bar.querySelectorAll(".fbi").forEach(function(e){e.remove();});
   FD.forEach(function(fd){
@@ -428,7 +428,26 @@ function buildFbar(){
     +"<div style=\"padding:10px 12px\"><input type=\"number\" id=\"eur-input\" placeholder=\"e.g. 1\" value=\""+(eurMinFilter||"")+"\" style=\"width:100%;border:1px solid var(--bd);border-radius:var(--r);padding:5px 8px;font-size:12px;outline:none\"/><button onclick=\"applyEurFilter()\" style=\"margin-top:8px;width:100%;padding:6px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-size:12px\">Apply</button></div>"
     +"</div>";
   div.parentNode.insertBefore(eurBtn,div);
-  // Pipeline Creation Quarter filter — only on sub-tabs
+  // Execution Quarter filter — calendar tab only
+  if(activeTab==="cal"){
+    function getExecQtr(dateStr){
+      if(!dateStr||dateStr==="")return null;
+      var d=new Date(dateStr);if(isNaN(d))return null;
+      var yr=d.getFullYear(),mo=d.getMonth()+1;
+      var q=mo<=3?1:mo<=6?2:mo<=9?3:4;
+      return yr+"-Q"+q;
+    }
+    var execQtrs=Array.from(new Set(campData.map(function(r){return getExecQtr(String(r["Execution End Date"]||"").trim());}).filter(Boolean))).sort();
+    var curEQ=window._execQtrFilter||"";
+    var eqN=curEQ?1:0;
+    var eqBtn=document.createElement("div");eqBtn.className="fbi";eqBtn.id="execqtr-fbi";
+    eqBtn.innerHTML="<button class=\"fbtn"+(eqN?" on":"")+"\" id=\"execqtr-fbtn\" onclick=\"toggleExecQtrDD()\">Exec Quarter <span class=\"fc\" style=\"display:"+(eqN?"inline-block":"none")+"\">1</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
+      +"<div class=\"fdd\" id=\"execqtr-fdd\"><div class=\"fdh\"><span class=\"fdt\">Execution Quarter</span><button class=\"fdc\" onclick=\"window._execQtrFilter='';applyFilters();renderCal();buildFbar();\">Clear</button></div>"
+      +"<div class=\"fdo\" id=\"execqtr-fdo\">"
+      +execQtrs.map(function(q){return"<label class=\"dopt\"><input type=\"radio\" name=\"execqtr\" "+(q===curEQ?"checked":"")+" onchange=\"window._execQtrFilter='"+q+"';applyFilters();renderCal();buildFbar();\"/><span class=\"ot\">"+q+"</span></label>";}).join("")
+      +"</div></div>";
+    div.parentNode.insertBefore(eqBtn,div);
+  }
   if(_subTabs.has(activeTab)){
   if(!window._pipeQtrSet)window._pipeQtrSet=new Set();
   var pipeQtrs=Array.from(new Set(pipeData.map(function(p){return String(p["Create Quarter"]||"").trim();}).filter(function(q){return q.startsWith("2026");}))). sort();
@@ -444,18 +463,19 @@ function buildFbar(){
   } // end pipeline quarter sub-tabs only
   // WBS, Campaign Name, Executor, DAT, DG Program — already in FD loop, no extra needed
   if(false){_subTabs;} // keep _subTabs reference live
-  if(_subTabs.has(activeTab)){
-  // Filter MM Identifiers by active region filter
+  if(_subTabs.has(activeTab)&&activeTab!=="out"){
   var _mmRegF=filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size?new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim();})):null;
   var mmIds=Array.from(new Set(pipeData.filter(function(p){return !_mmRegF||_mmRegF.has(String(p["Region Lvl 2"]||"").trim());}).map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean))).sort();
   var curMmId=window._mmIdFilter||"";
+  var mmN=curMmId?1:0;
   var mmBtn=document.createElement("div");mmBtn.className="fbi";mmBtn.id="mmid-fbi";
-  var mmSel='<select id="mmid-sel" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);cursor:pointer;max-width:200px" onchange="window._mmIdFilter=this.value.toLowerCase();if(activeTab===\'exe\')renderExe();if(activeTab===\'ana\')renderAna();if(activeTab===\'out\')renderOut();if(activeTab===\'sde\')renderSde();buildFbar();">';
-  mmSel+='<option value="">All MM Identifiers</option>';
-  mmIds.forEach(function(m){mmSel+='<option value="'+m.toLowerCase().replace(/"/g,'&quot;')+'"'+(m.toLowerCase()===curMmId?' selected':'')+'>'+m+'</option>';});
-  mmSel+='</select>';
+  mmBtn.innerHTML="<button class=\"fbtn"+(mmN?" on":"")+"\" id=\"mmid-fbtn\" onclick=\"toggleMmIdDD()\">MM Identifier <span class=\"fc\" style=\"display:"+(mmN?"inline-block":"none")+"\">1</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
+    +"<div class=\"fdd\" id=\"mmid-fdd\"><div class=\"fdh\"><span class=\"fdt\">MM Identifier</span><button class=\"fdc\" onclick=\"window._mmIdFilter='';if(activeTab==='ana')renderAna();if(activeTab==='sde')renderSde();buildFbar();\">Clear</button></div>"
+    +"<div class=\"fds\"><input type=\"text\" placeholder=\"Search...\" oninput=\"var q=this.value.toLowerCase();document.querySelectorAll('#mmid-fdo .dopt').forEach(function(o){o.style.display=o.querySelector('.ot').textContent.toLowerCase().indexOf(q)>=0?'':'none';})\"/></div>"
+    +"<div class=\"fdo\" id=\"mmid-fdo\">"
+    +mmIds.map(function(m){return"<label class=\"dopt\"><input type=\"radio\" name=\"mmid\" "+(m.toLowerCase()===curMmId?"checked":"")+" onchange=\"window._mmIdFilter='"+m.toLowerCase().replace(/'/g,"\\'")+"';if(activeTab==='ana')renderAna();if(activeTab==='sde')renderSde();buildFbar();\"/><span class=\"ot\">"+m+"</span></label>";}).join("")
+    +"</div></div>";
   if(curMmId)mmSel+=' <button onclick="window._mmIdFilter=\'\';if(activeTab===\'exe\')renderExe();if(activeTab===\'ana\')renderAna();if(activeTab===\'sde\')renderSde();buildFbar();" style="font-size:11px;padding:2px 8px;border:1px solid var(--rd);border-radius:var(--r);cursor:pointer;background:#fff;color:var(--rd)">Clear</button>';
-  mmBtn.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px"><span class="flbl">MM Identifier:</span>'+mmSel+'</span>';
   div.parentNode.insertBefore(mmBtn,div);
   } // end sub-tabs only
 }
@@ -540,6 +560,7 @@ function clearFilter(key){
 function clearAll(){
   FD.forEach(function(f){filters[f.k].clear();});
   drmFilters.clear();syncDrmBtn();eurMinFilter=null;syncEurBtn();
+  window._execQtrFilter="";
   srchQ="";var srchEl=document.getElementById("srch");if(srchEl)srchEl.value="";
   pg=1;closeAllDD();applyFilters();
   FD.forEach(function(f){syncBtn(f.k);});updateTags();syncCab();
@@ -623,6 +644,16 @@ function removeTag(key,val){
 }
 
 // DRM filter
+function toggleMmIdDD(){
+  var dd=document.getElementById("mmid-fdd"),btn=document.getElementById("mmid-fbtn");
+  var was=dd.classList.contains("on");closeAllDD();
+  if(!was){dd.classList.add("on");btn.classList.add("on");}
+}
+function toggleExecQtrDD(){
+  var dd=document.getElementById("execqtr-fdd"),btn=document.getElementById("execqtr-fbtn");
+  var was=dd.classList.contains("on");closeAllDD();
+  if(!was){dd.classList.add("on");btn.classList.add("on");}
+}
 function togglePipeQtrDD(){
   var dd=document.getElementById("pipeqtr-fdd"),btn=document.getElementById("pipeqtr-fbtn");
   var was=dd.classList.contains("on");closeAllDD();
@@ -688,6 +719,14 @@ function applyFilters(){
   filtered=campData.filter(function(r){
     if(srchQ){var q=srchQ.toLowerCase();if(String(r["Campaign Name"]||"").toLowerCase().indexOf(q)<0&&String(r["Campaign No"]||"").toLowerCase().indexOf(q)<0)return false;}
     for(var k in filters){if(!filters[k].size)continue;if(!matchF(String(r[k]||""),filters[k]))return false;}
+    if(window._execQtrFilter){
+      var ed=String(r["Execution End Date"]||"").trim();
+      if(!ed)return false;
+      var d=new Date(ed);if(isNaN(d))return false;
+      var mo=d.getMonth()+1,q2=mo<=3?1:mo<=6?2:mo<=9?3:4;
+      var rq=d.getFullYear()+"-Q"+q2;
+      if(rq!==window._execQtrFilter)return false;
+    }
     return true;
   });
   if(sCol)filtered.sort(function(a,b){return String(a[sCol]||"").localeCompare(String(b[sCol]||""))*sDir;});
@@ -2834,7 +2873,7 @@ if(pageId!=="ovwPage"){html3+="<div class=\"cc\" style=\"margin-bottom:28px;widt
   }).join("");
   html3+="</tbody></table></div></div>";
   page.innerHTML=html3;
-  if(pageId!=="ovwPage"){(function(){var rv=window.re2ViewMode||"reg";var re2DimLabels={"reg":"Region","sb":"Sales Bag","mc":"Mastercode","sod":"SoD","dat":"DAT Support","dg":"DG Program","type":"Type"};var titleEl=document.getElementById("re2-title");if(titleEl)titleEl.textContent="Pipeline Results - by "+(re2DimLabels[rv]||"Region");["reg","sb","mc","sod","dat","dg","type"].forEach(function(d){var b=document.getElementById("re2-vm-"+d);if(b){b.style.background=d===rv?"#012931":"";b.style.color=d===rv?"#fff":"";}});var re2SortMode=window.re2Sort||"eur";var bEur=document.getElementById("re2-sort-eur");var bOpps=document.getElementById("re2-sort-opps");if(bEur){bEur.style.background=re2SortMode==="eur"?"#012931":"";bEur.style.color=re2SortMode==="eur"?"#fff":"";}if(bOpps){bOpps.style.background=re2SortMode==="opps"?"#012931":"";bOpps.style.color=re2SortMode==="opps"?"#fff":"";}})();}
+  if(pageId!=="ovwPage"){(function(){var rv=window.re2ViewMode||"reg";var re2DimLabels={"reg":"Region","sb":"Sales Bag","mc":"Mastercode","sod":"SoD","dat":"DAT Support","dg":"DG Program","type":"Type"};var titleEl=document.getElementById("re2-title");if(titleEl)titleEl.textContent="Pipeline Results - by "+(re2DimLabels[rv]||"Region")+(rv==="sod"?" (totals differ due to multiple sources of demands listed in campaigns)":"");["reg","sb","mc","sod","dat","dg","type"].forEach(function(d){var b=document.getElementById("re2-vm-"+d);if(b){b.style.background=d===rv?"#012931":"";b.style.color=d===rv?"#fff":"";}});var re2SortMode=window.re2Sort||"eur";var bEur=document.getElementById("re2-sort-eur");var bOpps=document.getElementById("re2-sort-opps");if(bEur){bEur.style.background=re2SortMode==="eur"?"#012931":"";bEur.style.color=re2SortMode==="eur"?"#fff":"";}if(bOpps){bOpps.style.background=re2SortMode==="opps"?"#012931":"";bOpps.style.color=re2SortMode==="opps"?"#fff":"";}})();}
 
   function mkC(id,cfg,filterKey){
   if(charts[id])charts[id].destroy();
@@ -3061,33 +3100,37 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
         var _re2DimLabels={"reg":"Region","sb":"Sales Bag","mc":"Mastercode","sod":"SoD","dat":"DAT Support","dg":"DG Program","type":"Type"};
         var tblH='<div style="overflow:auto;height:366px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>'
           +'<th style="'+thT2+'">'+(_re2DimLabels[re2ViewMode]||re2ViewMode)+'</th>'
-          +'<th style="'+thT2+';text-align:right">Pipeline &euro;</th>'
+          +'<th style="'+thT2+';text-align:right"># Camps</th>'
           +'<th style="'+thT2+';text-align:right">Target Pipeline</th>'
+          +'<th style="'+thT2+';text-align:right">Pipeline Created</th>'
           +'<th style="'+thT2+';text-align:right">Attainment</th>'
           +'<th style="'+thT2+';text-align:right">Opps</th>'
           +'<th style="'+thT2+';text-align:right">% Share</th>'
           +'</tr></thead><tbody>';
         re2Sorted2.forEach(function(r,i){
           var lbl=re2ViewMode==="reg"?fmtReg(r[0]):fmtVal(r[0]);
-          var eur=re2Eur[i],opps=re2Opps[i];
+          var eur=re2Eur[i],opps=re2Opps[i],camps=re2Camps[i];
           var tgt=_re2TgtPipe[r[0]]||_re2TgtPipe["CS "+r[0]]||_re2TgtPipeLower[r[0].toLowerCase()]||0;
           var att=tgt>0?(eur/(tgt/1000)*100).toFixed(0)+"%":"—";
           var fmtTgt=tgt>0?fmtE(tgt/1000):"—";
-          var pct=totalEur>0?(eur/totalEur*100).toFixed(1)+"%":"—";
+          var pct=totalEur>0?(eur/totalEur*100).toFixed(0)+"%":"—";
           tblH+='<tr><td style="'+tdT2+'">'+lbl+'</td>'
+            +'<td style="'+tdT2+';text-align:right">'+(camps||0)+'</td>'
+            +'<td style="'+tdT2+';text-align:right">'+(tgt?'€'+fmtTgt:"—")+'</td>'
             +'<td style="'+tdT2+';text-align:right">€'+fmtE(eur)+'</td>'
-            +'<td style="'+tdT2+';text-align:right">'+(tgt?fmtTgt:"—")+'</td>'
-            +'<td style="'+tdT2+';text-align:right;font-weight:700;color:'+(tgt>0&&eur/tgt>=1?'#0a6640':eur/tgt>=0.75?'#804000':'#8B0000')+'">'+att+'</td>'
+            +'<td style="'+tdT2+';text-align:right;font-weight:700;color:'+(tgt>0&&eur/(tgt/1000)>=1?'#0a6640':eur/(tgt/1000)>=0.75?'#804000':'#8B0000')+'">'+att+'</td>'
             +'<td style="'+tdT2+';text-align:right">'+opps+'</td>'
             +'<td style="'+tdT2+';text-align:right">'+pct+'</td></tr>';
         });
         var totalOpps=re2Opps.reduce(function(s,v){return s+v;},0);
+        var totalCamps=re2Camps.reduce(function(s,v){return s+v;},0);
         var totalTgt=Object.values(_re2TgtPipe).reduce(function(s,v){return s+v;},0);
         var totalAtt=totalTgt>0?(totalEur/(totalTgt/1000)*100).toFixed(0)+"%":"—";
         var fmtTotalTgt=totalTgt>0?fmtE(totalTgt/1000):"—";
         tblH+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td>'
+          +'<td style="'+tdT2+';text-align:right">'+totalCamps.toLocaleString()+'</td>'
+          +'<td style="'+tdT2+';text-align:right">'+(totalTgt?'€'+fmtTotalTgt:"—")+'</td>'
           +'<td style="'+tdT2+';text-align:right">€'+(totalEur>=1000?(totalEur/1000).toFixed(0)+"M":totalEur.toFixed(0)+"K")+'</td>'
-          +'<td style="'+tdT2+';text-align:right">'+(totalTgt?fmtTotalTgt:"—")+'</td>'
           +'<td style="'+tdT2+';text-align:right">'+totalAtt+'</td>'
           +'<td style="'+tdT2+';text-align:right">'+totalOpps.toLocaleString()+'</td>'
           +'<td style="'+tdT2+';text-align:right">100%</td></tr>';
@@ -3867,6 +3910,9 @@ function renderOutInner(page){
     if(filters["Sales Bag"]&&filters["Sales Bag"].size>0){var rSB=String(r["Sales Bag"]||"").trim();if(!filters["Sales Bag"].has(rSB))return false;}
     if(filters["IAC"]&&filters["IAC"].size>0){var rIAC=String(r["IAC"]||"").trim();if(!filters["IAC"].has(rIAC))return false;}
     if(filters["SoD"]&&filters["SoD"].size>0){var rSoD=String(r["SoD"]||"").trim();if(!filters["SoD"].has(rSoD))return false;}
+    if(filters["Executor"]&&filters["Executor"].size>0){var rExec=String(r["Executor"]||"").trim();var execMatch=false;filters["Executor"].forEach(function(ex){if(rExec.indexOf(ex)>-1)execMatch=true;});if(!execMatch)return false;}
+    if(filters["DG Program"]&&filters["DG Program"].size>0){var rDG=String(r["DG Program"]||"").trim();if(!filters["DG Program"].has(rDG))return false;}
+    if(filters["Digital Assets team support"]&&filters["Digital Assets team support"].size>0){var rDAT=String(r["Digital Assets team support"]||"").trim();if(!filters["Digital Assets team support"].has(rDAT))return false;}
     if(window.outFilter.sb){if(String(r["Sales Bag"]||"").split(",").map(function(s){return s.trim();}).indexOf(window.outFilter.sb)<0)return false;}
     if(window.outFilter.iac){if(String(r["IAC"]||"").split(",").map(function(s){return s.trim();}).indexOf(window.outFilter.iac)<0)return false;}
     if(window.outFilter.sod){if(String(r["SoD"]||"").split(",").map(function(s){return s.trim();}).indexOf(window.outFilter.sod)<0)return false;}
