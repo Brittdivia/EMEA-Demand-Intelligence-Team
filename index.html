@@ -1,4 +1,4 @@
-﻿??<!DOCTYPE html>
+??<!DOCTYPE html>
 <!-- saved from url=(0058)file:///C:/Users/I572929/campaign-calendar-site/index.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
@@ -214,9 +214,9 @@ window.addEventListener('beforeprint',function(){
   });
 });
 window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});</script>
-<script src="data-camp.js?v=20260720"></script>
-<script src="data-pipe.js?v=20260721"></script>
-<script src="data-out.js?v=20260619"></script>
+<script src="data-camp.js?v=20260723"></script>
+<script src="data-pipe.js?v=20260723b"></script>
+<script src="data-out.js?v=20260723"></script>
 <script src="data-seqco.js?v=20260619"></script>
 <script src="data-prospects.js?v=20260623j"></script>
 <script src="data-seqprospect.js?v=20260623d"></script>
@@ -224,8 +224,8 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
 <script src="data-profiling-tags.js?v=20260623j"></script>
 <script src="data-seqstates-tags.js?v=20260706"></script>
 <script src="data-seqstates-flags.js?v=20260706"></script>
-<script src="data-targets.js?v=20260714"></script>
-<script src="data-budget.js?v=20260716"></script>
+<script src="data-targets.js?v=20260723"></script>
+<script src="data-budget.js?v=20260723"></script>
 <script src="data-tcp-targets.js?v=20260722"></script>
 <script src="data-access.js?v=20260716"></script>
 </head>
@@ -4715,6 +4715,13 @@ function renderPdel(){
     +'<div class="fdd"><div class="fdh"><span class="fdt">Age</span><button class="fdc" onclick="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.age=\'\';renderPdel()">Clear</button></div><div class="fdo">'
     +['','25','50','100'].map(function(v){return'<label class="dopt"><input type="radio" name="pdel-age" '+(String(pf.age||'')==v?'checked':'')+' onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.age=\''+v+'\';renderPdel()"/><span class="ot">'+(ageOpts[v]||'All')+'</span></label>';}).join('')
     +'</div></div></div>';
+  // External ID filter
+  var eidLbl=pf.eid?"External ID: "+(pf.eid==="blank"?"Blank":"Not Blank"):"External ID";
+  var eidOn=pf.eid?"on":"";
+  html+='<div class="fbi"><button class="fbtn '+eidOn+'" onclick="(function(el){var dd=el.nextElementSibling;var was=dd.classList.contains(\'on\');document.querySelectorAll(\'.fdd.on\').forEach(function(d){d.classList.remove(\'on\');});if(!was)dd.classList.add(\'on\');})(this)">'+eidLbl+' <span style="font-size:9px;opacity:.55">&#9660;</span></button>'
+    +'<div class="fdd"><div class="fdh"><span class="fdt">External ID</span><button class="fdc" onclick="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.eid=\'\';renderPdel()">Clear</button></div><div class="fdo">'
+    +['','blank','notblank'].map(function(v){var lbl=v===''?'All':v==='blank'?'Blank':'Not Blank';return'<label class="dopt"><input type="radio" name="pdel-eid" '+(String(pf.eid||'')==v?'checked':'')+' onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.eid=\''+v+'\';renderPdel()"/><span class="ot">'+lbl+'</span></label>';}).join('')
+    +'</div></div></div>';
   // Touched filter
   var touchOpts={"":"All","yes":"Yes (date)","in_sequence":"In Sequence","finished_sequence":"Finished Sequence","no":"Not Touched"};
   var touchLbl=pf.touched?touchOpts[pf.touched]||pf.touched:"Touched";
@@ -4826,7 +4833,7 @@ function renderPdel(){
       var dcmDisp=normDDM1pdel(String(r["Demand Manager"]||"").trim());
       var campN=String(r["Campaign Name"]||"").trim();
       // Split on "Tag: " prefix to extract individual tag values
-      var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim();}).filter(Boolean);
+      var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,).trim();}).filter(Boolean);
       
       // Fallback: comma-separated
       if(tagList.length<=1&&rawTags.indexOf(",")>-1)tagList=rawTags.split(",").map(function(t){return t.trim();}).filter(Boolean);
@@ -4972,8 +4979,8 @@ function renderPdel(){
     mkPdelSearch(cf51El,"Custom Field 51","cf51",Array.from(_cf51Set).sort());
     // Apply all filters
     if(pf.campWBS){rows=rows.filter(function(r){return r.wbs===pf.campWBS;});}
-    if(pf.ct||pf.src||pf.executor||pf.persona||pf.touched||pf.connType||pf.cf51||pf.thirdParty){rows=rows.filter(function(r){
-      return(!pf.ct||r.ct===pf.ct)&&(!pf.src||(pf.src==="(Blank)"?!r.src:pf.src==="Not Blank"?!!r.src:r.src===pf.src))&&(!pf.executor||r.executor===pf.executor)&&(!pf.persona||r.persona===pf.persona)&&(!pf.touched||(pf.touched==="no"?r.touchedStatus==="no":r.touchedStatus===pf.touched))&&(!pf.connType||r.connType===pf.connType)&&(!pf.cf51||r.cf51.split(",").map(function(v){return v.trim();}).indexOf(pf.cf51)>-1)&&(!pf.thirdParty||(pf.thirdParty==="3rd Party"?r.thirdParty==="3rd Party":r.thirdParty!=="3rd Party"));
+    if(pf.ct||pf.src||pf.executor||pf.persona||pf.touched||pf.connType||pf.cf51||pf.thirdParty||pf.eid){rows=rows.filter(function(r){
+      return(!pf.ct||r.ct===pf.ct)&&(!pf.src||(pf.src==="(Blank)"?!r.src:pf.src==="Not Blank"?!!r.src:r.src===pf.src))&&(!pf.executor||r.executor===pf.executor)&&(!pf.persona||r.persona===pf.persona)&&(!pf.touched||(pf.touched==="no"?r.touchedStatus==="no":r.touchedStatus===pf.touched))&&(!pf.connType||r.connType===pf.connType)&&(!pf.cf51||r.cf51.split(",").map(function(v){return v.trim();}).indexOf(pf.cf51)>-1)&&(!pf.thirdParty||(pf.thirdParty==="3rd Party"?r.thirdParty==="3rd Party":r.thirdParty!=="3rd Party"))&&(!pf.eid||(pf.eid==="blank"?!r.eid:!!r.eid));
     });}
 
     // Store full filtered rows for export
@@ -5484,7 +5491,7 @@ function renderDtr(){
   filtered.forEach(function(r){
     var wbs=String(r["Campaign/WBS Code"]||"").trim();if(!wbs)return;
     var rawTags=String(r["Outreach TAGS"]||"").trim();if(!rawTags)return;
-    var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim();}).filter(Boolean);
+    var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,).trim();}).filter(Boolean);
       
     if(tagList.length<=1&&rawTags.indexOf(",")>-1)tagList=rawTags.split(",").map(function(t){return t.trim();}).filter(Boolean);
     var noise=new Set(["existing","new","tag:","tag","old","-","--"]);
@@ -5648,7 +5655,7 @@ function renderDtr(){
       var dcmD=normDDM1(String(r['Demand Manager']||'').trim());if(!dcmD)return;
       var rawTags=String(r['Outreach TAGS']||'').trim();if(!rawTags)return;
       var campN=String(r['Campaign Name']||'').trim();
-      var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim();}).filter(Boolean);
+      var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,).trim();}).filter(Boolean);
       
       if(tagList.length<=1&&rawTags.indexOf(',')>-1)tagList=rawTags.split(',').map(function(t){return t.trim();}).filter(Boolean);
       tagList.forEach(function(t){
@@ -5657,18 +5664,26 @@ function renderDtr(){
         _dcmTagRowsDtr.push({dcm:dcmD,tag:t,camp:campN,reqs:_tagToProfReqsDtr[t]||[]});
       });
     });
+    // Build set of all prospect tags for calendar tag matching
+    var _allProsTagsDtr=new Set();
+    (window.PROSPECT_DATA||[]).forEach(function(p){
+      if(!p.tg)return;
+      String(p.tg).split(",").forEach(function(t){t=t.trim();if(t)_allProsTagsDtr.add(t);});
+    });
     _dcmTagRowsDtr.sort(function(a,b){return a.dcm.localeCompare(b.dcm)||a.tag.localeCompare(b.tag);});
     var thT="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0";
     html+='<div class="sec" style="margin-top:20px;margin-bottom:6px">Calendar Outreach Tags &#8594; Profiling Request Connections</div>';
     html+='<div class="cc"><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
-    html+='<th style="'+thT+';width:18%">DCM</th><th style="'+thT+';width:25%">Outreach Tag</th><th style="'+thT+';width:22%">Campaign</th><th style="'+thT+';width:35%">Profiling Request(s)</th></tr></thead><tbody>';
+    html+='<th style="'+thT+';width:15%">DCM</th><th style="'+thT+';width:22%">Outreach Tag</th><th style="'+thT+';width:18%">Campaign</th><th style="'+thT+';width:10%">Prospect Match</th><th style="'+thT+';width:35%">Profiling Request(s)</th></tr></thead><tbody>';
     _dcmTagRowsDtr.forEach(function(row,i){
       var reqDisplay=row.reqs.length?row.reqs.join(', '):'<span style="color:var(--mu);font-style:italic">No match</span>';
+      var prosMatch=_allProsTagsDtr.has(row.tag);
       var bg=row.reqs.length?(i%2===0?'#f0fff4':'#e6f9ed'):(i%2===0?'#fff':'#F8FBFF');
       html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+bg+'">'
         +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+row.dcm+'</td>'
         +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+row.tag+'">'+row.tag+'</td>'
         +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+row.camp+'">'+row.camp+'</td>'
+        +'<td style="padding:5px 10px;text-align:center;font-weight:700;color:'+(prosMatch?'#0a6640':'#B0B0B0')+'">'+(prosMatch?'&#10003; Match':'&#10007;')+'</td>'
         +'<td style="padding:5px 10px;font-size:10px;color:'+(row.reqs.length?'#0a6640':'var(--mu)')+'">'+reqDisplay+'</td>'
         +'</tr>';
     });

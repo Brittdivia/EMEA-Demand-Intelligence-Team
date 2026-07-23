@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 # refresh.ps1 — Weekly data refresh for Campaign Insights site
 # Run this script each week after saving new source files
 # ============================================================
