@@ -5598,7 +5598,7 @@ function renderDtr(){
       var dcmD=normDDM1(String(r['Demand Manager']||'').trim());if(!dcmD)return;
       // Apply DCM click filter if active
       if(_dtrDmSel&&dcmD.toLowerCase()!==_dtrDmSel)return;
-      var rawTags=(String(r['Profiling to Outreach Tag']||'').trim()+'\n'+String(r['Tag per SDE']||'').trim()+'\n'+String(r['Tag 2 per SDE']||'').trim()).trim();if(!rawTags)return;
+      var rawTags=String(r['Profiling to Outreach Tag']||'').trim();if(!rawTags||rawTags==='0')return;
       var campN=String(r['Campaign Name']||'').trim();
       var tagList=rawTags.split(/\r\n|\n|\\r\\n|\\n/).map(function(t){
         return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,"").trim();
