@@ -4825,8 +4825,8 @@ function renderPdel(){
       var dcmDisp=normDDM1pdel(String(r["Demand Manager"]||"").trim());
       var campN=String(r["Campaign Name"]||"").trim();
       // Split on "Tag: " prefix to extract individual tag values
-      var tagList=rawTags.split(/(?:^|\s)Tag:\s*/g).map(function(t){return t.trim();}).filter(Boolean);
-      var _tfl2=[];tagList.forEach(function(t){t.split(/ (?=EMEA-|[A-Z][A-Z0-9]*[-_])/g).forEach(function(p){p=p.trim().replace(/ New Prospects:?/gi,"").replace(/ New:?$/i,"").trim();if(p)_tfl2.push(p);});});tagList=_tfl2;
+      var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim();}).filter(Boolean);
+      
       // Fallback: comma-separated
       if(tagList.length<=1&&rawTags.indexOf(",")>-1)tagList=rawTags.split(",").map(function(t){return t.trim();}).filter(Boolean);
       // Filter out noise words
@@ -5481,8 +5481,8 @@ function renderDtr(){
   filtered.forEach(function(r){
     var wbs=String(r["Campaign/WBS Code"]||"").trim();if(!wbs)return;
     var rawTags=String(r["Outreach TAGS"]||"").trim();if(!rawTags)return;
-    var tagList=rawTags.split(/(?:^|\s)Tag:\s*/g).map(function(t){return t.trim();}).filter(Boolean);
-      var _tfl2=[];tagList.forEach(function(t){t.split(/ (?=EMEA-|[A-Z][A-Z0-9]*[-_])/g).forEach(function(p){p=p.trim().replace(/ New Prospects:?/gi,"").replace(/ New:?$/i,"").trim();if(p)_tfl2.push(p);});});tagList=_tfl2;
+    var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim();}).filter(Boolean);
+      
     if(tagList.length<=1&&rawTags.indexOf(",")>-1)tagList=rawTags.split(",").map(function(t){return t.trim();}).filter(Boolean);
     var noise=new Set(["existing","new","tag:","tag","old","-","--"]);
     tagList.forEach(function(t){if(t&&!noise.has(t.toLowerCase())&&_allProsTagSet2.has(t))_wbsWithCalTag.add(wbs);});
@@ -5645,8 +5645,8 @@ function renderDtr(){
       var dcmD=normDDM1(String(r['Demand Manager']||'').trim());if(!dcmD)return;
       var rawTags=String(r['Outreach TAGS']||'').trim();if(!rawTags)return;
       var campN=String(r['Campaign Name']||'').trim();
-      var tagList=rawTags.split(/(?:^|\s)Tag:\s*/g).map(function(t){return t.trim();}).filter(Boolean);
-      var _tfl2=[];tagList.forEach(function(t){t.split(/ (?=EMEA-|[A-Z][A-Z0-9]*[-_])/g).forEach(function(p){p=p.trim().replace(/ New Prospects:?/gi,"").replace(/ New:?$/i,"").trim();if(p)_tfl2.push(p);});});tagList=_tfl2;
+      var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim();}).filter(Boolean);
+      
       if(tagList.length<=1&&rawTags.indexOf(',')>-1)tagList=rawTags.split(',').map(function(t){return t.trim();}).filter(Boolean);
       tagList.forEach(function(t){
         if(!t||_noiseDtr.has(t.toLowerCase()))return;
