@@ -5600,7 +5600,7 @@ function renderDtr(){
       if(_dtrDmSel&&dcmD.toLowerCase()!==_dtrDmSel)return;
       var rawTags=String(r['Profiling to Outreach Tag']||'').trim();if(!rawTags||rawTags==='0')return;
       var campN=String(r['Campaign Name']||'').trim();
-      var tagList=rawTags.replace(/\\r\\n/g,'\n').split('\n').map(function(t){
+      var tagList=rawTags.split('\\r\\n').join('\n').split('\\n').join('\n').split('\n').map(function(t){
         return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,"").trim();
       }).filter(function(t){return t&&t.length>1;});
       tagList.forEach(function(t){
