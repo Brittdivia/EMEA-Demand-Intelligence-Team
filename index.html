@@ -5604,9 +5604,9 @@ function renderDtr(){
       if(_dtrDmSel&&dcmD.toLowerCase()!==_dtrDmSel)return;
       var rawTags=(String(r['Profiling to Outreach Tag']||'').trim()+'\n'+String(r['Tag per SDE']||'').trim()+'\n'+String(r['Tag 2 per SDE']||'').trim()).trim();if(!rawTags)return;
       var campN=String(r['Campaign Name']||'').trim();
-      var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,).trim();}).filter(Boolean);
-      
-      if(tagList.length<=1&&rawTags.indexOf(',')>-1)tagList=rawTags.split(',').map(function(t){return t.trim();}).filter(Boolean);
+      var tagList=rawTags.split(/\r\n|\n|\\r\\n|\\n/).map(function(t){
+        return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,"").trim();
+      }).filter(function(t){return t&&t.length>1;});
       tagList.forEach(function(t){
         if(!t||_noiseDtr.has(t.toLowerCase()))return;
         var key=dcmD+'|||'+t;if(_seenDcmTagDtr.has(key))return;_seenDcmTagDtr.add(key);
@@ -5622,30 +5622,28 @@ function renderDtr(){
     _dcmTagRowsDtr.sort(function(a,b){return a.dcm.localeCompare(b.dcm)||a.tag.localeCompare(b.tag);});
     var thT="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0";
     html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;margin-bottom:6px">';
-    html+='<div class="sec" style="margin-bottom:0">Calendar Outreach Tags &#8594; Profiling Request Connections</div>';
+    html+='<div class="sec" style="margin-bottom:0">Calendar Outreach Tags &#8594; Prospect Tag Match</div>';
     html+='<button onclick="window._exportCalTagTable()" style="padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">&#11015; Export CSV</button>';
     html+='</div>';
     window._exportCalTagTable=function(){
-      var rows=[['DCM','Outreach Tag','Campaign','Prospect Match','Profiling Request(s)']];
+      var rows=[['DCM','Outreach Tag (Calendar)','Campaign','Prospect Match']];
       _dcmTagRowsDtr.forEach(function(row){
-        rows.push([row.dcm,row.tag,row.camp,_allProsTagsDtr.has(row.tag)?'Match':'No Match',row.reqs.join('; ')]);
+        rows.push([row.dcm,row.tag,row.camp,_allProsTagsDtr.has(row.tag)?'Match':'No Match']);
       });
       function esc(v){v=String(v||'');return v.indexOf(',')>-1||v.indexOf('"')>-1?'"'+v.replace(/"/g,'""')+'"':v;}
       var csv='﻿'+rows.map(function(r){return r.map(esc).join(',');}).join('\n');
       var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='calendar_tag_connections.csv';a.click();
     };
     html+='<div class="cc"><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
-    html+='<th style="'+thT+';width:15%">DCM</th><th style="'+thT+';width:22%">Outreach Tag</th><th style="'+thT+';width:18%">Campaign</th><th style="'+thT+';width:10%">Prospect Match</th><th style="'+thT+';width:35%">Profiling Request(s)</th></tr></thead><tbody>';
+    html+='<th style="'+thT+';width:20%">DCM</th><th style="'+thT+';width:35%">Outreach Tag (Calendar)</th><th style="'+thT+';width:30%">Campaign</th><th style="'+thT+';width:15%">Prospect Match</th></tr></thead><tbody>';
     _dcmTagRowsDtr.forEach(function(row,i){
-      var reqDisplay=row.reqs.length?row.reqs.join(', '):'<span style="color:var(--mu);font-style:italic">No match</span>';
       var prosMatch=_allProsTagsDtr.has(row.tag);
-      var bg=row.reqs.length?(i%2===0?'#f0fff4':'#e6f9ed'):(i%2===0?'#fff':'#F8FBFF');
+      var bg=prosMatch?(i%2===0?'#f0fff4':'#e6f9ed'):(i%2===0?'#fff':'#F8FBFF');
       html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+bg+'">'
         +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+row.dcm+'</td>'
         +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+row.tag+'">'+row.tag+'</td>'
         +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+row.camp+'">'+row.camp+'</td>'
         +'<td style="padding:5px 10px;text-align:center;font-weight:700;color:'+(prosMatch?'#0a6640':'#B0B0B0')+'">'+(prosMatch?'&#10003; Match':'&#10007;')+'</td>'
-        +'<td style="padding:5px 10px;font-size:10px;color:'+(row.reqs.length?'#0a6640':'var(--mu)')+'">'+reqDisplay+'</td>'
         +'</tr>';
     });
     html+='</tbody></table></div></div>';
