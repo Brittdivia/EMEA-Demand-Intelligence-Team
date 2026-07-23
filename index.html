@@ -5616,6 +5616,9 @@ function renderDtr(){
       String(p.tg).split(",").forEach(function(t){t=t.trim();if(t)_allProsTagsDtr.add(t);});
     });
     _dcmTagRowsDtr.sort(function(a,b){return a.dcm.localeCompare(b.dcm)||a.tag.localeCompare(b.tag);});
+    var _matchCount=_dcmTagRowsDtr.filter(function(r){return _allProsTagsDtr.has(r.tag);}).length;
+    console.log('Tag rows:',_dcmTagRowsDtr.length,'Prospect tags:',_allProsTagsDtr.size,'Matches:',_matchCount);
+    if(_dcmTagRowsDtr.length>0)console.log('First tag:['+_dcmTagRowsDtr[0].tag+'] match:',_allProsTagsDtr.has(_dcmTagRowsDtr[0].tag));
     var thT="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0";
     html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;margin-bottom:6px">';
     html+='<div class="sec" style="margin-bottom:0">Calendar Outreach Tags &#8594; Prospect Tag Match</div>';
