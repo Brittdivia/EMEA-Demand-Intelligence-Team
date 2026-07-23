@@ -49,6 +49,7 @@ Write-Host "Headers found: $($colIdx.Count)"
 # Only keep fields actually used in index.html
 $fieldMap = @{
     'ID'                 = 'id'
+    'External ID'        = 'eid'
     'Company'            = 'co'
     'Touched At'         = 'touched'
     'Stage Changed At'   = 'sc'
@@ -78,7 +79,7 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
     if (-not $id -or -not $seenIds.Add($id)) { continue }
 
     $parts = [System.Collections.Generic.List[string]]::new()
-    foreach ($h in @('ID','Company','Touched At','Stage Changed At','Created At','Tags','Stage Name','Email','Assigned Users','Persona Name','Active Sequences','Finished Sequences')) {
+    foreach ($h in @('ID','External ID','Company','Touched At','Stage Changed At','Created At','Tags','Stage Name','Email','Assigned Users','Persona Name','Active Sequences','Finished Sequences')) {
         $f = $fieldMap[$h]
         $v = if ($colIdx[$h]) { EscJS $rowVals[$colIdx[$h]] } else { '' }
         $parts.Add("""$f"":""$v""")
