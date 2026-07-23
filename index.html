@@ -1,4 +1,4 @@
-??<!DOCTYPE html>
+﻿??<!DOCTYPE html>
 <!-- saved from url=(0058)file:///C:/Users/I572929/campaign-calendar-site/index.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
@@ -5568,58 +5568,6 @@ function renderDtr(){
   html+='<tfoot><tr style="background:#00144A;color:#fff;font-weight:700"><td style="padding:5px 8px;font-size:11px">TOTAL</td><td style="padding:5px 8px;text-align:right;font-size:11px">'+_reqTotTotal.toLocaleString()+'</td><td style="padding:5px 8px;text-align:right;font-size:11px">'+_reqTotConn.toLocaleString()+'</td></tr></tfoot></table></div>';
   html+='</div>';
   html+='</div>';
-  // Digital Hub Pipeline table
-  (function(){
-    var _calWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
-    var dhRows=pipeData.filter(function(p){
-      if(!String(p["Create Quarter"]||"").trim().startsWith(_dtrYearFilter||"2026"))return false;
-      if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return false;
-      if(String(p["TCP Pipeline Source Desc"]||"").trim()==="Sales")return false;
-      if(_dhRegFilter&&!_dhRegFilter.has(String(p["Region Lvl 2"]||"").trim()))return false;
-      if(_dhReg3Filter&&!_dhReg3Filter.has(String(p["Region Lvl 3"]||"").trim()))return false;
-      return true;
-    });
-    var _dhMmOpts=Array.from(new Set(dhRows.filter(function(p){return _calWBS.has(String(p["Opp Campaign ID"]||"").trim());}).map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean))).sort();
-    var _dhSrcOpts=Array.from(new Set(pipeData.filter(function(p){return String(p["Create Quarter"]||"").trim().startsWith(_dtrYearFilter||"2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline";}).map(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim();}).filter(Boolean))).sort();
-    if(_dhSrcFilter)dhRows=dhRows.filter(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim()===_dhSrcFilter;});
-    if(_dhMmFilter)dhRows=dhRows.filter(function(p){return String(p["MM Identifier"]||"").trim()===_dhMmFilter;});
-    dhRows.sort(function(a,b){return (String(a["Create Quarter"]||"")).localeCompare(String(b["Create Quarter"]||""))||(parseFloat(b["Eur"]||0)-parseFloat(a["Eur"]||0));});
-    var totEur=dhRows.reduce(function(s,p){return s+(parseFloat(p["Eur"])||0);},0);
-    var thD2="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0";
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;margin-bottom:4px">';
-    html+='<div class="sec" style="margin-bottom:0">Pipeline Created in '+(_dtrYearFilter||"2026")+' <span style="font-size:10px;font-weight:400;color:var(--mu)">(DCM filter does not apply to this table)</span></div>';
-    html+='<button onclick="window._exportDHPipeline()" style="padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">&#11015; Export CSV</button>';
-    html+='</div>';
-    html+='<div style="font-size:11px;color:var(--mu);margin-bottom:6px">';
-    html+='</div>';
-    window._dhRowsCache=dhRows;
-    html+='<div style="font-size:11px;color:var(--mu);margin-bottom:6px">'+dhRows.length.toLocaleString()+' opportunities &middot; <b>'+totEur.toLocaleString(undefined,{maximumFractionDigits:0})+'</b> EUR total</div>';
-    html+='<div class="cc" style="margin-bottom:20px"><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:7%"><col style="width:7%"><col style="width:12%"><col style="width:6%"><col style="width:6%"><col style="width:6%"><col style="width:12%"><col style="width:15%"><col style="width:7%"><col style="width:8%"><col style="width:7%"><col style="width:7%"></colgroup><thead><tr>';
-    html+='<th style="'+thD2+'">Region L2</th><th style="'+thD2+'">Region L3</th><th style="'+thD2+'">TCP Pipeline Source</th><th style="'+thD2+'">Create Quarter</th><th style="'+thD2+'">Campaign WBS Code</th><th style="'+thD2+'">Opp ID</th><th style="'+thD2+'">GB Identifier</th><th style="'+thD2+'">Opp Description</th><th style="'+thD2+';text-align:right">EUR</th><th style="'+thD2+'">DRM Category</th><th style="'+thD2+'">In Calendar</th></tr></thead><tbody>';
-    dhRows.forEach(function(p,i){
-      var wbs=String(p["Opp Campaign ID"]||"").trim();
-      var inCal=_calWBS.has(wbs);
-      html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
-        +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["Region Lvl 2"]||"").trim()+'</td>'
-        +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["Region Lvl 3"]||"").trim()+'</td>'
-        +'<td style="padding:5px 10px">'+String(p["TCP Pipeline Source Desc"]||"").trim()+'</td>'
-        +'<td style="padding:5px 10px">'+String(p["Create Quarter"]||"").trim()+'</td>'
-        +'<td style="padding:5px 10px;font-family:monospace">'+wbs+'</td>'
-        +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["Opportunity ID"]||"").trim()+'</td>'
-        +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["MM Identifier"]||"").trim()+'</td>'
-        +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["Opp Description"]||"").trim()+'</td>'
-        +'<td style="padding:5px 10px;text-align:right;font-weight:600">'+(parseFloat(p["Eur"])||0).toLocaleString(undefined,{maximumFractionDigits:0})+'</td>'
-        +'<td style="padding:5px 10px;color:var(--mu)">'+String(p["DRM Category"]||"").trim()+'</td>'
-        +'<td style="padding:5px 10px;font-weight:600;color:'+(inCal?'#1B7A34':'#B0B0B0')+'">'+(inCal?'Yes':'No')+'</td>'
-        +'</tr>';
-    });
-    html+='</tbody><tfoot><tr style="background:#00144A;color:#fff;font-weight:700">'
-      +'<td style="padding:5px 10px;font-size:11px" colspan="8">TOTAL</td>'
-      +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totEur.toLocaleString(undefined,{maximumFractionDigits:0})+'</td>'
-      +'<td></td>'
-      +'<td></td>'
-      +'</tr></tfoot></table></div></div>';
-  })();
   // TCP Pipeline Source summary table
   (function(){
     var srcMap={};
