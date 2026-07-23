@@ -4826,6 +4826,7 @@ function renderPdel(){
       var campN=String(r["Campaign Name"]||"").trim();
       // Split on "Tag: " prefix to extract individual tag values
       var tagList=rawTags.split(/(?:^|\s)Tag:\s*/g).map(function(t){return t.trim();}).filter(Boolean);
+      var _tfl2=[];tagList.forEach(function(t){t.split(/ (?=EMEA-|[A-Z][A-Z0-9]*[-_])/g).forEach(function(p){p=p.trim().replace(/ New Prospects:?/gi,"").replace(/ New:?$/i,"").trim();if(p)_tfl2.push(p);});});tagList=_tfl2;
       // Fallback: comma-separated
       if(tagList.length<=1&&rawTags.indexOf(",")>-1)tagList=rawTags.split(",").map(function(t){return t.trim();}).filter(Boolean);
       // Filter out noise words
@@ -5481,6 +5482,7 @@ function renderDtr(){
     var wbs=String(r["Campaign/WBS Code"]||"").trim();if(!wbs)return;
     var rawTags=String(r["Outreach TAGS"]||"").trim();if(!rawTags)return;
     var tagList=rawTags.split(/(?:^|\s)Tag:\s*/g).map(function(t){return t.trim();}).filter(Boolean);
+      var _tfl2=[];tagList.forEach(function(t){t.split(/ (?=EMEA-|[A-Z][A-Z0-9]*[-_])/g).forEach(function(p){p=p.trim().replace(/ New Prospects:?/gi,"").replace(/ New:?$/i,"").trim();if(p)_tfl2.push(p);});});tagList=_tfl2;
     if(tagList.length<=1&&rawTags.indexOf(",")>-1)tagList=rawTags.split(",").map(function(t){return t.trim();}).filter(Boolean);
     var noise=new Set(["existing","new","tag:","tag","old","-","--"]);
     tagList.forEach(function(t){if(t&&!noise.has(t.toLowerCase())&&_allProsTagSet2.has(t))_wbsWithCalTag.add(wbs);});
@@ -5626,25 +5628,48 @@ function renderDtr(){
       if(p["Opportunity ID"])srcMap[src].opps.add(String(p["Opportunity ID"]));
     });
     var srcEntries=Object.entries(srcMap).sort(function(a,b){return b[1].eur-a[1].eur;});
-    var totEurAll=srcEntries.reduce(function(s,e){return s+e[1].eur;},0);
-    var totOppsAll=new Set(srcEntries.reduce(function(a,e){e[1].opps.forEach(function(o){a.push(o);});return a;},[]));;
+    var _profMeta2dtr=window.CAMP_PROF_META||{};
+    var _profMetaArrDtr=Object.values(_profMeta2dtr).filter(function(m){
+      if(window._dtrYearFilter)return fmtCreated(m.created).slice(0,4)===window._dtrYearFilter;
+      return true;
+    });
+    var _tagToProfReqsDtr={};
+    _profMetaArrDtr.forEach(function(m){
+      var tag=String(m.tagOut||m.tag||'').trim();if(!tag||tag==='-'||tag==='--')return;
+      if(!_tagToProfReqsDtr[tag])_tagToProfReqsDtr[tag]=[];
+      _tagToProfReqsDtr[tag].push(String(m.title||m.id||'').trim());
+    });
+    var _noiseDtr=new Set(['existing','new','tag:','tag','old','-','--']);
+    var _dcmTagRowsDtr=[];var _seenDcmTagDtr=new Set();
+    filtered.forEach(function(r){
+      var dcmD=normDDM1(String(r['Demand Manager']||'').trim());if(!dcmD)return;
+      var rawTags=String(r['Outreach TAGS']||'').trim();if(!rawTags)return;
+      var campN=String(r['Campaign Name']||'').trim();
+      var tagList=rawTags.split(/(?:^|\s)Tag:\s*/g).map(function(t){return t.trim();}).filter(Boolean);
+      var _tfl2=[];tagList.forEach(function(t){t.split(/ (?=EMEA-|[A-Z][A-Z0-9]*[-_])/g).forEach(function(p){p=p.trim().replace(/ New Prospects:?/gi,"").replace(/ New:?$/i,"").trim();if(p)_tfl2.push(p);});});tagList=_tfl2;
+      if(tagList.length<=1&&rawTags.indexOf(',')>-1)tagList=rawTags.split(',').map(function(t){return t.trim();}).filter(Boolean);
+      tagList.forEach(function(t){
+        if(!t||_noiseDtr.has(t.toLowerCase()))return;
+        var key=dcmD+'|||'+t;if(_seenDcmTagDtr.has(key))return;_seenDcmTagDtr.add(key);
+        _dcmTagRowsDtr.push({dcm:dcmD,tag:t,camp:campN,reqs:_tagToProfReqsDtr[t]||[]});
+      });
+    });
+    _dcmTagRowsDtr.sort(function(a,b){return a.dcm.localeCompare(b.dcm)||a.tag.localeCompare(b.tag);});
     var thT="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0";
-    html+='<div class="sec" style="margin-top:20px;margin-bottom:6px">Pipeline by TCP Source (2026, excl. Excluded from Pipeline)</div>';
-    html+='<div class="cc"><div style="overflow:auto;max-height:300px"><table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:40%"><col style="width:30%"><col style="width:30%"></colgroup><thead><tr>';
-    html+='<th style="'+thT+'">TCP Pipeline Source</th><th style="'+thT+';text-align:right">EUR</th><th style="'+thT+';text-align:right">Opportunities</th></tr></thead><tbody>';
-    srcEntries.forEach(function(e,i){
-      var pct=totEurAll>0?Math.round(e[1].eur/totEurAll*100):0;
-      html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
-        +'<td style="padding:5px 10px">'+e[0]+'</td>'
-        +'<td style="padding:5px 10px;text-align:right;font-weight:600">'+e[1].eur.toLocaleString(undefined,{maximumFractionDigits:0})+'<span style="color:var(--mu);font-size:10px;margin-left:4px">('+pct+'%)</span></td>'
-        +'<td style="padding:5px 10px;text-align:right">'+e[1].opps.size.toLocaleString()+'</td>'
+    html+='<div class="sec" style="margin-top:20px;margin-bottom:6px">Calendar Outreach Tags &#8594; Profiling Request Connections</div>';
+    html+='<div class="cc"><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
+    html+='<th style="'+thT+';width:18%">DCM</th><th style="'+thT+';width:25%">Outreach Tag</th><th style="'+thT+';width:22%">Campaign</th><th style="'+thT+';width:35%">Profiling Request(s)</th></tr></thead><tbody>';
+    _dcmTagRowsDtr.forEach(function(row,i){
+      var reqDisplay=row.reqs.length?row.reqs.join(', '):'<span style="color:var(--mu);font-style:italic">No match</span>';
+      var bg=row.reqs.length?(i%2===0?'#f0fff4':'#e6f9ed'):(i%2===0?'#fff':'#F8FBFF');
+      html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+bg+'">'
+        +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+row.dcm+'</td>'
+        +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+row.tag+'">'+row.tag+'</td>'
+        +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+row.camp+'">'+row.camp+'</td>'
+        +'<td style="padding:5px 10px;font-size:10px;color:'+(row.reqs.length?'#0a6640':'var(--mu)')+'">'+reqDisplay+'</td>'
         +'</tr>';
     });
-    html+='</tbody><tfoot style="position:sticky;bottom:0"><tr style="background:#00144A;color:#fff;font-weight:700">'
-      +'<td style="padding:5px 10px;font-size:11px">TOTAL</td>'
-      +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totEurAll.toLocaleString(undefined,{maximumFractionDigits:0})+'</td>'
-      +'<td style="padding:5px 10px;text-align:right;font-size:11px">'+totOppsAll.size.toLocaleString()+'</td>'
-      +'</tr></tfoot></table></div></div>';
+    html+='</tbody></table></div></div>';
   })();
   page.innerHTML=html;
   }catch(e){page.innerHTML='<div class="nr"><div class="ni">&#9888;</div><p><b>Error:</b> '+e.message+'</p></div>';console.error(e);}
