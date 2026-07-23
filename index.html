@@ -4699,30 +4699,52 @@ function renderPdel(){
   var page=document.getElementById("pdelPage");
   if(!page)return;
   var html='<h2 style="color:var(--dk);margin:0 0 6px">Prospect Tracking</h2>';
-  html+='<div style="font-size:11px;color:var(--mu);margin-bottom:12px">Prospects in tracked Outreach sequences connected to campaigns in the calendar.<br>1. Profiling connected to Pipeline: means a profiling request can be connected to a campaign in the campaign calendar via WBS code. Therefore, pipeline can be connected to Profiling request and Campaign Calendar.<br>2. Calendar Connected to Outreach: connects the WBS code in the profiling request to the WBS code in the Campaign Calendar, if there is a sequence in Calendar, the connection enables sequence performance and status of all prospects added to that sequence.<br>3. Full Connection: checks prospects added in 2026 with a tag that connects to a profiling tag, enabling prospect status info and sequence analysis for those prospects connected through the tag.</div>';
   var _thDPdel="background:#00144A;color:#fff;padding:5px 6px;font-size:10px;font-weight:700;text-align:left;position:sticky;top:0;white-space:normal;word-break:break-word;max-width:80px";
-  html+='<div style="display:flex;gap:16px;align-items:stretch;margin-bottom:16px">';
+  html+='<details id="pdel-tables-details" style="margin-bottom:16px"'+(window._pdelTablesOpen?' open':'')+' ontoggle="window._pdelTablesOpen=this.open">';
+  html+='<summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--dk);padding:6px 0;list-style:none;display:flex;align-items:center;gap:6px"><span style="font-size:10px">&#9654;</span> Connection &amp; Connected Campaigns <span style="font-size:11px;font-weight:400;color:var(--mu)">(connection methodology details)</span></summary>';
+  html+='<div style="font-size:11px;color:var(--mu);margin-bottom:12px;padding:8px 0">Prospects in tracked Outreach sequences connected to campaigns in the calendar.<br><br>1. <b>Profiling connected to Pipeline:</b> means a profiling request can be connected to a campaign in the campaign calendar via WBS code. Therefore, pipeline can be connected to Profiling request and Campaign Calendar.<br>2. <b>Calendar Connected to Outreach:</b> connects the WBS code in the profiling request to the WBS code in the Campaign Calendar, if there is a sequence in Calendar, the connection enables sequence performance and status of all prospects added to that sequence.<br>3. <b>Full Connection:</b> checks prospects added in 2026 with a tag that connects to a profiling tag, enabling prospect status info and sequence analysis for those prospects connected through the tag.</div>';
+  html+='<div style="display:flex;gap:16px;align-items:stretch">';
   html+='<div style="flex:0 0 60%;min-width:0;display:flex;flex-direction:column">';
-  html+='<div class="sec" style="margin-bottom:6px">Connection</div>';
   html+=buildConnectionTable(_thDPdel,true,true);
   html+='</div>';
   html+='<div style="flex:0 0 40%;min-width:0;display:flex;flex-direction:column">';
   html+=buildConnectedCampaignsTable(true,window._pdelConnectedOnly);
   html+='</div>';
   html+='</div>';
+  html+='</details>';
   var pf=window.pdelFilter||{};
-  html+='<div style="margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px">';
-  html+='<label style="font-size:12px;font-weight:600">Age &gt;:</label>';
-  html+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.age=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option><option value="25"'+(pf.age==="25"?" selected":"")+'>25 days</option><option value="50"'+(pf.age==="50"?" selected":"")+'>50 days</option><option value="100"'+(pf.age==="100"?" selected":"")+'>100 days</option></select>';
-  html+='<label style="font-size:12px;font-weight:600">Touched:</label>';
-  html+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.touched=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option><option value="yes"'+(pf.touched==="yes"?" selected":"")+'>Yes (date)</option><option value="in_sequence"'+(pf.touched==="in_sequence"?" selected":"")+'>In Sequence</option><option value="finished_sequence"'+(pf.touched==="finished_sequence"?" selected":"")+'>Finished Sequence</option><option value="no"'+(pf.touched==="no"?" selected":"")+'>No</option></select>';
+  html+='<div style="margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:12px">';
+  // Age filter
+  var ageOpts={"":"All",25:"25+ days",50:"50+ days",100:"100+ days"};
+  var ageLbl=pf.age?ageOpts[pf.age]||pf.age:"Age";
+  var ageOn=pf.age?"on":"";
+  html+='<div class="fbi" id="pdel-age-fbi"><button class="fbtn '+ageOn+'" onclick="(function(el){var dd=el.nextElementSibling;var was=dd.classList.contains(\'on\');document.querySelectorAll(\'.fdd.on\').forEach(function(d){d.classList.remove(\'on\');});if(!was)dd.classList.add(\'on\');})(this)">'+ageLbl+' <span style="font-size:9px;opacity:.55">&#9660;</span></button>'
+    +'<div class="fdd"><div class="fdh"><span class="fdt">Age</span><button class="fdc" onclick="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.age=\'\';renderPdel()">Clear</button></div><div class="fdo">'
+    +['','25','50','100'].map(function(v){return'<label class="dopt"><input type="radio" name="pdel-age" '+(String(pf.age||'')==v?'checked':'')+' onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.age=\''+v+'\';renderPdel()"/><span class="ot">'+(ageOpts[v]||'All')+'</span></label>';}).join('')
+    +'</div></div></div>';
+  // Touched filter
+  var touchOpts={"":"All","yes":"Yes (date)","in_sequence":"In Sequence","finished_sequence":"Finished Sequence","no":"No"};
+  var touchLbl=pf.touched?touchOpts[pf.touched]||pf.touched:"Touched";
+  var touchOn=pf.touched?"on":"";
+  html+='<div class="fbi" id="pdel-touch-fbi"><button class="fbtn '+touchOn+'" onclick="(function(el){var dd=el.nextElementSibling;var was=dd.classList.contains(\'on\');document.querySelectorAll(\'.fdd.on\').forEach(function(d){d.classList.remove(\'on\');});if(!was)dd.classList.add(\'on\');})(this)">'+touchLbl+' <span style="font-size:9px;opacity:.55">&#9660;</span></button>'
+    +'<div class="fdd"><div class="fdh"><span class="fdt">Touched</span><button class="fdc" onclick="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.touched=\'\';renderPdel()">Clear</button></div><div class="fdo">'
+    +['','yes','in_sequence','finished_sequence','no'].map(function(v){return'<label class="dopt"><input type="radio" name="pdel-touch" '+(String(pf.touched||'')==v?'checked':'')+' onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.touched=\''+v+'\';renderPdel()"/><span class="ot">'+touchOpts[v]+'</span></label>';}).join('')
+    +'</div></div></div>';
   html+='<span id="pdel-conn-filter"></span>';
-  if(pf.campWBS){html+='<span style="background:#D1EFFF;padding:3px 10px;border-radius:var(--r);font-size:11px;font-weight:600">Campaign: '+pf.campWBS+'</span><button onclick="window.pdelFilter.campWBS=null;renderPdel()" style="padding:3px 10px;background:#C62828;color:#fff;border:none;border-radius:var(--r);font-size:11px;cursor:pointer">Clear</button>';}
+  if(pf.campWBS){html+='<span style="background:#D1EFFF;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid #000">Campaign: '+pf.campWBS+'</span><button onclick="window.pdelFilter.campWBS=null;renderPdel()" style="padding:3px 8px;background:#C62828;color:#fff;border:none;border-radius:20px;font-size:11px;cursor:pointer">✕</button>';}
   html+='<span id="pdel-cf51-filter"></span>';
   html+='<span id="pdel-ct-filter"></span>';
   html+='<span id="pdel-src-filter"></span>';
   html+='<span id="pdel-exec-filter"></span>';
   html+='<span id="pdel-persona-filter"></span>';
+  // Third Party filter
+  var tpOpts={"":"All","3rd Party":"3rd Party","not3p":"Not 3rd Party"};
+  var tpLbl=pf.thirdParty?(pf.thirdParty==="3rd Party"?"3rd Party":"Not 3rd Party"):"Third Party";
+  var tpOn=pf.thirdParty?"on":"";
+  html+='<div class="fbi"><button class="fbtn '+tpOn+'" onclick="(function(el){var dd=el.nextElementSibling;var was=dd.classList.contains(\'on\');document.querySelectorAll(\'.fdd.on\').forEach(function(d){d.classList.remove(\'on\');});if(!was)dd.classList.add(\'on\');})(this)">'+tpLbl+' <span style="font-size:9px;opacity:.55">&#9660;</span></button>'
+    +'<div class="fdd"><div class="fdh"><span class="fdt">Third Party</span><button class="fdc" onclick="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.thirdParty=\'\';renderPdel()">Clear</button></div><div class="fdo">'
+    +['','3rd Party','not3p'].map(function(v){return'<label class="dopt"><input type="radio" name="pdel-tp" '+(String(pf.thirdParty||'')==v?'checked':'')+' onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.thirdParty=\''+v+'\';renderPdel()"/><span class="ot">'+tpOpts[v]+'</span></label>';}).join('')
+    +'</div></div></div>';
   html+='</div>';
   html+='<div id="pdel-tbl"></div>';
   page.innerHTML=html;
@@ -4851,7 +4873,8 @@ function renderPdel(){
       if(p.touched&&p.touched!=="1970-01-01"&&p.touched!==""&&String(p.touched).startsWith("2026"))_ts="yes";
       else if(activeSeq)_ts="in_sequence";
       else if(finishedSeq)_ts="finished_sequence";
-      rows.push({sid:sid,pid:p.pid,co:p.co||"",campName:campName,wbs:wbs,connType:connType,src:p.src||"",ct:p.ct||"",cf51:p.cf51||"",days:days,created:created,touched:p.touched||"",touchedStatus:_ts,executor:executor,persona:persona,activeSeq:activeSeq,finishedSeq:finishedSeq});
+      var _tp=(/zoom\s*info/i.test(p.src||"")||/lead\s*genius/i.test(p.src||"")||/enginy/i.test(p.src||"")||/sales\s*navigator/i.test(p.src||"")||/data\s*hive/i.test(p.src||""))?"3rd Party":"";
+      rows.push({sid:sid,pid:p.pid,co:p.co||"",campName:campName,wbs:wbs,connType:connType,src:p.src||"",ct:p.ct||"",cf51:p.cf51||"",days:days,created:created,touched:p.touched||"",touchedStatus:_ts,executor:executor,persona:persona,activeSeq:activeSeq,finishedSeq:finishedSeq,thirdParty:_tp});
     });
 
     rows.sort(function(a,b){return(b.days||0)-(a.days||0);});
@@ -4871,20 +4894,28 @@ function renderPdel(){
     var cf51El=document.getElementById("pdel-cf51-filter");
     function mkPdelDrop(el,label,key,opts){
       if(!el)return;
-      var h='<label style="font-size:12px;font-weight:600;margin-left:10px">'+label+':</label>';
-      h+='<select onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.'+key+'=this.value;renderPdel()" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value="">All</option>';
-      opts.forEach(function(v){h+='<option value="'+v.replace(/"/g,"&quot;")+'"'+(pf[key]===v?" selected":"")+'>'+v+'</option>';});
-      h+='</select>';el.innerHTML=h;
+      var cur=pf[key]||"";
+      var isOn=cur?"on":"";
+      var btnLbl=cur||label;
+      var h='<div class="fbi" style="display:inline-block"><button class="fbtn '+isOn+'" onclick="(function(el){var dd=el.nextElementSibling;var was=dd.classList.contains(\'on\');document.querySelectorAll(\'.fdd.on\').forEach(function(d){d.classList.remove(\'on\');});if(!was)dd.classList.add(\'on\');})(this)">'+btnLbl+' <span style="font-size:9px;opacity:.55">&#9660;</span></button>';
+      h+='<div class="fdd"><div class="fdh"><span class="fdt">'+label+'</span><button class="fdc" onclick="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.'+key+'=\'\';renderPdel()">Clear</button></div>';
+      h+='<div class="fds"><input type="text" placeholder="Search..." oninput="var q=this.value.toLowerCase();this.closest(\'.fdd\').querySelectorAll(\'.dopt\').forEach(function(o){o.style.display=o.querySelector(\'.ot\').textContent.toLowerCase().indexOf(q)>=0?\'\':\' none\';})"/></div>';
+      h+='<div class="fdo"><label class="dopt"><input type="radio" name="pdel-'+key+'" '+(cur===''?'checked':'')+' onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.'+key+'=\'\';renderPdel()"/><span class="ot">All</span></label>';
+      opts.forEach(function(v){var eq=v.replace(/"/g,"&quot;").replace(/'/g,"\\'");h+='<label class="dopt"><input type="radio" name="pdel-'+key+'" '+(cur===v?'checked':'')+' onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.'+key+'=\''+eq+'\';renderPdel()"/><span class="ot">'+v.replace(/"/g,"&quot;")+'</span></label>';});
+      h+='</div></div></div>';
+      el.innerHTML=h;
     }
     function mkPdelSearch(el,label,key,opts){
       if(!el)return;
       var cur=pf[key]||"";
-      var h='<label style="font-size:12px;font-weight:600;margin-left:10px">'+label+':</label>';
-      h+='<span style="position:relative;display:inline-block">';
-      h+='<input type="text" value="'+cur.replace(/"/g,"&quot;")+'" placeholder="Search..." id="pdel-'+key+'-inp" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px;width:150px" oninput="(function(el){var q=el.value.toLowerCase();document.getElementById(\'pdel-'+key+'-sel\').querySelectorAll(\'option\').forEach(function(o){o.style.display=!q||o.text.toLowerCase().indexOf(q)>=0?\'\':\' none\';});})(this)">';
-      h+='<select id="pdel-'+key+'-sel" onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.'+key+'=this.value;document.getElementById(\'pdel-'+key+'-inp\').value=this.options[this.selectedIndex].text===\'All\'?\'\':(this.value);renderPdel()" size="1" style="padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px;max-width:160px"><option value="">All</option>';
-      opts.forEach(function(v){h+='<option value="'+v.replace(/"/g,"&quot;")+'"'+(cur===v?" selected":"")+'>'+v+'</option>';});
-      h+='</select></span>';
+      var isOn=cur?"on":"";
+      var btnLbl=cur||label;
+      var h='<div class="fbi" style="display:inline-block"><button class="fbtn '+isOn+'" onclick="(function(el){var dd=el.nextElementSibling;var was=dd.classList.contains(\'on\');document.querySelectorAll(\'.fdd.on\').forEach(function(d){d.classList.remove(\'on\');});if(!was)dd.classList.add(\'on\');})(this)">'+btnLbl+' <span style="font-size:9px;opacity:.55">&#9660;</span></button>';
+      h+='<div class="fdd"><div class="fdh"><span class="fdt">'+label+'</span><button class="fdc" onclick="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.'+key+'=\'\';renderPdel()">Clear</button></div>';
+      h+='<div class="fds"><input type="text" placeholder="Search..." id="pdel-'+key+'-inp" value="'+cur.replace(/"/g,"&quot;")+'" oninput="var q=this.value.toLowerCase();document.getElementById(\'pdel-'+key+'-sel\').querySelectorAll(\'.dopt\').forEach(function(o){o.style.display=o.querySelector(\'.ot\').textContent.toLowerCase().indexOf(q)>=0?\'\':\' none\';})"/></div>';
+      h+='<div class="fdo" id="pdel-'+key+'-sel"><label class="dopt"><input type="radio" name="pdel-'+key+'" '+(cur===''?'checked':'')+' onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.'+key+'=\'\';renderPdel()"/><span class="ot">All</span></label>';
+      opts.forEach(function(v){var eq=v.replace(/"/g,"&quot;").replace(/'/g,"\\'");h+='<label class="dopt"><input type="radio" name="pdel-'+key+'" '+(cur===v?'checked':'')+' onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.'+key+'=\''+eq+'\';renderPdel()"/><span class="ot">'+v.replace(/"/g,"&quot;")+'</span></label>';});
+      h+='</div></div></div>';
       el.innerHTML=h;
     }
     var _connTypeSet=new Set();
@@ -4898,8 +4929,8 @@ function renderPdel(){
     mkPdelSearch(cf51El,"Custom Field 51","cf51",Array.from(_cf51Set).sort());
     // Apply all filters
     if(pf.campWBS){rows=rows.filter(function(r){return r.wbs===pf.campWBS;});}
-    if(pf.ct||pf.src||pf.executor||pf.persona||pf.touched||pf.connType||pf.cf51){rows=rows.filter(function(r){
-      return(!pf.ct||r.ct===pf.ct)&&(!pf.src||(pf.src==="(Blank)"?!r.src:pf.src==="Not Blank"?!!r.src:r.src===pf.src))&&(!pf.executor||r.executor===pf.executor)&&(!pf.persona||r.persona===pf.persona)&&(!pf.touched||(pf.touched==="no"?r.touchedStatus==="no":r.touchedStatus===pf.touched))&&(!pf.connType||r.connType===pf.connType)&&(!pf.cf51||r.cf51.split(",").map(function(v){return v.trim();}).indexOf(pf.cf51)>-1);
+    if(pf.ct||pf.src||pf.executor||pf.persona||pf.touched||pf.connType||pf.cf51||pf.thirdParty){rows=rows.filter(function(r){
+      return(!pf.ct||r.ct===pf.ct)&&(!pf.src||(pf.src==="(Blank)"?!r.src:pf.src==="Not Blank"?!!r.src:r.src===pf.src))&&(!pf.executor||r.executor===pf.executor)&&(!pf.persona||r.persona===pf.persona)&&(!pf.touched||(pf.touched==="no"?r.touchedStatus==="no":r.touchedStatus===pf.touched))&&(!pf.connType||r.connType===pf.connType)&&(!pf.cf51||r.cf51.split(",").map(function(v){return v.trim();}).indexOf(pf.cf51)>-1)&&(!pf.thirdParty||(pf.thirdParty==="3rd Party"?r.thirdParty==="3rd Party":r.thirdParty!=="3rd Party"));
     });}
 
     // Store full filtered rows for export
@@ -4960,16 +4991,17 @@ function renderPdel(){
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+r.sid+"</td>";
           html2+="<td style='padding:5px 8px'>"+r.connType+"</td>";
           html2+="<td style='padding:5px 8px'>"+r.src+"</td>";
+          html2+="<td style='padding:5px 8px'>"+r.thirdParty+"</td>";
           html2+="<td style='padding:5px 8px'>"+r.ct+"</td>";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.cf51+"</td>";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.executor+"</td>";
-          html2+="<td style='padding:5px 8px'>"+r.created+"</td>";
+          html2+="<td style='padding:5px 8px'>"+String(r.created||"").substring(0,10)+"</td>";
           html2+="<td style='padding:5px 8px'>"+r.touched+"</td>";
           html2+="<td style='padding:5px 8px;text-align:right'>"+r.days+"</td>";
         } else {
           var touchedDisp=((r.touched&&r.touched!=="1970-01-01"&&String(r.touched).startsWith("2026"))?r.touched.substring(0,10):"");
-          if(!touchedDisp&&r.activeSeq)touchedDisp="In Sequence: "+r.activeSeq.split(",")[0];
-          if(!touchedDisp&&r.finishedSeq)touchedDisp="Finished: "+r.finishedSeq.split(",")[0];
+          if(!touchedDisp&&r.activeSeq)touchedDisp="In Sequence";
+          if(!touchedDisp&&r.finishedSeq)touchedDisp="Finished Sequence";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap' title='"+r.campName+"'>"+r.campName+"</td>";
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+r.sid+"</td>";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.co+"</td>";
@@ -4977,11 +5009,12 @@ function renderPdel(){
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+r.pid+"</td>";
           html2+="<td style='padding:5px 8px'>"+r.connType+"</td>";
           html2+="<td style='padding:5px 8px'>"+r.src+"</td>";
+          html2+="<td style='padding:5px 8px'>"+r.thirdParty+"</td>";
           html2+="<td style='padding:5px 8px'>"+r.ct+"</td>";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.cf51+"</td>";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.executor+"</td>";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.persona+"</td>";
-          html2+="<td style='padding:5px 8px'>"+r.created+"</td>";
+          html2+="<td style='padding:5px 8px'>"+String(r.created||"").substring(0,10)+"</td>";
           html2+="<td style='padding:5px 8px'>"+touchedDisp+"</td>";
           html2+="<td style='padding:5px 8px;text-align:right;font-weight:700"+(r.days>25?";background:#FFF9C4":"")+"'>"+r.days+"</td>";
         }
@@ -4991,8 +5024,8 @@ function renderPdel(){
       var pgEl=document.getElementById("pdel-pg-info");if(pgEl)pgEl.textContent="Page "+(pg+1)+" of "+Math.ceil(window._pdelDisplayRows.length/ps);
     };
     var _pdelCols=pf.cf51?
-      ["Connected","Prospect ID","Company","Country","Campaign Name","Sequence ID","Connection","Source","Company Type","Custom Field 51","Executor","Created","Touched","Age (days)"]:
-      ["Campaign Name","Sequence ID","Company","Country","Prospect ID","Connection","Source","Company Type","Custom Field 51","Executor","Persona Name","Created","Touched","Age (days)"];
+      ["Connected","Prospect ID","Company","Country","Campaign Name","Sequence ID","Connection","Source","Third Party","Company Type","Custom Field 51","Executor","Created","Touched","Age (days)"]:
+      ["Campaign Name","Sequence ID","Company","Country","Prospect ID","Connection","Source","Third Party","Company Type","Custom Field 51","Executor","Persona Name","Created","Touched","Age (days)"];
     var _pdelUniqCamps=new Set(rows.map(function(r){return r.campName;}).filter(Boolean)).size;
     var tbl="";
     tbl+="<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px'>";
@@ -5027,8 +5060,8 @@ window._exportPdel=function(){
     var country=_pidToCountry[r.pid]||"";
     var touched=(r.touched&&r.touched!=="1970-01-01")?r.touched.substring(0,10):(r.activeSeq?"In Sequence":(r.finishedSeq?"Finished":""));
     var row=pf.cf51?
-      [r.connected?"Yes":"No",r.pid,r.co,country,r.campName,r.sid,r.connType,r.src,r.ct,r.cf51,r.executor,r.created,r.touched,r.days]:
-      [r.campName,r.sid,r.co,country,r.pid,r.connType,r.src,r.ct,r.cf51,r.executor,r.persona,r.created,touched,r.days];
+      [r.connected?"Yes":"No",r.pid,r.co,country,r.campName,r.sid,r.connType,r.src,(/zoom\s*info/i.test(r.src)?"3rd Party":""),r.ct,r.cf51,r.executor,String(r.created||"").substring(0,10),r.touched,r.days]:
+      [r.campName,r.sid,r.co,country,r.pid,r.connType,r.src,(/zoom\s*info/i.test(r.src)?"3rd Party":""),r.ct,r.cf51,r.executor,r.persona,String(r.created||"").substring(0,10),touched,r.days];
     csv.push(row.map(esc).join(","));
   });
   var blob=new Blob([csv.join("\n")],{type:"text/csv"});
@@ -5358,56 +5391,6 @@ function renderDtr(){
   var profMap=window.CAMP_PROF_TAGS||{};
   var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Data Tracking</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
   html+='<p style="font-size:12px;color:var(--mu);margin-bottom:8px">Track data quality and coverage across the campaign calendar and pipeline.</p>';
-  // Build pipeline filter options at top level
-  var _pipeBase=pipeData.filter(function(p){return String(p["Create Quarter"]||"").trim().startsWith(_dtrYearFilter||"2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline";});
-  var _dtrSrcOpts=Array.from(new Set(_pipeBase.map(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim();}).filter(Boolean))).sort();
-  var _dtrMmOpts=Array.from(new Set(_pipeBase.map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean))).sort();
-  html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:12px;flex-wrap:wrap">';
-  html+='<label style="font-weight:600;color:var(--dk)">Year:</label>';
-  html+='<select onchange="window._dtrYearFilter=this.value;renderDtr()" style="padding:5px 10px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value=""'+(!_dtrYearFilter?" selected":"")+'>All</option>';
-  _dtrYears.forEach(function(y){html+='<option value="'+y+'"'+(y===_dtrYearFilter?" selected":"")+'>'+y+'</option>';});
-  html+='</select>';
-  html+='<label style="font-weight:600;color:var(--dk);margin-left:8px">TCP Source:</label>';
-  html+='<select onchange="window._dhSrcFilter=this.value;renderDtr()" style="padding:5px 10px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value=""'+(!_dhSrcFilter?" selected":"")+'>All</option>';
-  _dtrSrcOpts.forEach(function(v){html+='<option value="'+v.replace(/"/g,'&quot;')+'"'+(v===_dhSrcFilter?" selected":"")+'>'+v+'</option>';});
-  html+='</select>';
-  if(_dhSrcFilter)html+='<button onclick="window._dhSrcFilter=\'\';renderDtr()" style="font-size:11px;padding:2px 8px;border:1px solid var(--rd);border-radius:var(--r);cursor:pointer;background:#fff;color:var(--rd)">Clear</button>';
-  html+='<label style="font-weight:600;color:var(--dk);margin-left:8px">GB Identifier:</label>';
-  html+='<select onchange="window._dhMmFilter=this.value;renderDtr()" style="padding:5px 10px;border:1px solid var(--bd);border-radius:var(--r);font-size:12px"><option value=""'+(!_dhMmFilter?" selected":"")+'>All</option>';
-  _dtrMmOpts.forEach(function(v){html+='<option value="'+v.replace(/"/g,'&quot;')+'"'+(v===_dhMmFilter?" selected":"")+'>'+v+'</option>';});
-  html+='</select>';
-  if(_dhMmFilter)html+='<button onclick="window._dhMmFilter=\'\';renderDtr()" style="font-size:11px;padding:2px 8px;border:1px solid var(--rd);border-radius:var(--r);cursor:pointer;background:#fff;color:var(--rd)">Clear</button>';
-  html+='</div>';
-  html+="<div class=\"krow\" style=\"flex-wrap:wrap\">";
-  (function(){
-    var totalCamps=new Set(filtered.map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean)).size;
-    var withWBS=new Set(filtered.filter(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean)).size;
-    var pct=totalCamps>0?Math.round(withWBS/totalCamps*100):0;
-    html+="<div class=\"kpi kb\"><div class=\"kl\">Campaigns w/ WBS Code</div><div class=\"kv\">"+pct+"%</div><div class=\"ks\">"+withWBS.toLocaleString()+" of "+totalCamps.toLocaleString()+" campaigns (calendar)</div></div>";
-  })();
-  (function(){
-    var totalCamps=new Set(filtered.map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean)).size;
-    var withSeq=new Set(filtered.filter(function(r){return /^\d+$/.test(String(r["Sequence ID"]||"").trim());}).map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean)).size;
-    var pct=totalCamps>0?Math.round(withSeq/totalCamps*100):0;
-    html+="<div class=\"kpi kb\"><div class=\"kl\">Campaigns w/ Sequence ID</div><div class=\"kv\">"+pct+"%</div><div class=\"ks\">"+withSeq.toLocaleString()+" of "+totalCamps.toLocaleString()+" campaigns (calendar)</div></div>";
-  })();
-  (function(){
-    var totalCamps=new Set(filtered.map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean)).size;
-    var withTag=new Set(filtered.filter(function(r){return String(r["Outreach TAGS"]||"").trim()||(_profTagsMap&&_profTagsMap[String(r["Campaign/WBS Code"]||"").trim()]);}).map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean)).size;
-    var pct=totalCamps>0?Math.round(withTag/totalCamps*100):0;
-    html+="<div class=\"kpi kb\"><div class=\"kl\">Campaigns w/ Tag</div><div class=\"kv\">"+pct+"%</div><div class=\"ks\">"+withTag.toLocaleString()+" of "+totalCamps.toLocaleString()+" campaigns (calendar)</div></div>";
-  })();
-  html+="<div class=\"kpi kb\"><div class=\"kl\">Profiling Requests</div><div class=\"kv\">"+(new Set(profMetaVals.map(function(m){return m.id;}).filter(Boolean))).size.toLocaleString()+"</div><div class=\"ks\">total requests</div></div>";
-  (function(){
-    var total=(new Set(profMetaVals.map(function(m){return m.id;}).filter(Boolean))).size;
-    var withWBS=profMetaVals.filter(function(m){return m.wbs&&/^CRM-/i.test(String(m.wbs).trim());}).length;
-    var withTag=profMetaVals.filter(function(m){return m.tagOut&&m.tagOut.trim();}).length;
-    var pctWBS=total>0?Math.round(withWBS/total*100):0;
-    var withSeqPro=(function(){var ws={};(campData||[]).forEach(function(r){var w=String(r['Campaign/WBS Code']||'').trim();var s=String(r['Sequence ID']||'').trim();if(w&&s)ws[w]=1;});return profMetaVals.filter(function(m){var w=String(m.wbs||'').trim();return /^CRM-/i.test(w)&&ws[w];}).length;})();var pctSeqPro=total>0?Math.round(withSeqPro/total*100):0;var pctTag=total>0?Math.round(withTag/total*100):0;
-    html+="<div class=\"kpi kb\"><div class=\"kl\">With WBS Code</div><div class=\"kv\">"+pctWBS+"%</div><div class=\"ks\">"+withWBS.toLocaleString()+" of "+total.toLocaleString()+" requests</div></div>";
-    html+="<div class=\"kpi kb\"><div class=\"kl\">w/ Sequence ID</div><div class=\"kv\">"+pctSeqPro+"%</div><div class=\"ks\">"+withSeqPro.toLocaleString()+" of "+total.toLocaleString()+" requests</div></div>";
-    html+="<div class=\"kpi kb\"><div class=\"kl\">With Tag for Outreach</div><div class=\"kv\">"+pctTag+"%</div><div class=\"ks\">"+withTag.toLocaleString()+" of "+total.toLocaleString()+" requests</div></div>";
-  })();
   (function(){
     var _calWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
     var dhAll=pipeData.filter(function(p){var _yr=_dtrYearFilter||"2026";return String(p["Create Quarter"]||"").trim().startsWith(_yr)&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"&&String(p["TCP Pipeline Source Desc"]||"").trim()!=="Sales"&&(!_dhRegFilter||_dhRegFilter.has(String(p["Region Lvl 2"]||"").trim()))&&(!_dhReg3Filter||_dhReg3Filter.has(String(p["Region Lvl 3"]||"").trim()));});
@@ -5417,7 +5400,6 @@ function renderDtr(){
     var pct=totAll>0?Math.round(totConn/totAll*100):0;
     html+="<div class=\"kpi kb\"><div class=\"kl\">DH Pipeline ? Calendar</div><div class=\"kv\">"+pct+"%</div><div class=\"ks\">"+totConn.toLocaleString(undefined,{maximumFractionDigits:0})+" / "+totAll.toLocaleString(undefined,{maximumFractionDigits:0})+" EUR (2026 DH pipeline)</div></div>";
   })();
-  html+="</div>";
   // DCM Summary table
   var dcmMap={};
   var _profTagsMap=window.CAMP_PROF_TAGS||{};
@@ -5495,19 +5477,6 @@ function renderDtr(){
   html+='<table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:35%"><col style="width:16%"><col style="width:16%"><col style="width:16%"><col style="width:17%"></colgroup>';
   html+='<tfoot><tr style="background:#00144A;color:#fff;font-weight:700"><td style="padding:5px 8px;font-size:11px">TOTAL</td><td style="padding:5px 8px;text-align:right;font-size:11px">'+_reqTotTotal.toLocaleString()+'</td><td style="padding:5px 8px;text-align:right;font-size:11px">'+_reqTotWBS.toLocaleString()+'</td><td style="padding:5px 8px;text-align:right;font-size:11px">'+_reqTotSeq.toLocaleString()+'</td><td style="padding:5px 8px;text-align:right;font-size:11px">'+_reqTotTag.toLocaleString()+'</td></tr></tfoot></table></div>';
   html+='</div>';
-  // Connection table (remaining ~40%)
-  html+='<div style="flex:1;min-width:0">';
-  html+='<div style="display:flex;align-items:center;margin-bottom:4px"><div class="sec" style="margin-bottom:0">Connection</div></div>';
-  html+=buildConnectionTable(thD);
-  html+='</div>';
-  html+='</div>';
-  // Connected Campaigns table (collapsible)
-  html+='<div style="margin-top:20px">';
-  html+='<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:#012931;border-radius:var(--r);padding:6px 12px" onclick="window._dtrCampExpanded=!window._dtrCampExpanded;renderDtr()">';
-  html+='<div style="color:#fff;font-size:13px;font-weight:700">Connected Campaigns '+(window._dtrCampExpanded?'&#9650;':'&#9660;')+'</div>';
-  html+='<label style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer;color:#fff" onclick="event.stopPropagation()"><input type="checkbox"'+(window._dtrConnectedOnly?' checked':'')+' onchange="window._dtrConnectedOnly=this.checked;renderDtr()"> Show connected only</label>';
-  html+='</div>';
-  if(window._dtrCampExpanded){html+=buildConnectedCampaignsTable(false,window._dtrConnectedOnly);}
   html+='</div>';
   // Digital Hub Pipeline table
   (function(){
