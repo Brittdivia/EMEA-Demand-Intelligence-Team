@@ -5514,9 +5514,9 @@ function renderDtr(){
   }).sort(function(a,b){return b[1].camps-a[1].camps||a[1].display.localeCompare(b[1].display);});
   var thD="background:#00144A;color:#fff;padding:8px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;white-space:nowrap;position:sticky;top:0;border-right:1px solid #1B4F5A";
   html+='<div style="display:flex;gap:16px;align-items:stretch;margin-top:16px;margin-bottom:20px">';
-  html+='<div style="flex:0 0 30%;min-width:0">';
+  html+='<div style="flex:0 0 45%;min-width:0">';
   html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div class="sec" style="margin-bottom:0">DCM Summary of Campaign Calendar</div></div>';
-  html+='<div class="cc"><div style="overflow:auto;max-height:300px"><table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:55%"><col style="width:22%"><col style="width:23%"></colgroup><thead><tr>';
+  html+='<div class="cc"><div style="overflow-x:auto;overflow-y:auto;max-height:300px"><table style="width:100%;min-width:320px;border-collapse:collapse;font-size:11px;table-layout:auto"><thead><tr>';
   html+='<th style="'+thD+'">DCM</th><th style="'+thD+';text-align:right">Campaigns</th><th style="'+thD+';text-align:right">Connected to Prospect</th></tr></thead><tbody>';
   window._dcmClick=function(key){window._dtrProfFilter=window._dtrProfFilter||{};window._dtrProfFilter.dm=(window._dtrProfFilter.dm===key)?null:key;renderDtr();};
   var _dcmTotCamps=0,_dcmTotConn=0;
@@ -5536,10 +5536,10 @@ function renderDtr(){
   html+='<table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:55%"><col style="width:22%"><col style="width:23%"></colgroup>';
   html+='<tfoot><tr style="background:#00144A;color:#fff;font-weight:700"><td style="padding:5px 8px;font-size:11px">TOTAL</td><td style="padding:5px 8px;text-align:right;font-size:11px">'+_dcmTotCamps.toLocaleString()+'</td><td style="padding:5px 8px;text-align:right;font-size:11px">'+_dcmTotConn.toLocaleString()+'</td></tr></tfoot></table></div>';
   html+='</div>';
-  // Profiling Requests by DDM1 table (25%)
-  html+='<div style="flex:0 0 35%;min-width:0">';
+  // Profiling Requests by DDM1 table
+  html+='<div style="flex:0 0 45%;min-width:0">';
   html+='<div style="display:flex;align-items:center;margin-bottom:4px"><div class="sec" style="margin-bottom:0">Profiling Requests by DCM</div></div>';
-  html+='<div class="cc"><div style="overflow:auto;max-height:300px"><table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:55%"><col style="width:22%"><col style="width:23%"></colgroup><thead><tr>';
+  html+='<div class="cc"><div style="overflow-x:auto;overflow-y:auto;max-height:300px"><table style="width:100%;min-width:320px;border-collapse:collapse;font-size:11px;table-layout:auto"><thead><tr>';
   html+='<th style="'+thD+'">DCM</th><th style="'+thD+';text-align:right"># Requests</th><th style="'+thD+';text-align:right">Connected to Outreach</th></tr></thead><tbody>';
   var _allProsTagSet=new Set();
   (window.PROSPECT_DATA||[]).forEach(function(p){
@@ -5654,7 +5654,7 @@ function renderDtr(){
       var dcmD=normDDM1(String(r['Demand Manager']||'').trim());if(!dcmD)return;
       // Apply DCM click filter if active
       if(_dtrDmSel&&dcmD.toLowerCase()!==_dtrDmSel)return;
-      var rawTags=(String(r['Tag per SDE']||'').trim()+'\n'+String(r['Tag 2 per SDE']||'').trim()).trim();if(!rawTags)return;
+      var rawTags=(String(r['Profiling to Outreach Tag']||'').trim()+'\n'+String(r['Tag per SDE']||'').trim()+'\n'+String(r['Tag 2 per SDE']||'').trim()).trim();if(!rawTags)return;
       var campN=String(r['Campaign Name']||'').trim();
       var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,).trim();}).filter(Boolean);
       

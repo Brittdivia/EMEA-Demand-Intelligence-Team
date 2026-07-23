@@ -36,6 +36,11 @@ for ($r = 2; $r -le $lastRow; $r++) {
     foreach ($h in $headers.Keys) {
         $val = $ws.Cells.Item($r, $headers[$h]).Value2
         if ($h -match "Date" -and $val -and $val -is [double]) { $val = ExcelDateToISO $val }
+        # For tag fields, use Text to preserve full multi-line content
+        if ($h -match "Tag|tag") {
+            $textVal = $ws.Cells.Item($r, $headers[$h]).Text
+            if ($textVal -and "$textVal" -ne "$val") { $val = $textVal }
+        }
         $obj[$h] = if ($null -eq $val) { $null } else { "$val" }
     }
     $campRecords += [PSCustomObject]$obj
