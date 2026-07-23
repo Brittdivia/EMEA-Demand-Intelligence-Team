@@ -4833,7 +4833,7 @@ function renderPdel(){
       var dcmDisp=normDDM1pdel(String(r["Demand Manager"]||"").trim());
       var campN=String(r["Campaign Name"]||"").trim();
       // Split on "Tag: " prefix to extract individual tag values
-      var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,).trim();}).filter(Boolean);
+      var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,).trim();}).filter(Boolean);
       
       // Fallback: comma-separated
       if(tagList.length<=1&&rawTags.indexOf(",")>-1)tagList=rawTags.split(",").map(function(t){return t.trim();}).filter(Boolean);
@@ -5491,7 +5491,7 @@ function renderDtr(){
   filtered.forEach(function(r){
     var wbs=String(r["Campaign/WBS Code"]||"").trim();if(!wbs)return;
     var rawTags=String(r["Outreach TAGS"]||"").trim();if(!rawTags)return;
-    var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,).trim();}).filter(Boolean);
+    var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,).trim();}).filter(Boolean);
       
     if(tagList.length<=1&&rawTags.indexOf(",")>-1)tagList=rawTags.split(",").map(function(t){return t.trim();}).filter(Boolean);
     var noise=new Set(["existing","new","tag:","tag","old","-","--"]);
@@ -5651,11 +5651,14 @@ function renderDtr(){
     });
     var _noiseDtr=new Set(['existing','new','tag:','tag','old','-','--']);
     var _dcmTagRowsDtr=[];var _seenDcmTagDtr=new Set();
+    var _dtrDmSel=window._dtrProfFilter&&window._dtrProfFilter.dm?window._dtrProfFilter.dm:null;
     filtered.forEach(function(r){
       var dcmD=normDDM1(String(r['Demand Manager']||'').trim());if(!dcmD)return;
+      // Apply DCM click filter if active
+      if(_dtrDmSel&&dcmD.toLowerCase()!==_dtrDmSel)return;
       var rawTags=String(r['Outreach TAGS']||'').trim();if(!rawTags)return;
       var campN=String(r['Campaign Name']||'').trim();
-      var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,).trim();}).filter(Boolean);
+      var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,).trim();}).filter(Boolean);
       
       if(tagList.length<=1&&rawTags.indexOf(',')>-1)tagList=rawTags.split(',').map(function(t){return t.trim();}).filter(Boolean);
       tagList.forEach(function(t){
@@ -5672,7 +5675,19 @@ function renderDtr(){
     });
     _dcmTagRowsDtr.sort(function(a,b){return a.dcm.localeCompare(b.dcm)||a.tag.localeCompare(b.tag);});
     var thT="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0";
-    html+='<div class="sec" style="margin-top:20px;margin-bottom:6px">Calendar Outreach Tags &#8594; Profiling Request Connections</div>';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;margin-bottom:6px">';
+    html+='<div class="sec" style="margin-bottom:0">Calendar Outreach Tags &#8594; Profiling Request Connections</div>';
+    html+='<button onclick="window._exportCalTagTable()" style="padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">&#11015; Export CSV</button>';
+    html+='</div>';
+    window._exportCalTagTable=function(){
+      var rows=[['DCM','Outreach Tag','Campaign','Prospect Match','Profiling Request(s)']];
+      _dcmTagRowsDtr.forEach(function(row){
+        rows.push([row.dcm,row.tag,row.camp,_allProsTagsDtr.has(row.tag)?'Match':'No Match',row.reqs.join('; ')]);
+      });
+      function esc(v){v=String(v||'');return v.indexOf(',')>-1||v.indexOf('"')>-1?'"'+v.replace(/"/g,'""')+'"':v;}
+      var csv='﻿'+rows.map(function(r){return r.map(esc).join(',');}).join('\n');
+      var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='calendar_tag_connections.csv';a.click();
+    };
     html+='<div class="cc"><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
     html+='<th style="'+thT+';width:15%">DCM</th><th style="'+thT+';width:22%">Outreach Tag</th><th style="'+thT+';width:18%">Campaign</th><th style="'+thT+';width:10%">Prospect Match</th><th style="'+thT+';width:35%">Profiling Request(s)</th></tr></thead><tbody>';
     _dcmTagRowsDtr.forEach(function(row,i){
