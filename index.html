@@ -157,6 +157,7 @@ tbody td.wc{white-space:normal;word-break:break-word;max-width:260px;line-height
 #anaPage .kpi{flex:1 1 0%;min-width:0;max-width:none;height:110px;}
 #anaPage .krow{flex-wrap:wrap;gap:8px;}
 #anaPage .krow:nth-of-type(2) .kpi{flex:0 0 8%;max-width:8%;}
+#pdel-detail-tbl td{padding:3px 5px;white-space:nowrap;font-size:10px;border-bottom:1px solid #f0f0f0;}
 #anaPage .kl{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:var(--mu);margin-bottom:3px;white-space:normal;line-height:1.2;}
 #anaPage .kv{font-size:28px;font-weight:700;color:#00144A;line-height:1;margin-bottom:3px;}
 #anaPage .ks{font-size:11px;color:var(--mu);white-space:normal;line-height:1.3;}
@@ -4759,9 +4760,13 @@ function renderPdel(){
       if(p.id&&p.fs)pidToFinishedSeq[p.id]=p.fs;
     });
     // Build wbs->seqId and wbs->campName from campData
-    var wbsToSeq={};var wbsToName={};var wbsToExec={};
+    var wbsToSeq={};var wbsToName={};var wbsToExec={};var wbsToDcm={};
     (campData||[]).forEach(function(r){
       var w=String(r["Campaign/WBS Code"]||"").trim();if(!w)return;
+      if(r["Sequence ID"]){var sid=String(r["Sequence ID"]).trim();if(sid&&!wbsToSeq[w])wbsToSeq[w]=sid;}
+      if(!wbsToName[w])wbsToName[w]=String(r["Campaign Name"]||"").trim();
+      if(!wbsToExec[w])wbsToExec[w]=String(r["Executor"]||"").trim();
+      if(!wbsToDcm[w])wbsToDcm[w]=String(r["Demand Manager"]||"").trim();
       var sid=String(r["Sequence ID"]||"").trim();
       if(sid&&!wbsToSeq[w])wbsToSeq[w]=sid;
       if(!wbsToName[w])wbsToName[w]=String(r["Campaign Name"]||"").trim();
@@ -4862,7 +4867,9 @@ function renderPdel(){
       var _profTag=_pidToProfTag[_pid]||"";
       var campName=seqToCampName[sid]||wbsToName[wbs]||(_profTag?_tagToProfTitle[_profTag]||"":"");
       var executor=wbsToExec[wbs]||"";
-      var connType=profWbsSeq[wbs]?"WBS Code":(_tagMatchPids.has(_pid)?"Tag":"Sequence ID");
+      var dcm=wbsToDcm[wbs]||"";
+      var connType=profWbsSeq[wbs]?"WBS Code":(_tagMatchPids.has(_pid)?"Tag":"");
+      if(!connType)return; // skip Sequence ID connection type
       var created=p.created||pidToCreated[p.pid]||"";
       var persona=pidToPersona[p.pid]||"";
       var activeSeq=pidToActiveSeq[p.pid]||"";
@@ -4874,7 +4881,7 @@ function renderPdel(){
       else if(activeSeq)_ts="in_sequence";
       else if(finishedSeq)_ts="finished_sequence";
       var _tp=(/zoom\s*info/i.test(p.src||"")||/lead\s*genius/i.test(p.src||"")||/enginy/i.test(p.src||"")||/sales\s*navigator/i.test(p.src||"")||/data\s*hive/i.test(p.src||""))?"3rd Party":"";
-      rows.push({sid:sid,pid:p.pid,co:p.co||"",campName:campName,wbs:wbs,connType:connType,src:p.src||"",ct:p.ct||"",cf51:p.cf51||"",days:days,created:created,touched:p.touched||"",touchedStatus:_ts,executor:executor,persona:persona,activeSeq:activeSeq,finishedSeq:finishedSeq,thirdParty:_tp});
+      rows.push({sid:sid,pid:p.pid,co:p.co||"",campName:campName,wbs:wbs,connType:connType,src:p.src||"",ct:p.ct||"",cf51:p.cf51||"",days:days,created:created,touched:p.touched||"",touchedStatus:_ts,executor:executor,dcm:dcm,persona:persona,activeSeq:activeSeq,finishedSeq:finishedSeq,thirdParty:_tp});
     });
 
     rows.sort(function(a,b){return(b.days||0)-(a.days||0);});
@@ -4987,6 +4994,7 @@ function renderPdel(){
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+r.pid+"</td>";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.co+"</td>";
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+country+"</td>";
+          html2+="<td style='padding:3px 5px;white-space:nowrap'>"+(r.dcm||"")+"</td>";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.campName+"</td>";
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+r.sid+"</td>";
           html2+="<td style='padding:5px 8px'>"+r.connType+"</td>";
@@ -4994,14 +5002,15 @@ function renderPdel(){
           html2+="<td style='padding:5px 8px'>"+r.thirdParty+"</td>";
           html2+="<td style='padding:5px 8px'>"+r.ct+"</td>";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.cf51+"</td>";
-          html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.executor+"</td>";
-          html2+="<td style='padding:5px 8px'>"+String(r.created||"").substring(0,10)+"</td>";
-          html2+="<td style='padding:5px 8px'>"+r.touched+"</td>";
-          html2+="<td style='padding:5px 8px;text-align:right'>"+r.days+"</td>";
+          html2+="<td style='padding:3px 5px;white-space:nowrap'>"+r.executor+"</td>";
+          html2+="<td style='padding:3px 5px'>"+String(r.created||"").substring(0,10)+"</td>";
+          html2+="<td style='padding:3px 5px'>"+r.touched+"</td>";
+          html2+="<td style='padding:3px 5px;text-align:right'>"+r.days+"</td>";
         } else {
           var touchedDisp=((r.touched&&r.touched!=="1970-01-01"&&String(r.touched).startsWith("2026"))?r.touched.substring(0,10):"");
           if(!touchedDisp&&r.activeSeq)touchedDisp="In Sequence";
           if(!touchedDisp&&r.finishedSeq)touchedDisp="Finished Sequence";
+          html2+="<td style='padding:3px 5px;white-space:nowrap'>"+(r.dcm||"")+"</td>";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap' title='"+r.campName+"'>"+r.campName+"</td>";
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+r.sid+"</td>";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.co+"</td>";
@@ -5012,9 +5021,9 @@ function renderPdel(){
           html2+="<td style='padding:5px 8px'>"+r.thirdParty+"</td>";
           html2+="<td style='padding:5px 8px'>"+r.ct+"</td>";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.cf51+"</td>";
-          html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.executor+"</td>";
-          html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.persona+"</td>";
-          html2+="<td style='padding:5px 8px'>"+String(r.created||"").substring(0,10)+"</td>";
+          html2+="<td style='padding:3px 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.executor+"</td>";
+          html2+="<td style='padding:3px 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.persona+"</td>";
+          html2+="<td style='padding:3px 5px'>"+String(r.created||"").substring(0,10)+"</td>";
           html2+="<td style='padding:5px 8px'>"+touchedDisp+"</td>";
           html2+="<td style='padding:5px 8px;text-align:right;font-weight:700"+(r.days>25?";background:#FFF9C4":"")+"'>"+r.days+"</td>";
         }
@@ -5024,8 +5033,8 @@ function renderPdel(){
       var pgEl=document.getElementById("pdel-pg-info");if(pgEl)pgEl.textContent="Page "+(pg+1)+" of "+Math.ceil(window._pdelDisplayRows.length/ps);
     };
     var _pdelCols=pf.cf51?
-      ["Connected","Prospect ID","Company","Country","Campaign Name","Sequence ID","Connection","Source","Third Party","Company Type","Custom Field 51","Executor","Created","Touched","Age (days)"]:
-      ["Campaign Name","Sequence ID","Company","Country","Prospect ID","Connection","Source","Third Party","Company Type","Custom Field 51","Executor","Persona Name","Created","Touched","Age (days)"];
+      ["Connected","Prospect ID","Company","Country","DCM","Campaign Name","Sequence ID","Connection","Source","Third Party","Company Type","Custom Field 51","Executor","Created","Touched","Age (days)"]:
+      ["DCM","Campaign Name","Sequence ID","Company","Country","Prospect ID","Connection","Source","Third Party","Company Type","Custom Field 51","Executor","Persona Name","Created","Touched","Age (days)"];
     var _pdelUniqCamps=new Set(rows.map(function(r){return r.campName;}).filter(Boolean)).size;
     var tbl="";
     tbl+="<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px'>";
@@ -5037,8 +5046,8 @@ function renderPdel(){
     tbl+="<button onclick='window._pdelNextPage()' style='padding:2px 8px;font-size:11px;cursor:pointer;border:1px solid var(--bd);border-radius:var(--r)'>&#8594;</button>";
     tbl+="<button onclick=\"window._exportPdel()\" style='padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer'>&#11015; Export CSV</button>";
     tbl+="</div></div>";
-    tbl+="<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:11px'><thead><tr>";
-    var thS="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;white-space:nowrap;position:sticky;top:0";
+    tbl+="<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:10px;table-layout:auto' id='pdel-detail-tbl'><thead><tr>";
+    var thS="background:#00144A;color:#fff;padding:4px 6px;font-size:10px;font-weight:700;white-space:nowrap;position:sticky;top:0";
     _pdelCols.forEach(function(h){tbl+="<th style='"+thS+"'>"+h+"</th>";});
     tbl+="</tr></thead><tbody id='pdel-tbl-body'></tbody></table></div>";
     var el=document.getElementById("pdel-tbl");
@@ -5490,7 +5499,7 @@ function renderDtr(){
       return true;
     });
     var _dhMmOpts=Array.from(new Set(dhRows.filter(function(p){return _calWBS.has(String(p["Opp Campaign ID"]||"").trim());}).map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean))).sort();
-    var _dhSrcOpts=_dtrSrcOpts;
+    var _dhSrcOpts=Array.from(new Set(pipeData.filter(function(p){return String(p["Create Quarter"]||"").trim().startsWith(_dtrYearFilter||"2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline";}).map(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim();}).filter(Boolean))).sort();
     if(_dhSrcFilter)dhRows=dhRows.filter(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim()===_dhSrcFilter;});
     if(_dhMmFilter)dhRows=dhRows.filter(function(p){return String(p["MM Identifier"]||"").trim()===_dhMmFilter;});
     dhRows.sort(function(a,b){return (String(a["Create Quarter"]||"")).localeCompare(String(b["Create Quarter"]||""))||(parseFloat(b["Eur"]||0)-parseFloat(a["Eur"]||0));});
