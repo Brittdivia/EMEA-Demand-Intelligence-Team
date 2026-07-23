@@ -4829,12 +4829,9 @@ function renderPdel(){
     var _calTagToCamp={};  // tag -> {wbs, campName, dcm}
     (filtered||campData).forEach(function(r){
       var wbs=String(r["Campaign/WBS Code"]||"").trim();if(!wbs)return;
-      var rawTags=(String(r["Tag per SDE"]||"").trim()+"\n"+String(r["Tag 2 per SDE"]||"").trim()).trim();if(!rawTags)return;
+      var rawTags=(String(r["Profiling to Outreach Tag"]||"").trim()+"\n"+String(r["Tag per SDE"]||"").trim()+"\n"+String(r["Tag 2 per SDE"]||"").trim()).trim();if(!rawTags)return;
       var campN=String(r["Campaign Name"]||"").trim();
-      // Split on "Tag: " prefix to extract individual tag values
-      var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,).trim();}).filter(Boolean);
-      
-      // Fallback: comma-separated
+      var tagList=rawTags.split(/\r\n|\n|\\r\\n|\\n/).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,"").trim();}).filter(function(t){return t&&t.length>1;});
       if(tagList.length<=1&&rawTags.indexOf(",")>-1)tagList=rawTags.split(",").map(function(t){return t.trim();}).filter(Boolean);
       // Filter out noise words
       var noise=new Set(["existing","new","tag:","tag","old","-","--"]);
@@ -5489,9 +5486,8 @@ function renderDtr(){
   var _wbsWithCalTag=new Set();
   filtered.forEach(function(r){
     var wbs=String(r["Campaign/WBS Code"]||"").trim();if(!wbs)return;
-    var rawTags=(String(r["Tag per SDE"]||"").trim()+"\n"+String(r["Tag 2 per SDE"]||"").trim()).trim();if(!rawTags)return;
-    var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,"").trim();}).filter(Boolean);
-    if(tagList.length<=1&&rawTags.indexOf(",")>-1)tagList=rawTags.split(",").map(function(t){return t.trim();}).filter(Boolean);
+    var rawTags=(String(r["Profiling to Outreach Tag"]||"").trim()+"\n"+String(r["Tag per SDE"]||"").trim()+"\n"+String(r["Tag 2 per SDE"]||"").trim()).trim();if(!rawTags)return;
+    var tagList=rawTags.split(/\r\n|\n|\\r\\n|\\n/).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,"").trim();}).filter(function(t){return t&&t.length>1;});
     var noise=new Set(["existing","new","tag:","tag","old","-","--"]);
     tagList.forEach(function(t){if(t&&!noise.has(t.toLowerCase())&&_allProsTagSet2.has(t))_wbsWithCalTag.add(wbs);});
   });
