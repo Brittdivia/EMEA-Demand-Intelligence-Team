@@ -50,7 +50,7 @@ $wb.Close($false); $excel.Quit()
 
 Write-Host "Campaigns loaded: $($campRecords.Count)"
 $campJson = $campRecords | ConvertTo-Json -Compress -Depth 3
-"window.CAMP_DATA=$campJson;" | Set-Content "$site\data-camp.js" -Encoding UTF8
+[System.IO.File]::WriteAllText("$site\data-camp.js", "window.CAMP_DATA=$campJson;", (New-Object System.Text.UTF8Encoding $false))
 $kb = [Math]::Round((Get-Item "$site\data-camp.js").Length / 1KB)
 Write-Host "data-camp.js updated - ${kb}KB"
 

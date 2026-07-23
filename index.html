@@ -5626,23 +5626,22 @@ function renderDtr(){
     html+='<button onclick="window._exportCalTagTable()" style="padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">&#11015; Export CSV</button>';
     html+='</div>';
     window._exportCalTagTable=function(){
-      var rows=[['DCM','Outreach Tag (Calendar)','Campaign','Prospect Match']];
+      var rows=[['DCM','Outreach Tag (Calendar)','Prospect Match']];
       _dcmTagRowsDtr.forEach(function(row){
-        rows.push([row.dcm,row.tag,row.camp,_allProsTagsDtr.has(row.tag)?'Match':'No Match']);
+        rows.push([row.dcm,row.tag,_allProsTagsDtr.has(row.tag)?'Match':'No Match']);
       });
       function esc(v){v=String(v||'');return v.indexOf(',')>-1||v.indexOf('"')>-1?'"'+v.replace(/"/g,'""')+'"':v;}
       var csv='﻿'+rows.map(function(r){return r.map(esc).join(',');}).join('\n');
       var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='calendar_tag_connections.csv';a.click();
     };
     html+='<div class="cc"><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
-    html+='<th style="'+thT+';width:20%">DCM</th><th style="'+thT+';width:35%">Outreach Tag (Calendar)</th><th style="'+thT+';width:30%">Campaign</th><th style="'+thT+';width:15%">Prospect Match</th></tr></thead><tbody>';
+    html+='<th style="'+thT+';width:25%">DCM</th><th style="'+thT+';width:60%">Outreach Tag (Calendar)</th><th style="'+thT+';width:15%">Prospect Match</th></tr></thead><tbody>';
     _dcmTagRowsDtr.forEach(function(row,i){
       var prosMatch=_allProsTagsDtr.has(row.tag);
       var bg=prosMatch?(i%2===0?'#f0fff4':'#e6f9ed'):(i%2===0?'#fff':'#F8FBFF');
       html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+bg+'">'
         +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+row.dcm+'</td>'
         +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+row.tag+'">'+row.tag+'</td>'
-        +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+row.camp+'">'+row.camp+'</td>'
         +'<td style="padding:5px 10px;text-align:center;font-weight:700;color:'+(prosMatch?'#0a6640':'#B0B0B0')+'">'+(prosMatch?'&#10003; Match':'&#10007;')+'</td>'
         +'</tr>';
     });
