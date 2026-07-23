@@ -4825,12 +4825,11 @@ function renderPdel(){
       if(pid&&sid&&_tagMatchPids.has(pid))filtSeqIds.add(sid);
     });
 
-    // Path 4: Calendar Outreach Tags — direct match between campData Outreach TAGS and prospect tg
+    // Path 4: Calendar Outreach Tags — direct match between campData Tag per SDE and prospect tg
     var _calTagToCamp={};  // tag -> {wbs, campName, dcm}
     (filtered||campData).forEach(function(r){
       var wbs=String(r["Campaign/WBS Code"]||"").trim();if(!wbs)return;
-      var rawTags=String(r["Outreach TAGS"]||"").trim();if(!rawTags)return;
-      var dcmDisp=normDDM1pdel(String(r["Demand Manager"]||"").trim());
+      var rawTags=(String(r["Tag per SDE"]||"").trim()+"\n"+String(r["Tag 2 per SDE"]||"").trim()).trim();if(!rawTags)return;
       var campN=String(r["Campaign Name"]||"").trim();
       // Split on "Tag: " prefix to extract individual tag values
       var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,).trim();}).filter(Boolean);
@@ -5464,8 +5463,8 @@ function renderDtr(){
     var wbs=String(r["Campaign/WBS Code"]||"").trim();
     if(wbs)dcmMap[dm.toLowerCase()].withWBS++;
     if(/^\d+$/.test(String(r["Sequence ID"]||"").trim()))dcmMap[dm.toLowerCase()].withSeq++;
-    // Has tag if Outreach TAGS is set OR WBS is in CAMP_PROF_TAGS
-    var hasTag=String(r["Outreach TAGS"]||"").trim()||(wbs&&_profTagsMap[wbs]);
+    // Has tag if Tag per SDE is set OR WBS is in CAMP_PROF_TAGS
+    var hasTag=(String(r["Tag per SDE"]||"").trim()||String(r["Tag 2 per SDE"]||"").trim())||(wbs&&_profTagsMap[wbs]);
     if(hasTag)dcmMap[dm.toLowerCase()].withTag++;
   });
   var dcmSeen={};
@@ -5484,15 +5483,14 @@ function renderDtr(){
   (window.OUT_DATA||[]).forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var sid=String(r["Sequence ID"]||"").trim();if(w&&sid)_seqToWbs2[sid]=w;});
   (campData||[]).forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var sid=String(r["Sequence ID"]||"").trim();if(w&&sid)_seqToWbs2[sid]=w;});
   (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){var sid=String(p.sid||"").trim();var w=_seqToWbs2[sid];if(w)_wbsWithProspects.add(w);});
-  // Also check calendar Outreach TAGS vs prospect tags
+  // Also check calendar Tag per SDE vs prospect tags
   var _allProsTagSet2=new Set();
   (window.PROSPECT_DATA||[]).forEach(function(p){if(!p.tg)return;String(p.tg).split(",").forEach(function(t){t=t.trim();if(t)_allProsTagSet2.add(t);});});
   var _wbsWithCalTag=new Set();
   filtered.forEach(function(r){
     var wbs=String(r["Campaign/WBS Code"]||"").trim();if(!wbs)return;
-    var rawTags=String(r["Outreach TAGS"]||"").trim();if(!rawTags)return;
-    var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,).trim();}).filter(Boolean);
-      
+    var rawTags=(String(r["Tag per SDE"]||"").trim()+"\n"+String(r["Tag 2 per SDE"]||"").trim()).trim();if(!rawTags)return;
+    var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,"").trim();}).filter(Boolean);
     if(tagList.length<=1&&rawTags.indexOf(",")>-1)tagList=rawTags.split(",").map(function(t){return t.trim();}).filter(Boolean);
     var noise=new Set(["existing","new","tag:","tag","old","-","--"]);
     tagList.forEach(function(t){if(t&&!noise.has(t.toLowerCase())&&_allProsTagSet2.has(t))_wbsWithCalTag.add(wbs);});
@@ -5656,7 +5654,7 @@ function renderDtr(){
       var dcmD=normDDM1(String(r['Demand Manager']||'').trim());if(!dcmD)return;
       // Apply DCM click filter if active
       if(_dtrDmSel&&dcmD.toLowerCase()!==_dtrDmSel)return;
-      var rawTags=String(r['Outreach TAGS']||'').trim();if(!rawTags)return;
+      var rawTags=(String(r['Tag per SDE']||'').trim()+'\n'+String(r['Tag 2 per SDE']||'').trim()).trim();if(!rawTags)return;
       var campN=String(r['Campaign Name']||'').trim();
       var tagList=rawTags.replace(/^\s*(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag):\s*/i,"").split(/\n|\n|\s+(?:New Prospects\s+)?Tag:\s*|\s+(?:Existing|New):\s*/i).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,).trim();}).filter(Boolean);
       
