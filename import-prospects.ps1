@@ -91,7 +91,7 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
 
 Write-Host "Writing $($entries.Count) prospects..."
 $js = "window.PROSPECT_DATA=[" + ($entries -join ',') + "];"
-[System.IO.File]::WriteAllText("$outDir\data-prospects.js", $js, [System.Text.Encoding]::UTF8)
+[System.IO.File]::WriteAllText("$outDir\data-prospects.js", $js, (New-Object System.Text.UTF8Encoding $false))
 Write-Host "Done: $([Math]::Round((Get-Item "$outDir\data-prospects.js").Length/1MB, 1))MB"
 
 Remove-Item $zipPath -Force
