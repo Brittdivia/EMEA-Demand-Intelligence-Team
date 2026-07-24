@@ -143,3 +143,7 @@ Write-Host "Written data-seqprospect.js ($([Math]::Round($js.Length/1KB))KB)"
 Remove-Item $zipPath -Force
 Remove-Item $extPath -Recurse -Force
 Write-Host "Done."
+
+# Also refresh data-prospects.js (tags, touch dates etc)
+Write-Host "`nRefreshing data-prospects.js..."
+& "$outDir\import-prospects.ps1"
