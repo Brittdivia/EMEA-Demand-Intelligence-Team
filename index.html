@@ -4919,7 +4919,8 @@ function renderPdel(){
       var campName=wbsToName[wbs]||(_calTag&&_calTagToCamp[_calTag]?_calTagToCamp[_calTag].campName:"")||(_profTag?wbsToName[_profTagToWbs[_profTag]||""]||"":"")||seqToCampName[sid]||"";
       var executor=wbsToExec[wbs]||(_calTag&&_calTagToCamp[_calTag]?wbsToExec[_calTagToCamp[_calTag].wbs]||"":"");
       var dcm=wbsToDcm[wbs]||(_calTag&&_calTagToCamp[_calTag]?_calTagToCamp[_calTag].dcm:"")||(_profTag?_tagToDcm[_profTag]||"":"");
-      var connType=profWbsSeq[wbs]?"WBS Code":(_tagMatchPids.has(_pid)?"Tag":(_calTag?"Calendar Tag":""));
+      var _tagHasWbs=_tagMatchPids.has(_pid)&&_profTagToWbs[_pidToProfTag[_pid]||""];
+      var connType=profWbsSeq[wbs]?"WBS Code":(_tagMatchPids.has(_pid)?(_tagHasWbs?"E2E Connection":"Profiling Tag"):(_calTag?"Calendar Tag":""));
       if(!connType)return; // skip Sequence ID connection type
       // If DCM filter active, only show rows matching that DCM
       if(filters["Demand Manager"]&&filters["Demand Manager"].size){
