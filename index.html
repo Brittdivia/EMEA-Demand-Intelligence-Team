@@ -4908,13 +4908,21 @@ function renderPdel(){
       var tag=String(m.tagOut||m.tag||"").trim();
       if(tag&&m.title&&!_tagToProfTitle[tag])_tagToProfTitle[tag]=m.title;
     });
-    // Build pid -> matching profiling tag
+    // Build pid -> matching profiling tag (from ALL profiling tags for title lookup)
+    var _allProfTags=new Set(Object.values(profMeta).map(function(m){return String(m.tagOut||m.tag||"").trim();}).filter(Boolean));
     var _pidToProfTag={};
-    (window.PROSPECT_DATA||[]).forEach(function(p){
-      if(!p.tg||!p.id)return;
-      String(p.tg).split(",").forEach(function(t){
-        t=t.trim();if(t&&_filtProfTags.has(t)&&!_pidToProfTag[p.id])_pidToProfTag[p.id]=t;
+    (window._pidTagsCache?Object.keys(window._pidTagsCache):[]).forEach(function(pid){
+      var tags=window._pidTagsCache[pid];
+      for(var i=0;i<tags.length;i++){if(_allProfTags.has(tags[i])){_pidToProfTag[pid]=tags[i];break;}}
+    });
+    if(Object.keys(_pidToProfTag).length===0){
+      (window.PROSPECT_DATA||[]).forEach(function(p){
+        if(!p.tg||!p.id)return;
+        String(p.tg).split(",").forEach(function(t){
+          t=t.trim();if(t&&_allProfTags.has(t)&&!_pidToProfTag[p.id])_pidToProfTag[p.id]=t;
+        });
       });
+    }
     });
 
     var seen={};
@@ -4931,8 +4939,9 @@ function renderPdel(){
       var campName=wbsToName[wbs]||(_calTag&&_calTagToCamp[_calTag]?_calTagToCamp[_calTag].campName:"")||(_profTag?wbsToName[_profTagToWbs[_profTag]||""]||_profTagToTitle[_profTag]||"":"")||seqToCampName[sid]||"";
       var executor=wbsToExec[wbs]||(_calTag&&_calTagToCamp[_calTag]?wbsToExec[_calTagToCamp[_calTag].wbs]||"":"");
       var dcm=wbsToDcm[wbs]||(_calTag&&_calTagToCamp[_calTag]?_calTagToCamp[_calTag].dcm:"")||(_profTag?_tagToDcm[_profTag]||"":"");
-      var _tagHasWbs=_tagMatchPids.has(_pid)&&_profTagToWbs[_pidToProfTag[_pid]||""];
-      var connType=profWbsSeq[wbs]?"WBS Code":(_tagMatchPids.has(_pid)?(_tagHasWbs?"E2E Connection":"Profiling Tag"):(_calTag?"Calendar Tag":""));
+      var _hasProfTag=!!_pidToProfTag[_pid];
+      var _tagHasWbs=_hasProfTag&&_profTagToWbs[_pidToProfTag[_pid]||""];
+      var connType=profWbsSeq[wbs]?"WBS Code":(_hasProfTag?(_tagHasWbs?"E2E Connection":"Profiling Tag"):(_calTag?"Calendar Tag":""));
       if(!connType)return; // skip Sequence ID connection type
       // If DCM filter active, only show rows matching that DCM
       if(filters["Demand Manager"]&&filters["Demand Manager"].size){
