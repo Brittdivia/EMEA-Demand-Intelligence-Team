@@ -1,4 +1,4 @@
-# import-seqstates.ps1
+﻿# import-seqstates.ps1
 # Reads Sequence_States CSV and builds:
 #   1. window.SEQ_STATES_TAG_MAP  — tag -> [sequenceIds]
 #   2. window.SEQ_PROSPECT_FLAGS  — [{sid,pid,em,op,cl,re}] per prospect+sequence
