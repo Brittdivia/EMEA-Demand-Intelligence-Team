@@ -4704,7 +4704,7 @@ function renderPdel(){
   var html='<h2 style="color:var(--dk);margin:0 0 6px">Prospect Tracking</h2>';
   var _thDPdel="background:#00144A;color:#fff;padding:5px 6px;font-size:10px;font-weight:700;text-align:left;position:sticky;top:0;white-space:normal;word-break:break-word;max-width:80px";
   if(!window.pdelFilter)window.pdelFilter={};
-  if(!window._pdelTouchedDefaulted){window._pdelTouchedDefaulted=true;if(!window.pdelFilter.touched)window.pdelFilter.touched="no";}
+  if(!window._pdelTouchedDefaulted){window._pdelTouchedDefaulted=true;}
   var pf=window.pdelFilter||{};
   html+='<div style="margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:12px">';
   html+='<span style="font-size:10px;color:var(--mu);font-style:italic;margin-right:4px">Auto-applied: <span style="background:#C87000;color:#fff;border-radius:3px;padding:0 4px;font-size:9px;font-weight:700;font-style:normal">auto</span></span>';
@@ -4985,7 +4985,7 @@ function renderPdel(){
     // Apply all filters
     if(pf.campWBS){rows=rows.filter(function(r){return r.wbs===pf.campWBS;});}
     if(pf.ct||pf.src||pf.executor||pf.persona||pf.touched||pf.connType||pf.cf51||pf.thirdParty||pf.eid){rows=rows.filter(function(r){
-      return(!pf.ct||r.ct===pf.ct)&&(!pf.src||(pf.src==="(Blank)"?!r.src:pf.src==="Not Blank"?!!r.src:r.src===pf.src))&&(!pf.executor||r.executor===pf.executor)&&(!pf.persona||r.persona===pf.persona)&&(!pf.touched||(pf.touched==="no"?(!r.touched||r.touched===""||r.touched==="1970-01-01"||!String(r.touched).startsWith("2026")):r.touchedStatus===pf.touched))&&(!pf.connType||r.connType===pf.connType)&&(!pf.cf51||r.cf51.split(",").map(function(v){return v.trim();}).indexOf(pf.cf51)>-1)&&(!pf.thirdParty||(pf.thirdParty==="3rd Party"?r.thirdParty==="3rd Party":r.thirdParty!=="3rd Party"))&&(!pf.eid||(pf.eid==="blank"?!r.eid:!!r.eid));
+      return(!pf.ct||r.ct===pf.ct)&&(!pf.src||(pf.src==="(Blank)"?!r.src:pf.src==="Not Blank"?!!r.src:r.src===pf.src))&&(!pf.executor||r.executor===pf.executor)&&(!pf.persona||r.persona===pf.persona)&&(!pf.touched||(pf.touched==="no"?r.touchedStatus==="no":r.touchedStatus===pf.touched))&&(!pf.connType||r.connType===pf.connType)&&(!pf.cf51||r.cf51.split(",").map(function(v){return v.trim();}).indexOf(pf.cf51)>-1)&&(!pf.thirdParty||(pf.thirdParty==="3rd Party"?r.thirdParty==="3rd Party":r.thirdParty!=="3rd Party"))&&(!pf.eid||(pf.eid==="blank"?!r.eid:!!r.eid));
     });}
 
     // Store full filtered rows for export
