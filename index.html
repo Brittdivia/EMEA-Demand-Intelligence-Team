@@ -4810,12 +4810,17 @@ function renderPdel(){
     var _filtDMs=new Set((filtered||campData).map(function(r){return String(r["Demand Manager"]||"").trim().toLowerCase();}).filter(Boolean));
     function normDDM1pdel(d){var p=String(d||"").split(",");if(p.length<2)return String(d||"").trim();var first=p[1].trim();var last=p[0].trim().split(/\s+/)[0];return first+" "+last;}
     var _filtProfTags=new Set();
-    var _tagToDcm={};  // tag -> DCM display name
+    var _tagToDcm={};
+    var _profTagToWbs={};
     Object.values(profMeta).forEach(function(m){
       var dmNorm=normDDM1pdel(String(m.ddm1||"").trim()).toLowerCase();
       if(!_filtDMs.has(dmNorm))return;
       var tag=String(m.tagOut||m.tag||"").trim();
-      if(tag){_filtProfTags.add(tag);if(!_tagToDcm[tag])_tagToDcm[tag]=normDDM1pdel(String(m.ddm1||"").trim());}
+      if(tag){
+        _filtProfTags.add(tag);
+        if(!_tagToDcm[tag])_tagToDcm[tag]=normDDM1pdel(String(m.ddm1||"").trim());
+        if(!_profTagToWbs[tag]&&m.wbs&&/^CRM-/i.test(String(m.wbs).trim()))_profTagToWbs[tag]=String(m.wbs).trim();
+      }
     });
     // Build pid->tags lookup (cached globally, filter-independent)
     if(!window._pidTagsCache){
@@ -4911,7 +4916,7 @@ function renderPdel(){
       var _pid=String(p.pid||"").trim();
       var _profTag=_pidToProfTag[_pid]||"";
       var _calTag=_pidToCalTag[_pid]||"";
-      var campName=wbsToName[wbs]||(_calTag&&_calTagToCamp[_calTag]?_calTagToCamp[_calTag].campName:"")||seqToCampName[sid]||"";
+      var campName=wbsToName[wbs]||(_calTag&&_calTagToCamp[_calTag]?_calTagToCamp[_calTag].campName:"")||(_profTag?wbsToName[_profTagToWbs[_profTag]||""]||"":"")||seqToCampName[sid]||"";
       var executor=wbsToExec[wbs]||(_calTag&&_calTagToCamp[_calTag]?wbsToExec[_calTagToCamp[_calTag].wbs]||"":"");
       var dcm=wbsToDcm[wbs]||(_calTag&&_calTagToCamp[_calTag]?_calTagToCamp[_calTag].dcm:"")||(_profTag?_tagToDcm[_profTag]||"":"");
       var connType=profWbsSeq[wbs]?"WBS Code":(_tagMatchPids.has(_pid)?"Tag":(_calTag?"Calendar Tag":""));
