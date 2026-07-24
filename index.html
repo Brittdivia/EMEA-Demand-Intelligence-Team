@@ -755,6 +755,7 @@ function syncDrmBtn(){
 }
 
 function applyFilters(){
+  window._calTagToCampCache=null;window._pidToCalTagCache=null;window._tagMatchPidsCache=null;
   filtered=campData.filter(function(r){
     if(srchQ){var q=srchQ.toLowerCase();if(String(r["Campaign Name"]||"").toLowerCase().indexOf(q)<0&&String(r["Campaign No"]||"").toLowerCase().indexOf(q)<0)return false;}
     for(var k in filters){if(!filters[k].size)continue;if(!matchF(String(r[k]||""),filters[k]))return false;}
@@ -4810,14 +4811,18 @@ function renderPdel(){
       var tag=String(m.tagOut||m.tag||"").trim();
       if(tag){_filtProfTags.add(tag);if(!_tagToDcm[tag])_tagToDcm[tag]=normDDM1pdel(String(m.ddm1||"").trim());}
     });
-    // Build pid->tags from PROSPECT_DATA, collect pids that match a profiling tag
-    var _tagMatchPids=new Set();
-    (window.PROSPECT_DATA||[]).forEach(function(p){
-      if(!p.tg)return;
-      String(p.tg).split(",").forEach(function(t){
-        t=t.trim();if(t&&_filtProfTags.has(t)&&p.id)_tagMatchPids.add(String(p.id).trim());
+    // Build pid->tags from PROSPECT_DATA, collect pids that match a profiling tag (cached)
+    var _tagMatchPids=window._tagMatchPidsCache;
+    if(!_tagMatchPids){
+      _tagMatchPids=new Set();
+      (window.PROSPECT_DATA||[]).forEach(function(p){
+        if(!p.tg)return;
+        String(p.tg).split(",").forEach(function(t){
+          t=t.trim();if(t&&_filtProfTags.has(t)&&p.id)_tagMatchPids.add(String(p.id).trim());
+        });
       });
-    });
+      window._tagMatchPidsCache=_tagMatchPids;
+    }
     // Find sequence IDs for those pids via SEQ_PROSPECT_DATA
     (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){
       var pid=String(p.pid||"").trim();
@@ -4825,29 +4830,31 @@ function renderPdel(){
       if(pid&&sid&&_tagMatchPids.has(pid))filtSeqIds.add(sid);
     });
 
-    // Path 4: Calendar Outreach Tags — direct match between campData Tag per SDE and prospect tg
-    var _calTagToCamp={};  // tag -> {wbs, campName, dcm}
-    (filtered||campData).forEach(function(r){
-      var wbs=String(r["Campaign/WBS Code"]||"").trim();if(!wbs)return;
-      var rawTags=(String(r["Profiling to Outreach Tag"]||"").trim()+"\n"+String(r["Tag per SDE"]||"").trim()+"\n"+String(r["Tag 2 per SDE"]||"").trim()).trim();if(!rawTags)return;
-      var campN=String(r["Campaign Name"]||"").trim();
-      var tagList=rawTags.split(/\r\n|\n|\\r\\n|\\n/).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,"").trim();}).filter(function(t){return t&&t.length>1;});
-      if(tagList.length<=1&&rawTags.indexOf(",")>-1)tagList=rawTags.split(",").map(function(t){return t.trim();}).filter(Boolean);
-      // Filter out noise words
-      var noise=new Set(["existing","new","tag:","tag","old","-","--"]);
-      tagList.forEach(function(t){
-        if(!t||noise.has(t.toLowerCase()))return;
-        if(!_calTagToCamp[t])_calTagToCamp[t]={wbs:wbs,campName:campN,dcm:dcmDisp};
+    // Path 4: Calendar Outreach Tags — cache on first build
+    var _calTagToCamp=window._calTagToCampCache||{};
+    var _pidToCalTag=window._pidToCalTagCache||{};
+    if(!window._calTagToCampCache){
+      (filtered||campData).forEach(function(r){
+        var wbs=String(r["Campaign/WBS Code"]||"").trim();if(!wbs)return;
+        var rawTags=(String(r["Profiling to Outreach Tag"]||"").trim()+"\n"+String(r["Tag per SDE"]||"").trim()+"\n"+String(r["Tag 2 per SDE"]||"").trim()).trim();if(!rawTags)return;
+        var campN=String(r["Campaign Name"]||"").trim();
+        var dcmDisp=String(r["Demand Manager"]||"").trim();
+        var tagList=rawTags.split('\\r\\n').join('\n').split('\\n').join('\n').split('\n').map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,"").trim();}).filter(function(t){return t&&t.length>1;});
+        var noise=new Set(["existing","new","tag:","tag","old","-","--"]);
+        tagList.forEach(function(t){
+          if(!t||noise.has(t.toLowerCase()))return;
+          if(!_calTagToCamp[t])_calTagToCamp[t]={wbs:wbs,campName:campN,dcm:dcmDisp};
+        });
       });
-    });
-    // Build pid->calTag map from PROSPECT_DATA
-    var _pidToCalTag={};
-    (window.PROSPECT_DATA||[]).forEach(function(p){
-      if(!p.tg||!p.id)return;
-      String(p.tg).split(",").forEach(function(t){
-        t=t.trim();if(t&&_calTagToCamp[t]&&!_pidToCalTag[p.id])_pidToCalTag[p.id]=t;
+      window._calTagToCampCache=_calTagToCamp;
+      (window.PROSPECT_DATA||[]).forEach(function(p){
+        if(!p.tg||!p.id)return;
+        String(p.tg).split(",").forEach(function(t){
+          t=t.trim();if(t&&_calTagToCamp[t]&&!_pidToCalTag[p.id])_pidToCalTag[p.id]=t;
+        });
       });
-    });
+      window._pidToCalTagCache=_pidToCalTag;
+    }
     // Add sequence IDs for calendar-tag matched pids
     (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){
       var pid=String(p.pid||"").trim();
