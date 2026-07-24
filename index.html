@@ -4767,12 +4767,12 @@ function renderPdel(){
       var w=String(r["Campaign/WBS Code"]||"").trim();if(!w)return;
       if(r["Sequence ID"]){var sid=String(r["Sequence ID"]).trim();if(sid&&!wbsToSeq[w])wbsToSeq[w]=sid;}
       if(!wbsToName[w])wbsToName[w]=String(r["Campaign Name"]||"").trim();
-      if(!wbsToExec[w])wbsToExec[w]=String(r["Executor"]||"").trim();
+      if(!wbsToExec[w])wbsToExec[w]=String(r["Executor1"]||r["Executor"]||"").trim();
       if(!wbsToDcm[w])wbsToDcm[w]=String(r["Demand Manager"]||"").trim();
       var sid=String(r["Sequence ID"]||"").trim();
       if(sid&&!wbsToSeq[w])wbsToSeq[w]=sid;
       if(!wbsToName[w])wbsToName[w]=String(r["Campaign Name"]||"").trim();
-      if(!wbsToExec[w])wbsToExec[w]=String(r["Executor"]||"").trim();
+      if(!wbsToExec[w])wbsToExec[w]=String(r["Executor1"]||r["Executor"]||"").trim();
     });
     var filtWBS=new Set((filtered||campData).map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
 
