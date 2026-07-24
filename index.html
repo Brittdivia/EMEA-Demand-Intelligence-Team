@@ -4909,9 +4909,9 @@ function renderPdel(){
       var _pid=String(p.pid||"").trim();
       var _profTag=_pidToProfTag[_pid]||"";
       var _calTag=_pidToCalTag[_pid]||"";
-      var campName=wbsToName[wbs]||seqToCampName[sid]||"";
-      var executor=wbsToExec[wbs]||"";
-      var dcm=wbsToDcm[wbs]||(_profTag?_tagToDcm[_profTag]||"":"")|| (_calTag?_calTagToCamp[_calTag]&&_calTagToCamp[_calTag].dcm||"":"");
+      var campName=wbsToName[wbs]||(_calTag&&_calTagToCamp[_calTag]?_calTagToCamp[_calTag].campName:"")||seqToCampName[sid]||"";
+      var executor=wbsToExec[wbs]||(_calTag&&_calTagToCamp[_calTag]?wbsToExec[_calTagToCamp[_calTag].wbs]||"":"");
+      var dcm=wbsToDcm[wbs]||(_calTag&&_calTagToCamp[_calTag]?_calTagToCamp[_calTag].dcm:"")||(_profTag?_tagToDcm[_profTag]||"":"");
       var connType=profWbsSeq[wbs]?"WBS Code":(_tagMatchPids.has(_pid)?"Tag":(_calTag?"Calendar Tag":""));
       if(!connType)return; // skip Sequence ID connection type
       // If DCM filter active, only show rows matching that DCM
