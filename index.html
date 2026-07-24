@@ -4811,18 +4811,14 @@ function renderPdel(){
       var tag=String(m.tagOut||m.tag||"").trim();
       if(tag){_filtProfTags.add(tag);if(!_tagToDcm[tag])_tagToDcm[tag]=normDDM1pdel(String(m.ddm1||"").trim());}
     });
-    // Build pid->tags from PROSPECT_DATA, collect pids that match a profiling tag (cached)
-    var _tagMatchPids=window._tagMatchPidsCache;
-    if(!_tagMatchPids){
-      _tagMatchPids=new Set();
-      (window.PROSPECT_DATA||[]).forEach(function(p){
-        if(!p.tg)return;
-        String(p.tg).split(",").forEach(function(t){
-          t=t.trim();if(t&&_filtProfTags.has(t)&&p.id)_tagMatchPids.add(String(p.id).trim());
-        });
+    // Build pid->tags from PROSPECT_DATA, collect pids that match a profiling tag
+    var _tagMatchPids=new Set();
+    (window.PROSPECT_DATA||[]).forEach(function(p){
+      if(!p.tg)return;
+      String(p.tg).split(",").forEach(function(t){
+        t=t.trim();if(t&&_filtProfTags.has(t)&&p.id)_tagMatchPids.add(String(p.id).trim());
       });
-      window._tagMatchPidsCache=_tagMatchPids;
-    }
+    });
     // Find sequence IDs for those pids via SEQ_PROSPECT_DATA
     (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){
       var pid=String(p.pid||"").trim();
