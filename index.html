@@ -4190,6 +4190,16 @@ function renderOutInner(page){
   var campSource=filtered.length>0?filtered:campData;
   var filtWBS=new Set(campSource.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
   var allData=outData.filter(function(r){return filtWBS.has(String(r["Campaign/WBS Code"]||"").trim());});
+  // Add calendar sequences not in outData (with blank stats)
+  var _outDataSids=new Set(allData.map(function(r){return String(r["Sequence ID"]||"").trim();}));
+  campSource.forEach(function(r){
+    var wbs=String(r["Campaign/WBS Code"]||"").trim();if(!wbs)return;
+    String(r["Sequence ID"]||"").split(",").forEach(function(sid){
+      sid=sid.trim();if(!sid||_outDataSids.has(sid))return;
+      _outDataSids.add(sid);
+      allData.push({"Campaign/WBS Code":wbs,"Sequence ID":sid,"Sequence Name":String(r["Campaign Name"]||"").trim(),"Region Name (level 2)":String(r["Region Name (level 2)"]||"").trim(),"Prospects - Total":"0","Prospects - Delivered":"0","Prospects - Opened":"0","Prospects - Replied":"0","Emails - Deliveries":"0","Emails - Opens":"0","Emails - Replies":"0"});
+    });
+  });
 
   // Build WBS->profiling tag maps from CAMP_PROF_META
   var _wbsToTagOut={},_wbsToTagPros={};
