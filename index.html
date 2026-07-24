@@ -372,6 +372,8 @@ document.addEventListener("DOMContentLoaded",function(){
   applyFilters();
   buildFbar();buildWbar();FD.forEach(function(f){syncBtn(f.k);});syncDrmBtn();syncEurBtn();syncCab();updateTags();
   renderBud();
+  // Re-render Coverage Overview after PROSPECT_DATA is loaded (158MB takes time to parse)
+  setTimeout(function(){if(activeTab==="bud"){window._allProsTagSet2Cache=null;renderBud();}},3000);
   document.addEventListener("click",function(e){if(!e.target.closest(".fbi"))closeAllDD();if(!e.target.closest("#details-nav"))closeDetailsNav();});;
   }catch(e){document.getElementById("budPage").innerHTML='<div class="ap"><div class="nr"><p><b>Init Error:</b> '+e.message+'</p></div></div>';console.error("Init error:",e);}
 });
@@ -757,7 +759,7 @@ function syncDrmBtn(){
 }
 
 function applyFilters(){
-  window._calTagToCampCache=null;window._pidToCalTagCache=null;window._tagMatchPidsCache=null;
+  window._calTagToCampCache=null;window._pidToCalTagCache=null;window._tagMatchPidsCache=null;window._allProsTagSet2Cache=null;
   filtered=campData.filter(function(r){
     if(srchQ){var q=srchQ.toLowerCase();if(String(r["Campaign Name"]||"").toLowerCase().indexOf(q)<0&&String(r["Campaign No"]||"").toLowerCase().indexOf(q)<0)return false;}
     for(var k in filters){if(!filters[k].size)continue;if(!matchF(String(r[k]||""),filters[k]))return false;}
@@ -5133,14 +5135,12 @@ function renderPdel(){
     var _pdelUniqCamps=new Set(rows.map(function(r){return r.campName;}).filter(Boolean)).size;
     var tbl="";
     tbl+="<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px'>";
-    tbl+="<div class='sec' style='margin-bottom:0'>Details</div>";
-    tbl+="<div style='display:flex;align-items:center;gap:8px'>";
     tbl+="<span style='font-size:11px;color:var(--mu)'>"+displayRows.length.toLocaleString()+" prospects"+(pf.cf51?" ("+_connPids.size+" connected)":"")+"</span>";
     tbl+="<button onclick='window._pdelPrevPage()' style='padding:2px 8px;font-size:11px;cursor:pointer;border:1px solid var(--bd);border-radius:var(--r)'>&#8592;</button>";
     tbl+="<span id='pdel-pg-info' style='font-size:11px'>Page 1 of "+_pdelTotalPages+"</span>";
     tbl+="<button onclick='window._pdelNextPage()' style='padding:2px 8px;font-size:11px;cursor:pointer;border:1px solid var(--bd);border-radius:var(--r)'>&#8594;</button>";
     tbl+="<button onclick=\"window._exportPdel()\" style='padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer'>&#11015; Export CSV</button>";
-    tbl+="</div></div>";
+    tbl+="</div>";
     tbl+="<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:10px;table-layout:fixed' id='pdel-detail-tbl'><thead><tr>";
     var thS="background:#00144A;color:#fff;padding:4px 6px;font-size:10px;font-weight:700;white-space:nowrap;position:sticky;top:0";
     _pdelCols.forEach(function(h){tbl+="<th style='"+thS+"'>"+h+"</th>";});
@@ -5535,8 +5535,11 @@ function renderDtr(){
   (campData||[]).forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var sid=String(r["Sequence ID"]||"").trim();if(w&&sid)_seqToWbs2[sid]=w;});
   (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){var sid=String(p.sid||"").trim();var w=_seqToWbs2[sid];if(w)_wbsWithProspects.add(w);});
   // Also check calendar Tag per SDE vs prospect tags
-  var _allProsTagSet2=new Set();
-  (window.PROSPECT_DATA||[]).forEach(function(p){if(!p.tg)return;String(p.tg).split(",").forEach(function(t){t=t.trim();if(t)_allProsTagSet2.add(t);});});
+  if(!window._allProsTagSet2Cache){
+    window._allProsTagSet2Cache=new Set();
+    (window.PROSPECT_DATA||[]).forEach(function(p){if(!p.tg)return;String(p.tg).split(",").forEach(function(t){t=t.trim();if(t)window._allProsTagSet2Cache.add(t);});});
+  }
+  var _allProsTagSet2=window._allProsTagSet2Cache;
   var _wbsWithCalTag=new Set();
   filtered.forEach(function(r){
     var wbs=String(r["Campaign/WBS Code"]||"").trim();if(!wbs)return;
