@@ -3013,7 +3013,7 @@ if(pageId!=="ovwPage"){html3+="<div class=\"cc\" style=\"margin-bottom:28px;widt
     _calTotPipe+=_rPipe;_calTotAccts+=_rAccts;
     html3+="<tr style=\"border-bottom:1px solid #EBEBEB\">"
       +"<td style=\"padding:6px 10px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-right:1px solid #F0F0F0\" title=\""+(r["Campaign Name"]||"").replace(/"/g,"&quot;")+"\">"+(r["Campaign Name"]||"")+"</td>"
-      +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+(r["Executor"]||"")+"</td>"
+      +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+(r["Executor1"]||r["Executor"]||"")+"</td>"
       +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+(r["Campaign Origin"]||"")+"</td>"
       +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+(r["Sales Bag"]||"")+"</td>"
       +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+(r["IAC"]||"")+"</td>"
@@ -4232,7 +4232,7 @@ function renderOutInner(page){
     if(filters["Sales Bag"]&&filters["Sales Bag"].size>0){var rSB=String(r["Sales Bag"]||"").trim();if(!filters["Sales Bag"].has(rSB))return false;}
     if(filters["IAC"]&&filters["IAC"].size>0){var rIAC=String(r["IAC"]||"").trim();if(!filters["IAC"].has(rIAC))return false;}
     if(filters["SoD"]&&filters["SoD"].size>0){var rSoD=String(r["SoD"]||"").trim();if(!filters["SoD"].has(rSoD))return false;}
-    if(filters["Executor"]&&filters["Executor"].size>0){var rExec=String(r["Executor"]||"").trim();var execMatch=false;filters["Executor"].forEach(function(ex){if(rExec.indexOf(ex)>-1)execMatch=true;});if(!execMatch)return false;}
+    if(filters["Executor"]&&filters["Executor"].size>0){var rExec=String(r["Executor1"]||r["Executor"]||"").trim();var execMatch=false;filters["Executor"].forEach(function(ex){if(rExec.indexOf(ex)>-1)execMatch=true;});if(!execMatch)return false;}
     if(filters["DG Program"]&&filters["DG Program"].size>0){var rDG=String(r["DG Program"]||"").trim();if(!filters["DG Program"].has(rDG))return false;}
     if(filters["Digital Assets team support"]&&filters["Digital Assets team support"].size>0){var rDAT=String(r["Digital Assets team support"]||"").trim();if(!filters["Digital Assets team support"].has(rDAT))return false;}
     if(window.outFilter.sb){if(String(r["Sales Bag"]||"").split(",").map(function(s){return s.trim();}).indexOf(window.outFilter.sb)<0)return false;}
@@ -4706,22 +4706,28 @@ function renderPdel(){
   var html='<h2 style="color:var(--dk);margin:0 0 6px">Prospect Tracking</h2>';
   var _thDPdel="background:#00144A;color:#fff;padding:5px 6px;font-size:10px;font-weight:700;text-align:left;position:sticky;top:0;white-space:normal;word-break:break-word;max-width:80px";
   if(!window.pdelFilter)window.pdelFilter={};
-  if(!window._pdelTouchedDefaulted){window._pdelTouchedDefaulted=true;}
+  if(!window._pdelAgeDefaulted){
+    window._pdelAgeDefaulted=true;
+    if(!window.pdelFilter.age)window.pdelFilter.age='30';
+    if(!window.pdelFilter.thirdParty)window.pdelFilter.thirdParty='3rd Party';
+    if(!window.pdelFilter.eid)window.pdelFilter.eid='notblank';
+  }
   var pf=window.pdelFilter||{};
   html+='<div style="margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:12px">';
   html+='<span style="font-size:10px;color:var(--mu);font-style:italic;margin-right:4px">Auto-applied: <span style="background:#C87000;color:#fff;border-radius:3px;padding:0 4px;font-size:9px;font-weight:700;font-style:normal">auto</span></span>';
+  var _autoBadge=' <span style="font-size:8px;background:#C87000;color:#fff;border-radius:3px;padding:0 3px;font-weight:700;vertical-align:middle">auto</span>';
   // Age filter
-  var ageOpts={"":"All",25:"25+ days",50:"50+ days",100:"100+ days"};
+  var ageOpts={"":"All",30:"30+ days",50:"50+ days",100:"100+ days"};
   var ageLbl=pf.age?ageOpts[pf.age]||pf.age:"Age";
   var ageOn=pf.age?"on":"";
-  html+='<div class="fbi" id="pdel-age-fbi"><button class="fbtn '+ageOn+'" onclick="(function(el){var dd=el.nextElementSibling;var was=dd.classList.contains(\'on\');document.querySelectorAll(\'.fdd.on\').forEach(function(d){d.classList.remove(\'on\');});if(!was)dd.classList.add(\'on\');})(this)">'+ageLbl+' <span style="font-size:9px;opacity:.55">&#9660;</span></button>'
+  html+='<div class="fbi" id="pdel-age-fbi"><button class="fbtn '+ageOn+'" onclick="(function(el){var dd=el.nextElementSibling;var was=dd.classList.contains(\'on\');document.querySelectorAll(\'.fdd.on\').forEach(function(d){d.classList.remove(\'on\');});if(!was)dd.classList.add(\'on\');})(this)">'+ageLbl+(pf.age==='30'?_autoBadge:'')+' <span style="font-size:9px;opacity:.55">&#9660;</span></button>'
     +'<div class="fdd"><div class="fdh"><span class="fdt">Age</span><button class="fdc" onclick="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.age=\'\';renderPdel()">Clear</button></div><div class="fdo">'
-    +['','25','50','100'].map(function(v){return'<label class="dopt"><input type="radio" name="pdel-age" '+(String(pf.age||'')==v?'checked':'')+' onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.age=\''+v+'\';renderPdel()"/><span class="ot">'+(ageOpts[v]||'All')+'</span></label>';}).join('')
+    +['','30','50','100'].map(function(v){return'<label class="dopt"><input type="radio" name="pdel-age" '+(String(pf.age||'')==v?'checked':'')+' onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.age=\''+v+'\';renderPdel()"/><span class="ot">'+(ageOpts[v]||'All')+'</span></label>';}).join('')
     +'</div></div></div>';
   // External ID filter
   var eidLbl=pf.eid?"External ID: "+(pf.eid==="blank"?"Blank":"Not Blank"):"External ID";
   var eidOn=pf.eid?"on":"";
-  html+='<div class="fbi"><button class="fbtn '+eidOn+'" onclick="(function(el){var dd=el.nextElementSibling;var was=dd.classList.contains(\'on\');document.querySelectorAll(\'.fdd.on\').forEach(function(d){d.classList.remove(\'on\');});if(!was)dd.classList.add(\'on\');})(this)">'+eidLbl+' <span style="font-size:9px;opacity:.55">&#9660;</span></button>'
+  html+='<div class="fbi"><button class="fbtn '+eidOn+'" onclick="(function(el){var dd=el.nextElementSibling;var was=dd.classList.contains(\'on\');document.querySelectorAll(\'.fdd.on\').forEach(function(d){d.classList.remove(\'on\');});if(!was)dd.classList.add(\'on\');})(this)">'+eidLbl+(pf.eid==='notblank'?_autoBadge:'')+' <span style="font-size:9px;opacity:.55">&#9660;</span></button>'
     +'<div class="fdd"><div class="fdh"><span class="fdt">External ID</span><button class="fdc" onclick="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.eid=\'\';renderPdel()">Clear</button></div><div class="fdo">'
     +['','blank','notblank'].map(function(v){var lbl=v===''?'All':v==='blank'?'Blank':'Not Blank';return'<label class="dopt"><input type="radio" name="pdel-eid" '+(String(pf.eid||'')==v?'checked':'')+' onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.eid=\''+v+'\';renderPdel()"/><span class="ot">'+lbl+'</span></label>';}).join('')
     +'</div></div></div>';
@@ -4745,7 +4751,7 @@ function renderPdel(){
   var tpOpts={"":"All","3rd Party":"3rd Party","not3p":"Not 3rd Party"};
   var tpLbl=pf.thirdParty?(pf.thirdParty==="3rd Party"?"3rd Party":"Not 3rd Party"):"Third Party";
   var tpOn=pf.thirdParty?"on":"";
-  html+='<div class="fbi"><button class="fbtn '+tpOn+'" onclick="(function(el){var dd=el.nextElementSibling;var was=dd.classList.contains(\'on\');document.querySelectorAll(\'.fdd.on\').forEach(function(d){d.classList.remove(\'on\');});if(!was)dd.classList.add(\'on\');})(this)">'+tpLbl+' <span style="font-size:9px;opacity:.55">&#9660;</span></button>'
+  html+='<div class="fbi"><button class="fbtn '+tpOn+'" onclick="(function(el){var dd=el.nextElementSibling;var was=dd.classList.contains(\'on\');document.querySelectorAll(\'.fdd.on\').forEach(function(d){d.classList.remove(\'on\');});if(!was)dd.classList.add(\'on\');})(this)">'+tpLbl+(pf.thirdParty==='3rd Party'?_autoBadge:'')+' <span style="font-size:9px;opacity:.55">&#9660;</span></button>'
     +'<div class="fdd"><div class="fdh"><span class="fdt">Third Party</span><button class="fdc" onclick="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.thirdParty=\'\';renderPdel()">Clear</button></div><div class="fdo">'
     +['','3rd Party','not3p'].map(function(v){return'<label class="dopt"><input type="radio" name="pdel-tp" '+(String(pf.thirdParty||'')==v?'checked':'')+' onchange="window.pdelFilter=window.pdelFilter||{};window.pdelFilter.thirdParty=\''+v+'\';renderPdel()"/><span class="ot">'+tpOpts[v]+'</span></label>';}).join('')
     +'</div></div></div>';
@@ -4813,6 +4819,12 @@ function renderPdel(){
     var _tagToDcm={};
     var _profTagToWbs={};
     var _profTagToTitle={};
+    // Build title map from ALL profiling requests (not just filtered DCMs)
+    Object.values(profMeta).forEach(function(m){
+      var tag=String(m.tagOut||m.tag||"").trim();
+      if(tag&&m.title&&!_profTagToTitle[tag])_profTagToTitle[tag]=String(m.title).trim();
+      if(tag&&m.wbs&&/^CRM-/i.test(String(m.wbs).trim())&&!_profTagToWbs[tag])_profTagToWbs[tag]=String(m.wbs).trim();
+    });
     Object.values(profMeta).forEach(function(m){
       var dmNorm=normDDM1pdel(String(m.ddm1||"").trim()).toLowerCase();
       if(!_filtDMs.has(dmNorm))return;
@@ -4820,8 +4832,6 @@ function renderPdel(){
       if(tag){
         _filtProfTags.add(tag);
         if(!_tagToDcm[tag])_tagToDcm[tag]=normDDM1pdel(String(m.ddm1||"").trim());
-        if(!_profTagToWbs[tag]&&m.wbs&&/^CRM-/i.test(String(m.wbs).trim()))_profTagToWbs[tag]=String(m.wbs).trim();
-        if(!_profTagToTitle[tag]&&m.title)_profTagToTitle[tag]=String(m.title).trim();
       }
     });
     // Build pid->tags lookup (cached globally, filter-independent)
@@ -5091,7 +5101,7 @@ function renderPdel(){
           html2+="<td style='padding:3px 5px'>"+String(r.created||"").substring(0,10)+"</td>";
           html2+="<td style='padding:5px 8px'>"+touchedDisp+"</td>";
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+additionalInsight+"</td>";
-          html2+="<td style='padding:5px 8px;text-align:right;font-weight:700"+(r.days>25?";background:#FFF9C4":"")+"'>"+r.days+"</td>";
+          html2+="<td style='padding:5px 8px;text-align:right;font-weight:700"+(r.days>30?";background:#FFF9C4":"")+"'>"+r.days+"</td>";
         }
         html2+="</tr>";
       });
