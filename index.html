@@ -4905,7 +4905,7 @@ function renderPdel(){
       var _pid=String(p.pid||"").trim();
       var _profTag=_pidToProfTag[_pid]||"";
       var _calTag=_pidToCalTag[_pid]||"";
-      var campName=seqToCampName[sid]||wbsToName[wbs]||(_profTag?_tagToProfTitle[_profTag]||"":"")||(_calTag?_calTagToCamp[_calTag]&&_calTagToCamp[_calTag].campName||"":"");
+      var campName=wbsToName[wbs]||seqToCampName[sid]||"";
       var executor=wbsToExec[wbs]||"";
       var dcm=wbsToDcm[wbs]||(_profTag?_tagToDcm[_profTag]||"":"")|| (_calTag?_calTagToCamp[_calTag]&&_calTagToCamp[_calTag].dcm||"":"");
       var connType=profWbsSeq[wbs]?"WBS Code":(_tagMatchPids.has(_pid)?"Tag":(_calTag?"Calendar Tag":""));
