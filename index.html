@@ -4812,6 +4812,7 @@ function renderPdel(){
     var _filtProfTags=new Set();
     var _tagToDcm={};
     var _profTagToWbs={};
+    var _profTagToTitle={};
     Object.values(profMeta).forEach(function(m){
       var dmNorm=normDDM1pdel(String(m.ddm1||"").trim()).toLowerCase();
       if(!_filtDMs.has(dmNorm))return;
@@ -4820,6 +4821,7 @@ function renderPdel(){
         _filtProfTags.add(tag);
         if(!_tagToDcm[tag])_tagToDcm[tag]=normDDM1pdel(String(m.ddm1||"").trim());
         if(!_profTagToWbs[tag]&&m.wbs&&/^CRM-/i.test(String(m.wbs).trim()))_profTagToWbs[tag]=String(m.wbs).trim();
+        if(!_profTagToTitle[tag]&&m.title)_profTagToTitle[tag]=String(m.title).trim();
       }
     });
     // Build pid->tags lookup (cached globally, filter-independent)
@@ -4916,7 +4918,7 @@ function renderPdel(){
       var _pid=String(p.pid||"").trim();
       var _profTag=_pidToProfTag[_pid]||"";
       var _calTag=_pidToCalTag[_pid]||"";
-      var campName=wbsToName[wbs]||(_calTag&&_calTagToCamp[_calTag]?_calTagToCamp[_calTag].campName:"")||(_profTag?wbsToName[_profTagToWbs[_profTag]||""]||"":"")||seqToCampName[sid]||"";
+      var campName=wbsToName[wbs]||(_calTag&&_calTagToCamp[_calTag]?_calTagToCamp[_calTag].campName:"")||(_profTag?wbsToName[_profTagToWbs[_profTag]||""]||_profTagToTitle[_profTag]||"":"")||seqToCampName[sid]||"";
       var executor=wbsToExec[wbs]||(_calTag&&_calTagToCamp[_calTag]?wbsToExec[_calTagToCamp[_calTag].wbs]||"":"");
       var dcm=wbsToDcm[wbs]||(_calTag&&_calTagToCamp[_calTag]?_calTagToCamp[_calTag].dcm:"")||(_profTag?_tagToDcm[_profTag]||"":"");
       var _tagHasWbs=_tagMatchPids.has(_pid)&&_profTagToWbs[_pidToProfTag[_pid]||""];
