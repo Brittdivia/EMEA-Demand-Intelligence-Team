@@ -4977,6 +4977,23 @@ function renderPdel(){
       rows.push({sid:sid,pid:p.pid,eid:pidToEid[p.pid]||"",co:p.co||"",campName:campName,wbs:wbs,connType:connType,src:p.src||"",ct:p.ct||"",cf51:p.cf51||"",days:days,created:created,touched:p.touched||"",touchedStatus:_ts,executor:executor,dcm:dcm,persona:persona,activeSeq:activeSeq,finishedSeq:finishedSeq,thirdParty:_tp});
     });
 
+    // Add Calendar Tag matched prospects from PROSPECT_DATA not already in rows
+    var _seenPids=new Set(rows.map(function(r){return r.pid;}));
+    (window.PROSPECT_DATA||[]).forEach(function(p){
+      if(!p.id||_seenPids.has(p.id))return;
+      var _calTag=_pidToCalTag[p.id]||"";if(!_calTag)return;
+      var calCamp=_calTagToCamp[_calTag]||{};
+      var created=p.created||"";
+      var days=created?Math.floor((Date.now()-new Date(created).getTime())/(1000*60*60*24)):"";
+      if(pf.age&&(days||0)<=parseInt(pf.age))return;
+      var _ts="no";
+      if(p.touched&&p.touched!=="1970-01-01"&&p.touched!==""&&String(p.touched).startsWith("2026"))_ts="yes";
+      else if(p.as)_ts="in_sequence";
+      else if(p.fs)_ts="finished_sequence";
+      var _tp=(/zoom\s*info/i.test(p.src||"")||/lead\s*genius/i.test(p.src||"")||/enginy/i.test(p.src||"")||/sales\s*navigator/i.test(p.src||"")||/data\s*hive/i.test(p.src||""))?"3rd Party":"";
+      rows.push({sid:"",pid:p.id,eid:pidToEid[p.id]||"",co:p.co||"",campName:calCamp.campName||"",wbs:calCamp.wbs||"",connType:"Calendar Tag",src:"",ct:"",cf51:"",days:days,created:created,touched:p.touched||"",touchedStatus:_ts,executor:wbsToExec[calCamp.wbs||""]||"",dcm:calCamp.dcm||"",persona:p.pn||"",activeSeq:p.as||"",finishedSeq:p.fs||"",thirdParty:_tp});
+    });
+
     rows.sort(function(a,b){return(b.days||0)-(a.days||0);});
 
     // Build and inject Company Type, Source, Executor, Persona filter dropdowns
