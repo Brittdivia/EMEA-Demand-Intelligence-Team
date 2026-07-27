@@ -4774,13 +4774,15 @@ function renderPdel(){
 
   setTimeout(function(){
     // Build pid->created and pid->persona maps from PROSPECT_DATA
-    var pidToCreated={};var pidToPersona={};var pidToActiveSeq={};var pidToFinishedSeq={};var pidToEid={};
+    var pidToCreated={};var pidToPersona={};var pidToActiveSeq={};var pidToFinishedSeq={};var pidToEid={};var pidToFn={};var pidToLn={};
     (window.PROSPECT_DATA||[]).forEach(function(p){
       if(p.id&&p.created)pidToCreated[p.id]=p.created;
       if(p.id&&p.pn)pidToPersona[p.id]=p.pn;
       if(p.id&&p.as)pidToActiveSeq[p.id]=p.as;
       if(p.id&&p.fs)pidToFinishedSeq[p.id]=p.fs;
       if(p.id&&p.eid)pidToEid[p.id]=p.eid;
+      if(p.id&&p.fn)pidToFn[p.id]=p.fn;
+      if(p.id&&p.ln)pidToLn[p.id]=p.ln;
     });
     // Build wbs->seqId and wbs->campName from campData
     var wbsToSeq={};var wbsToName={};var wbsToExec={};var wbsToDcm={};
@@ -4974,7 +4976,7 @@ function renderPdel(){
       else if(activeSeq)_ts="in_sequence";
       else if(finishedSeq)_ts="finished_sequence";
       var _tp=(/zoom\s*info/i.test(p.src||"")||/lead\s*genius/i.test(p.src||"")||/enginy/i.test(p.src||"")||/sales\s*navigator/i.test(p.src||"")||/data\s*hive/i.test(p.src||""))?"3rd Party":"";
-      rows.push({sid:sid,pid:p.pid,eid:pidToEid[p.pid]||"",co:p.co||"",campName:campName,wbs:wbs,connType:connType,src:p.src||"",ct:p.ct||"",cf51:p.cf51||"",days:days,created:created,touched:p.touched||"",touchedStatus:_ts,executor:executor,dcm:dcm,persona:persona,activeSeq:activeSeq,finishedSeq:finishedSeq,thirdParty:_tp});
+      rows.push({sid:sid,pid:p.pid,eid:pidToEid[p.pid]||"",fn:pidToFn[p.pid]||"",ln:pidToLn[p.pid]||"",co:p.co||"",campName:campName,wbs:wbs,connType:connType,src:p.src||"",ct:p.ct||"",cf51:p.cf51||"",days:days,created:created,touched:p.touched||"",touchedStatus:_ts,executor:executor,dcm:dcm,persona:persona,activeSeq:activeSeq,finishedSeq:finishedSeq,thirdParty:_tp});
     });
 
     // Add Calendar Tag matched prospects from PROSPECT_DATA not already in rows
@@ -5103,6 +5105,8 @@ function renderPdel(){
           html2+="<td style='padding:5px 8px;font-weight:600;color:"+(r.connected?"#1B7A34":"#B0B0B0")+"'>"+(r.connected?"Yes":"No")+"</td>";
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+r.pid+"</td>";
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+(r.eid||"")+"</td>";
+          html2+="<td style='padding:5px 8px'>"+(r.fn||"")+"</td>";
+          html2+="<td style='padding:5px 8px'>"+(r.ln||"")+"</td>";
           html2+="<td style='padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+r.co+"</td>";
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+country+"</td>";
           html2+="<td style='padding:3px 5px;white-space:nowrap'>"+(r.dcm||"")+"</td>";
@@ -5129,6 +5133,8 @@ function renderPdel(){
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+country+"</td>";
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+r.pid+"</td>";
           html2+="<td style='padding:5px 8px;color:var(--mu)'>"+(r.eid||"")+"</td>";
+          html2+="<td style='padding:5px 8px'>"+(r.fn||"")+"</td>";
+          html2+="<td style='padding:5px 8px'>"+(r.ln||"")+"</td>";
           html2+="<td style='padding:5px 8px'>"+r.connType+"</td>";
           html2+="<td style='padding:5px 8px'>"+r.src+"</td>";
           html2+="<td style='padding:5px 8px'>"+r.thirdParty+"</td>";
@@ -5147,8 +5153,8 @@ function renderPdel(){
       var pgEl=document.getElementById("pdel-pg-info");if(pgEl)pgEl.textContent="Page "+(pg+1)+" of "+Math.ceil(window._pdelDisplayRows.length/ps);
     };
     var _pdelCols=pf.cf51?
-      ["Connected","Prospect ID","External ID","Company","Country","DCM","Campaign Name","Seq. ID","Connection","Source","Third Party","Company Type","Custom Field 51","Executor","Created","Touched","Additional Insight","Age (days)"]:
-      ["DCM","Campaign Name","Seq. ID","Company","Country","Prospect ID","External ID","Connection","Source","Third Party","Company Type","Custom Field 51","Executor","Persona Name","Created","Touched","Additional Insight","Age (days)"];
+      ["Connected","Prospect ID","External ID","First Name","Last Name","Company","Country","DCM","Campaign Name","Seq. ID","Connection","Source","Third Party","Company Type","Custom Field 51","Executor","Created","Touched","Additional Insight","Age (days)"]:
+      ["DCM","Campaign Name","Seq. ID","Company","Country","Prospect ID","External ID","First Name","Last Name","Connection","Source","Third Party","Company Type","Custom Field 51","Executor","Persona Name","Created","Touched","Additional Insight","Age (days)"];
     var _pdelUniqCamps=new Set(rows.map(function(r){return r.campName;}).filter(Boolean)).size;
     var tbl="";
     tbl+="<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px'>";
