@@ -217,7 +217,7 @@ window.addEventListener('beforeprint',function(){
 });
 window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});</script>
 <script src="data-camp.js?v=20260723"></script>
-<script src="data-pipe.js?v=20260723b"></script>
+<script src="data-pipe.js?v=20260727"></script>
 <script src="data-out.js?v=20260723"></script>
 <script src="data-seqco.js?v=20260619"></script>
 <script src="data-prospects.js?v=20260623j"></script>
@@ -237,7 +237,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
   <div class="ht">EMEA Demand Generation</div>
   <div class="hsp"></div>
   <div class="hm">
-    <span class="hu">Last updated: 20 Jul 2026</span>
+    <span class="hu">Last updated: 07 Jul 2026</span>
     <span class="hc" id="hcount">2,798 campaigns</span>
   </div>
 </header>
@@ -2668,7 +2668,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
 
 
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+fmtE(targetPipe/1000)+"</div><div class=\"ks\">from campaign calendar</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 29 &middot; 20 Jul 2026</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 30 &middot; 07 Jul 2026</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">2026 Pipeline Share</div><div class=\"kv\">"+camp2026Pct+"</div><div class=\"ks\">campaign-linked vs all 2026</div></div>";
 
@@ -2712,7 +2712,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+fmtE(targetPipe/1000)+"</div><div class=\"ks\">from campaign calendar</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
     html3+="<div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px;margin-left:8px\">Results</div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 29 &middot; 20 Jul 2026</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 30 &middot; 07 Jul 2026</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Distinct Opps Created</div><div class=\"kv\">"+totOpps.toLocaleString()+"</div><div class=\"ks\">connected to WBS/Campaign code</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Won+Live Pipeline</div><div class=\"kv\">"+qualOppRate+"</div><div class=\"ks\">"+qualOppsSet.size.toLocaleString()+" opps &middot; Won+Live / Total</div></div>";
     var hodEur=pr.filter(function(p){return hasHod(p["SDE Handover Date"]);}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);var hodPct=totEur>0?(hodEur/totEur*100).toFixed(0)+"%":"0%";
@@ -2976,7 +2976,7 @@ if(pageId!=="ovwPage"){html3+="<div class=\"cc\" style=\"margin-bottom:28px;widt
   html3+="</div>";
     
   }
-   html3+="<details style=\"margin-bottom:28px\"><summary style=\"cursor:pointer;font-size:13px;font-weight:700;color:var(--dk);padding:6px 0;list-style:none;display:flex;align-items:center;gap:6px\"><span style=\"font-size:10px\">&#9654;</span> Pipeline Detail - Week 29 <span style=\"font-size:11px;font-weight:400;color:var(--mu)\">("+pdet.length.toLocaleString()+" rows)</span></summary>";
+   html3+="<details style=\"margin-bottom:28px\"><summary style=\"cursor:pointer;font-size:13px;font-weight:700;color:var(--dk);padding:6px 0;list-style:none;display:flex;align-items:center;gap:6px\"><span style=\"font-size:10px\">&#9654;</span> Pipeline Detail - Week 30 <span style=\"font-size:11px;font-weight:400;color:var(--mu)\">("+pdet.length.toLocaleString()+" rows)</span></summary>";
   html3+="<div class=\"cc\" style=\"margin-bottom:0\"><style>details[open] summary span:first-child{transform:rotate(90deg);display:inline-block;}</style>";
   html3+="<div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between\">";
   html3+="<span>"+pdet.length.toLocaleString()+" rows &middot; "+totOpps.toLocaleString()+" distinct opps</span>";
