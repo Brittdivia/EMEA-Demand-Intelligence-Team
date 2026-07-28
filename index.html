@@ -4716,7 +4716,7 @@ function renderOutInner(page){
 function renderPdel(){
   var page=document.getElementById("pdelPage");
   if(!page)return;
-  var html='<h2 style="color:var(--dk);margin:0 0 6px">Prospect Tracking</h2>';
+  var html='<h2 style="color:var(--dk);margin:0 0 6px">Prospect Tracking</h2><p style="font-size:11px;color:var(--mu);margin:0 0 10px">Auto opens to those Created more than 30 days ago, coming from a third party, and not touched</p>';
   var _thDPdel="background:#00144A;color:#fff;padding:5px 6px;font-size:10px;font-weight:700;text-align:left;position:sticky;top:0;white-space:normal;word-break:break-word;max-width:80px";
   if(!window.pdelFilter)window.pdelFilter={};
   if(!window._pdelAgeDefaulted){
@@ -4724,6 +4724,7 @@ function renderPdel(){
     if(!window.pdelFilter.age)window.pdelFilter.age='30';
     if(!window.pdelFilter.thirdParty)window.pdelFilter.thirdParty='3rd Party';
     if(!window.pdelFilter.eid)window.pdelFilter.eid='notblank';
+    if(!window.pdelFilter.touched)window.pdelFilter.touched='no';
   }
   var pf=window.pdelFilter||{};
   html+='<div style="margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:12px">';
