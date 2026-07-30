@@ -4240,8 +4240,9 @@ function renderOutInner(page){
   var _tagProsOpts=Array.from(_tagProsSet).sort();
 
   // Build wbs->region from filtered calendar (authoritative region, not outreach row's region)
+  var _l3ToL2Out={"CS Israel":"CS MEA North","CS Portugal":"CS Southern Europe","CS Greece & Cyprus":"CS Southern Europe","CS Greece":"CS Southern Europe","CS Turkey":"CS MEA North","CS Türkiye":"CS MEA North","CS Turkiye":"CS MEA North","CS Kuwait":"CS MEA North","CS UAE":"CS MEA North","CS KSA":"CS MEA North","CS Egypt":"CS MEA North","CS EGYPT":"CS MEA North"};
   var _wbsToRegOut={};
-  campSource.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var reg=String(r["Region Name (level 2)"]||"").trim();if(w&&reg)_wbsToRegOut[w]=reg;});
+  campSource.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var reg=String(r["Region Name (level 2)"]||"").trim();if(w&&reg)_wbsToRegOut[w]=_l3ToL2Out[reg]||reg;});
 
   // Apply outFilter
   var data=allData.filter(function(r){
