@@ -2370,6 +2370,7 @@ function renderBud(){
     if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
     if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
     if(_brittL2F){var _pr2=_pipeRegNorm[String(p["Region Lvl 2"]||"").toLowerCase().trim()]||String(p["Region Lvl 2"]||"").trim();if(!_brittL2F.has(_pr2))return;}
+    if(_brittL3F){var _pr3=String(p["Region Lvl 3"]||"").trim();if(!_brittL3F.has(_pr3))return;}
     if(_sbActF){var _ps2=_pipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_sbActF.has(_ps2))return;}
     var src=_pipeSrcMap2[String(p["TCP Pipeline Source Desc"]||"").trim()];if(!src||_srcOrder2.indexOf(src)===-1)return;
     srcYTD2[src]=(srcYTD2[src]||0)+(parseFloat(p["Eur"]||0)||0);
