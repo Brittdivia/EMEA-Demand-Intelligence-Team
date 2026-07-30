@@ -2366,6 +2366,23 @@ function renderBud(){
     var src=String(t.src||"").trim();if(!src||_srcOrder2.indexOf(src)===-1)return;
     srcTgt2[src]=(srcTgt2[src]||0)+(parseFloat(t.target)||0);
   });
+  // If L3 filter active: calculate L3 share of L2 pipeline per source and pro-rate targets
+  if(_brittL3F){
+    var _srcYTD2L2={};_srcOrder2.forEach(function(src){_srcYTD2L2[src]=0;});
+    pipeData.forEach(function(p){
+      if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+      if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
+      if(_brittL2F){var _pr2b=_pipeRegNorm[String(p["Region Lvl 2"]||"").toLowerCase().trim()]||String(p["Region Lvl 2"]||"").trim();if(!_brittL2F.has(_pr2b))return;}
+      if(_sbActF){var _ps2b=_pipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_sbActF.has(_ps2b))return;}
+      var src=_pipeSrcMap2[String(p["TCP Pipeline Source Desc"]||"").trim()];if(!src||_srcOrder2.indexOf(src)===-1)return;
+      _srcYTD2L2[src]=((_srcYTD2L2[src]||0))+(parseFloat(p["Eur"]||0)||0);
+    });
+    // Pro-rate targets by L3/L2 ratio
+    _srcOrder2.forEach(function(src){
+      var ratio=_srcYTD2L2[src]>0?(srcYTD2[src]/_srcYTD2L2[src]):0;
+      srcTgt2[src]=srcTgt2[src]*ratio;
+    });
+  }
   pipeData.forEach(function(p){
     if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
     if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
