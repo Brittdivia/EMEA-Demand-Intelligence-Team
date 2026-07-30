@@ -227,6 +227,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
 <script src="data-targets.js?v=20260728"></script>
 <script src="data-budget.js?v=20260728"></script>
 <script src="data-tcp-targets.js?v=20260728"></script>
+<script src="data-security.js?v=20260730"></script>
 <script src="data-access.js?v=20260716"></script>
 </head>
 <body>
@@ -237,6 +238,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
   <div class="hm">
     <span class="hu">Last updated: 07 Jul 2026</span>
     <span class="hc" id="hcount">2,798 campaigns</span>
+    <span id="sec-user-badge" style="font-size:11px;color:var(--mu);cursor:pointer;margin-left:12px" onclick="promptSecEmail();if(activeTab==='bud')renderBud();if(activeTab==='exe')renderExe();" title="Click to change user"></span>
   </div>
 </header>
 <div class="tbar">
@@ -370,6 +372,8 @@ document.addEventListener("DOMContentLoaded",function(){
   applyFilters();
   buildFbar();buildWbar();FD.forEach(function(f){syncBtn(f.k);});syncDrmBtn();syncEurBtn();syncCab();updateTags();
   renderBud();
+  // Update security badge
+  (function(){var b=document.getElementById("sec-user-badge");if(b){var u=getSecUser();b.textContent=u?"&#128100; "+u:"&#128274; Not signed in";}})();
   // Re-render Coverage Overview after PROSPECT_DATA is loaded (158MB takes time to parse)
   setTimeout(function(){if(activeTab==="bud"){window._allProsTagSet2Cache=null;renderBud();}},3000);
   document.addEventListener("click",function(e){if(!e.target.closest(".fbi"))closeAllDD();if(!e.target.closest("#details-nav"))closeDetailsNav();});;
@@ -379,6 +383,24 @@ document.addEventListener("DOMContentLoaded",function(){
 var _accFiltersSaved=null;
 var DETAIL_TABS={"ana":"Campaign Insights","pip":"Pipeline Details","out":"Outreach Details","pdel":"Prospect Tracking","cal":"EMEA Campaign Calendar","dtr":"Data Tracking","ovw":"Extra Insights"};
 function switchTab(t){
+  // Security check for Coverage Overview and TCP tabs
+  if(t==="bud"||t==="exe"){
+    if(!checkSecAccess(t)){
+      // Blocked — stay on current tab or go to default
+      var page=document.getElementById(t==="bud"?"budPage":"exePage");
+      if(page)page.innerHTML='<div class="ap"><div class="nr"><p>&#128274; You do not have access to this view. <button onclick="promptSecEmail();switchTab(\''+t+'\')" style="padding:4px 12px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-size:12px;margin-left:8px">Enter Email</button></p></div></div>';
+      activeTab=t;
+      document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
+      var pnl=document.getElementById("p-"+t);if(pnl)pnl.classList.add("on");
+      return;
+    }
+    // Apply security region filter
+    var secRegs=getSecRegions();
+    if(secRegs){
+      filters["Region Name (level 2)"]=new Set(secRegs.map(function(r){return r.startsWith("CS ")?r:"CS "+r;}));
+      applyFilters();
+    }
+  }
   activeTab=t;
   var tabs=["bud","exe","cal"];document.querySelectorAll(".tbtn").forEach(function(b,i){b.classList.toggle("on",tabs[i]===t);});
   var subTabs=["ana","out","pdel","dtr","ovw"];document.querySelectorAll(".tbtn-sub").forEach(function(b,i){b.classList.toggle("on",subTabs[i]===t);});
@@ -399,6 +421,47 @@ function switchTab(t){
 
 function sk(k){return k.replace(/[^a-zA-Z0-9]/g,"_");}
 
+// Security: get current user email (stored in localStorage)
+function getSecUser(){return(localStorage.getItem("sec_user_email")||"").toLowerCase().trim();}
+function setSecUser(email){localStorage.setItem("sec_user_email",email.toLowerCase().trim());}
+function getSecEntry(){
+  var email=getSecUser();if(!email)return null;
+  var lookup=window.SECURITY_LOOKUP||[];
+  return lookup.find(function(e){return e.email===email;})||null;
+}
+function secCanSeeBud(){
+  var e=getSecEntry();
+  // Not in list → cannot see Coverage Overview
+  return !!e;
+}
+function applySecFilters(){
+  var e=getSecEntry();if(!e)return;
+  // Auto-apply region filters for bud/exe tabs based on user's regions
+  if(activeTab==="bud"||activeTab==="exe"){
+    if(e.rl2&&!filters["Region Name (level 2)"].size){
+      // Only auto-apply if no manual filter set
+    }
+  }
+}
+function promptSecEmail(){
+  var existing=getSecUser();
+  var email=window.prompt("Please enter your SAP email address to access this view:"+(existing?" (current: "+existing+")":""),existing||"");
+  if(email&&email.trim()){setSecUser(email.trim());return true;}
+  return false;
+}
+function checkSecAccess(tab){
+  if(tab!=="bud"&&tab!=="exe")return true; // other tabs always accessible
+  if(secCanSeeBud())return true;
+  // Not in list — block and prompt
+  if(promptSecEmail()){return secCanSeeBud();}
+  return false;
+}
+function getSecRegions(){
+  var e=getSecEntry();if(!e)return null;
+  var regions=[];
+  if(e.rl2)regions.push(e.rl2);
+  return regions.length?regions:null;
+}
 function buildFbar(){
   var bar=document.getElementById("fbar"),div=document.getElementById("fdiv");
   var _subTabs=new Set(["ana","out","pdel","dtr","ovw","sde","cal"]);
