@@ -363,6 +363,9 @@ var MFLDS=[
 document.addEventListener("DOMContentLoaded",function(){
   try{
   campData=window.CAMP_DATA||JSON.parse(document.getElementById("d-camp").textContent);
+  // Normalise L3 values incorrectly stored as L2
+  var _l3AsL2Map={"CS Israel":"CS MEA North","CS Portugal":"CS Southern Europe","CS Greece & Cyprus":"CS Southern Europe","CS Greece":"CS Southern Europe","CS Turkey":"CS MEA North","CS Türkiye":"CS MEA North","CS Turkiye":"CS MEA North","CS Kuwait":"CS MEA North","CS UAE":"CS MEA North","CS KSA":"CS MEA North","CS Egypt":"CS MEA North","CS EGYPT":"CS MEA North"};
+  campData.forEach(function(r){var v=r["Region Name (level 2)"];if(v&&_l3AsL2Map[v]&&_l3AsL2Map[v]!==v)r["Region Name (level 2)"]=_l3AsL2Map[v];});
   pipeData=window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent);
   pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});
   outData=window.OUT_DATA||JSON.parse(document.getElementById("d-out").textContent);
