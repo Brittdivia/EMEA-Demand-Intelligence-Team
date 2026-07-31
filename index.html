@@ -2360,7 +2360,7 @@ function renderBud(){
 
   // R4Q Budget by TCP Source + TCP Target by Source side by side
   html+='<div style="display:flex;gap:16px;align-items:flex-start">';
-  html+='<div style="flex:1;min-width:0">';
+  html+='<div style="flex:0 0 60%;min-width:0">';
   html+='<div class="cc"><div class="ch"><span>R4Q Budget by TCP Source (kEUR)</span><span style="font-size:10px;font-weight:400;color:var(--mu);margin-left:8px">— shows each source contribution to total budget</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:18%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"></colgroup><thead><tr>';
   html+='<th style="'+thL+'">TCP Source</th>';
   html+='<th style="'+thSW+'">Budget</th>';
@@ -2418,7 +2418,7 @@ function renderBud(){
   html+=cvgCell("—");html+=cvgCell("—");
   html+='</tr></tbody></table></div></div>';
   html+='</div>';  // close left side of flex row
-  html+='<div style="flex:1;min-width:0">';  // right side
+  html+='<div style="flex:0 0 38%;min-width:0">';  // right side
   // TCP Target by Source (from EMEA TCP_TARGETS_DETAIL)
   var srcTgt2={},srcYTD2={};
   var _srcOrder2=["SDE","Marketing","Sales","Partner","CSM"];
