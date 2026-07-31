@@ -429,19 +429,13 @@ function getSecEntry(){
   var lookup=window.SECURITY_LOOKUP||[];
   return lookup.find(function(e){return e.email===email;})||null;
 }
-function secCanSeeBud(){
-  var e=getSecEntry();
-  // Not in list → cannot see Coverage Overview
-  return !!e;
+function getSecEntries(){
+  var email=getSecUser();if(!email)return [];
+  var lookup=window.SECURITY_LOOKUP||[];
+  return lookup.filter(function(e){return e.email===email;});
 }
-function applySecFilters(){
-  var e=getSecEntry();if(!e)return;
-  // Auto-apply region filters for bud/exe tabs based on user's regions
-  if(activeTab==="bud"||activeTab==="exe"){
-    if(e.rl2&&!filters["Region Name (level 2)"].size){
-      // Only auto-apply if no manual filter set
-    }
-  }
+function secCanSeeBud(){
+  return getSecEntries().length>0;
 }
 function promptSecEmail(){
   var existing=getSecUser();
@@ -450,16 +444,14 @@ function promptSecEmail(){
   return false;
 }
 function checkSecAccess(tab){
-  if(tab!=="bud"&&tab!=="exe")return true; // other tabs always accessible
+  if(tab!=="bud"&&tab!=="exe")return true;
   if(secCanSeeBud())return true;
-  // Not in list — block and prompt
   if(promptSecEmail()){return secCanSeeBud();}
   return false;
 }
-function getSecRegions(){
-  var e=getSecEntry();if(!e)return null;
+  var entries=getSecEntries();if(!entries.length)return null;
   var regions=[];
-  if(e.rl2)regions.push(e.rl2);
+  entries.forEach(function(e){if(e.rl2&&regions.indexOf(e.rl2)===-1)regions.push(e.rl2);});
   return regions.length?regions:null;
 }
 function buildFbar(){
