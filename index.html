@@ -452,6 +452,7 @@ function checkSecAccess(tab){
   if(promptSecEmail()){return secCanSeeBud();}
   return false;
 }
+function getSecRegions(){
   var entries=getSecEntries();if(!entries.length)return null;
   var regions=[];
   entries.forEach(function(e){if(e.rl2&&regions.indexOf(e.rl2)===-1)regions.push(e.rl2);});
