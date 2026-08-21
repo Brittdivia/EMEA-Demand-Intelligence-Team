@@ -236,7 +236,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
   <div class="ht">EMEA Demand Generation</div>
   <div class="hsp"></div>
   <div class="hm">
-    <span class="hu">Last updated: 07 Jul 2026</span>
+    <span class="hu">Last updated: 03 Aug 2026</span>
     <span class="hc" id="hcount">2,798 campaigns</span>
     <span id="sec-user-badge" style="font-size:11px;color:var(--mu);cursor:pointer;margin-left:12px" onclick="promptSecEmail();if(activeTab==='bud')renderBud();if(activeTab==='exe')renderExe();" title="Click to change user"></span>
   </div>
@@ -388,13 +388,11 @@ var DETAIL_TABS={"ana":"Campaign Insights","pip":"Pipeline Details","out":"Outre
 function switchTab(t){
   // Security check for Coverage Overview and TCP tabs
   if(t==="bud"||t==="exe"){
-    if(!checkSecAccess(t)){
-      // Blocked — stay on current tab or go to default
-      var page=document.getElementById(t==="bud"?"budPage":"exePage");
-      if(page)page.innerHTML='<div class="ap"><div class="nr"><p>&#128274; You do not have access to this view. <button onclick="promptSecEmail();switchTab(\''+t+'\')" style="padding:4px 12px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-size:12px;margin-left:8px">Enter Email</button></p></div></div>';
+    if(!secCanSeeBud()){
       activeTab=t;
       document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
       var pnl=document.getElementById("p-"+t);if(pnl)pnl.classList.add("on");
+      showSecEmailForm(t);
       return;
     }
     // Apply security region filter
@@ -445,6 +443,28 @@ function promptSecEmail(){
   var email=window.prompt("Please enter your SAP email address to access this view:"+(existing?" (current: "+existing+")":""),existing||"");
   if(email&&email.trim()){setSecUser(email.trim());return true;}
   return false;
+}
+function showSecEmailForm(tab){
+  var page=document.getElementById(tab==="bud"?"budPage":"exePage");
+  if(!page)return;
+  var existing=getSecUser();
+  page.innerHTML='<div class="ap"><div class="nr" style="max-width:420px;margin:40px auto;padding:24px;background:var(--wh);border-radius:var(--r);box-shadow:0 2px 12px rgba(0,0,0,.1)">'
+    +'<p style="font-size:15px;font-weight:700;margin:0 0 8px">&#128274; Restricted Access</p>'
+    +'<p style="font-size:13px;color:var(--mu);margin:0 0 16px">Enter your SAP email address to access this view.</p>'
+    +'<input id="sec-email-input" type="email" placeholder="name@sap.com" value="'+existing+'" style="width:100%;box-sizing:border-box;padding:8px 12px;font-size:13px;border:1px solid #ccc;border-radius:var(--r);margin-bottom:10px"/>'
+    +'<button onclick="doSecEmailSubmit(\''+tab+'\')" style="padding:8px 20px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:600">Submit</button>'
+    +'<span id="sec-email-err" style="color:#c00;font-size:12px;margin-left:10px"></span>'
+    +'</div></div>';
+  setTimeout(function(){var el=document.getElementById("sec-email-input");if(el)el.focus();},50);
+}
+function doSecEmailSubmit(tab){
+  var el=document.getElementById("sec-email-input");
+  if(!el)return;
+  var email=(el.value||"").trim().toLowerCase();
+  if(!email){document.getElementById("sec-email-err").textContent="Please enter an email.";return;}
+  setSecUser(email);
+  if(secCanSeeBud()){switchTab(tab);}
+  else{document.getElementById("sec-email-err").textContent="Email not recognised. Please try your SAP email.";}
 }
 function checkSecAccess(tab){
   if(tab!=="bud"&&tab!=="exe")return true;
@@ -2743,7 +2763,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
 
 
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+fmtE(targetPipe/1000)+"</div><div class=\"ks\">from campaign calendar</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 30 &middot; 07 Jul 2026</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 31 &middot; 03 Aug 2026</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">2026 Pipeline Share</div><div class=\"kv\">"+camp2026Pct+"</div><div class=\"ks\">campaign-linked vs all 2026</div></div>";
 
@@ -2787,7 +2807,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+fmtE(targetPipe/1000)+"</div><div class=\"ks\">from campaign calendar</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
     html3+="<div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px;margin-left:8px\">Results</div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 30 &middot; 07 Jul 2026</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 31 &middot; 03 Aug 2026</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Distinct Opps Created</div><div class=\"kv\">"+totOpps.toLocaleString()+"</div><div class=\"ks\">connected to WBS/Campaign code</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Won+Live Pipeline</div><div class=\"kv\">"+qualOppRate+"</div><div class=\"ks\">"+qualOppsSet.size.toLocaleString()+" opps &middot; Won+Live / Total</div></div>";
     var hodEur=pr.filter(function(p){return hasHod(p["SDE Handover Date"]);}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);var hodPct=totEur>0?(hodEur/totEur*100).toFixed(0)+"%":"0%";
@@ -3051,7 +3071,7 @@ if(pageId!=="ovwPage"){html3+="<div class=\"cc\" style=\"margin-bottom:28px;widt
   html3+="</div>";
     
   }
-   html3+="<details style=\"margin-bottom:28px\"><summary style=\"cursor:pointer;font-size:13px;font-weight:700;color:var(--dk);padding:6px 0;list-style:none;display:flex;align-items:center;gap:6px\"><span style=\"font-size:10px\">&#9654;</span> Pipeline Detail - Week 30 <span style=\"font-size:11px;font-weight:400;color:var(--mu)\">("+pdet.length.toLocaleString()+" rows)</span></summary>";
+   html3+="<details style=\"margin-bottom:28px\"><summary style=\"cursor:pointer;font-size:13px;font-weight:700;color:var(--dk);padding:6px 0;list-style:none;display:flex;align-items:center;gap:6px\"><span style=\"font-size:10px\">&#9654;</span> Pipeline Detail - Week 31 <span style=\"font-size:11px;font-weight:400;color:var(--mu)\">("+pdet.length.toLocaleString()+" rows)</span></summary>";
   html3+="<div class=\"cc\" style=\"margin-bottom:0\"><style>details[open] summary span:first-child{transform:rotate(90deg);display:inline-block;}</style>";
   html3+="<div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between\">";
   html3+="<span>"+pdet.length.toLocaleString()+" rows &middot; "+totOpps.toLocaleString()+" distinct opps</span>";
