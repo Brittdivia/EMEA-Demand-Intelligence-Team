@@ -236,7 +236,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
   <div class="ht">EMEA Demand Generation</div>
   <div class="hsp"></div>
   <div class="hm">
-    <span class="hu">Last updated: 03 Aug 2026</span>
+    <span class="hu">Last updated: 31 Aug 2026</span>
     <span class="hc" id="hcount">2,798 campaigns</span>
     <span id="sec-user-badge" style="font-size:11px;color:var(--mu);cursor:pointer;margin-left:12px" onclick="promptSecEmail();if(activeTab==='bud')renderBud();if(activeTab==='exe')renderExe();" title="Click to change user"></span>
   </div>
@@ -1674,6 +1674,7 @@ function renderExe(){try{
         if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
         if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
         if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rf4=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim();}));if(!_rf4.has(String(p["Region Lvl 2"]||"").trim()))return;}
+        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rl3f4=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim();}));if(!_rl3f4.has(String(p["Region Lvl 3"]||"").trim()))return;}
         if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
         if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
         var src=_srcMap2[String(p["TCP Pipeline Source Desc"]||"").trim()]||"Other";
@@ -2375,8 +2376,8 @@ function renderBud(){
   html+='</tr></tbody></table></div></div>';
 
   // R4Q Budget by TCP Source + TCP Target by Source side by side
-  html+='<div style="display:flex;gap:16px;align-items:flex-start">';
-  html+='<div style="flex:0 0 60%;min-width:0">';
+  html+='<div style="display:flex;flex-direction:column;gap:12px">';
+  html+='<div style="width:100%">';
   html+='<div class="cc"><div class="ch"><span>R4Q Budget by TCP Source (kEUR)</span><span style="font-size:10px;font-weight:400;color:var(--mu);margin-left:8px">— shows each source contribution to total budget</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:18%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"></colgroup><thead><tr>';
   html+='<th style="'+thL+'">TCP Source</th>';
   html+='<th style="'+thSW+'">Budget</th>';
@@ -2433,12 +2434,12 @@ function renderBud(){
   html+=cvgCell(gsrcRem2>0?(gsrcLv2/gsrcRem2).toFixed(1)+"X":"—");
   html+=cvgCell("—");html+=cvgCell("—");
   html+='</tr></tbody></table></div></div>';
-  html+='</div>';  // close left side of flex row
-  html+='<div style="flex:0 0 38%;min-width:0">';  // right side
+  html+='</div>';  // close left side
+  html+='<div style="width:100%">';  // right side
   // TCP Target by Source (from EMEA TCP_TARGETS_DETAIL)
-  var srcTgt2={},srcYTD2={};
+  var srcTgt2={},srcYTD2={},srcHO2={};
   var _srcOrder2=["SDE","Marketing","Sales","Partner","CSM"];
-  _srcOrder2.forEach(function(src){srcTgt2[src]=0;srcYTD2[src]=0;});
+  _srcOrder2.forEach(function(src){srcTgt2[src]=0;srcYTD2[src]=0;srcHO2[src]=0;});
   (window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");}).forEach(function(t){
     var sa=String(t.sa||"").trim();if(_sbActF&&(!sa||SBS.indexOf(sa)===-1))return;
     if(_brittL2F){var muNorm=_pipeRegNorm[String(t.mu||"").replace(/^CS /,"").toLowerCase().trim()]||String(t.mu||"").replace(/^CS /,"").trim();if(!_brittL2F.has(muNorm))return;}
@@ -2469,18 +2470,23 @@ function renderBud(){
     if(_brittL3F){var _pr3=String(p["Region Lvl 3"]||"").trim();if(!_brittL3F.has(_pr3))return;}
     if(_sbActF){var _ps2=_pipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_sbActF.has(_ps2))return;}
     var src=_pipeSrcMap2[String(p["TCP Pipeline Source Desc"]||"").trim()];if(!src||_srcOrder2.indexOf(src)===-1)return;
-    srcYTD2[src]=(srcYTD2[src]||0)+(parseFloat(p["Eur"]||0)||0);
+    var _eur2=parseFloat(p["Eur"]||0)||0;
+    srcYTD2[src]=(srcYTD2[src]||0)+_eur2;
+    if(hasHod(p["SDE Handover Date"]))srcHO2[src]=(srcHO2[src]||0)+_eur2;
   });
-  html+='<div class="cc"><div class="ch"><span>2026 TCP Target by Source (EMEA Targets)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:40%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup><thead><tr>';
-  html+='<th style="'+thL+'">Source</th><th style="'+thSW+'">TCP Target</th><th style="'+thSW+'">YTD Pipeline Created</th><th style="'+thSW+'">Attainment</th></tr></thead><tbody>';
-  var gSrcTcp=0,gSrcYTD=0;
+  html+='<div class="cc"><div class="ch"><span>2026 TCP Target by Source (EMEA Targets)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:18%"><col style="width:13%"><col style="width:11%"><col style="width:15%"><col style="width:11%"><col style="width:16%"><col style="width:16%"></colgroup><thead><tr>';
+  html+='<th style="'+thL+'">Source</th><th style="'+thSW+'">TCP Target</th><th style="'+thSW+'">% of Target</th><th style="'+thSW+'">YTD Pipeline Created</th><th style="'+thSW+'">% of YTD</th><th style="'+thSW+'">Attainment</th><th style="'+thSW+'">% HO</th></tr></thead><tbody>';
+  var gSrcTcp=0,gSrcYTD=0,gSrcHO2=0;
+  _srcOrder2.forEach(function(src){gSrcTcp+=srcTgt2[src]||0;gSrcYTD+=srcYTD2[src]||0;gSrcHO2+=srcHO2[src]||0;});
   _srcOrder2.forEach(function(src){
-    var tcp=srcTgt2[src]||0,ytd=srcYTD2[src]||0;
+    var tcp=srcTgt2[src]||0,ytd=srcYTD2[src]||0,ho=srcHO2[src]||0;
+    var tgtPct=gSrcTcp>0?(tcp/gSrcTcp*100).toFixed(0)+"%":"—";
+    var ytdPct=gSrcYTD>0?(ytd/gSrcYTD*100).toFixed(0)+"%":"—";
     var att=tcp>0?(ytd/tcp*100).toFixed(0)+"%":"—";
-    gSrcTcp+=tcp;gSrcYTD+=ytd;
-    html+='<tr><td style="'+tdL+'">'+src+'</td><td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td><td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td><td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td></tr>';
+    var hoPct=ytd>0?(ho/ytd*100).toFixed(0)+"%":"—";
+    html+='<tr><td style="'+tdL+'">'+src+'</td><td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td><td style="'+td+'">'+tgtPct+'</td><td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td><td style="'+td+'">'+ytdPct+'</td><td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td><td style="'+td+'">'+hoPct+'</td></tr>';
   });
-  html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td><td style="'+td+';font-weight:700">'+fmtE(gSrcTcp)+'</td><td style="'+td+';font-weight:700">'+fmtE(gSrcYTD)+'</td><td style="'+td+';font-weight:700">'+(gSrcTcp>0?(gSrcYTD/gSrcTcp*100).toFixed(0)+"%":"—")+'</td></tr>';
+  html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td><td style="'+td+';font-weight:700">'+fmtE(gSrcTcp)+'</td><td style="'+td+';font-weight:700">100%</td><td style="'+td+';font-weight:700">'+fmtE(gSrcYTD)+'</td><td style="'+td+';font-weight:700">100%</td><td style="'+td+';font-weight:700">'+(gSrcTcp>0?(gSrcYTD/gSrcTcp*100).toFixed(0)+"%":"—")+'</td><td style="'+td+';font-weight:700">'+(gSrcYTD>0?(gSrcHO2/gSrcYTD*100).toFixed(0)+"%":"—")+'</td></tr>';
   html+='</tbody></table></div></div>';
   html+='</div>';  // close right side
   html+='</div>';  // close flex row (TCP Source budget + TCP Target by Source)
@@ -2763,7 +2769,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
 
 
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+fmtE(targetPipe/1000)+"</div><div class=\"ks\">from campaign calendar</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 31 &middot; 03 Aug 2026</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 36 &middot; 31 Aug 2026</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">2026 Pipeline Share</div><div class=\"kv\">"+camp2026Pct+"</div><div class=\"ks\">campaign-linked vs all 2026</div></div>";
 
@@ -2807,7 +2813,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+fmtE(targetPipe/1000)+"</div><div class=\"ks\">from campaign calendar</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
     html3+="<div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px;margin-left:8px\">Results</div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 31 &middot; 03 Aug 2026</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 36 &middot; 31 Aug 2026</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Distinct Opps Created</div><div class=\"kv\">"+totOpps.toLocaleString()+"</div><div class=\"ks\">connected to WBS/Campaign code</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Won+Live Pipeline</div><div class=\"kv\">"+qualOppRate+"</div><div class=\"ks\">"+qualOppsSet.size.toLocaleString()+" opps &middot; Won+Live / Total</div></div>";
     var hodEur=pr.filter(function(p){return hasHod(p["SDE Handover Date"]);}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);var hodPct=totEur>0?(hodEur/totEur*100).toFixed(0)+"%":"0%";
@@ -3071,7 +3077,7 @@ if(pageId!=="ovwPage"){html3+="<div class=\"cc\" style=\"margin-bottom:28px;widt
   html3+="</div>";
     
   }
-   html3+="<details style=\"margin-bottom:28px\"><summary style=\"cursor:pointer;font-size:13px;font-weight:700;color:var(--dk);padding:6px 0;list-style:none;display:flex;align-items:center;gap:6px\"><span style=\"font-size:10px\">&#9654;</span> Pipeline Detail - Week 31 <span style=\"font-size:11px;font-weight:400;color:var(--mu)\">("+pdet.length.toLocaleString()+" rows)</span></summary>";
+   html3+="<details style=\"margin-bottom:28px\"><summary style=\"cursor:pointer;font-size:13px;font-weight:700;color:var(--dk);padding:6px 0;list-style:none;display:flex;align-items:center;gap:6px\"><span style=\"font-size:10px\">&#9654;</span> Pipeline Detail - Week 36 <span style=\"font-size:11px;font-weight:400;color:var(--mu)\">("+pdet.length.toLocaleString()+" rows)</span></summary>";
   html3+="<div class=\"cc\" style=\"margin-bottom:0\"><style>details[open] summary span:first-child{transform:rotate(90deg);display:inline-block;}</style>";
   html3+="<div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between\">";
   html3+="<span>"+pdet.length.toLocaleString()+" rows &middot; "+totOpps.toLocaleString()+" distinct opps</span>";
@@ -4976,7 +4982,7 @@ function renderPdel(){
         var rawTags=(String(r["Profiling to Outreach Tag"]||"").trim()+"\n"+String(r["Tag per SDE"]||"").trim()+"\n"+String(r["Tag 2 per SDE"]||"").trim()).trim();if(!rawTags)return;
         var campN=String(r["Campaign Name"]||"").trim();
         var dcmDisp=String(r["Demand Manager"]||"").trim();
-        var tagList=rawTags.split('\\r\\n').join('\n').split('\\n').join('\n').split('\n').map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,"").trim();}).filter(function(t){return t&&t.length>1;});
+        var tagList=rawTags.split('\\r\\n').join('\n').split('\\n').join('\n').split(/[\n,]+/).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New):\s*/i,"").trim();}).filter(function(t){return t&&t.length>1;});
         var noise=new Set(["existing","new","tag:","tag","old","-","--"]);
         tagList.forEach(function(t){
           if(!t||noise.has(t.toLowerCase()))return;
@@ -5611,8 +5617,13 @@ function renderDtr(){
   var profMeta2=window.CAMP_PROF_META||{};
   var profMetaVals=Object.values(profMeta2);var _dtrDmFilter=filters&&filters["Demand Manager"]&&filters["Demand Manager"].size>0?filters["Demand Manager"]:null;if(_dtrDmFilter){profMetaVals=profMetaVals.filter(function(m){var norm=normDDM1(String(m.ddm1||"")).toLowerCase();return Array.from(_dtrDmFilter).some(function(d){return d.toLowerCase()===norm;});});}
   var _dtrYearFilter=window._dtrYearFilter!==undefined?window._dtrYearFilter:"2026";
+  var _dtrMonthFilter=window._dtrMonthFilter!==undefined?window._dtrMonthFilter:null;
+  var _dtrMonthNames={jan:"Jan",feb:"Feb",mar:"Mar",apr:"Apr",may:"May",jun:"Jun",jul:"Jul",aug:"Aug",sep:"Sep",oct:"Oct",nov:"Nov",dec:"Dec","01":"Jan","02":"Feb","03":"Mar","04":"Apr","05":"May","06":"Jun","07":"Jul","08":"Aug","09":"Sep","10":"Oct","11":"Nov","12":"Dec"};
   var _dtrYears=Array.from(new Set(Object.values(profMeta2).map(function(m){var s=fmtCreated(m.created);return s?s.slice(0,4):"";}).filter(Boolean))).sort();
+  var _dtrMonthsSrc=_dtrYearFilter?profMetaVals:Object.values(profMeta2);
+  var _dtrMonths=Array.from(new Set(_dtrMonthsSrc.map(function(m){var s=fmtCreated(m.created);return s&&s.length>=7?s.slice(5,7):"";}).filter(Boolean))).sort();
   if(_dtrYearFilter)profMetaVals=profMetaVals.filter(function(m){return fmtCreated(m.created).slice(0,4)===_dtrYearFilter;});
+  if(_dtrMonthFilter)profMetaVals=profMetaVals.filter(function(m){return fmtCreated(m.created).slice(5,7)===_dtrMonthFilter;});
   var profMap=window.CAMP_PROF_TAGS||{};
   var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Data Tracking</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
   html+='<p style="font-size:12px;color:var(--mu);margin-bottom:8px">Track data quality and coverage across the campaign calendar and pipeline.</p>';
@@ -5712,7 +5723,8 @@ function renderDtr(){
   html+='</div>';
   // Profiling Requests by DDM1 table
   html+='<div style="flex:0 0 45%;min-width:0">';
-  html+='<div style="display:flex;align-items:center;margin-bottom:4px"><div class="sec" style="margin-bottom:0">Profiling Requests by DCM</div></div>';
+  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div class="sec" style="margin-bottom:0">Profiling Requests by DCM</div><div style="display:flex;gap:3px;flex-wrap:wrap">'+((['All'].concat(_dtrYears)).map(function(y){var active=(y==='All'?!_dtrYearFilter:_dtrYearFilter===y);return '<button onclick="window._dtrYearFilter='+(y==='All'?'null':"'"+y+"'")+';window._dtrMonthFilter=null;renderDtr();" style="font-size:10px;padding:2px 7px;border:1px solid #012931;border-radius:3px;cursor:pointer;background:'+(active?'#012931':'#fff')+';color:'+(active?'#fff':'#012931')+'">'+y+'</button>';}).join(''))+'</div></div>';
+  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10px;color:#666">Month:</span><div style="display:flex;gap:3px;flex-wrap:wrap">'+((['All'].concat(_dtrMonths)).map(function(mo){var active=(mo==='All'?!_dtrMonthFilter:_dtrMonthFilter===mo);var lbl=mo==='All'?'All':(_dtrMonthNames[mo]||mo);return '<button onclick="window._dtrMonthFilter='+(mo==='All'?'null':"'"+mo+"'")+';renderDtr();" style="font-size:10px;padding:2px 7px;border:1px solid #012931;border-radius:3px;cursor:pointer;background:'+(active?'#012931':'#fff')+';color:'+(active?'#fff':'#012931')+'">'+lbl+'</button>';}).join(''))+'</div></div>';
   html+='<div class="cc"><div style="overflow-x:auto;overflow-y:auto;max-height:300px"><table style="width:100%;min-width:320px;border-collapse:collapse;font-size:11px;table-layout:auto"><thead><tr>';
   html+='<th style="'+thD+'">DCM</th><th style="'+thD+';text-align:right"># Requests</th><th style="'+thD+';text-align:right">Connected to Outreach</th></tr></thead><tbody>';
   var _allProsTagSet=new Set();
@@ -5742,6 +5754,45 @@ function renderDtr(){
   html+='<tfoot><tr style="background:#00144A;color:#fff;font-weight:700"><td style="padding:5px 8px;font-size:11px">TOTAL</td><td style="padding:5px 8px;text-align:right;font-size:11px">'+_reqTotTotal.toLocaleString()+'</td><td style="padding:5px 8px;text-align:right;font-size:11px">'+_reqTotConn.toLocaleString()+'</td></tr></tfoot></table></div>';
   html+='</div>';
   html+='</div>';
+
+  // Campaigns connected to profiling via tag table
+  (function(){
+    var _profTagSetDcm=new Set();
+    function _splitTags(raw){return String(raw||"").split(/[\n,\/;()\[\]]+/).map(function(t){return t.trim().toLowerCase();}).filter(function(t){return t&&t.length>1&&t!=="-"&&t!=="--";});}
+    profMetaVals.forEach(function(m){_splitTags(String(m.tagOut||"")).forEach(function(t){_profTagSetDcm.add(t);});_splitTags(String(m.tag||"")).forEach(function(t){_profTagSetDcm.add(t);});});
+    var dcmTagMap={};
+    (filtered||campData).forEach(function(r){
+      var dcm=String(r["Demand Manager"]||"").trim();if(!dcm)dcm="(No DCM)";
+      if(!dcmTagMap[dcm])dcmTagMap[dcm]={calTags:new Set(),matched:new Set()};
+      [String(r["Profiling to Outreach Tag"]||""),String(r["Tag per SDE"]||""),String(r["Tag 2 per SDE"]||"")].forEach(function(raw){
+        _splitTags(raw).forEach(function(t){
+          dcmTagMap[dcm].calTags.add(t);
+          if(_profTagSetDcm.has(t))dcmTagMap[dcm].matched.add(t);
+        });
+      });
+    });
+    html+='<div style="margin-top:16px">';
+    html+='<div style="display:flex;align-items:center;margin-bottom:4px"><div class="sec" style="margin-bottom:0">Calendar &harr; Profiling Tag Match &mdash; by DCM</div></div>';
+    html+='<div class="cc"><div style="overflow-x:auto;overflow-y:auto;max-height:300px"><table style="width:100%;min-width:320px;border-collapse:collapse;font-size:11px;table-layout:auto"><thead><tr>';
+    html+='<th style="'+thD+'">DCM</th><th style="'+thD+';text-align:right">Tags in Calendar</th><th style="'+thD+';text-align:right">Matched in Profiling</th><th style="'+thD+';text-align:right">%</th></tr></thead><tbody>';
+    var _dcmTotCal=0,_dcmTotMatch=0;
+    Object.entries(dcmTagMap).sort(function(a,b){return b[1].calTags.size-a[1].calTags.size;}).forEach(function(e,i){
+      var cal=e[1].calTags.size,match=e[1].matched.size,pct=cal>0?Math.round(match/cal*100):0;
+      _dcmTotCal+=cal;_dcmTotMatch+=match;
+      html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
+        +'<td style="padding:6px 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+e[0]+'">'+e[0]+'</td>'
+        +'<td style="padding:6px 12px;text-align:right;font-weight:700">'+cal.toLocaleString()+'</td>'
+        +'<td style="padding:6px 12px;text-align:right;font-weight:700;color:'+(match>0?'#0a6640':'var(--mu)')+'">'+match.toLocaleString()+'</td>'
+        +'<td style="padding:6px 12px;text-align:right;color:var(--mu)">'+pct+'%</td>'
+        +'</tr>';
+    });
+    var _totPct=_dcmTotCal>0?Math.round(_dcmTotMatch/_dcmTotCal*100):0;
+    html+='</tbody></table></div>';
+    html+='<table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed"><colgroup><col style="width:40%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup>';
+    html+='<tfoot><tr style="background:#00144A;color:#fff;font-weight:700"><td style="padding:5px 8px;font-size:11px">TOTAL</td><td style="padding:5px 8px;text-align:right;font-size:11px">'+_dcmTotCal.toLocaleString()+'</td><td style="padding:5px 8px;text-align:right;font-size:11px">'+_dcmTotMatch.toLocaleString()+'</td><td style="padding:5px 8px;text-align:right;font-size:11px">'+_totPct+'%</td></tr></tfoot></table></div>';
+    html+='</div>';
+  })();
+
   // TCP Pipeline Source summary table
   (function(){
     var srcMap={};

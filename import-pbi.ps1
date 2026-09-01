@@ -69,7 +69,7 @@ function EscapeJson($val) {
     if ($null -eq $val) { return '' }
     $s = [string]$val
     $s = $s -replace '_x000D_','' # remove carriage return encoding
-    $s = $s.Replace('\', '\\').Replace('"', '\"').Replace("`r`n", ' ').Replace("`n", ' ').Replace("`r", ' ').Replace("`t", ' ')
+    $s = $s.Replace('\', '\\').Replace('"', '\"').Replace("`r`n", '\n').Replace("`n", '\n').Replace("`r", '\n').Replace("`t", ' ')
     return $s
 }
 
@@ -120,6 +120,9 @@ $campCols = @{
     'Profiling CRM Nuevo'         = 'Profiling CRM Nuevo'
     'Profiling NO CRM Accounts'   = 'Profiling NO CRM Accounts'
     'Outreach TAGS'               = 'Outreach TAGS'
+    'Profiling to Outreach Tag'   = 'Profiling to Outreach Tag'
+    'Tag per SDE'                 = 'Tag per SDE'
+    'Tag 2 per SDE'               = 'Tag 2 per SDE'
     'Accounts enriched after complete Profiling' = 'Accounts enriched after complete Profiling'
     'Index'                       = 'Index'
 }
@@ -201,9 +204,15 @@ $tagPairs = $profTags.Keys | ForEach-Object { '"' + (EscapeJson $_) + '":"' + (E
 $tagsJs = 'window.CAMP_PROF_TAGS={' + ($tagPairs -join ',') + '};'
 [System.IO.File]::WriteAllText("$outDir\data-profiling-tags.js", $tagsJs, [System.Text.Encoding]::UTF8)
 
-Write-Host "Writing data-profiling-req.js (total=$totalAcctRequested)..."
-$reqJs = "window.PROFILING_ACCT_REQUESTED=$totalAcctRequested;"
-[System.IO.File]::WriteAllText("$outDir\data-profiling-req.js", $reqJs, [System.Text.Encoding]::UTF8)
+Write-Host "Updating PROFILING_ACCT_REQUESTED in data-profiling-req.js (total=$totalAcctRequested)..."
+$reqFile = "$outDir\data-profiling-req.js"
+if (Test-Path $reqFile) {
+    $reqContent = [System.IO.File]::ReadAllText($reqFile, [System.Text.Encoding]::UTF8)
+    $reqContent = [regex]::Replace($reqContent, 'window\.PROFILING_ACCT_REQUESTED=\d+;', "window.PROFILING_ACCT_REQUESTED=$totalAcctRequested;")
+    [System.IO.File]::WriteAllText($reqFile, $reqContent, [System.Text.Encoding]::UTF8)
+} else {
+    [System.IO.File]::WriteAllText($reqFile, "window.PROFILING_ACCT_REQUESTED=$totalAcctRequested;", [System.Text.Encoding]::UTF8)
+}
 
 # Cleanup
 Remove-Item $zipPath -Force

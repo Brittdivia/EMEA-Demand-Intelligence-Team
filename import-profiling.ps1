@@ -51,6 +51,17 @@ foreach ($row in $rows) {
     $title      = $row.Title
     $tag        = $row.'Tag of Prospects'
     $tagOut     = $row.'Tag for Outreach'
+
+    # If Tag for Outreach is blank, fall back to any column with "tag" in the header
+    if ([string]::IsNullOrWhiteSpace($tagOut)) {
+        $fallbackProp = $row.PSObject.Properties | Where-Object {
+            $_.Name -ne 'Tag for Outreach' -and
+            $_.Name -like '*tag*' -and
+            -not [string]::IsNullOrWhiteSpace($_.Value)
+        } | Select-Object -First 1
+        if ($fallbackProp) { $tagOut = $fallbackProp.Value }
+    }
+
     $wbs        = $row.'Campaign Code'
     $ddm1       = $row.DDM1
     $createdBy  = $row.'Created By'
