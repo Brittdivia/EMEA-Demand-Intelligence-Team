@@ -366,6 +366,8 @@ document.addEventListener("DOMContentLoaded",function(){
   // Normalise L3 values incorrectly stored as L2
   var _l3AsL2Map={"CS Israel":"CS MEA North","CS Portugal":"CS Southern Europe","CS Greece & Cyprus":"CS Southern Europe","CS Greece":"CS Southern Europe","CS Turkey":"CS MEA North","CS Türkiye":"CS MEA North","CS Turkiye":"CS MEA North","CS Kuwait":"CS MEA North","CS UAE":"CS MEA North","CS KSA":"CS MEA North","CS Egypt":"CS MEA North","CS EGYPT":"CS MEA North"};
   campData.forEach(function(r){var v=r["Region Name (level 2)"];if(v&&_l3AsL2Map[v]&&_l3AsL2Map[v]!==v)r["Region Name (level 2)"]=_l3AsL2Map[v];});
+  // Strip "CS " prefix so dropdown shows consistent names (e.g. "Southern Europe" not "CS Southern Europe")
+  campData.forEach(function(r){var v=r["Region Name (level 2)"];if(v)r["Region Name (level 2)"]=String(v).replace(/^CS /,"").trim();});
   pipeData=window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent);
   pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});
   outData=window.OUT_DATA||JSON.parse(document.getElementById("d-out").textContent);
@@ -820,11 +822,11 @@ function toggleDrmDD(){
 function toggleDrmF(val,checked){
   if(checked)drmFilters.add(val);else drmFilters.delete(val);
   syncDrmBtn();syncCab();
-  if(activeTab==="ana")renderAna();if(activeTab==="ovw")renderOvw();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="ovw")renderOvw();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="bud")renderBud();
 }
 function clearDrmFilter(){
   drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});syncDrmBtn();eurMinFilter=null;syncEurBtn();syncCab();buildDrmDD();
-  if(activeTab==="ana")renderAna();if(activeTab==="ovw")renderOvw();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="ovw")renderOvw();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="bud")renderBud();
 }
 function syncDrmBtn(){
   var btn=document.getElementById("drm-fbtn"),fc=document.getElementById("drm-fc");
@@ -2437,9 +2439,9 @@ function renderBud(){
   html+='</div>';  // close left side
   html+='<div style="width:100%">';  // right side
   // TCP Target by Source (from EMEA TCP_TARGETS_DETAIL)
-  var srcTgt2={},srcYTD2={},srcHO2={};
+  var srcTgt2={},srcYTD2={},srcHO2={},srcBW2={};
   var _srcOrder2=["SDE","Marketing","Sales","Partner","CSM"];
-  _srcOrder2.forEach(function(src){srcTgt2[src]=0;srcYTD2[src]=0;srcHO2[src]=0;});
+  _srcOrder2.forEach(function(src){srcTgt2[src]=0;srcYTD2[src]=0;srcHO2[src]=0;srcBW2[src]=0;});
   (window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");}).forEach(function(t){
     var sa=String(t.sa||"").trim();if(_sbActF&&(!sa||SBS.indexOf(sa)===-1))return;
     if(_brittL2F){var muNorm=_pipeRegNorm[String(t.mu||"").replace(/^CS /,"").toLowerCase().trim()]||String(t.mu||"").replace(/^CS /,"").trim();if(!_brittL2F.has(muNorm))return;}
@@ -2465,6 +2467,7 @@ function renderBud(){
   }
   pipeData.forEach(function(p){
     if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+    if(drmFilters.size&&!drmFilters.has(String(p["DRM Category"]||"").trim()))return;
     if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
     if(_brittL2F){var _pr2=_pipeRegNorm[String(p["Region Lvl 2"]||"").toLowerCase().trim()]||String(p["Region Lvl 2"]||"").trim();if(!_brittL2F.has(_pr2))return;}
     if(_brittL3F){var _pr3=String(p["Region Lvl 3"]||"").trim();if(!_brittL3F.has(_pr3))return;}
@@ -2473,23 +2476,128 @@ function renderBud(){
     var _eur2=parseFloat(p["Eur"]||0)||0;
     srcYTD2[src]=(srcYTD2[src]||0)+_eur2;
     if(hasHod(p["SDE Handover Date"]))srcHO2[src]=(srcHO2[src]||0)+_eur2;
+    if(String(p["DRM Category"]||"").trim()==="Booked/Won")srcBW2[src]=(srcBW2[src]||0)+_eur2;
   });
-  html+='<div class="cc"><div class="ch"><span>2026 TCP Target by Source (EMEA Targets)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:18%"><col style="width:13%"><col style="width:11%"><col style="width:15%"><col style="width:11%"><col style="width:16%"><col style="width:16%"></colgroup><thead><tr>';
-  html+='<th style="'+thL+'">Source</th><th style="'+thSW+'">TCP Target</th><th style="'+thSW+'">% of Target</th><th style="'+thSW+'">YTD Pipeline Created</th><th style="'+thSW+'">% of YTD</th><th style="'+thSW+'">Attainment</th><th style="'+thSW+'">% HO</th></tr></thead><tbody>';
-  var gSrcTcp=0,gSrcYTD=0,gSrcHO2=0;
-  _srcOrder2.forEach(function(src){gSrcTcp+=srcTgt2[src]||0;gSrcYTD+=srcYTD2[src]||0;gSrcHO2+=srcHO2[src]||0;});
+  html+='<div class="cc"><div class="ch"><span>2026 TCP Target by Source (EMEA Targets)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:15%"><col style="width:11%"><col style="width:9%"><col style="width:12%"><col style="width:8%"><col style="width:11%"><col style="width:13%"><col style="width:12%"><col style="width:9%"></colgroup><thead><tr>';
+  html+='<th style="'+thL+'">Source</th><th style="'+thSW+'">TCP Target</th><th style="'+thSW+'">% of Target</th><th style="'+thSW+'">YTD Pipeline Created</th><th style="'+thSW+'">% of YTD</th><th style="'+thSW+'">Attainment</th><th style="'+thSW+'">Won &amp; Booked YTD</th><th style="'+thSW+'">% Won</th><th style="'+thSW+'">% HO</th></tr></thead><tbody>';
+  var gSrcTcp=0,gSrcYTD=0,gSrcHO2=0,gSrcBW2=0;
+  _srcOrder2.forEach(function(src){gSrcTcp+=srcTgt2[src]||0;gSrcYTD+=srcYTD2[src]||0;gSrcHO2+=srcHO2[src]||0;gSrcBW2+=srcBW2[src]||0;});
   _srcOrder2.forEach(function(src){
-    var tcp=srcTgt2[src]||0,ytd=srcYTD2[src]||0,ho=srcHO2[src]||0;
+    var tcp=srcTgt2[src]||0,ytd=srcYTD2[src]||0,ho=srcHO2[src]||0,bw=srcBW2[src]||0;
     var tgtPct=gSrcTcp>0?(tcp/gSrcTcp*100).toFixed(0)+"%":"—";
     var ytdPct=gSrcYTD>0?(ytd/gSrcYTD*100).toFixed(0)+"%":"—";
     var att=tcp>0?(ytd/tcp*100).toFixed(0)+"%":"—";
+    var bwPct=ytd>0?(bw/ytd*100).toFixed(0)+"%":"—";
     var hoPct=ytd>0?(ho/ytd*100).toFixed(0)+"%":"—";
-    html+='<tr><td style="'+tdL+'">'+src+'</td><td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td><td style="'+td+'">'+tgtPct+'</td><td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td><td style="'+td+'">'+ytdPct+'</td><td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td><td style="'+td+'">'+hoPct+'</td></tr>';
+    html+='<tr><td style="'+tdL+'">'+src+'</td><td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td><td style="'+td+'">'+tgtPct+'</td><td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td><td style="'+td+'">'+ytdPct+'</td><td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td><td style="'+td+'">'+(bw?fmtE(bw):"—")+'</td><td style="'+td+'">'+bwPct+'</td><td style="'+td+'">'+hoPct+'</td></tr>';
   });
-  html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td><td style="'+td+';font-weight:700">'+fmtE(gSrcTcp)+'</td><td style="'+td+';font-weight:700">100%</td><td style="'+td+';font-weight:700">'+fmtE(gSrcYTD)+'</td><td style="'+td+';font-weight:700">100%</td><td style="'+td+';font-weight:700">'+(gSrcTcp>0?(gSrcYTD/gSrcTcp*100).toFixed(0)+"%":"—")+'</td><td style="'+td+';font-weight:700">'+(gSrcYTD>0?(gSrcHO2/gSrcYTD*100).toFixed(0)+"%":"—")+'</td></tr>';
+  html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td><td style="'+td+';font-weight:700">'+fmtE(gSrcTcp)+'</td><td style="'+td+';font-weight:700">100%</td><td style="'+td+';font-weight:700">'+fmtE(gSrcYTD)+'</td><td style="'+td+';font-weight:700">100%</td><td style="'+td+';font-weight:700">'+(gSrcTcp>0?(gSrcYTD/gSrcTcp*100).toFixed(0)+"%":"—")+'</td><td style="'+td+';font-weight:700">'+fmtE(gSrcBW2)+'</td><td style="'+td+';font-weight:700">'+(gSrcYTD>0?(gSrcBW2/gSrcYTD*100).toFixed(0)+"%":"—")+'</td><td style="'+td+';font-weight:700">'+(gSrcYTD>0?(gSrcHO2/gSrcYTD*100).toFixed(0)+"%":"—")+'</td></tr>';
   html+='</tbody></table></div></div>';
   html+='</div>';  // close right side
   html+='</div>';  // close flex row (TCP Source budget + TCP Target by Source)
+  // Table: YTD Pipeline by TCP Source × SDE Engagement Type
+  var _srcEngMatrix={},_engTypes=new Set();
+  var _srcOrder3=["SDE","Marketing","Sales","Partner","CSM"];
+  _srcOrder3.forEach(function(src){_srcEngMatrix[src]={};});
+  pipeData.forEach(function(p){
+    if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+    if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
+    if(_brittL2F){var _prE=_pipeRegNorm[String(p["Region Lvl 2"]||"").toLowerCase().trim()]||String(p["Region Lvl 2"]||"").trim();if(!_brittL2F.has(_prE))return;}
+    if(_brittL3F){var _pr3E=String(p["Region Lvl 3"]||"").trim();if(!_brittL3F.has(_pr3E))return;}
+    if(_sbActF){var _psE=_pipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_sbActF.has(_psE))return;}
+    var src=_pipeSrcMap2[String(p["TCP Pipeline Source Desc"]||"").trim()];if(!src||_srcOrder3.indexOf(src)===-1)return;
+    var eng=String(p["Closing Qtr"]||"").trim();
+    if(!eng)eng="Not Set";
+    _engTypes.add(eng);
+    var eur=parseFloat(p["Eur"]||0)||0;
+    _srcEngMatrix[src][eng]=(_srcEngMatrix[src][eng]||0)+eur;
+  });
+  var _engTypeOrder=Array.from(_engTypes).sort(function(a,b){
+    if(a==="Not Set")return 1;if(b==="Not Set")return -1;
+    return a.localeCompare(b);
+  });
+  var _emPct=window._engMatrixPct===true;
+  var thEM="background:#012931;color:#fff;padding:6px 8px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap";
+  var thEML="background:#012931;color:#fff;padding:6px 8px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap";
+  var tdEM="padding:5px 8px;font-size:12px;border-bottom:1px solid #f0f0f0;text-align:right";
+  var tdEML="padding:5px 8px;font-size:12px;border-bottom:1px solid #f0f0f0;text-align:left";
+  html+='<div class="cc"><div class="ch" style="display:flex;justify-content:space-between;align-items:center"><span>2026 YTD Pipeline by TCP Source &times; Closing Quarter</span>';
+  html+='<span><button onclick="window._engMatrixPct=false;renderBud();" style="font-size:10px;padding:2px 7px;border:1px solid #012931;border-radius:3px;cursor:pointer;margin-right:2px;'+(!_emPct?'background:#012931;color:#fff':'background:#fff;color:#012931')+'">kEUR</button>';
+  html+='<button onclick="window._engMatrixPct=true;renderBud();" style="font-size:10px;padding:2px 7px;border:1px solid #012931;border-radius:3px;cursor:pointer;'+(_emPct?'background:#012931;color:#fff':'background:#fff;color:#012931')+'">%</button></span>';
+  html+='</div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<th style="'+thEML+'">TCP Source</th>';
+  _engTypeOrder.forEach(function(e){html+='<th style="'+thEM+'">'+e+'</th>';});
+  html+='<th style="'+thEM+'">Total</th></tr></thead><tbody>';
+  var _engColTotals={};
+  _srcOrder3.forEach(function(src){
+    var rowTotal=_engTypeOrder.reduce(function(s,e){return s+(_srcEngMatrix[src][e]||0);},0);
+    if(!rowTotal)return;
+    html+='<tr><td style="'+tdEML+'">'+src+'</td>';
+    _engTypeOrder.forEach(function(e){
+      var v=_srcEngMatrix[src][e]||0;
+      _engColTotals[e]=(_engColTotals[e]||0)+v;
+      var disp=_emPct?(rowTotal>0?(v/rowTotal*100).toFixed(0)+"%":"—"):(v?fmtE(v):"—");
+      html+='<td style="'+tdEM+'">'+disp+'</td>';
+    });
+    html+='<td style="'+tdEM+';font-weight:700">'+(_emPct?"100%":fmtE(rowTotal))+'</td></tr>';
+  });
+  var _engGrandTotal=_engTypeOrder.reduce(function(s,e){return s+(_engColTotals[e]||0);},0);
+  html+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdEML+'">Total</td>';
+  _engTypeOrder.forEach(function(e){var v=_engColTotals[e]||0;html+='<td style="'+tdEM+'">'+(_emPct?(_engGrandTotal>0?(v/_engGrandTotal*100).toFixed(0)+"%":"—"):fmtE(v))+'</td>';});
+  html+='<td style="'+tdEM+'">'+(_emPct?"100%":fmtE(_engGrandTotal))+'</td></tr>';
+  html+='</tbody></table></div></div>';
+  // Copy table: YTD Pipeline by TCP Source × Closing Quarter — filtered by Touched bucket
+  var _tMode=window._touchedFilter||"all";
+  var _tcMatrix={},_tcTypes=new Set();
+  var _tcOrder=["SDE","Marketing","Sales","Partner","CSM"];
+  _tcOrder.forEach(function(src){_tcMatrix[src]={};});
+  pipeData.forEach(function(p){
+    if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+    if(drmFilters.size&&!drmFilters.has(String(p["DRM Category"]||"").trim()))return;
+    if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
+    if(_brittL2F){var _prT=_pipeRegNorm[String(p["Region Lvl 2"]||"").toLowerCase().trim()]||String(p["Region Lvl 2"]||"").trim();if(!_brittL2F.has(_prT))return;}
+    if(_brittL3F){var _pr3T=String(p["Region Lvl 3"]||"").trim();if(!_brittL3F.has(_pr3T))return;}
+    if(_sbActF){var _psT=_pipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_sbActF.has(_psT))return;}
+    var src=_pipeSrcMap2[String(p["TCP Pipeline Source Desc"]||"").trim()];if(!src||_tcOrder.indexOf(src)===-1)return;
+    var ud=p["Untouched Days"];var udNum=(ud===null||ud===undefined||ud==="")?null:parseInt(ud);
+    var bucket=udNum===null?"other":udNum<=30?"30":udNum<=60?"60":"other";
+    if(_tMode!=="all"&&bucket!==_tMode)return;
+    var qtr=String(p["Closing Qtr"]||"").trim();if(!qtr)qtr="Not Set";
+    _tcTypes.add(qtr);
+    var eur=parseFloat(p["Eur"]||0)||0;
+    _tcMatrix[src][qtr]=(_tcMatrix[src][qtr]||0)+eur;
+  });
+  var _tcQtrOrder=Array.from(_tcTypes).sort(function(a,b){if(a==="Not Set")return 1;if(b==="Not Set")return -1;return a.localeCompare(b);});
+  var _tcPct=window._engMatrixPct===true;
+  var _tModes=["all","30","60","other"];var _tLabels={"all":"All","30":"≤ 30d","60":"31–60d","other":">60d"};
+  html+='<div class="cc" style="margin-top:12px"><div class="ch" style="display:flex;justify-content:space-between;align-items:center"><span>2026 YTD Pipeline by TCP Source &times; Closing Quarter — Touched</span>';
+  html+='<span style="display:flex;gap:4px">';
+  _tModes.forEach(function(m){html+='<button onclick="window._touchedFilter=\''+m+'\';renderBud();" style="font-size:10px;padding:2px 7px;border:1px solid #012931;border-radius:3px;cursor:pointer;'+(m===_tMode?'background:#012931;color:#fff':'background:#fff;color:#012931')+'">'+_tLabels[m]+'</button>';});
+  html+='<button onclick="window._engMatrixPct=false;renderBud();" style="font-size:10px;padding:2px 7px;border:1px solid #666;border-radius:3px;cursor:pointer;margin-left:6px;'+(!_tcPct?'background:#555;color:#fff':'background:#fff;color:#666')+'">kEUR</button>';
+  html+='<button onclick="window._engMatrixPct=true;renderBud();" style="font-size:10px;padding:2px 7px;border:1px solid #666;border-radius:3px;cursor:pointer;'+(_tcPct?'background:#555;color:#fff':'background:#fff;color:#666')+'">%</button>';
+  html+='</span></div>';
+  html+='<div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<th style="'+thEML+'">TCP Source</th>';
+  _tcQtrOrder.forEach(function(q){html+='<th style="'+thEM+'">'+q+'</th>';});
+  html+='<th style="'+thEM+'">Total</th></tr></thead><tbody>';
+  var _tcColTotals={};
+  _tcOrder.forEach(function(src){
+    var rowTotal=_tcQtrOrder.reduce(function(s,q){return s+(_tcMatrix[src][q]||0);},0);
+    if(!rowTotal)return;
+    html+='<tr><td style="'+tdEML+'">'+src+'</td>';
+    _tcQtrOrder.forEach(function(q){
+      var v=_tcMatrix[src][q]||0;
+      _tcColTotals[q]=(_tcColTotals[q]||0)+v;
+      var disp=_tcPct?(rowTotal>0?(v/rowTotal*100).toFixed(0)+"%":"—"):(v?fmtE(v):"—");
+      html+='<td style="'+tdEM+'">'+disp+'</td>';
+    });
+    html+='<td style="'+tdEM+';font-weight:700">'+(_tcPct?"100%":fmtE(rowTotal))+'</td></tr>';
+  });
+  var _tcGrandTotal=_tcQtrOrder.reduce(function(s,q){return s+(_tcColTotals[q]||0);},0);
+  html+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdEML+'">Total</td>';
+  _tcQtrOrder.forEach(function(q){var v=_tcColTotals[q]||0;html+='<td style="'+tdEM+'">'+(_tcPct?(_tcGrandTotal>0?(v/_tcGrandTotal*100).toFixed(0)+"%":"—"):fmtE(v))+'</td>';});
+  html+='<td style="'+tdEM+'">'+(_tcPct?"100%":fmtE(_tcGrandTotal))+'</td></tr>';
+  html+='</tbody></table></div></div>';
   html+='</div>';  // close left column
   var _sbDrillMode2="sol3";
   html+='<div class="cc" style="flex:1;min-width:0"><div class="ch"><span>2026 TCP Target Attainment by Sales Bag (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:40%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup><thead><tr>';
@@ -5872,6 +5980,132 @@ function renderDtr(){
     });
     html+='</tbody></table></div></div>';
   })();
+
+  // Profiling → Prospect tag bridge table
+  (function(){
+    var _profMetaArrDtr=Object.values(window.CAMP_PROF_META||{}).filter(function(m){
+      if(window._dtrYearFilter)return (String(m.created||'').slice(0,4)===window._dtrYearFilter);
+      return true;
+    });
+    var _tagProsCount={};
+    (window.PROSPECT_DATA||[]).forEach(function(p){
+      if(!p.tg)return;
+      String(p.tg).split(',').forEach(function(t){t=t.trim();if(t)_tagProsCount[t]=(_tagProsCount[t]||0)+1;});
+    });
+    var _seen=new Set();var _rows=[];
+    _profMetaArrDtr.forEach(function(m){
+      var dcm=String(m.ddm1||'').trim();if(!dcm)dcm='(No DCM)';
+      var tag=String(m.tagOut||m.tag||'').trim();
+      if(!tag||tag==='-'||tag==='--')return;
+      var key=dcm+'|||'+tag;if(_seen.has(key))return;_seen.add(key);
+      _rows.push({dcm:dcm,tag:tag,count:_tagProsCount[tag]||0});
+    });
+    _rows.sort(function(a,b){return b.count-a.count||a.dcm.localeCompare(b.dcm);});
+    var thS='background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;margin-bottom:6px">';
+    html+='<div class="sec" style="margin-bottom:0">Profiling &#8594; Prospect Tag Bridge</div>';
+    html+='<button onclick="window._exportProfProsBridgeTable()" style="padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">&#11015; Export CSV</button>';
+    html+='</div>';
+    window._exportProfProsBridgeTable=function(){
+      var rows=[['DCM','Tag','# Prospects']];
+      _rows.forEach(function(r){rows.push([r.dcm,r.tag,r.count]);});
+      function esc(v){v=String(v||'');return v.indexOf(',')>-1||v.indexOf('"')>-1?'"'+v.replace(/"/g,'""')+'"':v;}
+      var csv='﻿'+rows.map(function(r){return r.map(esc).join(',');}).join('\n');
+      var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='profiling_prospect_bridge.csv';a.click();
+    };
+    window._profBridgeTagFilter=window._profBridgeTagFilter||null;
+    window._prosTagClick=function(el,tag){
+      var active=window._profBridgeTagFilter===tag;
+      document.querySelectorAll('#prof-bridge-tbody tr').forEach(function(r){r.style.background='';r.style.outline='';});
+      if(active){window._profBridgeTagFilter=null;}
+      else{window._profBridgeTagFilter=tag;el.style.background='#dbeafe';el.style.outline='2px solid #00144A';}
+      window._renderProsDetailTable();
+      if(!active){var el2=document.getElementById('pros-detail-section');if(el2)el2.scrollIntoView({behavior:'smooth',block:'start'});}
+    };
+    html+='<div class="cc"><div style="overflow:auto;max-height:400px"><table id="prof-bridge-tbl" style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
+    html+='<th style="'+thS+';width:25%">DCM</th><th style="'+thS+';width:60%">Tag</th><th style="'+thS+';width:15%;text-align:right">Prospects</th></tr></thead><tbody id="prof-bridge-tbody">';
+    _rows.forEach(function(row,i){
+      var bg=i%2===0?'#fff':'#F8FBFF';
+      var cStyle='text-align:right;font-weight:'+(row.count>0?'700':'400')+';color:'+(row.count>0?'#00144A':'#B0B0B0');
+      var tagEsc=row.tag.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+bg+';cursor:pointer" onclick="window._prosTagClick(this,\''+tagEsc+'\')">'
+        +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+row.dcm+'</td>'
+        +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+row.tag+'">'+row.tag+'</td>'
+        +'<td style="padding:5px 10px;'+cStyle+'">'+row.count.toLocaleString()+'</td>'
+        +'</tr>';
+    });
+    html+='</tbody></table></div></div>';
+  })();
+
+  // Prospect detail table by profiling tag
+  (function(){
+    var _profTags=new Set();
+    Object.values(window.CAMP_PROF_META||{}).forEach(function(m){
+      var t=String(m.tagOut||m.tag||'').trim();if(t&&t!=='-'&&t!=='--')_profTags.add(t);
+    });
+    var _detRows=[];
+    (window.PROSPECT_DATA||[]).forEach(function(p){
+      if(!p.tg)return;
+      String(p.tg).split(',').forEach(function(t){
+        t=t.trim();if(!t||!_profTags.has(t))return;
+        _detRows.push({tag:t,name:(p.fn||'')+' '+(p.ln||''),co:p.co||'',created:p.created||'',touched:p.touched||''});
+      });
+    });
+    _detRows.sort(function(a,b){return a.tag.localeCompare(b.tag)||(b.touched||'').localeCompare(a.touched||'');});
+    window._profDetailRowsAll=_detRows;
+    function fmtDt(s){if(!s)return'—';var d=s.slice(0,10);return d==='0000-00-00'?'—':d;}
+    window._fmtDtPros=fmtDt;
+    function buildRows(rows){
+      var h='';
+      rows.forEach(function(row,i){
+        var bg=i%2===0?'#fff':'#F8FBFF';
+        h+='<tr style="border-bottom:1px solid #EBEBEB;background:'+bg+'">'
+          +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+row.tag+'">'+row.tag+'</td>'
+          +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+row.name+'</td>'
+          +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+row.co+'</td>'
+          +'<td style="padding:5px 10px;text-align:right">'+fmtDt(row.created)+'</td>'
+          +'<td style="padding:5px 10px;text-align:right">'+fmtDt(row.touched)+'</td>'
+          +'</tr>';
+      });
+      return h;
+    }
+    window._renderProsDetailTable=function(){
+      var tbody=document.getElementById('pros-detail-tbody');
+      var label=document.getElementById('pros-detail-label');
+      if(!tbody)return;
+      var tag=window._profBridgeTagFilter;
+      var rows=window._profDetailRowsAll||[];
+      if(tag)rows=rows.filter(function(r){return r.tag===tag;});
+      tbody.innerHTML=buildRows(rows);
+      if(label)label.textContent=tag?'Prospects by Profiling Tag — '+tag+' ('+rows.length+')':'Prospects by Profiling Tag';
+    };
+    var thD='background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0';
+    html+='<div id="pros-detail-section" style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;margin-bottom:6px">';
+    html+='<div class="sec" style="margin-bottom:0"><span id="pros-detail-label">Prospects by Profiling Tag</span></div>';
+    html+='<div style="display:flex;gap:6px">';
+    html+='<button onclick="window._prosTagClick(null,null);window._profBridgeTagFilter=null;document.querySelectorAll(\'#prof-bridge-tbody tr\').forEach(function(r){r.style.background=\'\';r.style.outline=\'\';});window._renderProsDetailTable();" style="padding:4px 10px;background:#6B7280;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">&#10005; Clear</button>';
+    html+='<button onclick="window._exportProfProsDetail()" style="padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">&#11015; Export CSV</button>';
+    html+='</div></div>';
+    window._exportProfProsDetail=function(){
+      var tag=window._profBridgeTagFilter;
+      var rows=window._profDetailRowsAll||[];
+      if(tag)rows=rows.filter(function(r){return r.tag===tag;});
+      var out=[['Tag','Name','Company','Created','Last Contacted']];
+      rows.forEach(function(r){out.push([r.tag,r.name,r.co,fmtDt(r.created),fmtDt(r.touched)]);});
+      function esc(v){v=String(v||'');return v.indexOf(',')>-1||v.indexOf('"')>-1?'"'+v.replace(/"/g,'""')+'"':v;}
+      var csv='﻿'+out.map(function(r){return r.map(esc).join(',');}).join('\n');
+      var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='prospects_by_profiling_tag.csv';a.click();
+    };
+    html+='<div class="cc"><div style="overflow:auto;max-height:500px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
+    html+='<th style="'+thD+';width:22%">Tag</th>';
+    html+='<th style="'+thD+';width:20%">Name</th>';
+    html+='<th style="'+thD+';width:30%">Company</th>';
+    html+='<th style="'+thD+';width:14%;text-align:right">Created</th>';
+    html+='<th style="'+thD+';width:14%;text-align:right">Last Contacted</th></tr></thead><tbody id="pros-detail-tbody">';
+    html+=buildRows(_detRows);
+    html+='</tbody></table></div></div>';
+  })();
+
   page.innerHTML=html;
   }catch(e){page.innerHTML='<div class="nr"><div class="ni">&#9888;</div><p><b>Error:</b> '+e.message+'</p></div>';console.error(e);}
 }
