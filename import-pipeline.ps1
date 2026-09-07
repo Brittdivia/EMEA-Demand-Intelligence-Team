@@ -88,9 +88,18 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
         [double]::TryParse($eurRaw, [ref]$eur) | Out-Null
     }
 
+    $untouchedDays = $null
+    $untouchedRaw = GetByHeader 'Untouched Days'
+    if (-not [string]::IsNullOrWhiteSpace($untouchedRaw)) {
+        $ud = 0.0
+        if ([double]::TryParse($untouchedRaw, [ref]$ud)) { $untouchedDays = [int]$ud }
+    }
+
     $fields  = '"Opp Campaign ID":"'         + (EscapeJson (GetByHeader 'Opp Campaign ID'))           + '"'
     $fields += ',"Opportunity ID":"'         + (EscapeJson $oppId)                                    + '"'
     $fields += ',"Eur":'                     + $eur
+    $udJson = if ($null -eq $untouchedDays) { 'null' } else { "$untouchedDays" }
+    $fields += ',"Untouched Days":'          + $udJson
     $fields += ',"DRM Category":"'           + (EscapeJson (GetByHeader 'DRM Category'))              + '"'
     $fields += ',"SDE Handover Date":"'      + (EscapeJson (ConvertTo-DateStr (GetByHeader 'SDE Handover Date'))) + '"'
     $fields += ',"SDE Handover Role":"'      + (EscapeJson (GetByHeader 'SDE Handover Role'))                    + '"'
