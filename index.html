@@ -420,7 +420,7 @@ function sk(k){return k.replace(/[^a-zA-Z0-9]/g,"_");}
 // Security: get current user email (stored in localStorage)
 function getSecUser(){return(localStorage.getItem("sec_user_email")||"").toLowerCase().trim();}
 function setSecUser(email){localStorage.setItem("sec_user_email",email.toLowerCase().trim());updateAdminTabs();}
-function isAdminUser(){return getSecUser().indexOf("i572929")!==-1;}
+function isAdminUser(){var u=getSecUser();return u.indexOf("i572929")!==-1||u.indexOf("brittany.di.via")!==-1;}
 function updateAdminTabs(){var adm=isAdminUser();["tab-btn-out","tab-btn-pdel","tab-btn-dtr"].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display=adm?"":"none";});}
 function getSecEntry(){
   var email=getSecUser();if(!email)return null;
