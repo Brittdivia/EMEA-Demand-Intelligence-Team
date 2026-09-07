@@ -73,6 +73,21 @@ function EscapeJson($val) {
     return $s
 }
 
+# Normalise a multi-value tag cell: split on newlines/semicolons, strip -Existing/-New, deduplicate
+function NormTagList($val) {
+    if ([string]::IsNullOrWhiteSpace($val)) { return '' }
+    $parts = $val -split "[`r`n;]+" | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
+    $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    $out  = [System.Collections.Generic.List[string]]::new()
+    foreach ($p in $parts) {
+        # Strip common -Existing / -New / _Existing / _New / (Existing) / (New) suffixes
+        $clean = $p -replace '\s*[-_]\s*(Existing|New)\s*$','' -replace '\s*\((Existing|New)\)\s*$',''
+        $clean = $clean.Trim()
+        if ($clean -ne '' -and $seen.Add($clean)) { $out.Add($clean) }
+    }
+    return $out -join ','
+}
+
 # Get headers
 $headers = @{}
 $row0 = $rows[0]
@@ -170,6 +185,7 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
         $val = GetByHeader $srcHdr
         if ($dateColsSrc -contains $srcHdr) { $val = ConvertTo-ExcelDate $val }
         if ($destKey -eq 'Executor') { $val = NormExecutor $val }
+        if ($destKey -eq 'Profiling to Outreach Tag') { $val = NormTagList $val }
         $fields.Add('"' + (EscapeJson $destKey) + '":"' + (EscapeJson $val) + '"')
     }
     $campRows.Add('{' + ($fields -join ',') + '}')
