@@ -102,7 +102,6 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
     $fields += ',"Untouched Days":'          + $udJson
     $fields += ',"DRM Category":"'           + (EscapeJson (GetByHeader 'DRM Category'))              + '"'
     $fields += ',"SDE Handover Date":"'      + (EscapeJson (ConvertTo-DateStr (GetByHeader 'SDE Handover Date'))) + '"'
-    $fields += ',"SDE Handover Role":"'      + (EscapeJson (GetByHeader 'SDE Handover Role'))                    + '"'
     $fields += ',"Create Date":"'            + (EscapeJson (ConvertTo-DateStr (GetByHeader 'Create Date')))       + '"'
     $fields += ',"Create Quarter":"'         + (EscapeJson (GetByHeader 'Create Quarter'))            + '"'
     $fields += ',"Closing Qtr":"'            + (EscapeJson (GetByHeader 'Closing Qtr'))               + '"'
@@ -110,21 +109,15 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
     $gbId = GetByHeader 'GB Identifier'
     if ([string]::IsNullOrWhiteSpace($gbId)) { $gbId = GetByHeader 'MM Identifier' }
     $fields += ',"MM Identifier":"'          + (EscapeJson $gbId)                                     + '"'
-    $fields += ',"RBC":"'                    + (EscapeJson (GetByHeader 'RBC'))                       + '"'
-    $fields += ',"Account Name":"'           + (EscapeJson (GetByHeader 'Account Name'))              + '"'
     $fields += ',"Region Lvl 2":"'           + (EscapeJson (GetByHeader 'Region Lvl 2'))              + '"'
     $fields += ',"Region Lvl 3":"'           + (EscapeJson (GetByHeader 'Region Lvl 3'))              + '"'
-    $fields += ',"SAP Mastercode":"'         + (EscapeJson (GetByHeader 'SAP Mastercode'))            + '"'
     $fields += ',"Solution Area (L1)":"'     + (EscapeJson (GetByHeader 'Solution Area (L1)'))        + '"'
     $fields += ',"Sub-Solution Area (L2)":"' + (EscapeJson (GetByHeader 'Sub-Solution Area (L2)'))    + '"'
     $fields += ',"IAC (Engagement Model)":"' + (EscapeJson (GetByHeader 'IAC (Engagement Model)'))    + '"'
     $fields += ',"SDE Engagement Type":"'    + (EscapeJson (GetByHeader 'SDE Engagement Type'))       + '"'
-    $fields += ',"SDE Initial Engagement Role":"' + (EscapeJson (GetByHeader 'SDE Initial Engagement Role')) + '"'
     $fields += ',"SDE Initial Engagement Name":"' + (EscapeJson (GetByHeader 'SDE Initial Engagement Name')) + '"'
     $fields += ',"SDE Primary Engagement Name":"' + (EscapeJson (GetByHeader 'SDE Primary Engagement Name')) + '"'
     $fields += ',"SDE Secondary Engagement Name":"' + (EscapeJson (GetByHeader 'SDE Secondary Engagement Name')) + '"'
-    $fields += ',"SDE Territory Owner":"'    + (EscapeJson (GetByHeader 'SDE Current Territory Owner Name')) + '"'
-    $fields += ',"Opp Description":"'        + (EscapeJson (GetByHeader 'Opp Description'))           + '"'
 
     $pipeRows.Add('{' + $fields + '}')
 }
