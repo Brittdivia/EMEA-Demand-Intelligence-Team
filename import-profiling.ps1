@@ -50,9 +50,10 @@ foreach ($row in $rows) {
 
     $title      = $row.Title
     $tag        = $row.'Tag of Prospects'
-    $tagOut     = $row.'Tag for Outreach'
+    $tagOut     = $row.'Profiling to Outreach'
 
-    # If Tag for Outreach is blank, fall back to any column with "tag" in the header
+    # Fall back to 'Tag for Outreach', then any *tag* column if new column is blank
+    if ([string]::IsNullOrWhiteSpace($tagOut)) { $tagOut = $row.'Tag for Outreach' }
     if ([string]::IsNullOrWhiteSpace($tagOut)) {
         $fallbackProp = $row.PSObject.Properties | Where-Object {
             $_.Name -ne 'Tag for Outreach' -and
