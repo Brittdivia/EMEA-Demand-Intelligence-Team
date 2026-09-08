@@ -118,6 +118,7 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
     $fields += ',"SDE Initial Engagement Name":"' + (EscapeJson (GetByHeader 'SDE Initial Engagement Name')) + '"'
     $fields += ',"SDE Primary Engagement Name":"' + (EscapeJson (GetByHeader 'SDE Primary Engagement Name')) + '"'
     $fields += ',"SDE Secondary Engagement Name":"' + (EscapeJson (GetByHeader 'SDE Secondary Engagement Name')) + '"'
+    $fields += ',"IC_ACCOUNT_SRG_TEXT":"'         + (EscapeJson (GetByHeader 'IC_ACCOUNT_SRG_TEXT'))           + '"'
 
     $pipeRows.Add('{' + $fields + '}')
 }

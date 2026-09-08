@@ -1773,7 +1773,7 @@ function renderExe(){try{
     // Pipeline Created 2026 by Region table
     var _regTbl=document.getElementById("exe-pipe-reg-tbl");
     if(_regTbl){
-      var _regTotals={},_regHO={};
+      var _regData={};
       pipeData.forEach(function(p){
         if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
         if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
@@ -1782,25 +1782,54 @@ function renderExe(){try{
         if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rf5L3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rf5L3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
         if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
         if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
-        var reg=String(p["Region Lvl 2"]||"").trim()||"Other";
+        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
+        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
+        var team=String(p["IC_ACCOUNT_SRG_TEXT"]||"").trim();
         var eur=parseFloat(p["Eur"]||0)||0;
-        _regTotals[reg]=(_regTotals[reg]||0)+eur;
-        if(hasHod(p["SDE Handover Date"]))_regHO[reg]=(_regHO[reg]||0)+eur;
+        var isWon=String(p["DRM Category"]||"").trim()==="Booked/Won";
+        if(!_regData[l2])_regData[l2]={pipe:0,won:0,l3s:{}};
+        _regData[l2].pipe+=eur;if(isWon)_regData[l2].won+=eur;
+        if(!_regData[l2].l3s[l3])_regData[l2].l3s[l3]={pipe:0,won:0,teams:{}};
+        _regData[l2].l3s[l3].pipe+=eur;if(isWon)_regData[l2].l3s[l3].won+=eur;
+        if(team){if(!_regData[l2].l3s[l3].teams[team])_regData[l2].l3s[l3].teams[team]={pipe:0,won:0};_regData[l2].l3s[l3].teams[team].pipe+=eur;if(isWon)_regData[l2].l3s[l3].teams[team].won+=eur;}
       });
-      var _regOrder=Object.keys(_regTotals).sort(function(a,b){return _regTotals[b]-_regTotals[a];});
-      var _regGrand=_regOrder.reduce(function(s,k){return s+_regTotals[k];},0);
-      var _regHOGrand=_regOrder.reduce(function(s,k){return s+(_regHO[k]||0);},0);
+      if(!window._rtExpL2)window._rtExpL2=new Set();
+      if(!window._rtExpL3)window._rtExpL3=new Set();
+      window._rtL2Keys=[];window._rtL3Keys=[];
+      window._rtTogL2=function(i){var k=window._rtL2Keys[i];window._rtExpL2.has(k)?window._rtExpL2.delete(k):window._rtExpL2.add(k);renderExe();};
+      window._rtTogL3=function(i){var k=window._rtL3Keys[i];window._rtExpL3.has(k)?window._rtExpL3.delete(k):window._rtExpL3.add(k);renderExe();};
+      var _l2Order=Object.keys(_regData).sort(function(a,b){return _regData[b].pipe-_regData[a].pipe;});
+      var _regGrand={pipe:0,won:0};_l2Order.forEach(function(k){_regGrand.pipe+=_regData[k].pipe;_regGrand.won+=_regData[k].won;});
       var thT2="background:#012931;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap";
       var thTR2=thT2+";text-align:right";
       var tdT2="padding:5px 10px;font-size:12px;border-bottom:1px solid #f0f0f0";
-      var tbl2='<div class="cc"><div class="ch">Total Pipeline Created 2026 — by Region</div><div style="max-height:200px;overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>';
-      tbl2+='<th style="'+thT2+'">Region</th><th style="'+thTR2+'">Pipeline Created (kEUR)</th><th style="'+thTR2+'">Handed Over (kEUR)</th><th style="'+thTR2+'">HO %</th></tr></thead><tbody>';
-      _regOrder.forEach(function(r){
-        var v=_regTotals[r]||0,ho=_regHO[r]||0;
-        var hoPct=v>0?(ho/v*100).toFixed(0)+"%":"—";
-        tbl2+='<tr><td style="'+tdT2+'">'+fmtReg(r)+'</td><td style="'+tdT2+';text-align:right">'+fmtE(v)+'</td><td style="'+tdT2+';text-align:right">'+(ho?fmtE(ho):"—")+'</td><td style="'+tdT2+';text-align:right">'+hoPct+'</td></tr>';
+      var tbl2='<div class="cc"><div class="ch">Total Pipeline Created 2026 — by Region</div><div style="max-height:300px;overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>';
+      tbl2+='<th style="'+thT2+'">Region</th><th style="'+thTR2+'">Pipeline (kEUR)</th><th style="'+thTR2+'">Won &amp; Booked (kEUR)</th><th style="'+thTR2+'">Won %</th></tr></thead><tbody>';
+      _l2Order.forEach(function(l2){
+        var d=_regData[l2];
+        var l2i=window._rtL2Keys.push(l2)-1;
+        var isExpL2=window._rtExpL2.has(l2);
+        var wonPct=d.pipe>0?(d.won/d.pipe*100).toFixed(0)+"%":"—";
+        var l3Keys=Object.keys(d.l3s).sort(function(a,b){return d.l3s[b].pipe-d.l3s[a].pipe;});
+        var expBtn='<span onclick="_rtTogL2('+l2i+')" style="cursor:pointer;margin-right:4px;user-select:none">'+(isExpL2?'&#9660;':'&#9654;')+'</span>';
+        tbl2+='<tr style="background:#eef3f3"><td style="'+tdT2+';font-weight:600">'+expBtn+fmtReg(l2)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(d.pipe)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(d.won?fmtE(d.won):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+wonPct+'</td></tr>';
+        if(isExpL2){l3Keys.forEach(function(l3){
+          var d3=d.l3s[l3];
+          var l3k=l2+'||'+l3;
+          var l3i=window._rtL3Keys.push(l3k)-1;
+          var isExpL3=window._rtExpL3.has(l3k);
+          var wonPct3=d3.pipe>0?(d3.won/d3.pipe*100).toFixed(0)+"%":"—";
+          var teamKeys=Object.keys(d3.teams).sort(function(a,b){return d3.teams[b].pipe-d3.teams[a].pipe;});
+          var expBtn3=teamKeys.length?'<span onclick="_rtTogL3('+l3i+')" style="cursor:pointer;margin-right:4px;user-select:none">'+(isExpL3?'&#9660;':'&#9654;')+'</span>':'<span style="display:inline-block;width:14px;margin-right:4px"></span>';
+          tbl2+='<tr><td style="'+tdT2+';padding-left:22px">'+expBtn3+l3+'</td><td style="'+tdT2+';text-align:right">'+fmtE(d3.pipe)+'</td><td style="'+tdT2+';text-align:right">'+(d3.won?fmtE(d3.won):"—")+'</td><td style="'+tdT2+';text-align:right">'+wonPct3+'</td></tr>';
+          if(isExpL3){teamKeys.forEach(function(tm){
+            var dt=d3.teams[tm];
+            var wonPctT=dt.pipe>0?(dt.won/dt.pipe*100).toFixed(0)+"%":"—";
+            tbl2+='<tr style="background:#fafafa"><td style="'+tdT2+';padding-left:40px;font-size:11px;color:#555">'+tm+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+fmtE(dt.pipe)+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(dt.won?fmtE(dt.won):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+wonPctT+'</td></tr>';
+          });}
+        });}
       });
-      tbl2+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td><td style="'+tdT2+';text-align:right">'+fmtE(_regGrand)+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_regHOGrand)+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand>0?(_regHOGrand/_regGrand*100).toFixed(0)+"%":"—")+'</td></tr>';
+      tbl2+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td><td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.pipe)+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.won)+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.pipe>0?(_regGrand.won/_regGrand.pipe*100).toFixed(0)+"%":"—")+'</td></tr>';
       tbl2+='</tbody></table></div></div>';
 
       // Calendar contribution % by region

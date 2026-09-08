@@ -80,8 +80,7 @@ function NormTagList($val) {
     $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
     $out  = [System.Collections.Generic.List[string]]::new()
     foreach ($p in $parts) {
-        # Strip common -Existing / -New / _Existing / _New / (Existing) / (New) suffixes
-        $clean = $p -replace '\s*[-_]\s*(Existing|New)\s*$','' -replace '\s*\((Existing|New)\)\s*$',''
+        $clean = $p -replace '\s*[-_]\s*(Existing|New|NewProspects)\s*$','' -replace '\s*\((Existing|New|NewProspects)\)\s*$',''
         $clean = $clean.Trim()
         if ($clean -ne '' -and $seen.Add($clean)) { $out.Add($clean) }
     }
