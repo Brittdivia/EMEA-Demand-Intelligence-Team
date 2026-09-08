@@ -50,18 +50,23 @@ foreach ($row in $rows) {
 
     $title      = $row.Title
     $tag        = $row.'Tag of Prospects'
-    $tagOut     = $row.'Profiling to Outreach'
+    $tagRaw     = $row.'Profiling to Outreach'
 
     # Fall back to 'Tag for Outreach', then any *tag* column if new column is blank
-    if ([string]::IsNullOrWhiteSpace($tagOut)) { $tagOut = $row.'Tag for Outreach' }
-    if ([string]::IsNullOrWhiteSpace($tagOut)) {
+    if ([string]::IsNullOrWhiteSpace($tagRaw)) { $tagRaw = $row.'Tag for Outreach' }
+    if ([string]::IsNullOrWhiteSpace($tagRaw)) {
         $fallbackProp = $row.PSObject.Properties | Where-Object {
             $_.Name -ne 'Tag for Outreach' -and
             $_.Name -like '*tag*' -and
             -not [string]::IsNullOrWhiteSpace($_.Value)
         } | Select-Object -First 1
-        if ($fallbackProp) { $tagOut = $fallbackProp.Value }
+        if ($fallbackProp) { $tagRaw = $fallbackProp.Value }
     }
+    # Normalize: split on " / " (spaced slash) and semicolons/newlines
+    $tagOut = if (-not [string]::IsNullOrWhiteSpace($tagRaw)) {
+        $parts = $tagRaw -split "(\s+/\s+|[;\r\n]+)" | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' -and $_ -notmatch '^[/;]$' }
+        ($parts | Select-Object -Unique) -join ','
+    } else { '' }
 
     $wbs        = $row.'Campaign Code'
     $ddm1       = $row.DDM1
