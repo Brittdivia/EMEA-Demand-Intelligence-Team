@@ -2052,7 +2052,7 @@ function renderBud(){
   var regBW_q={},regLive_q={};
   var rsBW={},rsLv={},rsCP={},rsBW_q={},rsLv_q={};
   // Region L3 accumulators
-  var regL3BW={},regL3Lv={},regL3CP={},regL3BW_q={},regL3Lv_q={},regL3YTD={};
+  var regL3BW={},regL3Lv={},regL3CP={},regL3BW_q={},regL3Lv_q={},regL3YTD={},regL3SrgBW={};
   REGS.forEach(function(rg){
     regBW_q[rg]={};regLive_q[rg]={};regL3BW[rg]={};regL3Lv[rg]={};regL3CP[rg]={};regL3BW_q[rg]={};regL3Lv_q[rg]={};
     rsBW[rg]={};rsLv[rg]={};rsCP[rg]={};rsBW_q[rg]={};rsLv_q[rg]={};
@@ -2082,7 +2082,10 @@ function renderBud(){
     if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable"||drm==="Upside"))regLive[reg]=(regLive[reg]||0)+eur;
     // L3 accumulators
     if(l3&&regL3BW[reg]!==undefined){
-      if(closeQ.startsWith("2026")&&drm==="Booked/Won"){regL3BW[reg][l3]=(regL3BW[reg][l3]||0)+eur;}
+      if(closeQ.startsWith("2026")&&drm==="Booked/Won"){regL3BW[reg][l3]=(regL3BW[reg][l3]||0)+eur;
+        var _srg=String(p["IC_ACCOUNT_SRG_TEXT"]||"").trim();
+        if(_srg){if(!regL3SrgBW[reg])regL3SrgBW[reg]={};if(!regL3SrgBW[reg][l3])regL3SrgBW[reg][l3]={};regL3SrgBW[reg][l3][_srg]=(regL3SrgBW[reg][l3][_srg]||0)+eur;}
+      }
       if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable"||drm==="Upside")){regL3Lv[reg][l3]=(regL3Lv[reg][l3]||0)+eur;}
       if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable")){regL3CP[reg][l3]=(regL3CP[reg][l3]||0)+eur;}
       if(QTRS.indexOf(closeQ)>-1){if(!regL3BW_q[reg][l3])regL3BW_q[reg][l3]={};if(!regL3Lv_q[reg][l3])regL3Lv_q[reg][l3]={};if(drm==="Booked/Won")regL3BW_q[reg][l3][closeQ]=(regL3BW_q[reg][l3][closeQ]||0)+eur;if(drm==="Committed"||drm==="Probable"||drm==="Upside")regL3Lv_q[reg][l3][closeQ]=(regL3Lv_q[reg][l3][closeQ]||0)+eur;}
@@ -2288,7 +2291,9 @@ function renderBud(){
         html+='<td style="padding:2px 6px 2px 62px;font-size:10px;color:#999;border-bottom:1px solid #f4f4f4">'+te.orig+'</td>';
         html+='<td style="'+td+';font-size:10px;color:#999">—</td>';
         html+='<td style="'+td+';font-size:10px;color:#999">'+(tq?fmtE(tq):"—")+'</td>';
-        html+='<td style="'+td+';font-size:10px;color:#999">'+(sbw?fmtE(sbw):"—")+'</td>';
+        var _srgMap=regL3SrgBW[pipeReg]&&regL3SrgBW[pipeReg][l3]?regL3SrgBW[pipeReg][l3]:{};
+        var _teamWon=Object.keys(_srgMap).reduce(function(s,sk){return s+(te.orig.toLowerCase().indexOf(sk.toLowerCase())>-1?(_srgMap[sk]||0):0);},0);
+        html+='<td style="'+td+';font-size:10px;color:#999">'+(_teamWon?fmtE(_teamWon):"—")+'</td>';
         html+=cvgCell(tq>0?(scp/tq).toFixed(1)+"X":"—","font-size:10px;color:#999;");
         html+=cvgCell(tq>0&&_sqLv["2026-Q3"]?(_sqLv["2026-Q3"]/tq).toFixed(1)+"X":"—","font-size:10px;color:#999;");
         html+=cvgCell(tq>0&&_sqLv["2026-Q4"]?(_sqLv["2026-Q4"]/tq).toFixed(1)+"X":"—","font-size:10px;color:#999;");
