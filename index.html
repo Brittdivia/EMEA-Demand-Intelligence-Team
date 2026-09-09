@@ -3231,7 +3231,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     });
     
   }
-  html3+=(pageId!=="ovwPage"?"<div class=\"sec\">Campaign Insights</div>":"");
+  html3+=(pageId!=="ovwPage"?"<div class=\"sec\">Campaign Insights - Overview</div>":"");
   html3+=(pageId!=="ovwPage"?"<div style=\"display:flex;gap:12px;margin-bottom:20px;align-items:stretch\">"
     +"<div class=\"cc\" id=\"card-"+pfx+"-re2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div class=\"ch\" style=\"display:flex;flex-direction:column;gap:4px\"><div style=\"display:flex;align-items:center;justify-content:space-between;gap:8px\"><span id=\"re2-title\" style=\"font-size:12px;font-weight:600;white-space:nowrap\">Pipeline Results - by Region</span><div style=\"display:flex;gap:3px;flex-shrink:0\"><button id=\"re2-vm-acv\" onclick=\"window.re2DataMode=&apos;acv&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">ACV/Opps</button><button id=\"re2-vm-tbl\" onclick=\"window.re2DataMode=&apos;tbl&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Table</button></div></div><div style=\"display:flex;gap:3px;flex-wrap:wrap\"><button id=\"re2-vm-reg\" onclick=\"window.re2ViewMode=&apos;reg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Region</button><button id=\"re2-vm-sb\" onclick=\"window.re2ViewMode=&apos;sb&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Sales Bag</button><button id=\"re2-vm-mc\" onclick=\"window.re2ViewMode=&apos;mc&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Mastercode</button><button id=\"re2-vm-sod\" onclick=\"window.re2ViewMode=&apos;sod&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">SoD</button><button id=\"re2-vm-dat\" onclick=\"window.re2ViewMode=&apos;dat&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DAT</button><button id=\"re2-vm-dg\" onclick=\"window.re2ViewMode=&apos;dg&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">DG Program</button><button id=\"re2-vm-type\" onclick=\"window.re2ViewMode=&apos;type&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Type</button><button id=\"re2-vm-l3\" onclick=\"window.re2ViewMode=&apos;l3&apos;;renderAna();\" style=\"font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Region L3</button></div></div><div class=\"cb\" style=\"height:366px\"><canvas id=\""+pfx+"-re2\"></canvas></div></div>"
     +"<div class=\"cc\" id=\"card-"+pfx+"-re2SB2\" style=\"flex:0 0 50%;min-width:0;overflow:hidden\"><div id=\"ana-drm-tcp-tables\"></div><div id=\"ana-drm-tcp-tables2\"></div></div>"
@@ -3240,36 +3240,29 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
   // DAT Support chart removed - accessible via Type chart toggle
   // All 5 charts only on anaPage
   html3+=(pageId!=="ovwPage"?"":"");
-  html3+=(pageId!=="ovwPage"?"<div style=\"display:flex;gap:12px;margin-bottom:20px;align-items:flex-start;overflow:hidden;max-width:100%\">"
-    +(function(){
-      var drmMap={},drmOpps={};
-      pr.forEach(function(p){
-        var drm=String(p["DRM Category"]||"").trim()||"Unknown";
-        var eur=parseFloat(p["Eur"]||0)||0;
-        var oid=String(p["Opportunity ID"]||"").trim();
-        drmMap[drm]=(drmMap[drm]||0)+eur;
-        if(!drmOpps[drm])drmOpps[drm]=new Set();
-        if(oid)drmOpps[drm].add(oid);
+  if(pageId!=="ovwPage"){html3+='<div class="sec">Campaign Insight Details</div>';}
+  if(pageId!=="ovwPage"){
+    var _wbsSeqCnt={};
+    outData.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();if(w)_wbsSeqCnt[w]=(_wbsSeqCnt[w]||0)+1;});
+    var _exeMap={};
+    data.forEach(function(r){
+      var wbs=String(r["Campaign/WBS Code"]||"").trim();
+      String(r["Executor"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean).forEach(function(ex){
+        if(!_exeMap[ex])_exeMap[ex]={camps:0,seqs:0};
+        _exeMap[ex].camps++;
+        _exeMap[ex].seqs+=(_wbsSeqCnt[wbs]||0);
       });
-      var drmOrder=["Booked/Won","Probable","Committed","Upside","Disc/Lost","Excluded from Pipeline"].filter(function(d){return drmMap[d];});
-      Object.keys(drmMap).forEach(function(d){if(drmOrder.indexOf(d)===-1)drmOrder.push(d);});
-      var thD="background:#012931;color:#fff;padding:5px 8px;font-size:10px;font-weight:700;text-align:left;white-space:nowrap";
-      var thDR=thD+";text-align:right";
-      var tdD="padding:4px 8px;font-size:11px;border-bottom:1px solid #f0f0f0";
-      var grandEur=drmOrder.reduce(function(s,d){return s+(drmMap[d]||0);},0);
-      var grandOpps=new Set(pr.map(function(p){return String(p["Opportunity ID"]||"");})).size;
-      var t='<div class="cc" style="flex:0 0 30%;min-width:200px"><div class="ch" style="padding:4px 8px;font-size:10px">Pipeline by DRM Category</div><div style="overflow:auto;max-height:370px"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+thD+'">DRM Category</th><th style="'+thDR+'">Pipeline Created</th><th style="'+thDR+'"># Opps</th><th style="'+thDR+'">%</th></tr></thead><tbody>';
-      drmOrder.forEach(function(d){
-        var v=drmMap[d]||0,opps=drmOpps[d]?drmOpps[d].size:0;
-        var pct=grandEur>0?(v/grandEur*100).toFixed(0)+"%":"—";
-        t+='<tr><td style="'+tdD+'">'+d+'</td><td style="'+tdD+';text-align:right">'+fmtE(v)+'</td><td style="'+tdD+';text-align:right">'+opps.toLocaleString()+'</td><td style="'+tdD+';text-align:right">'+pct+'</td></tr>';
-      });
-      t+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdD+'">Total</td><td style="'+tdD+';text-align:right">'+fmtE(grandEur)+'</td><td style="'+tdD+';text-align:right">'+grandOpps.toLocaleString()+'</td><td style="'+tdD+';text-align:right">100%</td></tr>';
-      t+='</tbody></table></div></div>';
-      return t;
-    }())
-    +"</div>":"");
-      if(pageId!=="ovwPage"){
+    });
+    var _exeKeys=Object.keys(_exeMap).sort(function(a,b){return _exeMap[b].camps-_exeMap[a].camps;});
+    var _thEx="background:#012931;color:#fff;padding:5px 8px;font-size:10px;font-weight:700;text-align:left;white-space:nowrap";
+    var _thExR=_thEx+";text-align:right";
+    var _tdEx="padding:4px 8px;font-size:11px;border-bottom:1px solid #f0f0f0";
+    var _exeTbl='<div class="cc" style="margin-bottom:20px"><div class="ch">Campaign Executor Summary</div><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+_thEx+'">Executor</th><th style="'+_thExR+'">Campaigns</th><th style="'+_thExR+'">Sequences Connected</th></tr></thead><tbody>';
+    _exeKeys.forEach(function(ex){_exeTbl+='<tr><td style="'+_tdEx+'">'+ex+'</td><td style="'+_tdEx+';text-align:right">'+_exeMap[ex].camps+'</td><td style="'+_tdEx+';text-align:right">'+_exeMap[ex].seqs+'</td></tr>';});
+    _exeTbl+='</tbody></table></div></div>';
+    html3+=_exeTbl;
+  }
+  if(pageId!=="ovwPage"){
   var thS2="background:#012931;color:#fff;padding:5px 6px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;white-space:normal;position:sticky;top:0;border-right:1px solid #1B4F5A;max-width:70px;line-height:1.3";
   var thR2="background:#012931;color:#fff;padding:5px 6px;text-align:right;font-size:9px;font-weight:700;text-transform:uppercase;white-space:normal;position:sticky;top:0;border-right:1px solid #1B4F5A;max-width:70px;line-height:1.3";
   html3+="<div class=\"cgrid\" style=\"grid-template-columns:1fr 1fr\">";
