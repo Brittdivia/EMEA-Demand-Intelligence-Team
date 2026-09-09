@@ -2272,6 +2272,13 @@ function renderBud(){
       var sLive=sRem>0?(slv/sRem).toFixed(1)+"X":"—";
       var _l3Id='bud-t-'+rg.replace(/\s+/g,'_')+'-'+l3.replace(/\W+/g,'_');
       var _l3TeamsObj=(_sprTeamByMu1[rg]&&_sprTeamByMu1[rg][l3.toLowerCase()])||{};
+      if(!Object.keys(_l3TeamsObj).length){
+        var _rgFb=(_sprTeamByMu1[rg]&&_sprTeamByMu1[rg][rg.toLowerCase()])||{};
+        if(Object.keys(_rgFb).length){
+          var _l3SrgK=Object.keys((regL3SrgLv[pipeReg]&&regL3SrgLv[pipeReg][l3])||{}).concat(Object.keys((regL3SrgBW[pipeReg]&&regL3SrgBW[pipeReg][l3])||{}));
+          if(_l3SrgK.length){_l3TeamsObj={};Object.keys(_rgFb).forEach(function(tk){var tlo=_rgFb[tk].orig.toLowerCase();if(_l3SrgK.some(function(sk){return tlo.indexOf(sk.toLowerCase())>-1;}))_l3TeamsObj[tk]=_rgFb[tk];});}
+        }
+      }
       var _l3TeamKeys=Object.keys(_l3TeamsObj).sort(function(a,b){return _l3TeamsObj[a].orig.localeCompare(_l3TeamsObj[b].orig);});
       html+='<tr class="'+rgId+' bud-l3" style="display:none;background:#fafcff"><td style="padding:3px 6px 3px 34px;font-size:11px;color:var(--mu);border-bottom:1px solid #f0f0f0">';
       if(_l3TeamKeys.length){html+='<button onclick="(function(el){var rows=document.querySelectorAll(\'.\'+\''+_l3Id+'\');var open=el.textContent===\'-\';if(open){rows.forEach(function(r){r.style.display=\'none\';}); }else{rows.forEach(function(r){r.style.display=\'\';}); }el.textContent=open?\'+\':\'-\';})(this)" style="width:14px;height:14px;line-height:1;font-size:10px;font-weight:700;border:1px solid #aaa;border-radius:2px;background:#fff;cursor:pointer;margin-right:4px;padding:0">+</button>';}
