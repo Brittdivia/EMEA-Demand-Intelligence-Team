@@ -362,7 +362,7 @@ document.addEventListener("DOMContentLoaded",function(){
   campData.forEach(function(r){var v=r["Region Name (level 2)"];if(v&&_l3AsL2Map[v]&&_l3AsL2Map[v]!==v)r["Region Name (level 2)"]=_l3AsL2Map[v];});
   // Strip "CS " prefix so dropdown shows consistent names (e.g. "Southern Europe" not "CS Southern Europe")
   campData.forEach(function(r){var v=r["Region Name (level 2)"];if(v)r["Region Name (level 2)"]=String(v).replace(/^CS /,"").trim();});
-  pipeData=window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent);
+  pipeData=(window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});
   pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});
   outData=window.OUT_DATA||JSON.parse(document.getElementById("d-out").textContent);
   FD.forEach(function(f){filters[f.k]=new Set();});
@@ -603,6 +603,7 @@ function getOptCounts(key){
     var vals=SPLIT_KEYS.has(key)?String(v).split(",").map(function(s){var t=s.trim();return key==="Sub Sales Bag"&&t.indexOf(" - ")>-1?t.substring(t.indexOf(" - ")+3).trim():t;}).filter(Boolean):[String(v).trim()];
     vals.forEach(function(s){
       if(key==="Status"){s=s==="RunningExecuted"?"Executed":s==="Canceled"?"Cancelled":s;}
+      if(key==="IAC"&&/^E-/i.test(s))return;
       c[s]=(c[s]||0)+1;
     });
   });
@@ -1191,7 +1192,7 @@ function renderExe(){try{
   var _all2026Eur=pipeData.reduce(function(a,p){return String(p["Create Quarter"]||"").indexOf("2026")===0&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"&&(!window._pipeQtrSet||!window._pipeQtrSet.size||window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))?a+(parseFloat(p["Eur"]||0)||0):a;},0);
   var camp2026Pct=_all2026Eur>0?(camp2026Eur/_all2026Eur*100).toFixed(0)+"%":"0%";
   var activeCamps=filtered.filter(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).length;
-  var cfCounts={};filtered.forEach(function(r){String(r["IAC"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean).forEach(function(s){cfCounts[s]=(cfCounts[s]||0)+1;});});
+  var cfCounts={};filtered.forEach(function(r){String(r["IAC"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean).forEach(function(s){if(/^E-/i.test(s))return;cfCounts[s]=(cfCounts[s]||0)+1;});});
   var cfTop=Object.entries(cfCounts).sort(function(a,b){return b[1]-a[1];})[0];
   var cfPct=cfTop&&filtered.length>0?(cfTop[1]/filtered.length*100).toFixed(0)+"%":"0%";
   var cfName=cfTop?cfTop[0]:"";
@@ -1398,8 +1399,8 @@ function renderExe(){try{
     if(btnIacL2){btnIacL2.style.background=_iacRegMode==="l2"?"#00144A":"";btnIacL2.style.color=_iacRegMode==="l2"?"#fff":"";}
     if(btnIacL3){btnIacL3.style.background=_iacRegMode==="l3"?"#00144A":"";btnIacL3.style.color=_iacRegMode==="l3"?"#fff":"";}
     var iacRegs={};
-    var iacOrder=_iacViewMode==="drm"?drmOrder:["C-Field","C-Digital","E-High Touch","Partner-Driven"];
-    var iacColors=_iacViewMode==="drm"?drmOrder.map(function(d){return drmColors[d]||PAL[2];}): [PAL[4],PAL[0],PAL[6],PAL[2]];
+    var iacOrder=_iacViewMode==="drm"?drmOrder:["C-Field","C-Digital","Partner-Driven"];
+    var iacColors=_iacViewMode==="drm"?drmOrder.map(function(d){return drmColors[d]||PAL[2];}): [PAL[4],PAL[0],PAL[2]];
     _chartPipe.forEach(function(p){
       var w=String(p["Opp Campaign ID"]||"").trim();
       var oppL2p=String(p["Region Lvl 2"]||"").trim();
@@ -2293,19 +2294,29 @@ function renderBud(){
       html+=cvgCell(q1Bud27>0?(slv/q1Bud27).toFixed(1)+"X":"—","font-size:11px;");
       html+=cvgCell(q2Bud27>0?(slv/q2Bud27).toFixed(1)+"X":"—","font-size:11px;");
       html+='</tr>';
+      var _srgLvMap=(regL3SrgLv[pipeReg]&&regL3SrgLv[pipeReg][l3])||{};
+      var _srgBwMap=(regL3SrgBW[pipeReg]&&regL3SrgBW[pipeReg][l3])||{};
+      var _srgCpMap=(regL3SrgCP[pipeReg]&&regL3SrgCP[pipeReg][l3])||{};
+      var _srgQMapG=(regL3SrgLv_q[pipeReg]&&regL3SrgLv_q[pipeReg][l3])||{};
+      var _srgAllK=new Set(Object.keys(_srgLvMap).concat(Object.keys(_srgBwMap)).concat(Object.keys(_srgCpMap)).concat(Object.keys(_srgQMapG)));
+      var _srgShare={};
+      _srgAllK.forEach(function(sk){
+        var sklo=sk.toLowerCase();
+        var n=_l3TeamKeys.filter(function(tk){return _l3TeamsObj[tk].orig.toLowerCase().indexOf(sklo)>-1;}).length;
+        _srgShare[sk]=n||1;
+      });
       _l3TeamKeys.forEach(function(tk){
         var te=_l3TeamsObj[tk];var tq=te.q||0;
         var _tlo=te.orig.toLowerCase();
-        function _tsum(m){return m?Object.keys(m).reduce(function(s,sk){return s+(_tlo.indexOf(sk.toLowerCase())>-1?(m[sk]||0):0);},0):0;}
-        var _teamWon=_tsum(regL3SrgBW[pipeReg]&&regL3SrgBW[pipeReg][l3]);
-        var _teamLv=_tsum(regL3SrgLv[pipeReg]&&regL3SrgLv[pipeReg][l3]);
-        var _teamCP=_tsum(regL3SrgCP[pipeReg]&&regL3SrgCP[pipeReg][l3]);
+        function _tsum(m){return Object.keys(m).reduce(function(s,sk){return s+(_tlo.indexOf(sk.toLowerCase())>-1?(m[sk]||0)/(_srgShare[sk]||1):0);},0);}
+        var _teamWon=_tsum(_srgBwMap);
+        var _teamLv=_tsum(_srgLvMap);
+        var _teamCP=_tsum(_srgCpMap);
         var _teamRem=Math.max(0,tq-_teamWon);
         var _teamFcst=_teamRem>0?(_teamCP/_teamRem).toFixed(1)+"X":"—";
         var _teamLiveCvg=_teamRem>0?(_teamLv/_teamRem).toFixed(1)+"X":"—";
-        var _srgQMap=regL3SrgLv_q[pipeReg]&&regL3SrgLv_q[pipeReg][l3]?regL3SrgLv_q[pipeReg][l3]:{};
-        var _teamQ3=Object.keys(_srgQMap).reduce(function(s,sk){return s+(_tlo.indexOf(sk.toLowerCase())>-1?((_srgQMap[sk]&&_srgQMap[sk]["2026-Q3"])||0):0);},0);
-        var _teamQ4=Object.keys(_srgQMap).reduce(function(s,sk){return s+(_tlo.indexOf(sk.toLowerCase())>-1?((_srgQMap[sk]&&_srgQMap[sk]["2026-Q4"])||0):0);},0);
+        var _teamQ3=Object.keys(_srgQMapG).reduce(function(s,sk){return s+(_tlo.indexOf(sk.toLowerCase())>-1?((_srgQMapG[sk]&&_srgQMapG[sk]["2026-Q3"])||0)/(_srgShare[sk]||1):0);},0);
+        var _teamQ4=Object.keys(_srgQMapG).reduce(function(s,sk){return s+(_tlo.indexOf(sk.toLowerCase())>-1?((_srgQMapG[sk]&&_srgQMapG[sk]["2026-Q4"])||0)/(_srgShare[sk]||1):0);},0);
         var _teamQ3Cvg=_teamRem>0?(_teamQ3/_teamRem).toFixed(1)+"X":"—";
         var _teamQ4Cvg=_teamRem>0?(_teamQ4/_teamRem).toFixed(1)+"X":"—";
         html+='<tr class="'+rgId+' '+_l3Id+'" style="display:none;background:#f5f8fe">';
@@ -3020,7 +3031,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
   var totalIndCamps=Object.values(indCountMap).reduce(function(a,b){return a+b;},0);
   var topIndPct=totalIndCamps>0?(topInd[1]/totalIndCamps*100).toFixed(0)+"%":"0%";
   var iacCountMap={};
-  data.forEach(function(r){String(r["IAC"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean).forEach(function(s){iacCountMap[s]=(iacCountMap[s]||0)+1;});});
+  data.forEach(function(r){String(r["IAC"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean).forEach(function(s){if(/^E-/i.test(s))return;iacCountMap[s]=(iacCountMap[s]||0)+1;});});
   var topIAC=Object.entries(iacCountMap).sort(function(a,b){return b[1]-a[1];})[0]||["N/A",0];
   var topIACPct=data.length>0?(topIAC[1]/data.length*100).toFixed(0)+"%":"0%";
   var comboMap={};
