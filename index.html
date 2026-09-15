@@ -2662,6 +2662,7 @@ function renderBud(){
   var gsbTot=0,gsbBW=0,gsbLv=0,gsbCP=0;
   SBS.forEach(function(sb){
     var bud=sbBudget[sb]||0,bw=sbBW[sb]||0,lv=sbLv[sb]||0,cp=sbCP[sb]||0;
+    if(!bud&&!bw&&!lv&&!cp)return;
     var rem=bud-bw;var fcst=rem>0?(cp/rem).toFixed(1)+"X":"—";var live=rem>0?(lv/rem).toFixed(1)+"X":"—";
     gsbTot+=bud;gsbBW+=bw;gsbLv+=lv;gsbCP+=cp;
     var sbId='bud-sb-'+sb.replace(/\W+/g,'_');
@@ -2860,6 +2861,7 @@ function renderBud(){
   var _iacActSb=filters["IAC"]&&filters["IAC"].size;
   SBS.forEach(function(sb){
     var tcp=_iacActSb?((sbTcpTgt[sb]||0)*_iacRatioEmea):(sbTcpTgt[sb]||0),ytd=sbYTD[sb]||0;
+    if(!tcp&&!ytd)return;
     var att=tcp>0?(ytd/tcp*100).toFixed(0)+"%":"—";
     gsbTcp+=tcp;gsbYTD+=ytd;
     var sbId2='bud-sb2-'+sb.replace(/\W+/g,'_');
