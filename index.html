@@ -1175,6 +1175,7 @@ function renderExe(){try{
     var _allPipe2026=pipeData.filter(function(p){return String(p["Create Quarter"]||"").startsWith("2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"&&(!_iacFilter||_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))&&(!_mmIdFilter||String(p["MM Identifier"]||"").toLowerCase().indexOf(_mmIdFilter)>-1);});
   if(window._pipeQtrSet&&window._pipeQtrSet.size)_allPipe2026=_allPipe2026.filter(function(p){return window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim());});
   if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _regF2=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));_allPipe2026=_allPipe2026.filter(function(p){return _regF2.has(String(p["Region Lvl 2"]||"").trim().toLowerCase());});}
+  if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _regF2L3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));_allPipe2026=_allPipe2026.filter(function(p){return _regF2L3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase());});}
   var allPipe2026Eur=_allPipe2026.reduce(function(a,r){return a+(parseFloat(r["Eur"]||0)||0);},0);
   var allPipe2026Opps=new Set(_allPipe2026.map(function(r){return String(r["Opportunity ID"]||"");}).filter(Boolean)).size;
   var allProbEur=_allPipe2026.filter(function(p){return String(p["DRM Category"]||"").trim()==="Probable";}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
@@ -1189,6 +1190,8 @@ function renderExe(){try{
   var _brittL3NrmKpi={"belux":"BeLux","egypt & iraq":"EGYPT & IRAQ","egypt":"EGYPT","turkiye":"Türkiye","türkiye":"Türkiye"};
   var _brittL2Fk=filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size?new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){var s=r.replace(/^CS /,"").trim();return _brittRNrmKpi[s.toLowerCase()]||s;})):null;
   var _brittL3Fk=filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size?new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim();})):null;
+  var _sprIacTcpTotal=null;
+  if(_iacFilter&&_iacFilter.size){var _exeSprIacMap={"Digital":"C-Digital","Field":"C-Field","PLT":"Partner-Driven"};_sprIacTcpTotal=0;(window.SPR_DATA||[]).forEach(function(r){if(!String(r.qtr||"").startsWith("2026"))return;var _si=String(r.iac||"").trim();if(_si!=="Digital"&&_si!=="Field"&&_si!=="PLT")return;var mi=_exeSprIacMap[_si]||_si;if(!_iacFilter.has(mi))return;if(_brittL2Fk){var mn=_brittRNrmKpi[String(r.mu||"").toLowerCase().trim()]||String(r.mu||"").trim();if(!_brittL2Fk.has(mn))return;}_sprIacTcpTotal+=(r.quota||0)/1000;});}
   var tcpTgt2026Total=0;
   (window.TCP_TARGETS_BRITT||[]).forEach(function(t){
     var muRaw=String(t["Region Lvl 2"]||"").trim().replace(/^CS /,"");if(!muRaw)return;
@@ -1197,6 +1200,7 @@ function renderExe(){try{
     if(_brittL3Fk){var l3Raw=String(t["Region Lvl 3"]||"").trim();var l3=_brittL3NrmKpi[l3Raw.toLowerCase()]||l3Raw;if(!_brittL3Fk.has(l3))return;}
     tcpTgt2026Total+=(parseFloat(t["TCP Req d"])||0);
   });
+  if(_sprIacTcpTotal!==null)tcpTgt2026Total=_sprIacTcpTotal;
   var totEur=pr.reduce(function(a,r){return a+(parseFloat(r["Eur"]||0)||0);},0);
   var oppSet=new Set(pr.map(function(r){return String(r["Opportunity ID"]||"");}).filter(Boolean));
   var totOpps=oppSet.size;
@@ -1261,7 +1265,7 @@ function renderExe(){try{
   html+='</div>';
   html+='</div>';
   html+='<div style="display:flex;gap:16px;margin-top:16px">';
-  html+='<div class="cc" style="flex:1;min-width:0;height:200px;display:flex;flex-direction:column"><div class="ch">Total Pipeline Created 2026 vs TCP Target — by TCP Source</div><div style="padding:8px;flex:1;position:relative"><canvas id="exe-src-pipeline"></canvas></div></div>';
+  html+='<div class="cc" style="flex:1;min-width:0;height:200px;display:flex;flex-direction:column"><div class="ch" style="display:flex;align-items:center;gap:8px">Total Pipeline Created 2026 vs TCP Target — by TCP Source'+(window._exeSrcFilter?'<span style="background:#012931;color:#fff;border-radius:3px;padding:1px 6px;font-size:10px;cursor:pointer" onclick="window._exeSrcFilter=null;renderExe()">'+window._exeSrcFilter+' ×</span>':'')+'</div><div style="padding:8px;flex:1;position:relative"><canvas id="exe-src-pipeline"></canvas></div></div>';
   html+='<div id="exe-pipe-src-tbl" style="flex:1;min-width:0"></div>';
   html+='</div>';
   html+='<div style="display:flex;gap:16px;margin-top:16px">';
@@ -1332,6 +1336,7 @@ function renderExe(){try{
       if(_mmIdFilter&&String(p["MM Identifier"]||"").toLowerCase().indexOf(_mmIdFilter)===-1)return false;
       if(_activeCalRegs.size){var _pL2=String(p["Region Lvl 2"]||"").trim().toLowerCase();var _pL3=String(p["Region Lvl 3"]||"").trim().toLowerCase();if(!_activeCalRegs.has(_pL2)&&!_activeCalRegs.has(_pL3))return false;}
       if(_activeCalRegsL3.size){if(!_activeCalRegsL3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return false;}
+      if(window._exeSrcFilter){var _srfMapAll={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfMapAll[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return false;}
       return true;
     });
     // Use pr2 (calendar-connected) or pr2All depending on mode
@@ -1758,6 +1763,7 @@ function renderExe(){try{
         if(_brittL3Fs){var l3Raw=String(t["Region Lvl 3"]||"").trim();var l3=_brittL3Nrm2[l3Raw.toLowerCase()]||l3Raw;if(!_brittL3Fs.has(l3))return;}
         _brittTotalSrc+=(parseFloat(t["TCP Req d"])||0);
       });
+      if(_sprIacTcpTotal!==null)_brittTotalSrc=_sprIacTcpTotal;
       var _detailSrcRaw={},_detailGrandRaw=0;
       (window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");}).forEach(function(t){
         if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(t.qtr||"").trim()))return;
@@ -1800,6 +1806,7 @@ function renderExe(){try{
         if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rf5=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rf5.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
         if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rf5L3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rf5L3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
         if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
+        if(window._exeSrcFilter){var _srfMap={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfMap[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
         if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
         var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
         var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
@@ -1922,6 +1929,7 @@ function renderExe(){try{
       }
       if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rf3L3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim();}));if(!_rf3L3.has(String(p["Region Lvl 3"]||"").trim()))return;}
       if(_calWBSSetSrc&&!_calWBSSetSrc.has(String(p["Opp Campaign ID"]||"").trim()))return;
+      if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
       var raw=String(p["TCP Pipeline Source Desc"]||"").trim();
       var src=SRC_MAP[raw];if(!src)return;
       srcPipe[src]=(srcPipe[src]||0)+(parseFloat(p["Eur"]||0)||0);
@@ -1935,6 +1943,7 @@ function renderExe(){try{
       var src=String(t.src||"").trim();if(!src||SRC_ORDER.indexOf(src)===-1)return;
       srcTgt[src]=(srcTgt[src]||0)+(parseFloat(t.target)||0);
     });
+    if(_sprIacTcpTotal!==null){var _ctDet=SRC_ORDER.reduce(function(s,src){return s+(srcTgt[src]||0);},0);if(_ctDet>0)SRC_ORDER.forEach(function(src){srcTgt[src]=_sprIacTcpTotal*((srcTgt[src]||0)/_ctDet);});else SRC_ORDER.forEach(function(src){srcTgt[src]=0;});}
     var cSrcPipe=document.getElementById("exe-src-pipeline");
     if(cSrcPipe){
       if(charts["exe-src-pipeline"])charts["exe-src-pipeline"].destroy();
@@ -1954,6 +1963,7 @@ function renderExe(){try{
           ]
         },
         options:{responsive:true,maintainAspectRatio:false,
+          onClick:function(evt,elements){if(elements&&elements.length){var idx=elements[0].index;var src=SRC_ORDER[idx];window._exeSrcFilter=(window._exeSrcFilter===src)?null:src;renderExe();}},
           plugins:{legend:{display:true,position:"top",labels:{font:{size:11},boxWidth:12}},
             datalabels:{display:true},
             tooltip:{callbacks:{label:function(ctx){
