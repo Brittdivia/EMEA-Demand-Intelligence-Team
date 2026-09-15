@@ -2740,6 +2740,7 @@ function renderBud(){
       if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
       if(_brittL2F){var _pr2b=_pipeRegNorm[String(p["Region Lvl 2"]||"").toLowerCase().trim()]||String(p["Region Lvl 2"]||"").trim();if(!_brittL2F.has(_pr2b))return;}
       if(_sbActF){var _ps2b=_pipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_sbActF.has(_ps2b))return;}
+      if(filters["IAC"]&&filters["IAC"].size&&!filters["IAC"].has(String(p["IAC (Engagement Model)"]||"").trim()))return;
       var src=_pipeSrcMap2[String(p["TCP Pipeline Source Desc"]||"").trim()];if(!src||_srcOrder2.indexOf(src)===-1)return;
       _srcYTD2L2[src]=((_srcYTD2L2[src]||0))+(parseFloat(p["Eur"]||0)||0);
     });
@@ -2756,6 +2757,7 @@ function renderBud(){
     if(_brittL2F){var _pr2=_pipeRegNorm[String(p["Region Lvl 2"]||"").toLowerCase().trim()]||String(p["Region Lvl 2"]||"").trim();if(!_brittL2F.has(_pr2))return;}
     if(_brittL3F){var _pr3=String(p["Region Lvl 3"]||"").trim();if(!_brittL3F.has(_pr3))return;}
     if(_sbActF){var _ps2=_pipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_sbActF.has(_ps2))return;}
+    if(filters["IAC"]&&filters["IAC"].size&&!filters["IAC"].has(String(p["IAC (Engagement Model)"]||"").trim()))return;
     var src=_pipeSrcMap2[String(p["TCP Pipeline Source Desc"]||"").trim()];if(!src||_srcOrder2.indexOf(src)===-1)return;
     var _eur2=parseFloat(p["Eur"]||0)||0;
     srcYTD2[src]=(srcYTD2[src]||0)+_eur2;
@@ -2794,6 +2796,7 @@ function renderBud(){
     if(_brittL2F){var _prT=_pipeRegNorm[String(p["Region Lvl 2"]||"").toLowerCase().trim()]||String(p["Region Lvl 2"]||"").trim();if(!_brittL2F.has(_prT))return;}
     if(_brittL3F){var _pr3T=String(p["Region Lvl 3"]||"").trim();if(!_brittL3F.has(_pr3T))return;}
     if(_sbActF){var _psT=_pipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_sbActF.has(_psT))return;}
+    if(filters["IAC"]&&filters["IAC"].size&&!filters["IAC"].has(String(p["IAC (Engagement Model)"]||"").trim()))return;
     var src=_pipeSrcMap2[String(p["TCP Pipeline Source Desc"]||"").trim()];if(!src||_tcOrder.indexOf(src)===-1)return;
     var ud=p["Untouched Days"];var udNum=(ud===null||ud===undefined||ud==="")?null:parseInt(ud);
     var bucket=udNum===null?"other":udNum<=30?"30":udNum<=60?"60":"other";
