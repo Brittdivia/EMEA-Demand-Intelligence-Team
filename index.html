@@ -2759,6 +2759,8 @@ function renderBud(){
     });
   }
   if(filters["IAC"]&&filters["IAC"].size){_srcOrder2.forEach(function(src){srcTgt2[src]=(srcTgt2[src]||0)*_iacRatioEmea;});}
+  var _srcTgt2Tot=_srcOrder2.reduce(function(s,src){return s+(srcTgt2[src]||0);},0);
+  if(_srcTgt2Tot>0&&grandTcp2>0){_srcOrder2.forEach(function(src){srcTgt2[src]=(srcTgt2[src]||0)*grandTcp2/_srcTgt2Tot;});}
   pipeData.forEach(function(p){
     if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
     if(drmFilters.size&&!drmFilters.has(String(p["DRM Category"]||"").trim()))return;
