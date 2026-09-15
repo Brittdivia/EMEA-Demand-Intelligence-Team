@@ -16,17 +16,16 @@ Write-Host "Sequence Stats entries: $($seqStatsMap.Count)"
 
 # Build sequence->campaign info map from data-camp.js
 $campJs = [System.IO.File]::ReadAllText("$outDir\data-camp.js")
-$campSids = [regex]::Matches($campJs, '"Sequence ID":"([^"]+)"') | ForEach-Object { $_.Groups[1].Value.Trim() } | Where-Object { $_ } | Sort-Object -Unique
+$campSids = [regex]::Matches($campJs, '"Sequence ID":"([^"]+)"') | ForEach-Object { $_.Groups[1].Value.Trim().Split(',') | ForEach-Object { $_.Trim() } } | Where-Object { $_ } | Sort-Object -Unique
 Write-Host "Sequences in campaign calendar: $($campSids.Count)"
 
 # Build sid->campaign info from data-camp.js
 $sidToCamp = @{}
 $campEntries = [regex]::Matches($campJs, '\{[^}]+\}')
 foreach ($entry in $campEntries) {
-    $sid = [regex]::Match($entry.Value, '"Sequence ID":"([^"]+)"').Groups[1].Value.Trim()
-    if (-not $sid) { continue }
-    if ($sidToCamp.ContainsKey($sid)) { continue }
-    $sidToCamp[$sid] = @{
+    $rawSids = [regex]::Match($entry.Value, '"Sequence ID":"([^"]+)"').Groups[1].Value.Trim()
+    if (-not $rawSids) { continue }
+    $campInfo = @{
         wbs    = [regex]::Match($entry.Value, '"Campaign/WBS Code":"([^"]+)"').Groups[1].Value
         name   = [regex]::Match($entry.Value, '"Campaign Name":"([^"]+)"').Groups[1].Value
         dm     = [regex]::Match($entry.Value, '"Demand Manager":"([^"]+)"').Groups[1].Value
@@ -35,6 +34,9 @@ foreach ($entry in $campEntries) {
         sb     = [regex]::Match($entry.Value, '"Sales Bag":"([^"]+)"').Groups[1].Value
         iac    = [regex]::Match($entry.Value, '"IAC":"([^"]+)"').Groups[1].Value
         sod    = [regex]::Match($entry.Value, '"SoD":"([^"]+)"').Groups[1].Value
+    }
+    foreach ($sid in ($rawSids.Split(',') | ForEach-Object { $_.Trim() } | Where-Object { $_ })) {
+        if (-not $sidToCamp.ContainsKey($sid)) { $sidToCamp[$sid] = $campInfo }
     }
 }
 

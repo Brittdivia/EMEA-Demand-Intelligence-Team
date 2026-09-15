@@ -1,4 +1,4 @@
-??<!DOCTYPE html>
+﻿??<!DOCTYPE html>
 <!-- saved from url=(0058)file:///C:/Users/I572929/campaign-calendar-site/index.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
@@ -318,7 +318,8 @@ var FD=[
   {k:"Campaign Name",l:"Campaign Name"},
   {k:"Executor",l:"Executor"},
   {k:"Digital Assets team support",l:"DAT Support"},
-  {k:"DG Program",l:"DG Program"}
+  {k:"DG Program",l:"DG Program"},
+  {k:"Partner",l:"Partner"}
 ];
 var TCOLS=[
   {k:"Campaign Name",l:"Campaign Name",w:true},
@@ -486,8 +487,8 @@ function buildFbar(){
   if(isAna)setTimeout(function(){if(bar2)bar2.style.top=(132+bar.offsetHeight)+"px";if(bar3)bar3.style.top=(132+bar.offsetHeight+(bar2?bar2.offsetHeight:0))+"px";},0);
   function ins(w,toRow2,toRow3){if(isAna&&bar3&&toRow3){bar3.insertBefore(w,div3);}else if(isAna&&bar2&&toRow2){bar2.insertBefore(w,div2);}else{bar.insertBefore(w,div);}}
   FD.forEach(function(fd){
-    // WBS Code, Executor, DAT, DG Program only on sub-tabs
-    if((fd.k==="Campaign/WBS Code"||fd.k==="Executor"||fd.k==="Digital Assets team support"||fd.k==="DG Program")&&!_subTabs.has(activeTab))return;
+    // WBS Code, Executor, DAT, DG Program, Partner only on sub-tabs
+    if((fd.k==="Campaign/WBS Code"||fd.k==="Executor"||fd.k==="Digital Assets team support"||fd.k==="DG Program"||fd.k==="Partner")&&!_subTabs.has(activeTab))return;
     if((activeTab==="bud"||activeTab==="exe")&&(fd.k==="Demand Manager"||fd.k==="Status"||fd.k==="SoD"||fd.k==="Campaign Name"))return;
     if(!_subTabs.has(activeTab)&&fd.k==="Starting Quarter")return;
     var s=sk(fd.k),n=filters[fd.k].size;
@@ -592,7 +593,13 @@ function buildOpts(key){
   var counts=getOptCounts(key);
   var opts=Object.keys(counts).sort(function(a,b){return a.localeCompare(b);});
   if(!opts.length)return "<div style=\"padding:10px 12px;font-size:12px;color:var(--mu)\">No options</div>";
-  return opts.map(function(opt){
+  var html="";
+  if(key==="Partner"){
+    var _allSel=opts.every(function(o){return filters[key].has(o);});
+    var _ek=key.replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+    html+="<label class=\"dopt\" style=\"border-bottom:1px solid #e8e8e8;font-weight:600\"><input type=\"checkbox\" "+(_allSel?"checked":"")+" onchange=\"toggleAllF('"+_ek+"',this.checked)\"/><span class=\"ot\">Select All</span></label>";
+  }
+  return html+opts.map(function(opt){
     var chk;
     if(key==="Region Name (level 2)"||key==="Region Name (level 3)"){var _normOpt=opt.replace(/^CS /,"").trim().toLowerCase();chk=Array.from(filters[key]).some(function(v){return v.replace(/^CS /,"").trim().toLowerCase()===_normOpt;})?"checked":"";}else{chk=filters[key].has(opt)?"checked":"";}
     var eq=opt.replace(/"/g,"&quot;");
@@ -658,6 +665,12 @@ function toggleF(key,val,checked){
   if(key==="Demand Manager"){anaFilter.reg=null;anaFilter.wbs=null;anaFilter.combo=null;}
   pg=1;applyFilters();syncBtn(key);updateTags();syncCab();buildWbar();buildFbar();if(activeTab==="dtr")renderDtr();
   if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="bud")renderBud();if(activeTab==="sde")renderSde();if(activeTab==="exe")renderExe();
+}
+function toggleAllF(key,checked){
+  var counts=getOptCounts(key);var opts=Object.keys(counts);
+  if(checked){opts.forEach(function(o){filters[key].add(o);});}else{filters[key].clear();}
+  pg=1;applyFilters();syncBtn(key);updateTags();syncCab();buildWbar();buildFbar();if(activeTab==="dtr")renderDtr();
+  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="bud")renderBud();if(activeTab==="sde")renderSde();
 }
 function clearFilter(key){
   filters[key].clear();
@@ -1170,7 +1183,7 @@ function renderExe(){try{
   var allWonOpps=new Set(_allPipe2026.filter(function(p){return String(p["DRM Category"]||"").trim()==="Booked/Won";}).map(function(p){return String(p["Opportunity ID"]||"");})).size;
   var allHodEur=_allPipe2026.filter(function(p){return hasHod(p["SDE Handover Date"]);}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
   var allHodOpps=new Set(_allPipe2026.filter(function(p){return hasHod(p["SDE Handover Date"]);}).map(function(p){return String(p["Opportunity ID"]||"");})).size;
-  var allHoRate=allPipe2026Opps>0?(allHodOpps/allPipe2026Opps*100).toFixed(0)+"%":"0%";
+  var allHoRate=allPipe2026Eur>0?(allHodEur/allPipe2026Eur*100).toFixed(0)+"%":"0%";
   // Total TCP Target 2026 — from BRITT (L2+L3 filtered), matches Coverage Overview
   var _brittRNrmKpi={"benelux":"Benelux","france":"France","italy":"Italy","mea north":"MEA North","mea south":"MEA South","nordic":"Nordic","southern europe":"Southern Europe","uki":"UKI"};
   var _brittL3NrmKpi={"belux":"BeLux","egypt & iraq":"EGYPT & IRAQ","egypt":"EGYPT","turkiye":"Türkiye","türkiye":"Türkiye"};
@@ -1193,7 +1206,7 @@ function renderExe(){try{
   var probOpps=new Set(pr.filter(function(r){return String(r["DRM Category"]||"").trim()==="Probable";}).map(function(r){return String(r["Opportunity ID"]||"");}).filter(Boolean)).size;
   var hodOpps=new Set(pr.filter(function(r){return hasHod(r["SDE Handover Date"]);}).map(function(r){return String(r["Opportunity ID"]||"");})).size;
   var hodEur=pr.filter(function(r){return hasHod(r["SDE Handover Date"]);}).reduce(function(a,r){return a+(parseFloat(r["Eur"]||0)||0);},0);
-  var hoRate=totOpps>0?(hodOpps/totOpps*100).toFixed(0)+"%":"0%";
+  var hoRate=totEur>0?(hodEur/totEur*100).toFixed(0)+"%":"0%";
   var camp2026Eur=pr.filter(function(p){return String(p["Create Quarter"]||"").indexOf("2026")===0&&(!window._pipeQtrSet||!window._pipeQtrSet.size||window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()));}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
   var _all2026Eur=pipeData.reduce(function(a,p){return String(p["Create Quarter"]||"").indexOf("2026")===0&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"&&(!window._pipeQtrSet||!window._pipeQtrSet.size||window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))?a+(parseFloat(p["Eur"]||0)||0):a;},0);
   var camp2026Pct=_all2026Eur>0?(camp2026Eur/_all2026Eur*100).toFixed(0)+"%":"0%";
@@ -1242,9 +1255,9 @@ function renderExe(){try{
   html+=fnote;
   // Pipeline row
   html+='<div class="krow">';
-  html+='<div class="kpi kb"><div class="kl">Total Pipeline Created 2026</div><div class="kv">&euro;'+fmtE(_dispPipeEur)+'</div><div class="ks">'+_dispPipeOpps.toLocaleString()+' opportunities</div></div>';
-  html+='<div class="kpi kb"><div class="kl">2026 TCP Target</div><div class="kv">&euro;'+fmtE(tcpTgt2026Total)+'</div><div class="ks">'+(tcpTgt2026Total>0?(_dispPipeEur/tcpTgt2026Total*100).toFixed(0)+'% pipeline vs target':'n/a')+'</div></div>';
-  html+='<div class="kpi kb"><div class="kl">HO Rate</div><div class="kv">'+allHoRate+'</div><div class="ks">'+_dispHodOpps.toLocaleString()+' handed over &middot; &euro;'+fmtE(_dispHodEur)+'</div></div>';
+  html+='<div class="kpi kb"><div class="kl">2026 Pipeline Created</div><div class="kv">&euro;'+fmtE(_dispPipeEur)+'</div></div>';
+  html+='<div class="kpi kb"><div class="kl">2026 TCP Target</div><div class="kv">&euro;'+fmtE(tcpTgt2026Total)+'</div></div>';
+  html+='<div class="kpi kb"><div class="kl">HO Rate</div><div class="kv">'+allHoRate+'</div></div>';
   html+='</div>';
   html+='</div>';
   html+='<div style="display:flex;gap:16px;margin-top:16px">';
@@ -2083,7 +2096,7 @@ function renderBud(){
     var l3=String(p["Region Lvl 3"]||"").trim();
     if(createQ.startsWith("2026"))regPipeYTD[reg]=(regPipeYTD[reg]||0)+eur;
     if(l3&&createQ.startsWith("2026")){if(!regL3YTD[reg])regL3YTD[reg]={};regL3YTD[reg][l3]=(regL3YTD[reg][l3]||0)+eur;var _srgY=String(p["IC_ACCOUNT_SRG_TEXT"]||"").trim();if(_srgY){if(!regL3SrgYTD[reg])regL3SrgYTD[reg]={};if(!regL3SrgYTD[reg][l3])regL3SrgYTD[reg][l3]={};regL3SrgYTD[reg][l3][_srgY]=(regL3SrgYTD[reg][l3][_srgY]||0)+eur;}}
-    if(drm==="Booked/Won")regBW[reg]=(regBW[reg]||0)+eur;
+    if(closeQ.startsWith("2026")&&drm==="Booked/Won")regBW[reg]=(regBW[reg]||0)+eur;
     if(closeQ.startsWith("2026")&&(drm==="Booked/Won"||drm==="Probable"||drm==="Committed"))regForecast[reg]=(regForecast[reg]||0)+eur;
     if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable"||drm==="Upside"))regLive[reg]=(regLive[reg]||0)+eur;
     // L3 accumulators
@@ -2182,7 +2195,7 @@ function renderBud(){
   html+='</div>';
   html+='<div style="display:flex;gap:16px;margin-bottom:20px;align-items:flex-start">';
   // SPR Cloud N&U Quota aggregation
-  var _sprIacMap={"Digital":"C-Digital","Field":"C-Field","PLT":"E-High Touch"};
+  var _sprIacMap={"Digital":"C-Digital","Field":"C-Field","PLT":"Partner-Driven"};
   var _sprData=(window.SPR_DATA||[]).filter(function(r){
     if(!String(r.qtr||"").startsWith("2026"))return false;
     var _si=String(r.iac||"").trim();if(_si!=="Digital"&&_si!=="Field"&&_si!=="PLT")return false;
@@ -2226,7 +2239,7 @@ function renderBud(){
     var rowTot=QTRS.reduce(function(s,q){return s+(regQtr[rg][q]||0);},0);
     var pipeReg=rg.replace(/^CS /,"");
     var bw=regBW[pipeReg]||0;
-    var tcp=regTcpTgt[pipeReg]||0;
+    var tcp=(filters["IAC"]&&filters["IAC"].size)?(sprByMu[rg]||0):(regTcpTgt[pipeReg]||0);
     var ytd=regPipeYTD[pipeReg]||0;
     var fc=regForecast[pipeReg]||0;
     var lv=regLive[pipeReg]||0;
@@ -2278,18 +2291,24 @@ function renderBud(){
         var m4=regL3SrgLv_q[pipeReg]&&regL3SrgLv_q[pipeReg][l3]||{};Object.keys(m4).forEach(function(sk){if(!_allSrgQM[sk])_allSrgQM[sk]={};Object.keys(m4[sk]).forEach(function(q){_allSrgQM[sk][q]=(_allSrgQM[sk][q]||0)+m4[sk][q];});});
       });
       var _l2TeamKeys=Object.keys(_rgFbTeamsObj).sort(function(a,b){return _rgFbTeamsObj[a].orig.localeCompare(_rgFbTeamsObj[b].orig);});
-      var _allSrgAllK=new Set(Object.keys(_allSrgBwM).concat(Object.keys(_allSrgLvM)).concat(Object.keys(_allSrgCpM)).concat(Object.keys(_allSrgQM)));
-      var _l2SrgShare={};
-      _allSrgAllK.forEach(function(sk){var sklo=sk.toLowerCase();var n=_l2TeamKeys.filter(function(tk){return _rgFbTeamsObj[tk].orig.toLowerCase().indexOf(sklo)>-1;}).length;_l2SrgShare[sk]=n||1;});
+      var _allSrgBwLow={};Object.keys(_allSrgBwM).forEach(function(k){_allSrgBwLow[k.toLowerCase().replace(/[\s\-]+/g,'')]=_allSrgBwM[k];});
+      var _allSrgLvLow={};Object.keys(_allSrgLvM).forEach(function(k){_allSrgLvLow[k.toLowerCase().replace(/[\s\-]+/g,'')]=_allSrgLvM[k];});
+      var _allSrgCpLow={};Object.keys(_allSrgCpM).forEach(function(k){_allSrgCpLow[k.toLowerCase().replace(/[\s\-]+/g,'')]=_allSrgCpM[k];});
+      var _allSrgQLow={};Object.keys(_allSrgQM).forEach(function(k){_allSrgQLow[k.toLowerCase().replace(/[\s\-]+/g,'')]=_allSrgQM[k];});
+      var _l2AllKeys=Object.keys(_allSrgBwLow).concat(Object.keys(_allSrgLvLow)).concat(Object.keys(_allSrgQLow));
+      function _resL2(sfx,map){var lk=Object.keys(map);for(var _i=0;_i<lk.length;_i++){var _k=lk[_i];if(_k===sfx||sfx.startsWith(_k)||_k.startsWith(sfx))return _k;}return null;}
+      var _l2SfxCount={};_l2TeamKeys.forEach(function(tk){var _s=_rgFbTeamsObj[tk].orig.indexOf(' - ');var _sfx=(_s>-1?_rgFbTeamsObj[tk].orig.slice(_s+3):_rgFbTeamsObj[tk].orig).replace(/^[SF]LSM[-\s]*/i,'').toLowerCase().replace(/[\s\-]+/g,'');var _rk=_resL2(_sfx,_allSrgBwLow)||_resL2(_sfx,_allSrgLvLow)||_resL2(_sfx,_allSrgQLow);if(_rk)_l2SfxCount[_rk]=(_l2SfxCount[_rk]||0)+1;});
       _l2TeamKeys.forEach(function(tk){
-        var te=_rgFbTeamsObj[tk];var tq=te.q||0;var _tlo=te.orig.toLowerCase();
-        function _tsum2(m){return Object.keys(m).reduce(function(s,sk){return s+(_tlo.indexOf(sk.toLowerCase())>-1?(m[sk]||0)/(_l2SrgShare[sk]||1):0);},0);}
-        var _teamWon=_tsum2(_allSrgBwM);var _teamLv=_tsum2(_allSrgLvM);var _teamCP=_tsum2(_allSrgCpM);
+        var te=_rgFbTeamsObj[tk];var tq=te.q||0;
+        var _tsep=te.orig.indexOf(' - ');var _tsfx=(_tsep>-1?te.orig.slice(_tsep+3):te.orig).replace(/^[SF]LSM[-\s]*/i,'').toLowerCase().replace(/[\s\-]+/g,'');
+        var _sh=_l2SfxCount[_resL2(_tsfx,_allSrgBwLow)||_resL2(_tsfx,_allSrgLvLow)||_tsfx]||1;
+        var _teamWon=(_allSrgBwLow[_resL2(_tsfx,_allSrgBwLow)||_tsfx]||0)/_sh;var _teamLv=(_allSrgLvLow[_resL2(_tsfx,_allSrgLvLow)||_tsfx]||0)/_sh;var _teamCP=(_allSrgCpLow[_resL2(_tsfx,_allSrgCpLow)||_tsfx]||0)/_sh;
         var _teamRem=Math.max(0,tq-_teamWon);
         var _teamFcst=_teamRem>0?(_teamCP/_teamRem).toFixed(1)+"X":"—";
         var _teamLiveCvg=_teamRem>0?(_teamLv/_teamRem).toFixed(1)+"X":"—";
-        var _teamQ3=Object.keys(_allSrgQM).reduce(function(s,sk){return s+(_tlo.indexOf(sk.toLowerCase())>-1?((_allSrgQM[sk]&&_allSrgQM[sk]["2026-Q3"])||0)/(_l2SrgShare[sk]||1):0);},0);
-        var _teamQ4=Object.keys(_allSrgQM).reduce(function(s,sk){return s+(_tlo.indexOf(sk.toLowerCase())>-1?((_allSrgQM[sk]&&_allSrgQM[sk]["2026-Q4"])||0)/(_l2SrgShare[sk]||1):0);},0);
+        var _qkL2=_resL2(_tsfx,_allSrgQLow)||_tsfx;
+        var _teamQ3=((_allSrgQLow[_qkL2]&&_allSrgQLow[_qkL2]["2026-Q3"])||0)/_sh;
+        var _teamQ4=((_allSrgQLow[_qkL2]&&_allSrgQLow[_qkL2]["2026-Q4"])||0)/_sh;
         var _teamQ3Cvg=_teamRem>0?(_teamQ3/_teamRem).toFixed(1)+"X":"—";
         var _teamQ4Cvg=_teamRem>0?(_teamQ4/_teamRem).toFixed(1)+"X":"—";
         html+='<tr class="'+rgId+' bud-l3" style="display:none;background:#f5f8fe">';
@@ -2349,25 +2368,25 @@ function renderBud(){
       var _srgBwMap=(regL3SrgBW[pipeReg]&&regL3SrgBW[pipeReg][l3])||{};
       var _srgCpMap=(regL3SrgCP[pipeReg]&&regL3SrgCP[pipeReg][l3])||{};
       var _srgQMapG=(regL3SrgLv_q[pipeReg]&&regL3SrgLv_q[pipeReg][l3])||{};
-      var _srgAllK=new Set(Object.keys(_srgLvMap).concat(Object.keys(_srgBwMap)).concat(Object.keys(_srgCpMap)).concat(Object.keys(_srgQMapG)));
-      var _srgShare={};
-      _srgAllK.forEach(function(sk){
-        var sklo=sk.toLowerCase();
-        var n=_l3TeamKeys.filter(function(tk){return _l3TeamsObj[tk].orig.toLowerCase().indexOf(sklo)>-1;}).length;
-        _srgShare[sk]=n||1;
-      });
+      var _srgBwLow={};Object.keys(_srgBwMap).forEach(function(k){_srgBwLow[k.toLowerCase().replace(/[\s\-]+/g,'')]=_srgBwMap[k];});
+      var _srgLvLow={};Object.keys(_srgLvMap).forEach(function(k){_srgLvLow[k.toLowerCase().replace(/[\s\-]+/g,'')]=_srgLvMap[k];});
+      var _srgCpLow={};Object.keys(_srgCpMap).forEach(function(k){_srgCpLow[k.toLowerCase().replace(/[\s\-]+/g,'')]=_srgCpMap[k];});
+      var _srgQLow={};Object.keys(_srgQMapG).forEach(function(k){_srgQLow[k.toLowerCase().replace(/[\s\-]+/g,'')]=_srgQMapG[k];});
+      function _resL3(sfx,map){var lk=Object.keys(map);for(var _i=0;_i<lk.length;_i++){var _k=lk[_i];if(_k===sfx||sfx.startsWith(_k)||_k.startsWith(sfx))return _k;}return null;}
+      var _l3SfxCount={};_l3TeamKeys.forEach(function(tk){var _s=_l3TeamsObj[tk].orig.indexOf(' - ');var _sfx=(_s>-1?_l3TeamsObj[tk].orig.slice(_s+3):_l3TeamsObj[tk].orig).replace(/^[SF]LSM[-\s]*/i,'').toLowerCase().replace(/[\s\-]+/g,'');var _rk=_resL3(_sfx,_srgBwLow)||_resL3(_sfx,_srgLvLow)||_resL3(_sfx,_srgQLow);if(_rk)_l3SfxCount[_rk]=(_l3SfxCount[_rk]||0)+1;});
       _l3TeamKeys.forEach(function(tk){
         var te=_l3TeamsObj[tk];var tq=te.q||0;
-        var _tlo=te.orig.toLowerCase();
-        function _tsum(m){return Object.keys(m).reduce(function(s,sk){return s+(_tlo.indexOf(sk.toLowerCase())>-1?(m[sk]||0)/(_srgShare[sk]||1):0);},0);}
-        var _teamWon=_tsum(_srgBwMap);
-        var _teamLv=_tsum(_srgLvMap);
-        var _teamCP=_tsum(_srgCpMap);
+        var _tsep=te.orig.indexOf(' - ');var _tsfx=(_tsep>-1?te.orig.slice(_tsep+3):te.orig).replace(/^[SF]LSM[-\s]*/i,'').toLowerCase().replace(/[\s\-]+/g,'');
+        var _bwk=_resL3(_tsfx,_srgBwLow)||_tsfx;var _lvk=_resL3(_tsfx,_srgLvLow)||_tsfx;var _cpk=_resL3(_tsfx,_srgCpLow)||_tsfx;var _qk=_resL3(_tsfx,_srgQLow)||_tsfx;
+        var _sh=_l3SfxCount[_bwk]||_l3SfxCount[_lvk]||1;
+        var _teamWon=(_srgBwLow[_bwk]||0)/_sh;
+        var _teamLv=(_srgLvLow[_lvk]||0)/_sh;
+        var _teamCP=(_srgCpLow[_cpk]||0)/_sh;
         var _teamRem=Math.max(0,tq-_teamWon);
         var _teamFcst=_teamRem>0?(_teamCP/_teamRem).toFixed(1)+"X":"—";
         var _teamLiveCvg=_teamRem>0?(_teamLv/_teamRem).toFixed(1)+"X":"—";
-        var _teamQ3=Object.keys(_srgQMapG).reduce(function(s,sk){return s+(_tlo.indexOf(sk.toLowerCase())>-1?((_srgQMapG[sk]&&_srgQMapG[sk]["2026-Q3"])||0)/(_srgShare[sk]||1):0);},0);
-        var _teamQ4=Object.keys(_srgQMapG).reduce(function(s,sk){return s+(_tlo.indexOf(sk.toLowerCase())>-1?((_srgQMapG[sk]&&_srgQMapG[sk]["2026-Q4"])||0)/(_srgShare[sk]||1):0);},0);
+        var _teamQ3=((_srgQLow[_qk]&&_srgQLow[_qk]["2026-Q3"])||0)/_sh;
+        var _teamQ4=((_srgQLow[_qk]&&_srgQLow[_qk]["2026-Q4"])||0)/_sh;
         var _teamQ3Cvg=_teamRem>0?(_teamQ3/_teamRem).toFixed(1)+"X":"—";
         var _teamQ4Cvg=_teamRem>0?(_teamQ4/_teamRem).toFixed(1)+"X":"—";
         html+='<tr class="'+rgId+' '+_l3Id+'" style="display:none;background:#f5f8fe">';
@@ -2414,18 +2433,19 @@ function renderBud(){
   html+='<div class="cc" style="flex:1;min-width:0"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><span>2026 TCP Target Attainment by Region (kEUR)</span><div style="display:flex;align-items:center;gap:6px;font-weight:400"><label style="font-size:11px;color:var(--mu)">Team:</label><select onchange="window._sprTeamFilter=this.value||null;renderBud()" style="font-size:11px;padding:2px 4px;border:1px solid #ccc;border-radius:3px;max-width:220px"><option value="">All Teams</option>'+_sprTeams.map(function(t){return'<option value="'+t.replace(/"/g,'&quot;')+'"'+((window._sprTeamFilter===t)?' selected':'')+'>'+ t+'</option>';}).join('')+'</select></div></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
   html+='<th style="'+thL+'">Region</th>';
   html+='<th style="'+thS+'">TCP Target</th>';
-  html+='<th style="'+thS+'">YTD Pipeline Created</th>';
+  html+='<th style="'+thS+'">Pipeline Created</th>';
   html+='<th style="'+thS+'">Attainment</th>';
   html+='</tr></thead><tbody>';
   var grandTcp2=0,grandYTD2=0;
   REGS.forEach(function(rg){
     var pipeReg=rg.replace(/^CS /,"");
-    var tcp=window._sprTeamFilter?(sprByMu[rg]||0):(regTcpTgt[pipeReg]||0);
+    var tcp=(window._sprTeamFilter||(filters["IAC"]&&filters["IAC"].size))?(sprByMu[rg]||0):(regTcpTgt[pipeReg]||0);
     var ytd=regPipeYTD[pipeReg]||0;
     var att=tcp>0?(ytd/tcp*100).toFixed(0)+"%":"—";
     grandTcp2+=tcp;grandYTD2+=ytd;
     var rgId='bud-reg2-'+pipeReg.replace(/\W+/g,'_');
-    var l3Map=window._sprTeamFilter?{}:(l3TcpTgt[pipeReg]||{});
+    var _iacActive=filters["IAC"]&&filters["IAC"].size;
+    var l3Map=(window._sprTeamFilter||_iacActive)?{}:(l3TcpTgt[pipeReg]||{});
     var sprL3Obj=_sprMu1ForMu[rg]||{};
     var l3DisplaySet=new Set(Object.keys(l3Map));
     Object.values(sprL3Obj).forEach(function(v){if(v.orig)l3DisplaySet.add(v.orig);});
@@ -2440,7 +2460,7 @@ function renderBud(){
     allL3Displays.forEach(function(l3Display){
       var l3Key=l3Display.toLowerCase();
       var isL3SameAsL2=l3Display.toLowerCase()===pipeReg.toLowerCase();
-      var l3tcp=window._sprTeamFilter?(sprL3Obj[l3Key]?sprL3Obj[l3Key].q:0):(l3Map[l3Display]||0);
+      var l3tcp=(window._sprTeamFilter||_iacActive)?(sprL3Obj[l3Key]?sprL3Obj[l3Key].q:0):(l3Map[l3Display]||0);
       var l3ytd=(regL3YTD[pipeReg]&&regL3YTD[pipeReg][l3Display])||0;
       var l3att=l3tcp>0?(l3ytd/l3tcp*100).toFixed(0)+"%":"—";
       var teamsObj=(_sprTeamByMu1[rg]&&_sprTeamByMu1[rg][l3Key])||{};
@@ -2464,17 +2484,24 @@ function renderBud(){
         _srgYtdRaw=(regL3SrgYTD[pipeReg]&&regL3SrgYTD[pipeReg][l3Display])||{};
       }
       var _srgYtdLower={};Object.keys(_srgYtdRaw).forEach(function(k){_srgYtdLower[k.toLowerCase().replace(/[\s\-]+/g,'')]=_srgYtdRaw[k];});
+      var _srgYtdLK=Object.keys(_srgYtdLower);
+      function _resolveSrgYtd(sfx){if(_srgYtdLower[sfx]!==undefined)return sfx;for(var _i=0;_i<_srgYtdLK.length;_i++){var _k=_srgYtdLK[_i];if(sfx.startsWith(_k)||_k.startsWith(sfx))return _k;}return null;}
+      var totalTeamQ=teamKeys.reduce(function(s,tk){return s+(teamsObj[tk].q||0);},0);
+      var tcpBase=isL3SameAsL2?tcp:l3tcp;
+      var _teamSfxCount={};teamKeys.forEach(function(tk){var _s=teamsObj[tk].orig.indexOf(' - ');var _sfx=(_s>-1?teamsObj[tk].orig.slice(_s+3):teamsObj[tk].orig).replace(/^[SF]LSM[-\s]*/i,'').toLowerCase().replace(/[\s\-]+/g,'');var _rk=_resolveSrgYtd(_sfx);if(_rk)_teamSfxCount[_rk]=(_teamSfxCount[_rk]||0)+1;});
       teamKeys.forEach(function(tk){
         var team=teamsObj[tk];
         var _sep=team.orig.indexOf(' - ');
-        var _suffix=_sep>-1?team.orig.slice(_sep+3):team.orig;
+        var _suffix=(_sep>-1?team.orig.slice(_sep+3):team.orig).replace(/^[SF]LSM[-\s]*/i,'');
         var _srgKey=_suffix.toLowerCase().replace(/[\s\-]+/g,'');
-        var teamYTD=_srgYtdLower[_srgKey]||0;
-        var teamAtt=team.q>0?(teamYTD/team.q*100).toFixed(0)+"%":"—";
-        var attColor=team.q>0&&teamYTD/team.q>=1?'#0a6640':teamYTD/team.q>=0.75?'#804000':'#8B0000';
+        var _mk=_resolveSrgYtd(_srgKey);
+        var teamYTD=_mk?(_srgYtdLower[_mk]||0)/(_teamSfxCount[_mk]||1):0;
+        var teamTCP=totalTeamQ>0?tcpBase*(team.q/totalTeamQ):0;
+        var teamAtt=teamTCP>0?(teamYTD/teamTCP*100).toFixed(0)+"%":"—";
+        var attColor=teamTCP>0&&teamYTD/teamTCP>=1?'#0a6640':teamYTD/teamTCP>=0.75?'#804000':'#8B0000';
         html+='<tr class="'+teamParentClass+'" style="display:none;background:#eef4ff">';
         html+='<td style="padding:3px 6px 3px '+(isL3SameAsL2?'28':'36')+'px;font-size:10px;color:#444;border-bottom:1px solid #f0f0f0">'+team.orig+'</td>';
-        html+='<td style="'+td+';font-size:10px;color:#444">'+(team.q?fmtE(team.q):"—")+'</td>';
+        html+='<td style="'+td+';font-size:10px;color:#444">'+(teamTCP?fmtE(teamTCP):"—")+'</td>';
         html+='<td style="'+td+';font-size:10px;color:#444">'+(teamYTD?fmtE(teamYTD):"—")+'</td>';
         html+='<td style="'+td+';font-size:10px;font-weight:700;color:'+attColor+'">'+teamAtt+'</td>';
         html+='</tr>';
@@ -2544,7 +2571,7 @@ function renderBud(){
     var srcRaw2=String(p["TCP Pipeline Source Desc"]||"").trim();
     var src=_pipeSrcMap2[srcRaw2]||null;
     if(createQ.startsWith("2026")){sbYTD[sb]=(sbYTD[sb]||0)+eur;if(sol3)sbSol3YTD[sb][sol3]=(sbSol3YTD[sb][sol3]||0)+eur;if(src)sbSrcYTD[sb][src]=(sbSrcYTD[sb][src]||0)+eur;}
-    if(drm==="Booked/Won"){sbBW[sb]=(sbBW[sb]||0)+eur;if(sol3)sbSol3BW[sb][sol3]=(sbSol3BW[sb][sol3]||0)+eur;if(src)sbSrcBW[sb][src]=(sbSrcBW[sb][src]||0)+eur;}
+    if(closeQ.startsWith("2026")&&drm==="Booked/Won"){sbBW[sb]=(sbBW[sb]||0)+eur;if(sol3)sbSol3BW[sb][sol3]=(sbSol3BW[sb][sol3]||0)+eur;if(src)sbSrcBW[sb][src]=(sbSrcBW[sb][src]||0)+eur;}
     if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable"||drm==="Upside")){sbLv[sb]=(sbLv[sb]||0)+eur;if(sol3)sbSol3Lv[sb][sol3]=(sbSol3Lv[sb][sol3]||0)+eur;if(src)sbSrcLv[sb][src]=(sbSrcLv[sb][src]||0)+eur;}
     if(closeQ.startsWith("2026")&&(drm==="Committed"||drm==="Probable")){sbCP[sb]=(sbCP[sb]||0)+eur;if(sol3)sbSol3CP[sb][sol3]=(sbSol3CP[sb][sol3]||0)+eur;if(src)sbSrcCP[sb][src]=(sbSrcCP[sb][src]||0)+eur;}
     if(QTRS.indexOf(closeQ)>-1){
@@ -2866,9 +2893,9 @@ function renderBud(){
   var hoRate=totEur>0?(hoEur/totEur*100).toFixed(0)+"%":"0%";
   var html='<div class="ap"><h2 style="color:var(--dk);margin:0 0 12px">SDE Insights</h2>';
   html+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">';
-  html+='<div class="kpi kb"><div class="kl">SDE Pipeline 2026</div><div class="kv">&euro;'+fmtE(totEur)+'</div><div class="ks">'+totOpps.toLocaleString()+' opportunities</div></div>';
-  html+='<div class="kpi kb"><div class="kl">Active MM Identifiers</div><div class="kv">'+uniqMM.toLocaleString()+'</div><div class="ks">with Digital Hub pipeline</div></div>';
-  html+='<div class="kpi kb"><div class="kl">Handed Over</div><div class="kv">&euro;'+fmtE(hoEur)+'</div><div class="ks">'+hoRate+' of SDE pipeline</div></div>';
+  html+='<div class="kpi kb"><div class="kl">SDE Pipeline 2026</div><div class="kv">&euro;'+fmtE(totEur)+'</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Active MM Identifiers</div><div class="kv">'+uniqMM.toLocaleString()+'</div></div>';
+  html+='<div class="kpi kb"><div class="kl">Handed Over</div><div class="kv">&euro;'+fmtE(hoEur)+'</div></div>';
   html+='</div>';
   // Table 1: By MM Identifier
   var mmMap={},mmOpps={},mmHO={},mmEngType={};
@@ -3070,13 +3097,13 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     html3+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Strategy Overview</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
     html3+='<p style="font-size:12px;color:var(--mu);margin-bottom:14px">High level view of strategies implemented to achieve targets</p>';
     html3+="<div class=\"krow\">";
-    html3+="<div class=\"kpi kr\"><div class=\"kl\">Demand Managers</div><div class=\"kv\">"+uniqMgr+"</div><div class=\"ks\">tracked in campaign calendar</div></div>";
+    html3+="<div class=\"kpi kr\"><div class=\"kl\">Demand Managers</div><div class=\"kv\">"+uniqMgr+"</div></div>";
 
 
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+fmtE(targetPipe/1000)+"</div><div class=\"ks\">from campaign calendar</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 38 &middot; 14 Sep 2026</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">2026 Pipeline Share</div><div class=\"kv\">"+camp2026Pct+"</div><div class=\"ks\">campaign-linked vs all 2026</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+fmtE(targetPipe/1000)+"</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">2026 Pipeline Share</div><div class=\"kv\">"+camp2026Pct+"</div></div>";
 
     html3+="</div>";
     html3+="</div>";
@@ -3112,15 +3139,15 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
       return{pct:(entries[0][1]/total*100).toFixed(0)+"%",name:entries[0][0]};
     }
     var trSB=topOppPct(oppSBMap),trInd=topOppPct(oppIndMap),trRBC=topOppPct(oppRBCMap),trIAC=topOppPct(oppIACMap);
-    html3='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Campaign Insights</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>'+html3;
+    html3='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div><h2 style="color:var(--dk);margin:0">Campaign Insights</h2><div style="font-size:11px;color:var(--mu);margin-top:2px">connected to campaign calendar</div></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>'+html3;
     html3+="<div class=\"krow\"><div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px\">Campaigns</div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Campaigns</div><div class=\"kv\">"+(new Set(data.map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean))).size.toLocaleString()+"</div><div class=\"ks\">Distinct Campaign names tracked in Campaign Calendar</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+fmtE(targetPipe/1000)+"</div><div class=\"ks\">from campaign calendar</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">Pipeline &euro; vs Target Pipeline</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Campaigns</div><div class=\"kv\">"+(new Set(data.map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean))).size.toLocaleString()+"</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+fmtE(targetPipe/1000)+"</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Achiev.</div><div class=\"kv\">"+(targetPipe>0?((totEur*1000)/targetPipe*100).toFixed(0)+"%":"0%")+"</div></div>";
     html3+="<div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px;margin-left:8px\">Results</div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div><div class=\"ks\">Week 38 &middot; 14 Sep 2026</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Distinct Opps Created</div><div class=\"kv\">"+totOpps.toLocaleString()+"</div><div class=\"ks\">connected to WBS/Campaign code</div></div>";
-    html3+="<div class=\"kpi kb\"><div class=\"kl\">Won+Live Pipeline</div><div class=\"kv\">"+qualOppRate+"</div><div class=\"ks\">"+qualOppsSet.size.toLocaleString()+" opps &middot; Won+Live / Total</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Pipeline Created</div><div class=\"kv\">&euro;"+(totEur>=1000?(totEur/1000).toFixed(0)+"M":totEur.toFixed(0)+"K")+"</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Distinct Opps Created</div><div class=\"kv\">"+totOpps.toLocaleString()+"</div></div>";
+    html3+="<div class=\"kpi kb\"><div class=\"kl\">Won+Live Pipeline</div><div class=\"kv\">"+qualOppRate+"</div></div>";
     var hodEur=pr.filter(function(p){return hasHod(p["SDE Handover Date"]);}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);var hodPct=totEur>0?(hodEur/totEur*100).toFixed(0)+"%":"0%";
     var hodOppsSet=new Set(pr.filter(function(p){return hasHod(p["SDE Handover Date"]);}).map(function(p){return String(p["Opportunity ID"]||"");}));
     var hodOpps=hodOppsSet.size;    var hodEur2=pr.filter(function(p){return hasHod(p["SDE Handover Date"]);}).reduce(function(a,p){return a+(parseFloat(p["Eur"]||0)||0);},0);
@@ -3230,33 +3257,35 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     var _wbsPipeEur={};
     pr.forEach(function(p){var w=String(p["Opp Campaign ID"]||"").trim();if(w)_wbsPipeEur[w]=(_wbsPipeEur[w]||0)+(parseFloat(p["Eur"]||0)||0);});
     var _wbsEmail={};
-    outData.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();if(!w)return;if(!_wbsEmail[w])_wbsEmail[w]={o:0,d:0,r:0};_wbsEmail[w].o+=(parseInt(r["Emails - Opens"])||0);_wbsEmail[w].d+=(parseInt(r["Emails - Deliveries"])||0);_wbsEmail[w].r+=(parseInt(r["Emails - Replies"])||0);});
+    outData.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();if(!w)return;if(!_wbsEmail[w])_wbsEmail[w]={o:0,d:0,r:0,b:0};_wbsEmail[w].o+=(parseInt(r["Emails - Opens"])||0);_wbsEmail[w].d+=(parseInt(r["Emails - Deliveries"])||0);_wbsEmail[w].r+=(parseInt(r["Emails - Replies"])||0);_wbsEmail[w].b+=(parseInt(r["Emails - Bounces"])||0);});
     var _exeMap={};
     data.forEach(function(r){
       var wbs=String(r["Campaign/WBS Code"]||"").trim();
-      var _exArr=r["Executor1"]?[String(r["Executor1"]).trim()]:String(r["Executor"]||"").split(",").map(function(s){return s.trim();});
+      var _exArr=r["Executor1"]?[String(r["Executor1"]).trim()]:(function(){var _p=String(r["Executor"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);var _a=[];for(var _i=0;_i<_p.length;_i+=2){_a.push(_p[_i]+(_p[_i+1]?", "+_p[_i+1]:""));}return _a;})();
       _exArr.filter(Boolean).forEach(function(ex){
-        if(!_exeMap[ex])_exeMap[ex]={camps:0,seqs:0,pipe:0,opens:0,delivered:0,replies:0};
+        if(!_exeMap[ex])_exeMap[ex]={camps:0,seqs:0,pipe:0,opens:0,delivered:0,replies:0,bounces:0};
         _exeMap[ex].camps++;
         _exeMap[ex].seqs+=(_wbsSeqCnt[wbs]||0);
         _exeMap[ex].pipe+=(_wbsPipeEur[wbs]||0);
         _exeMap[ex].opens+=(_wbsEmail[wbs]?_wbsEmail[wbs].o:0);
         _exeMap[ex].delivered+=(_wbsEmail[wbs]?_wbsEmail[wbs].d:0);
         _exeMap[ex].replies+=(_wbsEmail[wbs]?_wbsEmail[wbs].r:0);
+        _exeMap[ex].bounces+=(_wbsEmail[wbs]?_wbsEmail[wbs].b:0);
       });
     });
     var _exeKeys=Object.keys(_exeMap).sort(function(a,b){return _exeMap[b].camps-_exeMap[a].camps;});
     var _thEx="background:#012931;color:#fff;padding:5px 8px;font-size:10px;font-weight:700;text-align:left;white-space:nowrap";
     var _thExR=_thEx+";text-align:right";
     var _tdEx="padding:4px 8px;font-size:11px;border-bottom:1px solid #f0f0f0";
-    var _exeTbl='<div class="cc" style="margin-bottom:20px"><div class="ch">Campaign Executor Summary</div><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+_thEx+'">Executor</th><th style="'+_thExR+'">Campaigns</th><th style="'+_thExR+'">Sequences Connected</th><th style="'+_thExR+'">Open Rate</th><th style="'+_thExR+'">Reply Rate</th><th style="'+_thExR+'">Pipeline Created</th></tr></thead><tbody>';
+    var _exeTbl='<div class="cc" style="margin-bottom:20px"><div class="ch">Campaign Executor Summary</div><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+_thEx+'">Executor</th><th style="'+_thExR+'">Campaigns</th><th style="'+_thExR+'">Sequences Connected</th><th style="'+_thExR+'">Open Rate</th><th style="'+_thExR+'">Reply Rate</th><th style="'+_thExR+'">Bounce Rate</th><th style="'+_thExR+'">Pipeline Created</th></tr></thead><tbody>';
     window._anaClickExe=function(ex){anaFilter.executor=(anaFilter.executor===ex)?null:ex;renderAna();};
     _exeKeys.forEach(function(ex){
       var e=_exeMap[ex];
       var _eor=e.delivered>0?(e.opens/e.delivered*100).toFixed(0)+"%":"—";
       var _err=e.opens>0?(e.replies/e.opens*100).toFixed(0)+"%":"—";
+      var _ebr=e.delivered>0?(e.bounces/e.delivered*100).toFixed(0)+"%":"—";
       var isSel=anaFilter.executor===ex;
-      _exeTbl+='<tr style="cursor:pointer;background:'+(isSel?"#D1EFFF":"")+';" onclick="window._anaClickExe(this.dataset.ex)" data-ex="'+ex.replace(/"/g,"&quot;")+'"><td style="'+_tdEx+'">'+ex+'</td><td style="'+_tdEx+';text-align:right">'+e.camps+'</td><td style="'+_tdEx+';text-align:right">'+e.seqs+'</td><td style="'+_tdEx+';text-align:right">'+_eor+'</td><td style="'+_tdEx+';text-align:right">'+_err+'</td><td style="'+_tdEx+';text-align:right">'+(e.pipe?'€'+fmtE(e.pipe):"—")+'</td></tr>';
+      _exeTbl+='<tr style="cursor:pointer;background:'+(isSel?"#D1EFFF":"")+';" onclick="window._anaClickExe(this.dataset.ex)" data-ex="'+ex.replace(/"/g,"&quot;")+'"><td style="'+_tdEx+'">'+ex+'</td><td style="'+_tdEx+';text-align:right">'+e.camps+'</td><td style="'+_tdEx+';text-align:right">'+e.seqs+'</td><td style="'+_tdEx+';text-align:right">'+_eor+'</td><td style="'+_tdEx+';text-align:right">'+_err+'</td><td style="'+_tdEx+';text-align:right">'+_ebr+'</td><td style="'+_tdEx+';text-align:right">'+(e.pipe?'€'+fmtE(e.pipe):"—")+'</td></tr>';
     });
     var _exTotCamps=_exeKeys.reduce(function(s,ex){return s+_exeMap[ex].camps;},0);
     var _exTotSeqs=_exeKeys.reduce(function(s,ex){return s+_exeMap[ex].seqs;},0);
@@ -3264,9 +3293,11 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     var _exTotDel=_exeKeys.reduce(function(s,ex){return s+_exeMap[ex].delivered;},0);
     var _exTotReplies=_exeKeys.reduce(function(s,ex){return s+_exeMap[ex].replies;},0);
     var _exTotPipe=_exeKeys.reduce(function(s,ex){return s+_exeMap[ex].pipe;},0);
+    var _exTotBounces=_exeKeys.reduce(function(s,ex){return s+_exeMap[ex].bounces;},0);
     var _exTotOr=_exTotDel>0?(_exTotOpens/_exTotDel*100).toFixed(0)+"%":"—";
     var _exTotRr=_exTotOpens>0?(_exTotReplies/_exTotOpens*100).toFixed(0)+"%":"—";
-    _exeTbl+='</tbody><tfoot><tr style="background:#f0f4f8;font-weight:700;border-top:2px solid #012931"><td style="'+_tdEx+';position:sticky;bottom:0;background:#f0f4f8">Total</td><td style="'+_tdEx+';text-align:right;position:sticky;bottom:0;background:#f0f4f8">'+_exTotCamps+'</td><td style="'+_tdEx+';text-align:right;position:sticky;bottom:0;background:#f0f4f8">'+_exTotSeqs+'</td><td style="'+_tdEx+';text-align:right;position:sticky;bottom:0;background:#f0f4f8">'+_exTotOr+'</td><td style="'+_tdEx+';text-align:right;position:sticky;bottom:0;background:#f0f4f8">'+_exTotRr+'</td><td style="'+_tdEx+';text-align:right;position:sticky;bottom:0;background:#f0f4f8">'+(_exTotPipe?'€'+fmtE(_exTotPipe):"—")+'</td></tr></tfoot></table></div></div>';
+    var _exTotBr=_exTotDel>0?(_exTotBounces/_exTotDel*100).toFixed(0)+"%":"—";
+    _exeTbl+='</tbody><tfoot><tr style="background:#f0f4f8;font-weight:700;border-top:2px solid #012931"><td style="'+_tdEx+';position:sticky;bottom:0;background:#f0f4f8">Total</td><td style="'+_tdEx+';text-align:right;position:sticky;bottom:0;background:#f0f4f8">'+_exTotCamps+'</td><td style="'+_tdEx+';text-align:right;position:sticky;bottom:0;background:#f0f4f8">'+_exTotSeqs+'</td><td style="'+_tdEx+';text-align:right;position:sticky;bottom:0;background:#f0f4f8">'+_exTotOr+'</td><td style="'+_tdEx+';text-align:right;position:sticky;bottom:0;background:#f0f4f8">'+_exTotRr+'</td><td style="'+_tdEx+';text-align:right;position:sticky;bottom:0;background:#f0f4f8">'+_exTotBr+'</td><td style="'+_tdEx+';text-align:right;position:sticky;bottom:0;background:#f0f4f8">'+(_exTotPipe?'€'+fmtE(_exTotPipe):"—")+'</td></tr></tfoot></table></div></div>';
     // _exeTbl injected into right column via ana-drm-tcp-tables
   }
   if(pageId!=="ovwPage"){
@@ -4643,17 +4674,17 @@ function renderOutInner(page){
   if(_curTagOut||_curTagPros)html3+='<button onclick="window.outFilter.proTagOut=null;window.outFilter.proTagPros=null;renderOut()" style="font-size:11px;padding:3px 10px;cursor:pointer;border:1px solid var(--rd);border-radius:var(--r);background:#fff;color:var(--rd)">Clear</button>';
   html3+='</div>';
   html3+="<div class=\"krow\" style=\"flex-wrap:wrap\">";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Prospects Contacted</div><div class=\"kv\">"+totP.toLocaleString()+"</div><div class=\"ks\">through tracked sequences &middot; "+_seqsWithData.toLocaleString()+" sequences with data</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Accounts Added</div><div class=\"kv\">"+totAcctAdded.toLocaleString()+"</div><div class=\"ks\">added to tracked sequences &middot; "+_seqsWithData.toLocaleString()+" sequences with data</div></div>";
-  html3+="<div class=\"kpi ko\"><div class=\"kl\">Prospects Delivered</div><div class=\"kv\">"+totDelivered.toLocaleString()+"</div><div class=\"ks\">"+_seqsWithData.toLocaleString()+" sequences with data</div></div>";
-  html3+="<div class=\"kpi kp\"><div class=\"kl\">Email Open Rate</div><div class=\"kv\">"+openPct+"</div><div class=\"ks\">"+totO.toLocaleString()+" opens / "+totD.toLocaleString()+" delivered &middot; "+_seqsWithData.toLocaleString()+" sequences with data</div></div>";
-  html3+="<div class=\"kpi kr\"><div class=\"kl\">Email Reply Rate</div><div class=\"kv\">"+repPct+"</div><div class=\"ks\">"+totR.toLocaleString()+" replies / "+totO.toLocaleString()+" opens &middot; "+_seqsWithData.toLocaleString()+" sequences with data</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Prospect Bounce Rate</div><div class=\"kv\">"+(totP>0?(totB/totP*100).toFixed(0)+"%":"0%")+"</div><div class=\"ks\">"+totB.toLocaleString()+" bounces / "+totP.toLocaleString()+" prospects contacted &middot; "+_seqsWithData.toLocaleString()+" sequences with data</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Prospects / Account</div><div class=\"kv\">"+(totAcctAdded>0?(totP/totAcctAdded).toFixed(0):"0")+"</div><div class=\"ks\">avg prospects per account &middot; "+_seqsWithData.toLocaleString()+" sequences with data</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Prospects Contacted</div><div class=\"kv\">"+totP.toLocaleString()+"</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Accounts Added</div><div class=\"kv\">"+totAcctAdded.toLocaleString()+"</div></div>";
+  html3+="<div class=\"kpi ko\"><div class=\"kl\">Prospects Delivered</div><div class=\"kv\">"+totDelivered.toLocaleString()+"</div></div>";
+  html3+="<div class=\"kpi kp\"><div class=\"kl\">Email Open Rate</div><div class=\"kv\">"+openPct+"</div></div>";
+  html3+="<div class=\"kpi kr\"><div class=\"kl\">Email Reply Rate</div><div class=\"kv\">"+repPct+"</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Prospect Bounce Rate</div><div class=\"kv\">"+(totP>0?(totB/totP*100).toFixed(0)+"%":"0%")+"</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Prospects / Account</div><div class=\"kv\">"+(totAcctAdded>0?(totP/totAcctAdded).toFixed(0):"0")+"</div></div>";
   html3+="</div>";
   html3+="<div class=\"krow\" style=\"flex-wrap:wrap\">";
-  html3+="<div class=\"kpi kg\"><div class=\"kl\">Unique Prospects Contacted</div><div class=\"kv\">"+totUniqP.toLocaleString()+"</div><div class=\"ks\">distinct across "+_seqsWithData.toLocaleString()+" sequences with data</div></div>";
-  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Accounts Contacted</div><div class=\"kv\">"+totUniqCo.toLocaleString()+"</div><div class=\"ks\">distinct across "+_seqsWithData.toLocaleString()+" sequences with data</div></div>";
+  html3+="<div class=\"kpi kg\"><div class=\"kl\">Unique Prospects Contacted</div><div class=\"kv\">"+totUniqP.toLocaleString()+"</div></div>";
+  html3+="<div class=\"kpi kb\"><div class=\"kl\">Unique Accounts Contacted</div><div class=\"kv\">"+totUniqCo.toLocaleString()+"</div></div>";
 
   html3+="</div>";
   html3+="<div class=\"sec\" style=\"margin-top:18px\">Outreach User Summary</div>";

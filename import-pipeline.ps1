@@ -123,6 +123,14 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
     $pipeRows.Add('{' + $fields + '}')
 }
 
+# Deduplicate by Opportunity ID + Sub-Solution Area (L2) to avoid contact-level inflation
+$seen = [System.Collections.Generic.HashSet[string]]::new()
+$pipeRows = $pipeRows | Where-Object {
+    $obj = $_ | ConvertFrom-Json
+    $key = $obj.'Opportunity ID' + '|' + $obj.'Sub-Solution Area (L2)'
+    $seen.Add($key)
+}
+
 Write-Host "Writing data-pipe.js ($($pipeRows.Count) rows)..."
 $js = 'window.PIPE_DATA=[' + ($pipeRows -join ',') + '];'
 [System.IO.File]::WriteAllText("$outDir\data-pipe.js", $js, [System.Text.Encoding]::UTF8)
