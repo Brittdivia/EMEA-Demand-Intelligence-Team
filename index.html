@@ -2036,6 +2036,7 @@ function renderBud(){
     REGS=REGS.filter(function(rg){return _selRegs.has(rg);});
   }
   var _sbActF=filters["Sales Bag"]&&filters["Sales Bag"].size?filters["Sales Bag"]:null;
+  if(_sbActF){var _budSol2SA={"PFLEARH1":"Human Capital Management","PFMKTGEMA":"Customer Experience","SAAI":"Data & AI","SABLD":"Business Technology Platform","SABPI":"Business Technology Platform","SABTPADI":"Business Technology Platform","SABTPCDC":"Business Technology Platform","SABTPEA":"Business Technology Platform","SABTPPRI":"Data & AI","SABUSN":"Business Technology Platform","SACHRPAY2":"Human Capital Management","SACSA":"Customer Experience","SACXCOMM":"Customer Experience","SACXSS":"Customer Experience","SADABDC":"Data & AI","SADABDCPR":"Data & AI","SADADBCL":"Data & AI","SADBDM":"Data & AI","SADSC":"Supply Chain Management","SADSCMD":"Supply Chain Management","SADSCP":"Supply Chain Management","SADSCPL":"Supply Chain Management","SADSCS4":"Supply Chain Management","SAEM":"Cloud ERP Private","SAFFPA":"Finance and Spend Management","SAFGRC":"Finance and Spend Management","SAFIELDGL":"Human Capital Management","SAFQ2C":"Finance and Spend Management","SAFQP":"Finance and Spend Management","SAFTR":"Finance and Spend Management","SAHCMCPP":"Human Capital Management","SAHXMLR2":"Human Capital Management","SAHXMLRSR":"Human Capital Management","SAHXMSPM2":"Human Capital Management","SAHXMX2":"Human Capital Management","SAINS":"Business Technology Platform","SALEAX":"Business Technology Platform","SAPROC":"Supply Chain Management","SAS4EMP":"Cloud ERP Private","SAS4FQ":"Cloud ERP Private","SATAUL1":"Finance and Spend Management","SATOOLCH":"Business Technology Platform","SAWME":"Business Technology Platform"};data=data.filter(function(r){var _sb=_budSol2SA[r.sol2];return _sb&&_sbActF.has(_sb);});}
   var QTRS=["2026-Q1","2026-Q2","2026-Q3","2026-Q4"];
   function fmtQtr(q){var m=String(q).match(/(\d{4})-Q(\d)/);return m?"Q"+m[2]+m[1].slice(2):q;}
   var IAC_ORDER=["C-Field","C-Digital","E-High Touch","Partner-Driven"];
@@ -2502,7 +2503,7 @@ function renderBud(){
       function _resolveSrgYtd(sfx){if(_srgYtdLower[sfx]!==undefined)return sfx;for(var _i=0;_i<_srgYtdLK.length;_i++){var _k=_srgYtdLK[_i];if(sfx.startsWith(_k)||_k.startsWith(sfx))return _k;}return null;}
       var totalTeamQ=teamKeys.reduce(function(s,tk){return s+(teamsObj[tk].q||0);},0);
       var tcpBase=isL3SameAsL2?tcp:l3tcp;
-      var _teamSfxCount={};teamKeys.forEach(function(tk){var _s=teamsObj[tk].orig.indexOf(' - ');var _sfx=(_s>-1?teamsObj[tk].orig.slice(_s+3):teamsObj[tk].orig).replace(/^[SF]LSM[-\s]*/i,'').toLowerCase().replace(/[\s\-]+/g,'');var _rk=_resolveSrgYtd(_sfx);if(_rk)_teamSfxCount[_rk]=(_teamSfxCount[_rk]||0)+1;});
+      var _teamSfxCount={};var _matchedSrgKeys=new Set();teamKeys.forEach(function(tk){var _s=teamsObj[tk].orig.indexOf(' - ');var _sfx=(_s>-1?teamsObj[tk].orig.slice(_s+3):teamsObj[tk].orig).replace(/^[SF]LSM[-\s]*/i,'').toLowerCase().replace(/[\s\-]+/g,'');var _rk=_resolveSrgYtd(_sfx);if(_rk){_teamSfxCount[_rk]=(_teamSfxCount[_rk]||0)+1;_matchedSrgKeys.add(_rk);}});
       teamKeys.forEach(function(tk){
         var team=teamsObj[tk];
         var _sep=team.orig.indexOf(' - ');
@@ -2520,6 +2521,8 @@ function renderBud(){
         html+='<td style="'+td+';font-size:10px;font-weight:700;color:'+attColor+'">'+teamAtt+'</td>';
         html+='</tr>';
       });
+      var _otherSrgYTD=_srgYtdLK.reduce(function(s,k){return s+(_matchedSrgKeys.has(k)?0:(_srgYtdLower[k]||0));},0);
+      if(_otherSrgYTD>0.001){html+='<tr class="'+teamParentClass+'" style="display:none;background:#eef4ff"><td style="padding:3px 6px 3px '+(isL3SameAsL2?'28':'36')+'px;font-size:10px;color:#888;font-style:italic;border-bottom:1px solid #f0f0f0">Other</td><td style="'+td+';font-size:10px;color:#888">—</td><td style="'+td+';font-size:10px;color:#888">'+fmtE(_otherSrgYTD)+'</td><td style="'+td+';font-size:10px;color:#888">—</td></tr>';}
     });
   });
   html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td>';
