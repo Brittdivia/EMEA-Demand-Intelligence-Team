@@ -2775,7 +2775,7 @@ function renderBud(){
     if(hasHod(p["SDE Handover Date"]))srcHO2[src]=(srcHO2[src]||0)+_eur2;
     if(String(p["DRM Category"]||"").trim()==="Booked/Won")srcBW2[src]=(srcBW2[src]||0)+_eur2;
   });
-  html+='<div class="cc"><div class="ch"><span>2026 TCP Target by Source (EMEA Targets)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:15%"><col style="width:11%"><col style="width:9%"><col style="width:12%"><col style="width:8%"><col style="width:11%"><col style="width:13%"><col style="width:12%"><col style="width:9%"></colgroup><thead><tr>';
+  html+='<div class="cc"><div class="ch"><span>2026 TCP Target by Source (EMEA Targets) &amp; Pipeline Created YTD</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:15%"><col style="width:11%"><col style="width:9%"><col style="width:12%"><col style="width:8%"><col style="width:11%"><col style="width:13%"><col style="width:12%"><col style="width:9%"></colgroup><thead><tr>';
   html+='<th style="'+thL+'">Source</th><th style="'+thSW+'">TCP Target</th><th style="'+thSW+'">% of Target</th><th style="'+thSW+'">YTD Pipeline Created</th><th style="'+thSW+'">% of YTD</th><th style="'+thSW+'">Attainment</th><th style="'+thSW+'">Won &amp; Booked YTD</th><th style="'+thSW+'">% Won</th><th style="'+thSW+'">% HO</th></tr></thead><tbody>';
   var gSrcTcp=0,gSrcYTD=0,gSrcHO2=0,gSrcBW2=0;
   _srcOrder2.forEach(function(src){gSrcTcp+=srcTgt2[src]||0;gSrcYTD+=srcYTD2[src]||0;gSrcHO2+=srcHO2[src]||0;gSrcBW2+=srcBW2[src]||0;});
