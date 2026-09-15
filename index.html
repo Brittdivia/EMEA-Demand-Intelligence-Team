@@ -2449,10 +2449,11 @@ function renderBud(){
   html+='<th style="'+thS+'">Attainment</th>';
   html+='</tr></thead><tbody>';
   var grandTcp2=0,grandYTD2=0;
+  var _iacRatioEmea=1;if(filters["IAC"]&&filters["IAC"].size){var _eTot=Object.keys(sprByMuTotal).reduce(function(s,k){return s+(sprByMuTotal[k]||0);},0);var _eIac=Object.keys(sprByMu).reduce(function(s,k){return s+(sprByMu[k]||0);},0);_iacRatioEmea=_eTot>0?_eIac/_eTot:0;}
   REGS.forEach(function(rg){
     var pipeReg=rg.replace(/^CS /,"");
     var tcp=(window._sprTeamFilter)?(sprByMu[rg]||0):(regTcpTgt[pipeReg]||0);
-    if(filters["IAC"]&&filters["IAC"].size){var _st=sprByMuTotal[rg]||0;tcp=_st>0?((regTcpTgt[pipeReg]||0)*(sprByMu[rg]||0)/_st):0;}
+    if(filters["IAC"]&&filters["IAC"].size){tcp=(regTcpTgt[pipeReg]||0)*_iacRatioEmea;}
     var ytd=regPipeYTD[pipeReg]||0;
     var att=tcp>0?(ytd/tcp*100).toFixed(0)+"%":"—";
     grandTcp2+=tcp;grandYTD2+=ytd;
@@ -2473,7 +2474,7 @@ function renderBud(){
     allL3Displays.forEach(function(l3Display){
       var l3Key=l3Display.toLowerCase();
       var isL3SameAsL2=l3Display.toLowerCase()===pipeReg.toLowerCase();
-      var _l3tcpBritt=l3Map[l3Display]||0;var _l3iacR=(_iacActive&&(sprByMuTotal[rg]||0)>0)?((sprByMu[rg]||0)/(sprByMuTotal[rg])):1;var l3tcp=(window._sprTeamFilter)?(sprL3Obj[l3Key]?sprL3Obj[l3Key].q:0):(_l3tcpBritt*_l3iacR);
+      var _l3tcpBritt=l3Map[l3Display]||0;var l3tcp=(window._sprTeamFilter)?(sprL3Obj[l3Key]?sprL3Obj[l3Key].q:0):(_iacActive?(_l3tcpBritt*_iacRatioEmea):_l3tcpBritt);
       var l3ytd=(regL3YTD[pipeReg]&&regL3YTD[pipeReg][l3Display])||0;
       var l3att=l3tcp>0?(l3ytd/l3tcp*100).toFixed(0)+"%":"—";
       var teamsObj=(_sprTeamByMu1[rg]&&_sprTeamByMu1[rg][l3Key])||{};
@@ -2849,9 +2850,9 @@ function renderBud(){
   html+='<th style="'+thSW+'">Attainment</th>';
   html+='</tr></thead><tbody>';
   var gsbTcp=0,gsbYTD=0;
-  var _iacActSb=filters["IAC"]&&filters["IAC"].size;var _sbIacRatio=1;if(_iacActSb){var _emeaTotSpr=Object.keys(sprByMuTotal).reduce(function(s,k){return s+(sprByMuTotal[k]||0);},0);var _emeaIacSpr=Object.keys(sprByMu).reduce(function(s,k){return s+(sprByMu[k]||0);},0);_sbIacRatio=_emeaTotSpr>0?_emeaIacSpr/_emeaTotSpr:0;}
+  var _iacActSb=filters["IAC"]&&filters["IAC"].size;
   SBS.forEach(function(sb){
-    var tcp=_iacActSb?((sbTcpTgt[sb]||0)*_sbIacRatio):(sbTcpTgt[sb]||0),ytd=sbYTD[sb]||0;
+    var tcp=_iacActSb?((sbTcpTgt[sb]||0)*_iacRatioEmea):(sbTcpTgt[sb]||0),ytd=sbYTD[sb]||0;
     var att=tcp>0?(ytd/tcp*100).toFixed(0)+"%":"—";
     gsbTcp+=tcp;gsbYTD+=ytd;
     var sbId2='bud-sb2-'+sb.replace(/\W+/g,'_');
@@ -2863,7 +2864,7 @@ function renderBud(){
     html+='<td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td></tr>';
     var sol3Set2=new Set(Object.keys(sbSol3Tgt[sb]||{}).concat(Object.keys(sbSol3YTD[sb]||{})).concat(Object.keys(sbSol3Bud[sb]||{})));
     Array.from(sol3Set2).sort().forEach(function(item){
-      var itcp=_iacActSb?((sbSol3Tgt[sb][item]||0)*_sbIacRatio):(sbSol3Tgt[sb][item]||0);
+      var itcp=_iacActSb?((sbSol3Tgt[sb][item]||0)*_iacRatioEmea):(sbSol3Tgt[sb][item]||0);
       var iytd=sbSol3YTD[sb][item]||0;
       var iatt=itcp>0?(iytd/itcp*100).toFixed(0)+"%":"—";
       html+='<tr class="'+sbId2+'" style="display:none;background:#fafcff">';
