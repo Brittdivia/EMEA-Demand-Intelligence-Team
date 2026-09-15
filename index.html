@@ -2757,6 +2757,7 @@ function renderBud(){
       srcTgt2[src]=srcTgt2[src]*ratio;
     });
   }
+  if(filters["IAC"]&&filters["IAC"].size){_srcOrder2.forEach(function(src){srcTgt2[src]=(srcTgt2[src]||0)*_iacRatioEmea;});}
   pipeData.forEach(function(p){
     if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
     if(drmFilters.size&&!drmFilters.has(String(p["DRM Category"]||"").trim()))return;
