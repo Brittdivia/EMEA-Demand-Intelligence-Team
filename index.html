@@ -2719,13 +2719,14 @@ function renderBud(){
   html+='<td style="'+td+';font-weight:700">'+fmtE(gsbTot)+'</td>';
   html+='<td style="'+td+';font-weight:700">'+fmtE(gsbBW)+'</td>';
   html+=cvgCell(gsbRem>0?(gsbCP/gsbRem).toFixed(1)+"X":"—");
-  ["2026-Q3","2026-Q4"].forEach(function(q){var qBW=SBS.reduce(function(s,sb){return s+(sbBW_q[sb][q]||0);},0);var qLv=SBS.reduce(function(s,sb){return s+(sbLv_q[sb][q]||0);},0);var qRem=gsbTot-qBW;html+=cvgCell(qRem>0?(qLv/qRem).toFixed(1)+"X":"—");});
+  ["2026-Q3","2026-Q4"].forEach(function(q){var qBW=SBS.reduce(function(s,sb){return s+(sbBW_q[sb][q]||0);},0);var qLv=SBS.reduce(function(s,sb){return s+(sbLv_q[sb][q]||0);},0);var qBudget=SBS.reduce(function(s,sb){return s+(sbBudget_q[sb][q]||0);},0);var qRem=qBudget-qBW;html+=cvgCell(qRem>0?(qLv/qRem).toFixed(1)+"X":"—");});
   html+=cvgCell(gsbRem>0?(gsbLv/gsbRem).toFixed(1)+"X":"—");
-  var gsbQ1Bud27=gsbTot*1.3/QTRS.length;
+  var gsbQ1Bud27=SBS.reduce(function(s,sb){return s+(sbBudget_q[sb]["2026-Q1"]||0);},0)*1.3;
+  var gsbQ2Bud27=SBS.reduce(function(s,sb){return s+(sbBudget_q[sb]["2026-Q2"]||0);},0)*1.3;
   var gsbQ1Live27=SBS.reduce(function(s,sb){return s+(sbLv_q[sb]["2027-Q1"]||0);},0);
   var gsbQ2Live27=SBS.reduce(function(s,sb){return s+(sbLv_q[sb]["2027-Q2"]||0);},0);
   html+=cvgCell(gsbQ1Bud27>0?(gsbQ1Live27/gsbQ1Bud27).toFixed(1)+"X":"—");
-  html+=cvgCell(gsbQ1Bud27>0?(gsbQ2Live27/gsbQ1Bud27).toFixed(1)+"X":"—");
+  html+=cvgCell(gsbQ2Bud27>0?(gsbQ2Live27/gsbQ2Bud27).toFixed(1)+"X":"—");
   html+='</tr></tbody></table></div></div>';
 
   // TCP Target by Source
