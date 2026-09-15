@@ -1953,10 +1953,7 @@ function renderExe(){try{
           labels:SRC_ORDER,
           datasets:[
             {label:"Pipeline Created 2026",data:SRC_ORDER.map(function(s){return Math.round(srcPipe[s]||0);}),backgroundColor:PAL[0],borderWidth:0,
-              datalabels:{display:true,anchor:"center",align:"center",formatter:function(v,ctx){
-                var tgt=srcTgt[SRC_ORDER[ctx.dataIndex]]||0;
-                if(!v||!tgt)return"";return(v/tgt*100).toFixed(0)+"%";
-              },font:{size:9,weight:"bold"},color:"#fff"}},
+              datalabels:{display:true,anchor:"end",align:"top",formatter:function(v){return v>=1?fmtE(v):"";},font:{size:9,weight:"bold"},color:PAL[0]}},
             {label:"TCP Target",data:SRC_ORDER.map(function(s){return srcTgt[s]?Math.round(srcTgt[s]):null;}),
               type:"line",borderColor:PAL[1],backgroundColor:"transparent",borderWidth:2,pointRadius:4,pointBackgroundColor:PAL[1],
               order:0,datalabels:{display:true,anchor:"end",align:"top",formatter:function(v){return v?fmtE(v):"";},font:{size:9,weight:"bold"},color:PAL[1]}}
@@ -1964,6 +1961,7 @@ function renderExe(){try{
         },
         options:{responsive:true,maintainAspectRatio:false,
           onClick:function(evt,elements){if(elements&&elements.length){var idx=elements[0].index;var src=SRC_ORDER[idx];window._exeSrcFilter=(window._exeSrcFilter===src)?null:src;renderExe();}},
+          layout:{padding:{top:20}},
           plugins:{legend:{display:true,position:"top",labels:{font:{size:11},boxWidth:12}},
             datalabels:{display:true},
             tooltip:{callbacks:{label:function(ctx){
