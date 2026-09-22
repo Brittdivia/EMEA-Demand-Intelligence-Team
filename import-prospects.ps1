@@ -63,6 +63,8 @@ $fieldMap = @{
     'Persona Name'       = 'pn'
     'Active Sequences'   = 'as'
     'Finished Sequences' = 'fs'
+    'Custom Field 63'    = 'cf63'
+    'Custom Field 64'    = 'cf64'
 }
 
 Write-Host "Processing $($rows.Count - 1) rows..."
@@ -81,7 +83,7 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
     if (-not $id -or -not $seenIds.Add($id)) { continue }
 
     $parts = [System.Collections.Generic.List[string]]::new()
-    foreach ($h in @('ID','External ID','First Name','Last Name','Company','Touched At','Stage Changed At','Created At','Tags','Stage Name','Email','Assigned Users','Persona Name','Active Sequences','Finished Sequences')) {
+    foreach ($h in @('ID','External ID','First Name','Last Name','Company','Touched At','Stage Changed At','Created At','Tags','Stage Name','Email','Assigned Users','Persona Name','Active Sequences','Finished Sequences','Custom Field 63','Custom Field 64')) {
         $f = $fieldMap[$h]
         $v = if ($colIdx[$h]) { EscJS $rowVals[$colIdx[$h]] } else { '' }
         $parts.Add("""$f"":""$v""")

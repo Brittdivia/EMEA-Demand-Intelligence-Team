@@ -1,5 +1,5 @@
 # import-pipeline.ps1
-# Reads Week 22 DL.xlsx and generates data-pipe.js -> window.PIPE_DATA
+# Reads Week 23 DL.xlsx and generates data-pipe.js -> window.PIPE_DATA
 
 $xlsxPath = "C:\Users\I572929\OneDrive - SAP SE\2026\Campaign Insights AI\Pipeline\Week 22 DL.xlsx"
 $outDir   = "C:\Users\I572929\campaign-calendar-site"
