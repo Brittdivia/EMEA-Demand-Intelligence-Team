@@ -2108,26 +2108,8 @@ function renderExe(){try{
       var _pCYTogBtn='<span onclick="window._pipeCYExpCols='+(_pCYEx?'false':'true')+';renderExe()" style="cursor:pointer;margin-left:4px;font-weight:900;font-size:13px;line-height:1;opacity:0.8">'+(_pCYEx?'&#8722;':'+')+'</span>';
       var _wrData=window.WIN_RATE_DATA||[];
       function _getWR(regKey,l3Key){
-        var rows=_wrData.filter(function(r){
-          if(r.reg.toLowerCase()!==regKey)return false;
-          if(l3Key!==null&&r.l3.toLowerCase()!==l3Key)return false;
-          if(_iacFilter){var im=false;_iacFilter.forEach(function(i){if(i===r.iac)im=true;});if(!im)return false;}
-          if(_exeProdFilter&&r.sol!==_exeProdFilter&&r.subsol!==_exeProdFilter)return false;
-          return true;
-        });
-        if(!rows.length&&l3Key!==null)rows=_wrData.filter(function(r){
-          if(r.reg.toLowerCase()!==regKey)return false;
-          if(_iacFilter){var im=false;_iacFilter.forEach(function(i){if(i===r.iac)im=true;});if(!im)return false;}
-          if(_exeProdFilter&&r.sol!==_exeProdFilter&&r.subsol!==_exeProdFilter)return false;
-          return true;
-        });
-        if(!rows.length)return{old:"—",nw:"—"};
-        var os=0,oc=0,ns=0,nc=0;
-        rows.forEach(function(r){
-          if(r.old===null||r.old<2||r.nw===null||r.nw<2)return;
-          os+=r.old;oc++;ns+=r.nw;nc++;
-        });
-        return{old:oc?Math.round(os/oc)+"%":"—",nw:nc?Math.round(ns/nc+5)+"%":"—"};
+        var isMEAS=regKey==="mea south";
+        return{old:"6%",nw:isMEAS?"10%":"20%"};
       }
       var tbl2='<div class="cc"><div class="ch">Pipeline closing 2026 and TCP needs</div><div style="max-height:300px;overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>';
       var _weeksYTD=Math.max(1,Math.round((new Date()-new Date('2026-01-01'))/(7*24*3600*1000)));
