@@ -4821,14 +4821,16 @@ function exportCalDetail(){
   function esc(v){v=String(v==null?"":v).trim();if(v.indexOf(",")>-1||v.indexOf('"')>-1||v.indexOf("\n")>-1)v='"'+v.replace(/"/g,'""')+'"';return v;}
   var rows=[];
   tbl.querySelectorAll("tr").forEach(function(tr){
-    rows.push(Array.from(tr.querySelectorAll("th,td")).map(function(c){return esc(c.innerText||c.textContent);}).join(","));
+    var cells=Array.from(tr.querySelectorAll("th,td"));
+    if(cells.length<13)return;
+    rows.push(cells.map(function(c){return esc(c.innerText||c.textContent);}).join(","));
   });
   var a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob(["﻿"+rows.join("\n")],{type:"text/csv;charset=utf-8"}));
   a.download="campaign_calendar_detail.csv";a.click();
 }
 function exportPdet(){
-  var rows=[["Campaign Name","Demand Manager","Region (Calendar)","Region (Opp)","Account Name","Opp Description","Campaign/WBS Code","Sequence ID","Opportunity ID","DRM Category","TCP Source","Handover Date","Create Quarter","Closing Quarter","MM Identifier","EUR"]];
+  var rows=[["Campaign Name","DCM","Demand Manager","Region (Calendar)","Region (Opp)","Account Name","Opp Description","Campaign/WBS Code","Sequence ID","Opportunity ID","DRM Category","TCP Source","Handover Date","Create Quarter","Closing Quarter","MM Identifier","SDE Initial Engagement Name","SDE Primary Engagement Name","SDE Secondary Engagement Name","EUR"]];
   var body=document.getElementById("pdb");
   if(!body)return;
   body.querySelectorAll("tr").forEach(function(tr){
