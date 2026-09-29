@@ -293,7 +293,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
 <script>
 window.onerror=function(msg,src,line,col,err){document.getElementById("exePage").innerHTML='<div style="padding:20px;color:red"><b>JS Error:</b> '+msg+' (line '+line+')</div>';return false;};
 var SPLIT_KEYS=new Set(["IAC","SoD","Sales Bag","Sub Sales Bag","Starting Quarter","Executor","Region Name (level 3)"]);
-var drmFilters=new Set();var eurMinFilter=1;var regSummaryCache={};var TOTAL_2026_PIPELINE=1935778.13;
+var drmFilters=new Set();var eurMinFilter=1;var eurMaxFilter=null;var regSummaryCache={};var TOTAL_2026_PIPELINE=1935778.13;
 var campData=[],pipeData=[],outData=[],filtered=[];
 var filters={},srchQ="",sCol=null,sDir=1,pg=1,pgSz=100,activeTab="bud",charts={};
 var anaFilter={};
@@ -511,9 +511,11 @@ function buildFbar(){
     +"<div class=\"fdo\" id=\"drm-fdo\"></div></div>";
   div.parentNode.insertBefore(drmBtn,div);
   var eurBtn=document.createElement("div");eurBtn.className="fbi";eurBtn.id="eur-fbi";
-  eurBtn.innerHTML="<button class=\"fbtn"+(eurMinFilter?" on":"")+"\" id=\"eur-fbtn\" onclick=\"toggleEurFilter()\">Opp &euro; &gt; <span id=\"eur-val\">"+(eurMinFilter||"All")+"</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
-    +"<div class=\"fdd\" id=\"eur-fdd\"><div class=\"fdh\"><span class=\"fdt\">Min Opp — Value</span><button class=\"fdc\" onclick=\"clearEurFilter()\">Clear</button></div>"
-    +"<div style=\"padding:10px 12px\"><input type=\"number\" id=\"eur-input\" placeholder=\"e.g. 1\" value=\""+(eurMinFilter||"")+"\" style=\"width:100%;border:1px solid var(--bd);border-radius:var(--r);padding:5px 8px;font-size:12px;outline:none\"/><button onclick=\"applyEurFilter()\" style=\"margin-top:8px;width:100%;padding:6px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-size:12px\">Apply</button></div>"
+  eurBtn.innerHTML="<button class=\"fbtn"+((eurMinFilter!==null||eurMaxFilter!==null)?" on":"")+"\" id=\"eur-fbtn\" onclick=\"toggleEurFilter()\">Opp &euro; <span id=\"eur-val\">"+(eurMinFilter!==null&&eurMaxFilter!==null?"&ge;"+eurMinFilter+" &lt;"+eurMaxFilter:eurMinFilter!==null?"&gt;"+eurMinFilter:eurMaxFilter!==null?"&lt;"+eurMaxFilter:"All")+"</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
+    +"<div class=\"fdd\" id=\"eur-fdd\"><div class=\"fdh\"><span class=\"fdt\">Opp Value Range</span><button class=\"fdc\" onclick=\"clearEurFilter()\">Clear</button></div>"
+    +"<div style=\"padding:10px 12px\"><div style=\"font-size:11px;color:var(--mu);margin-bottom:3px\">&euro; &ge; (minimum)</div><input type=\"number\" id=\"eur-input\" placeholder=\"e.g. 1\" value=\""+(eurMinFilter!==null?eurMinFilter:"")+"\" style=\"width:100%;border:1px solid var(--bd);border-radius:var(--r);padding:5px 8px;font-size:12px;outline:none;box-sizing:border-box\"/>"
+    +"<div style=\"font-size:11px;color:var(--mu);margin:8px 0 3px\">&euro; &lt; (maximum)</div><input type=\"number\" id=\"eur-max-input\" placeholder=\"e.g. 100\" value=\""+(eurMaxFilter!==null?eurMaxFilter:"")+"\" style=\"width:100%;border:1px solid var(--bd);border-radius:var(--r);padding:5px 8px;font-size:12px;outline:none;box-sizing:border-box\"/>"
+    +"<button onclick=\"applyEurFilter()\" style=\"margin-top:8px;width:100%;padding:6px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-size:12px\">Apply</button></div>"
     +"</div>";
   div.parentNode.insertBefore(eurBtn,div);
   // Execution Quarter filter — calendar tab only
@@ -724,7 +726,7 @@ function clearFilter(key){
 }
 function clearAll(){
   FD.forEach(function(f){filters[f.k].clear();});
-  drmFilters.clear();syncDrmBtn();eurMinFilter=null;syncEurBtn();
+  drmFilters.clear();syncDrmBtn();eurMinFilter=null;eurMaxFilter=null;syncEurBtn();
   window._execQtrFilter="";
   srchQ="";var srchEl=document.getElementById("srch");if(srchEl)srchEl.value="";
   pg=1;closeAllDD();applyFilters();
@@ -795,7 +797,7 @@ function buildWbar(){
   if(wb){wb.style.display="none";document.body.classList.remove("wbar-active");}
 }
 function syncCab(){
-  var any=srchQ||drmFilters.size>0||eurMinFilter!==null||FD.some(function(f){return filters[f.k].size>0;});
+  var any=srchQ||drmFilters.size>0||eurMinFilter!==null||eurMaxFilter!==null||FD.some(function(f){return filters[f.k].size>0;});
   document.getElementById("caBtn").style.display=any?"":"none";
 }
 function onSearch(){srchQ=document.getElementById("srch").value.trim();pg=1;applyFilters();updateTags();syncCab();}
@@ -846,21 +848,31 @@ function toggleEurFilter(){
 }
 function applyEurFilter(){
   var v=parseFloat(document.getElementById("eur-input").value);
+  var vmax=parseFloat(document.getElementById("eur-max-input").value);
   eurMinFilter=isNaN(v)?null:v;
+  eurMaxFilter=isNaN(vmax)?null:vmax;
   syncEurBtn();syncCab();closeAllDD();
-  if(activeTab==="ana")renderAna();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="exe")renderExe();if(activeTab==="out")renderOut();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="out")renderOut();if(activeTab==="bud")renderBud();
 }
 function clearEurFilter(){
-  eurMinFilter=null;var _ei2=document.getElementById("eur-input");if(_ei2)_ei2.value="";
+  eurMinFilter=null;eurMaxFilter=null;
+  var _ei2=document.getElementById("eur-input");if(_ei2)_ei2.value="";
+  var _ei3=document.getElementById("eur-max-input");if(_ei3)_ei3.value="";
   syncEurBtn();syncCab();
-  if(activeTab==="ana")renderAna();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="exe")renderExe();if(activeTab==="out")renderOut();if(activeTab==="exe")renderExe();
+  if(activeTab==="ana")renderAna();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="out")renderOut();if(activeTab==="bud")renderBud();
 }
 function syncEurBtn(){
   var btn=document.getElementById("eur-fbtn"),val=document.getElementById("eur-val");
   if(!btn)return;
-  btn.classList.toggle("on",eurMinFilter!==null);
-  if(val)val.textContent=eurMinFilter!==null?eurMinFilter:"All";
+  btn.classList.toggle("on",eurMinFilter!==null||eurMaxFilter!==null);
+  if(val){
+    if(eurMinFilter!==null&&eurMaxFilter!==null)val.innerHTML="&ge;"+eurMinFilter+" &lt;"+eurMaxFilter;
+    else if(eurMinFilter!==null)val.innerHTML="&gt;"+eurMinFilter;
+    else if(eurMaxFilter!==null)val.innerHTML="&lt;"+eurMaxFilter;
+    else val.textContent="All";
+  }
   var _ei=document.getElementById("eur-input");if(_ei&&eurMinFilter!==null&&!_ei.value)_ei.value=eurMinFilter;
+  var _em=document.getElementById("eur-max-input");if(_em&&eurMaxFilter!==null&&!_em.value)_em.value=eurMaxFilter;
 }function buildDrmDD(){
   var counts={};
   pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(!v)return;counts[v]=(counts[v]||0)+1;});
@@ -1024,6 +1036,7 @@ function getPipeRows(data){
     if(!String(p["Create Quarter"]||"").startsWith("2026"))return false;
     if(drmFilters.size&&!drmFilters.has(String(p["DRM Category"]||"").trim()))return false;
     if(eurMinFilter!==null&&(parseFloat(p["Eur"]||0)||0)<eurMinFilter)return false;
+    if(eurMaxFilter!==null&&(parseFloat(p["Eur"]||0)||0)>=eurMaxFilter)return false;
     var wbs=String(p["Opp Campaign ID"]||"").trim();
     if(REGION_FILTER_DMS.has(wbsDM[wbs]||"")){
       var calRegs=wbsRegs[wbs]||new Set();
@@ -1184,7 +1197,8 @@ function buildFilterBanner(campCount,seqCount){
   var excluded=Array.from(allDrm).filter(function(v){return !drmFilters.has(v);});
   if(excluded.length>0)parts.push('<b>DRM excluded:</b> '+excluded.join(', '));
   // EUR filter
-  if(eurMinFilter!==null)parts.push('<b>Min Pipeline:</b> '+eurMinFilter+'k—');
+  if(eurMinFilter!==null)parts.push('<b>Min Pipeline:</b> &ge;'+eurMinFilter+'k');
+  if(eurMaxFilter!==null)parts.push('<b>Max Pipeline:</b> &lt;'+eurMaxFilter+'k');
   if(!parts.length&&campCount===null)return '';
   var lines=[];
   if(campCount!==null)lines.push('Filters active &mdash; showing <b>'+campCount.toLocaleString()+'</b> campaigns'+(seqCount!==null?' &middot; <b>'+seqCount.toLocaleString()+'</b> sequences':''));
@@ -4983,7 +4997,7 @@ function renderOutInner(page){
 
   // Show active filter banner
   var filterKeys=Object.keys(window.outFilter).filter(function(k){return window.outFilter[k];});
-  var anyFilter=FD.some(function(f){return filters[f.k].size>0;})||eurMinFilter!==null;
+  var anyFilter=FD.some(function(f){return filters[f.k].size>0;})||eurMinFilter!==null||eurMaxFilter!==null;
   var globalBanner=anyFilter?buildFilterBanner(filtered.length,data.length):"";
   var filterBanner=globalBanner+(filterKeys.length?"<div style=\"background:#FEF1E6;border:1px solid #F5C6A0;border-radius:4px;padding:6px 12px;margin-bottom:8px;font-size:12px;display:flex;align-items:center;gap:8px\">Filter: "+filterKeys.map(function(k){var v=window.outFilter[k];if(k==="stage")v=v.replace(/^Stage_/,"").replace(/_+/g," ");return"<b>"+k+":</b> "+v;}).join(" | ")+"<button onclick=\"window.outFilter={};renderOut();\" style=\"margin-left:auto;font-size:11px;padding:2px 8px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Clear</button></div>":"");
 
