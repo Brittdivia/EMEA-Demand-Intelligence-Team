@@ -1,4 +1,4 @@
-﻿??<!DOCTYPE html>
+??<!DOCTYPE html>
 <!-- saved from url=(0058)file:///C:/Users/I572929/campaign-calendar-site/index.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
@@ -217,7 +217,7 @@ window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});
 <script src="data-prospects.js?v=20260623j"></script>
 <script src="data-seqprospect.js?v=20260623d"></script>
 <script src="data-pros-export.js?v=20260910"></script>
-<script src="data-profiling-req.js?v=20260907"></script>
+<script src="data-profiling-req.js?v=20260930"></script>
 <script src="data-profiling-tags.js?v=20260623j"></script>
 <script src="data-targets.js?v=20260731b"></script>
 <script src="data-budget.js?v=20260731b"></script>
@@ -2070,7 +2070,70 @@ function renderExe(){try{
         if(!_regNewClose[l2].l3s[l3])_regNewClose[l2].l3s[l3]={pipe:0,won:0};
         _regNewClose[l2].l3s[l3].pipe+=eur;if(drm==="Booked/Won")_regNewClose[l2].l3s[l3].won+=eur;
       });
-      var _regTcpTgt={};
+
+      var regNewQ1_27={},regL3NewQ1_27={};
+      pipeData.forEach(function(p){
+        var drm=String(p["DRM Category"]||"").trim();
+        if(drm!=="Committed"&&drm!=="Probable"&&drm!=="Upside")return;
+        if(String(p["Closing Qtr"]||"").trim()!=="2027-Q1")return;
+        if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
+        if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
+        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfQ27=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfQ27.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
+        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfQ27L3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfQ27L3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
+        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
+        if(window._exeSrcFilter){var _srfQ27={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfQ27[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
+        if(_exeRegFilter){var _rQ27L2=String(p["Region Lvl 2"]||"").trim();var _rQ27L3=String(p["Region Lvl 3"]||"").trim();if(_rQ27L2!==_exeRegFilter&&_rQ27L3!==_exeRegFilter)return;}
+        if(_exeProdFilter){var _rQ27Sol=String(p["Solution Area (L1)"]||"").trim();var _rQ27Ssol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_rQ27Sol!==_exeProdFilter&&_rQ27Ssol!==_exeProdFilter)return;}
+        if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
+        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
+        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
+        var eur=parseFloat(p["Eur"]||0)||0;
+        regNewQ1_27[l2]=(regNewQ1_27[l2]||0)+eur;
+        if(!regL3NewQ1_27[l2])regL3NewQ1_27[l2]={};
+        regL3NewQ1_27[l2][l3]=(regL3NewQ1_27[l2][l3]||0)+eur;
+      });
+      var _regOldClose26={},_regL3OldClose26={};
+      pipeData.forEach(function(p){
+        var drm=String(p["DRM Category"]||"").trim();
+        if(drm!=="Committed"&&drm!=="Probable"&&drm!=="Upside")return;
+        if(String(p["Create Quarter"]||"").startsWith("2026"))return;
+        if(!String(p["Closing Qtr"]||"").startsWith("2026"))return;
+        if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
+        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfOc=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfOc.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
+        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfOcL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfOcL3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
+        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
+        if(window._exeSrcFilter){var _srfOc={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfOc[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
+        if(_exeRegFilter){var _rOcL2=String(p["Region Lvl 2"]||"").trim();var _rOcL3=String(p["Region Lvl 3"]||"").trim();if(_rOcL2!==_exeRegFilter&&_rOcL3!==_exeRegFilter)return;}
+        if(_exeProdFilter){var _rOcSol=String(p["Solution Area (L1)"]||"").trim();var _rOcSsol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_rOcSol!==_exeProdFilter&&_rOcSsol!==_exeProdFilter)return;}
+        if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
+        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
+        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
+        var eur=parseFloat(p["Eur"]||0)||0;
+        _regOldClose26[l2]=(_regOldClose26[l2]||0)+eur;
+        if(!_regL3OldClose26[l2])_regL3OldClose26[l2]={};
+        _regL3OldClose26[l2][l3]=(_regL3OldClose26[l2][l3]||0)+eur;
+      });
+      var _regExclQ4={},_regL3ExclQ4={},_gExclQ4=0;
+      pipeData.forEach(function(p){
+        if(String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline")return;
+        if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
+        if(String(p["Closing Qtr"]||"").trim()!=="2026-Q4")return;
+        if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
+        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfEq=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfEq.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
+        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfEqL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfEqL3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
+        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
+        if(window._exeSrcFilter){var _srfEq={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfEq[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
+        if(_exeRegFilter){var _rEqL2=String(p["Region Lvl 2"]||"").trim();var _rEqL3=String(p["Region Lvl 3"]||"").trim();if(_rEqL2!==_exeRegFilter&&_rEqL3!==_exeRegFilter)return;}
+        if(_exeProdFilter){var _rEqSol=String(p["Solution Area (L1)"]||"").trim();var _rEqSsol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_rEqSol!==_exeProdFilter&&_rEqSsol!==_exeProdFilter)return;}
+        if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
+        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
+        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
+        var eur=parseFloat(p["Eur"]||0)||0;
+        _regExclQ4[l2]=(_regExclQ4[l2]||0)+eur;
+        if(!_regL3ExclQ4[l2])_regL3ExclQ4[l2]={};
+        _regL3ExclQ4[l2][l3]=(_regL3ExclQ4[l2][l3]||0)+eur;
+        _gExclQ4+=eur;
+      });      var _regTcpTgt={};
       (window.TCP_TARGETS_BRITT||[]).forEach(function(t){
         var muRaw=String(t["Region Lvl 2"]||"").trim().replace(/^CS /,"").toLowerCase();if(!muRaw)return;
         var l3Raw=(String(t["Region Lvl 3"]||"").trim().replace(/^CS /,"")||"Other").toLowerCase();
@@ -2086,9 +2149,10 @@ function renderExe(){try{
       });
       if(!window._rtExpL2)window._rtExpL2=new Set();
       if(!window._rtExpL3)window._rtExpL3=new Set();
-      window._rtL2Keys=[];window._rtL3Keys=[];
+      window._rtL2Keys=[];window._rtL3Keys=[];window._tbl2xL2Keys=[];
       window._rtTogL2=function(i){var k=window._rtL2Keys[i];window._rtExpL2.has(k)?window._rtExpL2.delete(k):window._rtExpL2.add(k);renderExe();};
       window._rtTogL3=function(i){var k=window._rtL3Keys[i];window._rtExpL3.has(k)?window._rtExpL3.delete(k):window._rtExpL3.add(k);renderExe();};
+if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(i){var k=window._tbl2xL2Keys[i];window._tbl2xExpL2.has(k)?window._tbl2xExpL2.delete(k):window._tbl2xExpL2.add(k);renderExe();};
       var _l2Order=Object.keys(_regData).sort(function(a,b){return _regData[b].pipe-_regData[a].pipe;});
       var _regBudgetByKey={};
       var _regNormBud={"mea north":"mea north","mea south":"mea south","benelux":"benelux","france":"france","italy":"italy","nordic":"nordic","southern europe":"southern europe","uki":"uki"};
@@ -2101,6 +2165,8 @@ function renderExe(){try{
       var thTR2L2=thTR2.replace("#012931","#2d6475");
       var tdT2="padding:5px 10px;font-size:12px;border-bottom:1px solid #f0f0f0";
       var _pEx=!!window._pipeExpCols;
+      var _brkEx=!!window._tbl2xBrkExp;
+      var _gapEx=!!window._tbl2xGapExp;
       var _pTogBtn='<span onclick="window._pipeExpCols='+(_pEx?'false':'true')+';renderExe()" style="cursor:pointer;margin-left:4px;font-weight:900;font-size:13px;line-height:1;opacity:0.8">'+(_pEx?'&#8722;':'+')+'</span>';
       var _pNEx=!!window._pipeNetExpCols;
       var _pNTogBtn='<span onclick="window._pipeNetExpCols='+(_pNEx?'false':'true')+';renderExe()" style="cursor:pointer;margin-left:4px;font-weight:900;font-size:13px;line-height:1;opacity:0.8">'+(_pNEx?'&#8722;':'+')+'</span>';
@@ -2113,7 +2179,7 @@ function renderExe(){try{
       }
       var tbl2='<div class="cc"><div class="ch">Pipeline closing 2026 and TCP needs</div><div style="max-height:300px;overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>';
       var _weeksYTD=Math.max(1,Math.round((new Date()-new Date('2026-01-01'))/(7*24*3600*1000)));
-      tbl2+='<th style="'+thT2+'">Region</th><th style="'+thTR2+'">Budget</th><th style="'+thTR2+'">Total pipeline'+_pTogBtn+'</th>'+(_pEx?'<th style="'+thTR2L+'">Won</th><th style="'+thTR2L+'">Disc lost</th><th style="'+thTR2L+'">Live</th><th style="'+thTR2L+'">Won / week</th><th style="'+thTR2L+'">Disc / week</th><th style="'+thTR2L+'">Old pipeline</th>':'')+'<th style="'+thTR2L+'">Live Cvg 2026</th><th style="'+thTR2L+'">Net pipeline / week'+_pNTogBtn+'</th>'+(_pNEx?'<th style="'+thTR2L+'">Created / week</th><th style="'+thTR2L+'">Disc lost / week</th>':'')+'<th style="'+thTR2+'">TCP Target</th><th style="'+thTR2+'">Created YTD'+_pCYTogBtn+'</th>'+(_pCYEx?'<th style="'+thTR2L2+'">YTD cl.2026</th><th style="'+thTR2L2+'">Won / week cl.2026</th><th style="'+thTR2L2+'">Disc / week cl.2026</th>':'')+'<th style="'+thTR2+'">To create per TCP</th><th style="'+thTR2L+'">Old PL win rate</th><th style="'+thTR2L+'">New PL win rate</th><th style="'+thTR2L+'">Old PL won</th><th style="'+thTR2L+'">New PL won</th><th style="'+thTR2L+'">Old PL bkgs exp</th><th style="'+thTR2L+'">New PL bkgs exp</th><th style="'+thTR2L+'">Remaining budget to cover</th><th style="'+thTR2L+'">Pipeline needed to cover gap</th><th style="'+thTR2L+'">Pipeline needed vs TCP gap %</th></tr></thead><tbody>';
+      tbl2+='<th style="'+thT2+'"></th><th colspan='+(_pEx?9:2)+' style="'+thT2+';text-align:center;background:#1a4a55">Closing 2026</th><th style="'+thTR2L+'"></th>'+(_pNEx?'<th style="'+thTR2L+'"></th>':'')+'<th style="'+thTR2+'"></th><th style="'+thTR2+'"></th>'+(_pCYEx?'<th style="'+thTR2L2+'"></th><th style="'+thTR2L2+'"></th>':'')+'<th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th></tr><tr><th style="'+thT2+'">Region</th><th style="'+thTR2+'">Budget</th><th style="'+thTR2+'">Total pipeline'+_pTogBtn+'</th>'+(_pEx?'<th style="'+thTR2L+'">Won</th><th style="'+thTR2L+'">Disc lost</th><th style="'+thTR2L+'">Live</th><th style="'+thTR2L+'">Won / week</th><th style="'+thTR2L+'">Disc / week</th><th style="'+thTR2L+'">Old pipeline closing 2026</th><th style="'+thTR2L+'">New Pipeline closing 2026</th>':'')+'<th style="'+thTR2L+'">Net pipeline / week'+_pNTogBtn+'</th>'+(_pNEx?'<th style="'+thTR2L+'">Created / week</th>':'')+'<th style="'+thTR2+'">TCP Target</th><th style="'+thTR2+'">Created YTD'+_pCYTogBtn+'</th>'+(_pCYEx?'<th style="'+thTR2L2+'">Won / week cl.2026</th><th style="'+thTR2L2+'">Disc / week cl.2026</th>':'')+'<th style="'+thTR2+'">To create per TCP</th><th style="'+thTR2L+'">Old PL win rate</th><th style="'+thTR2L+'">New PL win rate</th><th style="'+thTR2L+'">Old PL won</th><th style="'+thTR2L+'">New PL bkgs exp</th><th style="'+thTR2L+'">Remaining budget to cover</th><th style="'+thTR2L+'">Pipeline needed to cover gap</th><th style="'+thTR2L+'">Pipeline needed vs TCP gap %</th></tr></thead><tbody>';
       _l2Order.forEach(function(l2){
         var d=_regData[l2];
         var l2i=window._rtL2Keys.push(l2)-1;
@@ -2127,8 +2193,8 @@ function renderExe(){try{
         var _netL2=_clL2-_discL2-_wonAllL2;
         var _tcpL2=(_regTcpTgt[l2.replace(/^CS /,"").toLowerCase()]||{tgt:0}).tgt;
         var _budL2=_getBudL2(l2);var _liveCvgL2=(_budL2-_wonAllL2)>0?(_netL2/(_budL2-_wonAllL2)).toFixed(1)+"X":"—";
-        var _dcl2=_regDataCl[l2]||{pipe:0,won:0,disc:0};var _wrL2=_getWR(l2.replace(/^CS /,"").toLowerCase(),null);var _oldLvL2=(_regOldLive[l2]||{pipe:0}).pipe;var _oldWonL2=(_regOldLive[l2]||{won:0}).won;var _newLvL2=(_regNewClose[l2]||{pipe:0}).pipe;var _newWonL2=(_regNewClose[l2]||{won:0}).won;var _wrOldNum=_wrL2.old!=="—"?parseInt(_wrL2.old)/100:null;var _wrNewNum=_wrL2.nw!=="—"?parseInt(_wrL2.nw)/100:null;var _oldBkgRawL2=_wrOldNum!==null?(_oldLvL2*_wrOldNum)-_oldWonL2:0;var _effOldBkgL2=Math.max(_wrOldNum!==null?_oldLvL2*_wrOldNum:0,_oldWonL2);var _newBkgRawL2=_wrNewNum!==null?(_newLvL2-_newWonL2)*_wrNewNum:0;var _oldBkgL2=_oldBkgRawL2?fmtE(_oldBkgRawL2):"—";var _newBkgL2=_newBkgRawL2?fmtE(_newBkgRawL2):"—";var _newAllBkgRawL2=_wrNewNum!==null?(_newLvL2*_wrNewNum)-_newWonL2:0;var _newAllBkgL2=_newAllBkgRawL2?fmtE(_newAllBkgRawL2):"—";var _gapRawL2=_budL2?_budL2-_effOldBkgL2-_newAllBkgRawL2:null;var _gapL2=_gapRawL2!==null?fmtE(_gapRawL2):"—";var _gapBkgRawL2=(_gapRawL2!==null&&_wrNewNum)?_gapRawL2/_wrNewNum:null;var _gapBkgL2=_gapBkgRawL2!==null?fmtE(_gapBkgRawL2):"—";var _tcpGapL2=_tcpL2-d.pipe;var _pctDiffL2=(_gapBkgRawL2!==null&&_tcpGapL2!==0)?((_gapBkgRawL2-_tcpGapL2)/Math.abs(_tcpGapL2)*100).toFixed(0)+"%":"—";
-        tbl2+='<tr style="background:#eef3f3"><td style="'+tdT2+';font-weight:600">'+expBtn+fmtReg(l2)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_getBudL2(l2)?fmtE(_getBudL2(l2)):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_clL2?fmtE(_clL2):"—")+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(_wonAllL2?fmtE(_wonAllL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_discL2?fmtE(_discL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(_netL2)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_wonAllL2?fmtE(_wonAllL2/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_discL2?fmtE(_discL2/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_oldLvL2?fmtE(_oldLvL2):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+_liveCvgL2+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE((d.pipe-_discL2)/_weeksYTD)+'</td>'+(_pNEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(d.pipe/_weeksYTD)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_discL2?fmtE(_discL2/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+(_tcpL2?fmtE(_tcpL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(d.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(_dcl2.pipe?fmtE(_dcl2.pipe):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_dcl2.won?fmtE(_dcl2.won/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_dcl2.disc?fmtE(_dcl2.disc/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(_tcpL2-d.pipe)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_wrL2.old+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_wrL2.nw+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_oldWonL2?fmtE(_oldWonL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_newWonL2?fmtE(_newWonL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_oldBkgL2+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_newAllBkgL2+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_gapL2+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_gapBkgL2+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_pctDiffL2+'</td></tr>';
+        var _dcl2=_regDataCl[l2]||{pipe:0,won:0,disc:0};var _wrL2=_getWR(l2.replace(/^CS /,"").toLowerCase(),null);var _oldLvL2=(_regOldLive[l2]||{pipe:0}).pipe;var _oldWonL2=(_regOldLive[l2]||{won:0}).won;var _newLvL2=(_regNewClose[l2]||{pipe:0}).pipe;var _newWonL2=(_regNewClose[l2]||{won:0}).won;var _wrOldNum=_wrL2.old!=="—"?parseInt(_wrL2.old)/100:null;var _wrNewNum=_wrL2.nw!=="—"?parseInt(_wrL2.nw)/100:null;var _oldBkgRawL2=_wrOldNum!==null?(_oldLvL2*_wrOldNum)-_oldWonL2:0;var _effOldBkgL2=_oldWonL2;var _newBkgRawL2=_wrNewNum!==null?(_newLvL2-_newWonL2)*_wrNewNum:0;var _oldBkgL2=_oldBkgRawL2?fmtE(_oldBkgRawL2):"—";var _newBkgL2=_newBkgRawL2?fmtE(_newBkgRawL2):"—";var _newAllBkgRawL2=_wrNewNum!==null?(_newLvL2*_wrNewNum)-_newWonL2:0;var _newAllBkgL2=_newAllBkgRawL2?fmtE(_newAllBkgRawL2):"—";var _effOldExpRawL2=(_wrOldNum!==null&&(_oldLvL2*_wrOldNum)>_oldWonL2)?_oldLvL2*_wrOldNum-_oldWonL2:0;var _gapRawL2=_budL2?_budL2-_effOldExpRawL2-_oldWonL2-(_wrNewNum!==null?_newLvL2*_wrNewNum-_newWonL2:0):null;var _gapL2=_gapRawL2!==null?fmtE(_gapRawL2):"—";var _gapBkgRawL2=(_gapRawL2!==null&&_wrNewNum)?_gapRawL2/_wrNewNum:null;var _gapBkgL2=_gapBkgRawL2!==null?fmtE(_gapBkgRawL2):"—";var _tcpGapL2=_tcpL2-d.pipe;var _pctDiffL2=(_gapBkgRawL2!==null&&_tcpGapL2!==0)?((_gapBkgRawL2-_tcpGapL2)/Math.abs(_tcpGapL2)*100).toFixed(0)+"%":"—";
+        tbl2+='<tr style="background:#eef3f3"><td style="'+tdT2+';font-weight:600">'+expBtn+fmtReg(l2)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_getBudL2(l2)?fmtE(_getBudL2(l2)):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_clL2?fmtE(_clL2):"—")+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(_wonAllL2?fmtE(_wonAllL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_discL2?fmtE(_discL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(_netL2)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_wonAllL2?fmtE(_wonAllL2/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_discL2?fmtE(_discL2/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_oldLvL2?fmtE(_oldLvL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_dcl2.pipe?fmtE(_dcl2.pipe):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE((d.pipe-_discL2)/_weeksYTD)+'</td>'+(_pNEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(d.pipe/_weeksYTD)+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+(_tcpL2?fmtE(_tcpL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(d.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(_dcl2.won?fmtE(_dcl2.won/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_dcl2.disc?fmtE(_dcl2.disc/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(_tcpL2-d.pipe)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_wrL2.old+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_wrL2.nw+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_oldWonL2?fmtE(_oldWonL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_newWonL2?fmtE(_newWonL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_oldBkgL2+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_newAllBkgL2+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_gapL2+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_gapBkgL2+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+_pctDiffL2+'</td></tr>';
         if(isExpL2){l3Keys.forEach(function(l3){
           var d3=d.l3s[l3];
           var l3k=l2+'||'+l3;
@@ -2142,8 +2208,8 @@ function renderExe(){try{
           var _liveL3=((_regLive[l2]||{l3s:{}}).l3s[l3]||{live:0}).live;
           var _netL3=_clL3-_discL3-_wonAllL3;
           var _tcpL3=((_regTcpTgt[l2.replace(/^CS /,"").toLowerCase()]||{l3s:{}}).l3s[l3.toLowerCase()])||0;
-          var _dclL3=((_regDataCl[l2]||{l3s:{}}).l3s[l3]||{pipe:0,won:0,disc:0});var _wrL3=_getWR(l2.replace(/^CS /,"").toLowerCase(),l3.toLowerCase());var _oldLvL3=((_regOldLive[l2]||{l3s:{}}).l3s[l3]||{pipe:0}).pipe;var _oldWonL3=((_regOldLive[l2]||{l3s:{}}).l3s[l3]||{won:0}).won;var _newLvL3=((_regNewClose[l2]||{l3s:{}}).l3s[l3]||{pipe:0}).pipe;var _newWonL3=((_regNewClose[l2]||{l3s:{}}).l3s[l3]||{won:0}).won;var _wrOldNumL3=_wrL3.old!=="—"?parseInt(_wrL3.old)/100:null;var _wrNewNumL3=_wrL3.nw!=="—"?parseInt(_wrL3.nw)/100:null;var _oldBkgRawL3=_wrOldNumL3!==null?(_oldLvL3*_wrOldNumL3)-_oldWonL3:0;var _effOldBkgL3=Math.max(_oldBkgRawL3,_oldWonL3);var _newBkgRawL3=_wrNewNumL3!==null?(_newLvL3-_newWonL3)*_wrNewNumL3:0;var _oldBkgL3=_oldBkgRawL3?fmtE(_oldBkgRawL3):"—";var _newBkgL3=_newBkgRawL3?fmtE(_newBkgRawL3):"—";var _newAllBkgRawL3=_wrNewNumL3!==null?(_newLvL3*_wrNewNumL3)-_newWonL3:0;var _newAllBkgL3=_newAllBkgRawL3?fmtE(_newAllBkgRawL3):"—";
-          tbl2+='<tr><td style="'+tdT2+';padding-left:22px">'+expBtn3+l3+'</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">'+(_clL3?fmtE(_clL3):"—")+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right">'+(_wonAllL3?fmtE(_wonAllL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_discL3?fmtE(_discL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_netL3)+'</td><td style="'+tdT2+';text-align:right">'+(_wonAllL3?fmtE(_wonAllL3/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_discL3?fmtE(_discL3/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_oldLvL3?fmtE(_oldLvL3):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">'+fmtE((d3.pipe-_discL3)/_weeksYTD)+'</td>'+(_pNEx?'<td style="'+tdT2+';text-align:right">'+fmtE(d3.pipe/_weeksYTD)+'</td><td style="'+tdT2+';text-align:right">'+(_discL3?fmtE(_discL3/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+(_tcpL3?fmtE(_tcpL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(d3.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right">'+(_dclL3.pipe?fmtE(_dclL3.pipe):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_dclL3.won?fmtE(_dclL3.won/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_dclL3.disc?fmtE(_dclL3.disc/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+fmtE(_tcpL3-d3.pipe)+'</td><td style="'+tdT2+';text-align:right">'+_wrL3.old+'</td><td style="'+tdT2+';text-align:right">'+_wrL3.nw+'</td><td style="'+tdT2+';text-align:right">'+(_oldWonL3?fmtE(_oldWonL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_newWonL3?fmtE(_newWonL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+_oldBkgL3+'</td><td style="'+tdT2+';text-align:right">'+_newAllBkgL3+'</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td></tr>';
+          var _dclL3=((_regDataCl[l2]||{l3s:{}}).l3s[l3]||{pipe:0,won:0,disc:0});var _wrL3=_getWR(l2.replace(/^CS /,"").toLowerCase(),l3.toLowerCase());var _oldLvL3=((_regOldLive[l2]||{l3s:{}}).l3s[l3]||{pipe:0}).pipe;var _oldWonL3=((_regOldLive[l2]||{l3s:{}}).l3s[l3]||{won:0}).won;var _newLvL3=((_regNewClose[l2]||{l3s:{}}).l3s[l3]||{pipe:0}).pipe;var _newWonL3=((_regNewClose[l2]||{l3s:{}}).l3s[l3]||{won:0}).won;var _wrOldNumL3=_wrL3.old!=="—"?parseInt(_wrL3.old)/100:null;var _wrNewNumL3=_wrL3.nw!=="—"?parseInt(_wrL3.nw)/100:null;var _oldBkgRawL3=_wrOldNumL3!==null?(_oldLvL3*_wrOldNumL3)-_oldWonL3:0;var _effOldBkgL3=_oldWonL3;var _newBkgRawL3=_wrNewNumL3!==null?(_newLvL3-_newWonL3)*_wrNewNumL3:0;var _oldBkgL3=_oldBkgRawL3?fmtE(_oldBkgRawL3):"—";var _newBkgL3=_newBkgRawL3?fmtE(_newBkgRawL3):"—";var _newAllBkgRawL3=_wrNewNumL3!==null?(_newLvL3*_wrNewNumL3)-_newWonL3:0;var _newAllBkgL3=_newAllBkgRawL3?fmtE(_newAllBkgRawL3):"—";var _effOldExpRawL3=(_wrOldNumL3!==null&&(_oldLvL3*_wrOldNumL3)>_oldWonL3)?_oldLvL3*_wrOldNumL3-_oldWonL3:0;var _gapRawL3=_tcpL3?_tcpL3-_effOldExpRawL3-_oldWonL3-(_wrNewNumL3!==null?_newLvL3*_wrNewNumL3-_newWonL3:0):null;var _gapL3=_gapRawL3!==null?fmtE(_gapRawL3):"—";var _gapBkgRawL3=(_gapRawL3!==null&&_wrNewNumL3)?_gapRawL3/_wrNewNumL3:null;var _gapBkgL3=_gapBkgRawL3!==null?fmtE(_gapBkgRawL3):"—";var _tcpGapL3=_tcpL3-d3.pipe;var _pctDiffL3=(_gapBkgRawL3!==null&&_tcpGapL3!==0)?((_gapBkgRawL3-_tcpGapL3)/Math.abs(_tcpGapL3)*100).toFixed(0)+"%":"—";
+          tbl2+='<tr><td style="'+tdT2+';padding-left:22px">'+expBtn3+l3+'</td><td style="'+tdT2+';text-align:right">'+(_tcpL3?fmtE(_tcpL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_clL3?fmtE(_clL3):"—")+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right">'+(_wonAllL3?fmtE(_wonAllL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_discL3?fmtE(_discL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_netL3)+'</td><td style="'+tdT2+';text-align:right">'+(_wonAllL3?fmtE(_wonAllL3/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_discL3?fmtE(_discL3/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_oldLvL3?fmtE(_oldLvL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_dclL3.pipe?fmtE(_dclL3.pipe):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+fmtE((d3.pipe-_discL3)/_weeksYTD)+'</td>'+(_pNEx?'<td style="'+tdT2+';text-align:right">'+fmtE(d3.pipe/_weeksYTD)+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+(_tcpL3?fmtE(_tcpL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(d3.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right">'+(_dclL3.won?fmtE(_dclL3.won/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_dclL3.disc?fmtE(_dclL3.disc/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+fmtE(_tcpL3-d3.pipe)+'</td><td style="'+tdT2+';text-align:right">'+_wrL3.old+'</td><td style="'+tdT2+';text-align:right">'+_wrL3.nw+'</td><td style="'+tdT2+';text-align:right">'+(_oldWonL3?fmtE(_oldWonL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_newWonL3?fmtE(_newWonL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+_oldBkgL3+'</td><td style="'+tdT2+';text-align:right">'+_newAllBkgL3+'</td><td style="'+tdT2+';text-align:right">'+_gapL3+'</td><td style="'+tdT2+';text-align:right">'+_gapBkgL3+'</td><td style="'+tdT2+';text-align:right">'+_pctDiffL3+'</td></tr>';
           if(isExpL3){teamKeys.forEach(function(tm){
             var dt=d3.teams[tm];
             var wonPctT=dt.pipe>0?(dt.won/dt.pipe*100).toFixed(0)+"%":"—";
@@ -2152,13 +2218,76 @@ function renderExe(){try{
             var _liveTm=(((_regLive[l2]||{l3s:{}}).l3s[l3]||{teams:{}}).teams[tm]||{live:0}).live;
             var _netTm=_clTm-_discTm-_wonAllTm;
             var _dclTm=(((_regDataCl[l2]||{l3s:{}}).l3s[l3]||{teams:{}}).teams[tm]||{pipe:0,won:0,disc:0});
-            tbl2+='<tr style="background:#fafafa"><td style="'+tdT2+';padding-left:40px;font-size:11px;color:#555">'+tm+'</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_clTm?fmtE(_clTm):"—")+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right;font-size:11px">'+(_wonAllTm?fmtE(_wonAllTm):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_discTm?fmtE(_discTm):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+fmtE(_netTm)+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_wonAllTm?fmtE(_wonAllTm/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_discTm?fmtE(_discTm/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td>':'')+'<td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">'+fmtE((dt.pipe-_discTm)/_weeksYTD)+'</td>'+(_pNEx?'<td style="'+tdT2+';text-align:right;font-size:11px">'+fmtE(dt.pipe/_weeksYTD)+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_discTm?fmtE(_discTm/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">'+fmtE(dt.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right;font-size:11px">'+(_dclTm.pipe?fmtE(_dclTm.pipe):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_dclTm.won?fmtE(_dclTm.won/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_dclTm.disc?fmtE(_dclTm.disc/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td></tr>';
+            tbl2+='<tr style="background:#fafafa"><td style="'+tdT2+';padding-left:40px;font-size:11px;color:#555">'+tm+'</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_clTm?fmtE(_clTm):"—")+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right;font-size:11px">'+(_wonAllTm?fmtE(_wonAllTm):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_discTm?fmtE(_discTm):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+fmtE(_netTm)+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_wonAllTm?fmtE(_wonAllTm/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_discTm?fmtE(_discTm/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_dclTm.pipe?fmtE(_dclTm.pipe):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-size:11px">'+fmtE((dt.pipe-_discTm)/_weeksYTD)+'</td>'+(_pNEx?'<td style="'+tdT2+';text-align:right;font-size:11px">'+fmtE(dt.pipe/_weeksYTD)+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">'+fmtE(dt.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right;font-size:11px">'+(_dclTm.won?fmtE(_dclTm.won/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_dclTm.disc?fmtE(_dclTm.disc/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td></tr>';
           });}
         });}
       });
       var _grandLiveCvg=(_regGrand.budget-_regGrand.wonAll)>0?((_regGrand.close-_regGrand.disc-_regGrand.wonAll)/(_regGrand.budget-_regGrand.wonAll)).toFixed(1)+"X":"—";
-      tbl2+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td><td style="'+tdT2+';text-align:right">'+(_regGrand.budget?fmtE(_regGrand.budget):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.close?fmtE(_regGrand.close):"—")+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right">'+(_regGrand.wonAll?fmtE(_regGrand.wonAll):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.disc?fmtE(_regGrand.disc):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.close-_regGrand.disc-_regGrand.wonAll)+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.wonAll?fmtE(_regGrand.wonAll/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.disc?fmtE(_regGrand.disc/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">—</td>':'')+'<td style="'+tdT2+';text-align:right">'+_grandLiveCvg+'</td><td style="'+tdT2+';text-align:right">'+fmtE((_regGrand.pipe-_regGrand.disc)/_weeksYTD)+'</td>'+(_pNEx?'<td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.pipe/_weeksYTD)+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.disc?fmtE(_regGrand.disc/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+(_regGrand.tcpTgt?fmtE(_regGrand.tcpTgt):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Pipe?fmtE(_regGrand.cl26Pipe):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Won?fmtE(_regGrand.cl26Won/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Disc?fmtE(_regGrand.cl26Disc/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.tcpTgt-_regGrand.pipe)+'</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td></tr>';
+      tbl2+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td><td style="'+tdT2+';text-align:right">'+(_regGrand.budget?fmtE(_regGrand.budget):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.close?fmtE(_regGrand.close):"—")+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right">'+(_regGrand.wonAll?fmtE(_regGrand.wonAll):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.disc?fmtE(_regGrand.disc):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.close-_regGrand.disc-_regGrand.wonAll)+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.wonAll?fmtE(_regGrand.wonAll/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.disc?fmtE(_regGrand.disc/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Pipe?fmtE(_regGrand.cl26Pipe):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+fmtE((_regGrand.pipe-_regGrand.disc)/_weeksYTD)+'</td>'+(_pNEx?'<td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.pipe/_weeksYTD)+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+(_regGrand.tcpTgt?fmtE(_regGrand.tcpTgt):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Won?fmtE(_regGrand.cl26Won/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Disc?fmtE(_regGrand.cl26Disc/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.tcpTgt-_regGrand.pipe)+'</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td></tr>';
       tbl2+='</tbody></table></div></div>';
+      // Second table: pipeline closing forecast (reduced columns)
+      var tbl2x='<div class="cc"><div class="ch">Pipeline closing 2026 and TCP needs</div><div style="max-height:300px;overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>';
+      tbl2x+='<th style="'+thT2+'"></th><th colspan='+(_pEx?3:1)+' style="'+thT2+';text-align:center;background:#1a4a55">Closing 2026</th><th style="'+thTR2+'"></th>'+(_pCYEx?'<th style="'+thTR2L2+'"></th><th style="'+thTR2L2+'"></th>':'')+'<th style="'+thTR2L+'"></th>'+(_brkEx?'<th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th>':'')+'<th style="'+thTR2L+'"></th>'+(_gapEx?'<th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th>':'')+'<th style="'+thTR2L+'"></th></tr><tr>';
+      tbl2x+='<th style="'+thT2+'">Region</th><th style="'+thTR2+'">Budget</th>'+(_pEx?'<th style="'+thTR2L+'">Old pipeline closing 2026</th><th style="'+thTR2L+'">New Pipeline closing 2026</th>':'')+'<th style="'+thTR2+'">Created YTD</th>'+(_pCYEx?'<th style="'+thTR2L2+'">Won / week cl.2026</th><th style="'+thTR2L2+'">Disc / week cl.2026</th>':'')+'<th style="'+thTR2L+';cursor:pointer" onclick="window._tbl2xBrkExp=!window._tbl2xBrkExp;renderExe()">Remaining budget to cover '+(_brkEx?'&#9660;':'&#9654;')+'</th>'+(_brkEx?'<th style="'+thTR2L+'">YTD * new WR</th><th style="'+thTR2L+';color:red">YTD*WR - Won</th><th style="'+thTR2L+'">YTD created won</th><th style="'+thTR2L+'">Old PL won</th>':'')+'<th style="'+thTR2L+';cursor:pointer" onclick="window._tbl2xGapExp=!window._tbl2xGapExp;renderExe()">Pipeline needed to cover gap '+(_gapEx?'&#9660;':'&#9654;')+'</th>'+(_gapEx?'<th style="'+thTR2L+'">New PL Q1-27</th><th style="'+thTR2L+'">Old PL C2026 C/P/U</th><th style="'+thTR2L+'">Excl. Cr.26 Cl.Q426</th>':'')+'<th style="'+thTR2L+'">Pipeline needed vs TCP gap %</th></tr></thead><tbody>';
+      _l2Order.forEach(function(l2x){
+        var dx=_regData[l2x];
+        var l2kx=l2x.replace(/^CS /,'').toLowerCase();
+        var l2xi=window._tbl2xL2Keys.push(l2x)-1;var isExpL2x=window._tbl2xExpL2.has(l2x);var expBtnx='<span onclick="_tbl2xTogL2('+l2xi+')" style="cursor:pointer;margin-right:4px;user-select:none">'+(isExpL2x?'&#9660;':'&#9654;')+'</span>';
+        var budx=_getBudL2(l2x);
+        var dclx=_regDataCl[l2x]||{pipe:0,won:0,disc:0};
+        var wrx=_getWR(l2kx,null);
+        var oldLvx=(_regOldLive[l2x]||{pipe:0}).pipe;
+        var oldWonx=(_regOldLive[l2x]||{won:0}).won;
+        var newLvx=(_regNewClose[l2x]||{pipe:0}).pipe;
+        var newWonx=(_regNewClose[l2x]||{won:0}).won;
+        var wrOldNx=wrx.old!=='-'?parseInt(wrx.old)/100:null;
+        var wrNewNx=wrx.nw!=='-'?parseInt(wrx.nw)/100:null;
+        var oldBkgRx=wrOldNx!==null?(oldLvx*wrOldNx)-oldWonx:0;
+        var oldBkgx=oldBkgRx?fmtE(oldBkgRx):'-';
+        var newAllBkgRx=wrNewNx!==null?(newLvx*wrNewNx)-newWonx:0;
+        var newAllBkgx=newAllBkgRx?fmtE(newAllBkgRx):'-';
+        var effOldExpRx=(wrOldNx!==null&&(oldLvx*wrOldNx)>oldWonx)?oldLvx*wrOldNx-oldWonx:0;
+        var gapRx=budx?budx-newAllBkgRx-dclx.won-oldWonx:null;
+        var gapx=gapRx!==null?fmtE(gapRx):'-';
+        var gapBkgRx=gapRx!==null?gapRx/0.35:null;
+        var gapBkgx=gapBkgRx!==null?fmtE(gapBkgRx):'-';
+        var tcpx=(_regTcpTgt[l2kx]||{tgt:0}).tgt;
+        var oldClose26x=_regOldClose26[l2x]||0;
+        var exclQ4x=_regExclQ4[l2x]||0;
+        var tcpGapx=tcpx-dx.pipe;
+        var pctDiffx=(gapBkgRx!==null&&tcpGapx!==0)?((gapBkgRx-tcpGapx)/Math.abs(tcpGapx)*100).toFixed(0)+'%':'-';
+        tbl2x+='<tr style="background:#eef3f3"><td style="'+tdT2+';font-weight:600">'+expBtnx+fmtReg(l2x)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(budx?fmtE(budx):'-')+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(oldLvx?fmtE(oldLvx):'-')+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(dclx.pipe?fmtE(dclx.pipe):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(dx.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(dclx.won?fmtE(dclx.won/_weeksYTD):'-')+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(dclx.disc?fmtE(dclx.disc/_weeksYTD):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+gapx+'</td>'+(_brkEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(wrNewNx?fmtE(dx.pipe*wrNewNx):"-")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(wrNewNx?fmtE(dx.pipe*wrNewNx-dclx.won):"-")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(dclx.won?fmtE(dclx.won):'-')+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(oldWonx?fmtE(oldWonx):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+gapBkgx+'</td>'+(_gapEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(regNewQ1_27[l2x]?fmtE(regNewQ1_27[l2x]):'-')+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(oldClose26x?fmtE(oldClose26x):'-')+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(exclQ4x?fmtE(exclQ4x):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+pctDiffx+'</td></tr>';
+        var l3ksx=Object.keys(dx.l3s).sort(function(a,b){return (dx.l3s[b]||{pipe:0}).pipe-(dx.l3s[a]||{pipe:0}).pipe;});
+        if(isExpL2x)l3ksx.forEach(function(l3x){
+          var d3x=dx.l3s[l3x];
+          var tcpL3x=((_regTcpTgt[l2kx]||{l3s:{}}).l3s[l3x.toLowerCase()])||0;
+          var dclL3x=((_regDataCl[l2x]||{l3s:{}}).l3s[l3x]||{pipe:0,won:0,disc:0});
+          var wrL3x=_getWR(l2kx,l3x.toLowerCase());
+          var oldLvL3x=((_regOldLive[l2x]||{l3s:{}}).l3s[l3x]||{pipe:0}).pipe;
+          var oldWonL3x=((_regOldLive[l2x]||{l3s:{}}).l3s[l3x]||{won:0}).won;
+          var newLvL3x=((_regNewClose[l2x]||{l3s:{}}).l3s[l3x]||{pipe:0}).pipe;
+          var newWonL3x=((_regNewClose[l2x]||{l3s:{}}).l3s[l3x]||{won:0}).won;
+          var wrOldNL3x=wrL3x.old!=='-'?parseInt(wrL3x.old)/100:null;
+          var wrNewNL3x=wrL3x.nw!=='-'?parseInt(wrL3x.nw)/100:null;
+          var oldBkgRL3x=wrOldNL3x!==null?(oldLvL3x*wrOldNL3x)-oldWonL3x:0;
+          var oldBkgL3x=oldBkgRL3x?fmtE(oldBkgRL3x):'-';
+          var newAllBkgRL3x=wrNewNL3x!==null?(newLvL3x*wrNewNL3x)-newWonL3x:0;
+          var newAllBkgL3x=newAllBkgRL3x?fmtE(newAllBkgRL3x):'-';
+          var effOldExpRL3x=(wrOldNL3x!==null&&(oldLvL3x*wrOldNL3x)>oldWonL3x)?oldLvL3x*wrOldNL3x-oldWonL3x:0;
+          var gapRL3x=tcpL3x?tcpL3x-newAllBkgRL3x-dclL3x.won-oldWonL3x:null;
+          var gapL3x=gapRL3x!==null?fmtE(gapRL3x):'-';
+          var gapBkgRL3x=gapRL3x!==null?gapRL3x/0.35:null;
+          var gapBkgL3x=gapBkgRL3x!==null?fmtE(gapBkgRL3x):'-';
+          var oldClose26L3x=(_regL3OldClose26[l2x]||{})[l3x]||0;
+          var exclQ4L3x=(_regL3ExclQ4[l2x]||{})[l3x]||0;
+          var tcpGapL3x=tcpL3x-d3x.pipe;
+          var pctDiffL3x=(gapBkgRL3x!==null&&tcpGapL3x!==0)?((gapBkgRL3x-tcpGapL3x)/Math.abs(tcpGapL3x)*100).toFixed(0)+'%':'-';
+          tbl2x+='<tr><td style="'+tdT2+';padding-left:22px">'+l3x+'</td><td style="'+tdT2+';text-align:right">'+(tcpL3x?fmtE(tcpL3x):'-')+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right">'+(oldLvL3x?fmtE(oldLvL3x):'-')+'</td><td style="'+tdT2+';text-align:right">'+(dclL3x.pipe?fmtE(dclL3x.pipe):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+fmtE(d3x.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right">'+(dclL3x.won?fmtE(dclL3x.won/_weeksYTD):'-')+'</td><td style="'+tdT2+';text-align:right">'+(dclL3x.disc?fmtE(dclL3x.disc/_weeksYTD):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+gapL3x+'</td>'+(_brkEx?'<td style="'+tdT2+';text-align:right">'+(wrNewNL3x?fmtE(d3x.pipe*wrNewNL3x):"-")+'</td><td style="'+tdT2+';text-align:right">'+(wrNewNL3x?fmtE(d3x.pipe*wrNewNL3x-dclL3x.won):"-")+'</td><td style="'+tdT2+';text-align:right">'+(dclL3x.won?fmtE(dclL3x.won):'-')+'</td><td style="'+tdT2+';text-align:right">'+(oldWonL3x?fmtE(oldWonL3x):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+gapBkgL3x+'</td>'+(_gapEx?'<td style="'+tdT2+';text-align:right">'+((regL3NewQ1_27[l2x]||{})[l3x]?fmtE((regL3NewQ1_27[l2x]||{})[l3x]):'-')+'</td><td style="'+tdT2+';text-align:right">'+(oldClose26L3x?fmtE(oldClose26L3x):'-')+'</td><td style="'+tdT2+';text-align:right">'+(exclQ4L3x?fmtE(exclQ4L3x):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+pctDiffL3x+'</td></tr>';
+        });
+      });
+      tbl2x+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td><td style="'+tdT2+';text-align:right">'+(_regGrand.budget?fmtE(_regGrand.budget):'-')+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right">-</td><td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Pipe?fmtE(_regGrand.cl26Pipe):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Won?fmtE(_regGrand.cl26Won/_weeksYTD):'-')+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Disc?fmtE(_regGrand.cl26Disc/_weeksYTD):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">-</td>'+(_brkEx?'<td style="'+tdT2+';text-align:right">-</td><td style="'+tdT2+';text-align:right">-</td><td style="'+tdT2+';text-align:right">-</td><td style="'+tdT2+';text-align:right">-</td>':'')+'<td style="'+tdT2+';text-align:right">-</td>'+(_gapEx?'<td style="'+tdT2+';text-align:right">-</td><td style="'+tdT2+';text-align:right">-</td><td style="'+tdT2+';text-align:right">'+(_gExclQ4?fmtE(_gExclQ4):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">-</td></tr>';
+      tbl2x+='</tbody></table></div></div>';
+      tbl2+=tbl2x;
 
       // Calendar contribution % by region
       var _calWBSSet2=new Set(campData.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
@@ -2415,11 +2544,12 @@ function renderBud(){
   var _pipeSrcMap2={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};
   var regBW={},regPipeYTD={},regForecast={},regLive={},regCommProb={};
   var regBW_q={},regLive_q={};
+  var regNewQ1_27={},regL3NewQ1_27={};
   var rsBW={},rsLv={},rsCP={},rsBW_q={},rsLv_q={};
   // Region L3 accumulators
   var regL3BW={},regL3Lv={},regL3CP={},regL3BW_q={},regL3Lv_q={},regL3YTD={},regL3SrgYTD={},regL3SrgBW={},regL3SrgLv={},regL3SrgCP={},regL3SrgLv_q={};
   REGS.forEach(function(rg){
-    regBW_q[rg]={};regLive_q[rg]={};regL3BW[rg]={};regL3Lv[rg]={};regL3CP[rg]={};regL3BW_q[rg]={};regL3Lv_q[rg]={};
+    regBW_q[rg]={};regLive_q[rg]={};regL3BW[rg]={};regL3Lv[rg]={};regL3CP[rg]={};regL3BW_q[rg]={};regL3Lv_q[rg]={};regNewQ1_27[rg]=0;regL3NewQ1_27[rg]={};
     rsBW[rg]={};rsLv[rg]={};rsCP[rg]={};rsBW_q[rg]={};rsLv_q[rg]={};
     SRCS.forEach(function(s){rsBW[rg][s]=0;rsLv[rg][s]=0;rsCP[rg][s]=0;rsBW_q[rg][s]={};rsLv_q[rg][s]={};
       QTRS.forEach(function(q){regBW_q[rg][q]=0;regLive_q[rg][q]=0;rsBW_q[rg][s][q]=0;rsLv_q[rg][s][q]=0;});
@@ -2474,6 +2604,7 @@ function renderBud(){
     if(closeQ==="2027-Q1"||closeQ==="2027-Q2"){
       if(!regLive_q[reg])regLive_q[reg]={};
       if(drm==="Committed"||drm==="Probable"||drm==="Upside"){
+        if(closeQ==="2027-Q1"&&createQ.startsWith("2026")){regNewQ1_27[reg]=(regNewQ1_27[reg]||0)+eur;if(!regL3NewQ1_27[reg])regL3NewQ1_27[reg]={};regL3NewQ1_27[reg][l3]=(regL3NewQ1_27[reg][l3]||0)+eur;}
         regLive_q[reg][closeQ]=(regLive_q[reg][closeQ]||0)+eur;
         if(src&&rsBW[reg]){if(!rsLv_q[reg][src])rsLv_q[reg][src]={};rsLv_q[reg][src][closeQ]=(rsLv_q[reg][src][closeQ]||0)+eur;}
       }
@@ -3069,9 +3200,9 @@ function renderBud(){
 
   // TCP Target by Source
   // TCP Target by Source (from EMEA TCP_TARGETS_DETAIL)
-  var srcTgt2={},srcYTD2={},srcHO2={},srcBW2={};
+  var srcTgt2={},srcYTD2={},srcHO2={},srcBW2={},srcDL2={};
   var _srcOrder2=["SDE","Marketing","Sales","Partner","CSM"];
-  _srcOrder2.forEach(function(src){srcTgt2[src]=0;srcYTD2[src]=0;srcHO2[src]=0;srcBW2[src]=0;});
+  _srcOrder2.forEach(function(src){srcTgt2[src]=0;srcYTD2[src]=0;srcHO2[src]=0;srcBW2[src]=0;srcDL2[src]=0;});
   (window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");}).forEach(function(t){
     var sa=String(t.sa||"").trim();if(_sbActF&&(!sa||SBS.indexOf(sa)===-1))return;
     if(_brittL2F){var muNorm=_pipeRegNorm[String(t.mu||"").replace(/^CS /,"").toLowerCase().trim()]||String(t.mu||"").replace(/^CS /,"").trim();if(!_brittL2F.has(muNorm))return;}
@@ -3092,6 +3223,7 @@ function renderBud(){
     srcYTD2[src]=(srcYTD2[src]||0)+_eur2;
     if(hasHod(p["SDE Handover Date"]))srcHO2[src]=(srcHO2[src]||0)+_eur2;
     if(String(p["DRM Category"]||"").trim()==="Booked/Won")srcBW2[src]=(srcBW2[src]||0)+_eur2;
+    if(String(p["DRM Category"]||"").trim()==="Disc/Lost")srcDL2[src]=(srcDL2[src]||0)+_eur2;
   });
   // If L3 filter active: calculate L3 share of L2 pipeline per source and pro-rate targets
   if(_brittL3F){
@@ -3115,20 +3247,22 @@ function renderBud(){
   var _srcTgt2Tot=_srcOrder2.reduce(function(s,src){return s+(srcTgt2[src]||0);},0);
   // Only rescale to grandTcp2 when no SB filter — SB-filtered detail targets are already correct
   if(!_sbActF&&_srcTgt2Tot>0&&grandTcp2>0){_srcOrder2.forEach(function(src){srcTgt2[src]=(srcTgt2[src]||0)*grandTcp2/_srcTgt2Tot;});}
-  html+='<div class="cc"><div class="ch"><span>2026 TCP Target by Source (EMEA Targets) &amp; Pipeline Created YTD</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:15%"><col style="width:11%"><col style="width:9%"><col style="width:12%"><col style="width:8%"><col style="width:11%"><col style="width:13%"><col style="width:12%"><col style="width:9%"></colgroup><thead><tr>';
-  html+='<th style="'+thL+'">Source</th><th style="'+thSW+'">TCP Target</th><th style="'+thSW+'">% of Target</th><th style="'+thSW+'">YTD Pipeline Created</th><th style="'+thSW+'">% of YTD</th><th style="'+thSW+'">Attainment</th><th style="'+thSW+'">Won &amp; Booked YTD</th><th style="'+thSW+'">% Won</th><th style="'+thSW+'">% HO</th></tr></thead><tbody>';
-  var gSrcTcp=0,gSrcYTD=0,gSrcHO2=0,gSrcBW2=0;
-  _srcOrder2.forEach(function(src){gSrcTcp+=srcTgt2[src]||0;gSrcYTD+=srcYTD2[src]||0;gSrcHO2+=srcHO2[src]||0;gSrcBW2+=srcBW2[src]||0;});
+  var sTcpEx=!!window._srcTcpExpand,sYtdEx=!!window._srcYtdExpand;
+  html+='<div class="cc"><div class="ch"><span>2026 TCP Target by Source (EMEA Targets) &amp; Pipeline Created YTD</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<th style="'+thL+'">Source</th><th style="'+thSW+';cursor:pointer" onclick="window._srcTcpExpand=!window._srcTcpExpand;renderBud()">TCP Target '+(sTcpEx?'&#9660;':'&#9654;')+'</th>'+(sTcpEx?'<th style="'+thSW+'">% of Target</th>':'')+'<th style="'+thSW+';cursor:pointer" onclick="window._srcYtdExpand=!window._srcYtdExpand;renderBud()">YTD Pipeline Created '+(sYtdEx?'&#9660;':'&#9654;')+'</th>'+(sYtdEx?'<th style="'+thSW+'">% of YTD</th>':'')+'<th style="'+thSW+'">Attainment</th><th style="'+thSW+'">Won &amp; Booked YTD</th><th style="'+thSW+'">% Won</th><th style="'+thSW+'">% disc/lost</th><th style="'+thSW+'">% HO</th></tr></thead><tbody>';
+  var gSrcTcp=0,gSrcYTD=0,gSrcHO2=0,gSrcBW2=0,gSrcDL2=0;
+  _srcOrder2.forEach(function(src){gSrcTcp+=srcTgt2[src]||0;gSrcYTD+=srcYTD2[src]||0;gSrcHO2+=srcHO2[src]||0;gSrcBW2+=srcBW2[src]||0;gSrcDL2+=srcDL2[src]||0;});
   _srcOrder2.forEach(function(src){
     var tcp=srcTgt2[src]||0,ytd=srcYTD2[src]||0,ho=srcHO2[src]||0,bw=srcBW2[src]||0;
     var tgtPct=gSrcTcp>0?(tcp/gSrcTcp*100).toFixed(0)+"%":"—";
     var ytdPct=gSrcYTD>0?(ytd/gSrcYTD*100).toFixed(0)+"%":"—";
     var att=tcp>0?(ytd/tcp*100).toFixed(0)+"%":"—";
+    var dl=srcDL2[src]||0;var dlPct=ytd>0?(dl/ytd*100).toFixed(0)+"%":"-";
     var bwPct=ytd>0?(bw/ytd*100).toFixed(0)+"%":"—";
     var hoPct=ytd>0?(ho/ytd*100).toFixed(0)+"%":"—";
-    html+='<tr><td style="'+tdL+'">'+src+'</td><td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td><td style="'+td+'">'+tgtPct+'</td><td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td><td style="'+td+'">'+ytdPct+'</td><td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td><td style="'+td+'">'+(bw?fmtE(bw):"—")+'</td><td style="'+td+'">'+bwPct+'</td><td style="'+td+'">'+hoPct+'</td></tr>';
+    html+='<tr><td style="'+tdL+'">'+src+'</td><td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td>'+(sTcpEx?'<td style="'+td+'">'+tgtPct+'</td>':'')+'<td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td>'+(sYtdEx?'<td style="'+td+'">'+ytdPct+'</td>':'')+'<td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td><td style="'+td+'">'+(bw?fmtE(bw):"—")+'</td><td style="'+td+'">'+bwPct+'</td><td style="'+td+'">'+dlPct+'</td><td style="'+td+'">'+hoPct+'</td></tr>';
   });
-  html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td><td style="'+td+';font-weight:700">'+fmtE(gSrcTcp)+'</td><td style="'+td+';font-weight:700">100%</td><td style="'+td+';font-weight:700">'+fmtE(gSrcYTD)+'</td><td style="'+td+';font-weight:700">100%</td><td style="'+td+';font-weight:700">'+(gSrcTcp>0?(gSrcYTD/gSrcTcp*100).toFixed(0)+"%":"—")+'</td><td style="'+td+';font-weight:700">'+fmtE(gSrcBW2)+'</td><td style="'+td+';font-weight:700">'+(gSrcYTD>0?(gSrcBW2/gSrcYTD*100).toFixed(0)+"%":"—")+'</td><td style="'+td+';font-weight:700">'+(gSrcYTD>0?(gSrcHO2/gSrcYTD*100).toFixed(0)+"%":"—")+'</td></tr>';
+  html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td><td style="'+td+';font-weight:700">'+fmtE(gSrcTcp)+'</td>'+(sTcpEx?'<td style="'+td+';font-weight:700">100%</td>':'')+'<td style="'+td+';font-weight:700">'+fmtE(gSrcYTD)+'</td>'+(sYtdEx?'<td style="'+td+';font-weight:700">100%</td>':'')+'<td style="'+td+';font-weight:700">'+(gSrcTcp>0?(gSrcYTD/gSrcTcp*100).toFixed(0)+"%":"—")+'</td><td style="'+td+';font-weight:700">'+fmtE(gSrcBW2)+'</td><td style="'+td+';font-weight:700">'+(gSrcYTD>0?(gSrcBW2/gSrcYTD*100).toFixed(0)+"%":"—")+'</td><td style="'+td+';font-weight:700">'+(gSrcYTD>0?(gSrcDL2/gSrcYTD*100).toFixed(0)+"%":"—")+'</td><td style="'+td+';font-weight:700">'+(gSrcYTD>0?(gSrcHO2/gSrcYTD*100).toFixed(0)+"%":"—")+'</td></tr>';
   html+='</tbody></table></div></div>';
   html+='</div>';  // close left column
   var _sbDrillMode2="sol3";
@@ -3189,6 +3323,8 @@ function renderBud(){
     if(_iacF&&!_iacF.has(String(p["IAC (Engagement Model)"]||"").trim()))return false;
     if(_regF2&&!_regF2.has(String(p["Region Lvl 2"]||"").trim()))return false;
     if(_mmF&&String(p["MM Identifier"]||"").toLowerCase().indexOf(_mmF)===-1)return false;
+    if(eurMinFilter!==null&&(parseFloat(p["Eur"]||0)||0)<eurMinFilter)return false;
+    if(eurMaxFilter!==null&&(parseFloat(p["Eur"]||0)||0)>=eurMaxFilter)return false;
     return true;
   });
   var thS2="background:#012931;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap";
@@ -6261,7 +6397,7 @@ function renderDtr(){
   html+='<p style="font-size:12px;color:var(--mu);margin-bottom:8px">Track data quality and coverage across the campaign calendar and pipeline.</p>';
   (function(){
     var _calWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
-    var dhAll=pipeData.filter(function(p){var _yr=_dtrYearFilter||"2026";return String(p["Create Quarter"]||"").trim().startsWith(_yr)&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"&&String(p["TCP Pipeline Source Desc"]||"").trim()!=="Sales"&&(!_dhRegFilter||_dhRegFilter.has(String(p["Region Lvl 2"]||"").trim()))&&(!_dhReg3Filter||_dhReg3Filter.has(String(p["Region Lvl 3"]||"").trim()));});
+    var dhAll=pipeData.filter(function(p){var _yr=_dtrYearFilter||"2026";return String(p["Create Quarter"]||"").trim().startsWith(_yr)&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"&&String(p["TCP Pipeline Source Desc"]||"").trim()!=="Sales"&&(!_dhRegFilter||_dhRegFilter.has(String(p["Region Lvl 2"]||"").trim()))&&(!_dhReg3Filter||_dhReg3Filter.has(String(p["Region Lvl 3"]||"").trim()))&&(eurMinFilter===null||(parseFloat(p["Eur"]||0)||0)>=eurMinFilter)&&(eurMaxFilter===null||(parseFloat(p["Eur"]||0)||0)<eurMaxFilter);});
     var dhConnected=dhAll.filter(function(p){return _calWBS.has(String(p["Opp Campaign ID"]||"").trim());});
     var totAll=dhAll.reduce(function(s,p){return s+(parseFloat(p["Eur"])||0);},0);
     var totConn=dhConnected.reduce(function(s,p){return s+(parseFloat(p["Eur"])||0);},0);
