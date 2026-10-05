@@ -96,6 +96,7 @@ foreach ($row in $rows) {
 Write-Host "Writing data-profiling-req.js ($($entries.Count) entries, total acct=$totalAcct)..."
 $js  = 'window.CAMP_PROF_META={' + ($entries -join ',') + '};'
 $js += "`nwindow.PROFILING_ACCT_REQUESTED=$totalAcct;"
-[System.IO.File]::WriteAllText("$outDir\data-profiling-req.js", $js, [System.Text.Encoding]::UTF8)
+$noBomEnc = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText("$outDir\data-profiling-req.js", $js, $noBomEnc)
 
 Write-Host "Done."
