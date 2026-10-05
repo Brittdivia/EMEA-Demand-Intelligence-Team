@@ -57,7 +57,8 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
 
 Write-Host "Writing $($entries.Count) rows..."
 $js = "window.BUDGET_DATA=[" + ($entries -join ',') + "];"
-[System.IO.File]::WriteAllText("$outDir\data-budget.js", $js, [System.Text.Encoding]::UTF8)
+$noBomEnc = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText("$outDir\data-budget.js", $js, $noBomEnc)
 Write-Host "Done: $([Math]::Round((Get-Item "$outDir\data-budget.js").Length/1KB))KB"
 
 Remove-Item $zipPath -Force
