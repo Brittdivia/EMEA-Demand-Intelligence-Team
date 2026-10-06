@@ -31,7 +31,7 @@ $profData  = $profJs | ConvertFrom-Json
 
 $profTagSet = [System.Collections.Generic.HashSet[string]]::new()
 foreach ($entry in $profData.PSObject.Properties.Value) {
-    foreach ($field in @('tag','tagOut')) {
+    foreach ($field in @('tag','tagOut','tagEnr','tagWave2')) {
         foreach ($t in (Split-Tags ([string]($entry.$field)))) {
             $profTagSet.Add($t) | Out-Null
         }

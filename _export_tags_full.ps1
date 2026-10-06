@@ -37,7 +37,7 @@ foreach ($entry in $profData.PSObject.Properties.Value) {
     $title = $entry.title
     $ddm1  = $entry.ddm1
     $wbs   = $entry.wbs
-    foreach ($field in @('tag','tagOut')) {
+    foreach ($field in @('tag','tagOut','tagEnr','tagWave2')) {
         $raw = [string]($entry.$field)
         foreach ($t in (Split-Tags $raw)) {
             $profTagSet.Add($t) | Out-Null

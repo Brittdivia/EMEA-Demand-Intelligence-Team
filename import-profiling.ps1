@@ -50,6 +50,8 @@ foreach ($row in $rows) {
 
     $title      = $row.Title
     $tag        = $row.'Tag of Prospects'
+    $tagEnr     = $row.'Tag of Enriched Accounts'
+    $tagWave2   = $row.'Tag of Prospects (Wave2)'
     $tagRaw     = $row.'Profiling to Outreach'
 
     # Fall back to 'Tag for Outreach', then any *tag* column if new column is blank
@@ -84,6 +86,8 @@ foreach ($row in $rows) {
     $entry += '"title":"'       + (EscapeJson $title)     + '",'
     $entry += '"tag":"'         + (EscapeJson $tag)       + '",'
     $entry += '"tagOut":"'      + (EscapeJson $tagOut)    + '",'
+    $entry += '"tagEnr":"'      + (EscapeJson $tagEnr)    + '",'
+    $entry += '"tagWave2":"'    + (EscapeJson $tagWave2)  + '",'
     $entry += '"wbs":"'         + (EscapeJson $wbs)       + '",'
     $entry += '"ddm1":"'        + (EscapeJson $ddm1)      + '",'
     $entry += '"createdBy":"'   + (EscapeJson $createdBy) + '",'
