@@ -6637,10 +6637,11 @@ function renderDtr(){
     profMetaVals.forEach(function(m){
       var d=String(m.ddm1||"").trim()||"(No DDM1)";
       [m.tag,m.tagOut,m.tagEnr,m.tagWave2].forEach(function(f){
-        _splitDtrT(String(f||"")).forEach(function(t){
+        var rawF=String(f||"").trim();
+        _splitDtrT(rawF).forEach(function(t){
           var matched=_allProsTagSet.has(t);
           if(!matched){for(var _pi=0;_pi<_allProsTagArr.length;_pi++){var _pa=_allProsTagArr[_pi];if((t.startsWith(_pa)&&_pa.length>=8)||(_pa.startsWith(t)&&t.length>=8)){matched=true;break;}}}
-          if(!matched){if(!_unmatchedMap[t])_unmatchedMap[t]={tag:t,ddm1s:new Set()};_unmatchedMap[t].ddm1s.add(d);}
+          if(!matched){if(!_unmatchedMap[t])_unmatchedMap[t]={tag:t,raw:rawF,ddm1s:new Set()};_unmatchedMap[t].ddm1s.add(d);}
         });
       });
     });
@@ -6650,10 +6651,11 @@ function renderDtr(){
     html+='<div class="sec" style="margin-bottom:0">Profiling Tags Not in Outreach ('+_unmatchedRows.length+')</div>';
     html+='</div>';
     html+='<div class="cc"><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
-    html+='<th style="'+thU+'">Profiling Tag</th><th style="'+thU+'">DDM1</th>';
+    html+='<th style="'+thU+'">Original Tag</th><th style="'+thU+'">Match Value</th><th style="'+thU+'">DDM1</th>';
     html+='</tr></thead><tbody>';
     _unmatchedRows.forEach(function(row,i){
       html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
+        +'<td style="padding:5px 10px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+row.raw+'">'+row.raw+'</td>'
         +'<td style="padding:5px 10px;font-family:monospace;white-space:nowrap">'+row.tag+'</td>'
         +'<td style="padding:5px 10px;color:var(--mu)">'+Array.from(row.ddm1s).sort().join(', ')+'</td>'
         +'</tr>';
