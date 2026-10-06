@@ -6564,7 +6564,7 @@ function renderDtr(){
   });
   var _splitDtrT=function(raw){return String(raw||"").split(/[\r\n,;|\/\(\)\[\]]+|\\r\\n|\\n/).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New)(?::\s*|\s+)/i,"").replace(/^(?:EX|NP)-/i,"").replace(/[\s-]+(?:existing|new|ex|np)$/i,"").trim().toLowerCase();}).filter(function(t){return t&&t.length>1&&t!=="-"&&t!=="--";});};
   var _calTagsByNormDcm={};
-  filtered.forEach(function(r){var raw=String(r["Demand Manager"]||"").trim();if(!raw)return;var key=normDDM1(raw).toLowerCase();if(!_calTagsByNormDcm[key])_calTagsByNormDcm[key]=new Set();Object.keys(r).filter(function(f){return f.toLowerCase().indexOf("tag")>=0;}).forEach(function(f){String(r[f]||"").split(/[,;]/).forEach(function(t){t=t.trim();if(t)_calTagsByNormDcm[key].add(t.toLowerCase());});});});
+  filtered.forEach(function(r){var raw=String(r["Demand Manager"]||"").trim();if(!raw)return;var key=normDDM1(raw).toLowerCase();if(!_calTagsByNormDcm[key])_calTagsByNormDcm[key]=new Set();Object.keys(r).filter(function(f){return f.toLowerCase().indexOf("tag")>=0;}).forEach(function(f){String(r[f]||"").split(/[,;\r\n]+/).forEach(function(t){t=t.trim();if(t)_calTagsByNormDcm[key].add(t.toLowerCase());});});});
   var _profTagsByNormDcm={};
   profMetaVals.forEach(function(m){if(!m.ddm1)return;var key=normDDM1(m.ddm1).toLowerCase();if(!_profTagsByNormDcm[key])_profTagsByNormDcm[key]=new Set();[m.tag,m.tagOut,m.tagEnr,m.tagWave2].forEach(function(f){_splitDtrT(String(f||"")).forEach(function(t){_profTagsByNormDcm[key].add(t);});});});
   Object.keys(ddm1ReqMap).forEach(function(d){var key=normDDM1(d).toLowerCase();var pt=_profTagsByNormDcm[key]||new Set();var ct=_calTagsByNormDcm[key]||new Set();var n=0;pt.forEach(function(t){if(ct.has(t))n++;});ddm1ReqMap[d].tagMatch=n;});
@@ -6600,7 +6600,7 @@ function renderDtr(){
     (filtered||campData).forEach(function(r){
       var dcm=String(r["Demand Manager"]||"").trim();if(!dcm)dcm="(No DCM)";
       if(!dcmTagMap[dcm])dcmTagMap[dcm]={calTags:new Set(),matched:new Set()};
-      Object.keys(r).filter(function(c){return c.toLowerCase().indexOf("tag")>=0;}).forEach(function(c){String(r[c]||"").split(/[,;]/).forEach(function(t){t=t.trim().toLowerCase();if(!t)return;
+      Object.keys(r).filter(function(c){return c.toLowerCase().indexOf("tag")>=0;}).forEach(function(c){String(r[c]||"").split(/[,;\r\n]+/).forEach(function(t){t=t.trim().toLowerCase();if(!t)return;
           dcmTagMap[dcm].calTags.add(t);
           if(_profTagSetDcm.has(t))dcmTagMap[dcm].matched.add(t);
         });

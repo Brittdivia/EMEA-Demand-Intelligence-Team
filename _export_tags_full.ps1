@@ -17,7 +17,7 @@ function Split-Tags($raw) {
 # ── Calendar tag splitter — raw values, comma-split only ───────────────────
 function Split-CalTags($raw) {
     if (-not $raw) { return @() }
-    return ([string]$raw) -split '[,;]' | ForEach-Object { $_.Trim() } | Where-Object { $_ -and $_.Length -gt 0 }
+    return ([string]$raw) -split '[,;\r\n]+' | ForEach-Object { $_.Trim() } | Where-Object { $_ -and $_.Length -gt 0 }
 }
 
 # ── Parse profiling data ───────────────────────────────────────────────────
