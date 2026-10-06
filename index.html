@@ -6558,8 +6558,9 @@ function renderDtr(){
   var _allProsTagSet=new Set();
   (window.PROSPECT_DATA||[]).forEach(function(p){
     if(!p.tg)return;
-    String(p.tg).split(",").forEach(function(t){t=t.trim();if(t)_allProsTagSet.add(t);});
+    String(p.tg).split(",").forEach(function(t){t=t.trim().toLowerCase();if(t)_allProsTagSet.add(t);});
   });
+  var _allProsTagArr=Array.from(_allProsTagSet);
   var _calWbsSetReq=new Set((filtered||[]).map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
   var _wbsPipeEur={};
   pipeData.forEach(function(p){
@@ -6573,7 +6574,7 @@ function renderDtr(){
     var d=String(m.ddm1||"").trim();if(!d)d="(No DDM1)";
     if(!ddm1ReqMap[d])ddm1ReqMap[d]={total:0,connPros:0,connCal:0,calCodes:new Set(),pipeEur:0};
     ddm1ReqMap[d].total++;
-    var _profTagsOut=(String(m.tag||"")+"\n"+String(m.tagOut||"")+"\n"+String(m.tagEnr||"")+"\n"+String(m.tagWave2||"")).split(/[\r\n,;|\/\(\)\[\]]+/).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New)(?::\s*|\s+)/i,"").replace(/^(?:EX|NP)-/i,"").trim().toLowerCase();}).filter(function(t){return t&&t.length>1&&t!=="-"&&t!=="--";});if(_profTagsOut.some(function(t){return _allProsTagSet.has(t);}))ddm1ReqMap[d].connPros++;
+    var _profTagsOut=(String(m.tag||"")+"\n"+String(m.tagOut||"")+"\n"+String(m.tagEnr||"")+"\n"+String(m.tagWave2||"")).split(/[\r\n,;|\/\(\)\[\]]+/).map(function(t){return t.trim().replace(/^(?:New Prospects\s+Tag|Existing\s+Tag|New\s+Tag|Tag|Existing|New)(?::\s*|\s+)/i,"").replace(/^(?:EX|NP)-/i,"").trim().toLowerCase();}).filter(function(t){return t&&t.length>1&&t!=="-"&&t!=="--";});if(_profTagsOut.some(function(t){if(_allProsTagSet.has(t))return true;for(var _pi=0;_pi<_allProsTagArr.length;_pi++){var _pa=_allProsTagArr[_pi];if((t.startsWith(_pa)&&_pa.length>=8)||(_pa.startsWith(t)&&t.length>=8))return true;}return false;}))ddm1ReqMap[d].connPros++;
     var _wbs=String(m.wbs||"").trim();
     if(_wbs&&_calWbsSetReq.has(_wbs)){
       ddm1ReqMap[d].connCal++;
