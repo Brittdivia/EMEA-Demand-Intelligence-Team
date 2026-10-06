@@ -2,7 +2,7 @@ $campPath = "C:\Users\I572929\campaign-calendar-site\data-camp.js"
 $profPath = "C:\Users\I572929\campaign-calendar-site\data-profiling-req-20261005.js"
 $outPath  = "C:\Users\I572929\campaign-calendar-site\tag-matching.xlsx"
 
-# ── Tag normaliser (mirrors _splitDtrT in JS) ──────────────────────────────
+# ── Profiling tag normaliser (mirrors _splitDtrT in JS) ────────────────────
 function Split-Tags($raw) {
     if (-not $raw) { return @() }
     return ([string]$raw) -split '[\r\n,;|\/\(\)\[\]]+|\\r\\n|\\n' | ForEach-Object {
@@ -12,6 +12,12 @@ function Split-Tags($raw) {
         $t = $t -ireplace '[\s-]+(?:existing|new|ex|np)$', ''
         $t.Trim().ToLower()
     } | Where-Object { $_ -and $_.Length -gt 1 -and $_ -ne '-' -and $_ -ne '--' }
+}
+
+# ── Calendar tag splitter — raw values, comma-split only ───────────────────
+function Split-CalTags($raw) {
+    if (-not $raw) { return @() }
+    return ([string]$raw) -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -and $_.Length -gt 0 }
 }
 
 # ── Parse profiling data ───────────────────────────────────────────────────
@@ -69,7 +75,7 @@ foreach ($row in $campData) {
     $dm   = [string]$row.'Demand Manager'
     foreach ($col in $calTagCols) {
         $raw = [string]$row.$col
-        foreach ($t in (Split-Tags $raw)) {
+        foreach ($t in (Split-CalTags $raw)) {
             $calTagSet.Add($t) | Out-Null
             $calTagRows.Add([PSCustomObject]@{
                 Tag          = $t
@@ -86,8 +92,11 @@ foreach ($row in $campData) {
 Write-Host "  Calendar: $($calTagRows.Count) tag rows, $($calTagSet.Count) unique tags"
 
 # ── Fill Matched column ────────────────────────────────────────────────────
-foreach ($r in $profTagRows) { $r.Matched = if ($calTagSet.Contains($r.Tag)) { "Yes" } else { "No" } }
-foreach ($r in $calTagRows)  { $r.Matched = if ($profTagSet.Contains($r.Tag)) { "Yes" } else { "No" } }
+$calTagSetLower = [System.Collections.Generic.HashSet[string]]::new()
+foreach ($t in $calTagSet) { $calTagSetLower.Add($t.ToLower()) | Out-Null }
+
+foreach ($r in $profTagRows) { $r.Matched = if ($calTagSetLower.Contains($r.Tag)) { "Yes" } else { "No" } }
+foreach ($r in $calTagRows)  { $r.Matched = if ($profTagSet.Contains($r.Tag.ToLower())) { "Yes" } else { "No" } }
 
 $profMatched   = ($profTagRows | Where-Object { $_.Matched -eq "Yes" } | Select-Object -ExpandProperty Tag | Sort-Object -Unique).Count
 $calMatched    = ($calTagRows  | Where-Object { $_.Matched -eq "Yes" } | Select-Object -ExpandProperty Tag | Sort-Object -Unique).Count
