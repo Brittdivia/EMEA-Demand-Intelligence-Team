@@ -2728,7 +2728,6 @@ function renderBud(){
   html+='<th style="'+thS+'">Cloud N&amp;U Quota</th>';
   html+='<th style="'+thS+'">Won 2026</th>';
   html+='<th style="'+thS+'">Fcst Cvg</th>';
-  html+='<th style="'+thS+'">Live Cvg Q326</th>';
   html+='<th style="'+thS+'">Live Cvg Q426</th>';
   html+='<th style="'+thS+'">Live Cvg 2026</th>';
   html+='<th style="'+thS+'">Live Cvg Q127</th>';
@@ -2764,7 +2763,7 @@ function renderBud(){
     html+='<td style="'+td+';font-weight:700">'+(bw?fmtE(bw):"—")+'</td>';
     html+=cvgCell(fcstCvg);
     // Q326 and Q426
-    ["2026-Q3","2026-Q4"].forEach(function(q){
+    ["2026-Q4"].forEach(function(q){
       var qBW=regBW_q[pipeReg]?regBW_q[pipeReg][q]||0:0;
       var qLv=regLive_q[pipeReg]?regLive_q[pipeReg][q]||0:0;
       var qBudget=regQtr[rg][q]||0;
@@ -2807,7 +2806,6 @@ function renderBud(){
         var _teamFcst=_teamRem>0?(_teamCP/_teamRem).toFixed(1)+"X":"—";
         var _teamLiveCvg=_teamRem>0?(_teamLv/_teamRem).toFixed(1)+"X":"—";
         var _qkL2=_resL2(_tsfx,_allSrgQLow)||_tsfx;
-        var _teamQ3=((_allSrgQLow[_qkL2]&&_allSrgQLow[_qkL2]["2026-Q3"])||0)/_sh;
         var _teamQ4=((_allSrgQLow[_qkL2]&&_allSrgQLow[_qkL2]["2026-Q4"])||0)/_sh;
         var _teamQ3Cvg=_teamRem>0?(_teamQ3/_teamRem).toFixed(1)+"X":"—";
         var _teamQ4Cvg=_teamRem>0?(_teamQ4/_teamRem).toFixed(1)+"X":"—";
@@ -2817,7 +2815,6 @@ function renderBud(){
         html+='<td style="'+td+';font-size:10px;color:#999">'+(tq?fmtE(tq):"—")+'</td>';
         html+='<td style="'+td+';font-size:10px;color:#999">'+(_teamWon?fmtE(_teamWon):"—")+'</td>';
         html+=cvgCell(_teamFcst,"font-size:10px;color:#999;");
-        html+=cvgCell(_teamQ3Cvg,"font-size:10px;color:#999;");
         html+=cvgCell(_teamQ4Cvg,"font-size:10px;color:#999;");
         html+=cvgCell(_teamLiveCvg,"font-size:10px;color:#999;");
         html+=cvgCell("—","font-size:10px;color:#999;");
@@ -2852,7 +2849,7 @@ function renderBud(){
       html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(sbw?fmtE(sbw):"—")+'</td>';
       html+=cvgCell(sFcst,"font-size:11px;");
       var _sqLv={};
-      ["2026-Q3","2026-Q4"].forEach(function(q){
+      ["2026-Q4"].forEach(function(q){
         var sqBW=regL3BW_q[pipeReg]&&regL3BW_q[pipeReg][l3]?regL3BW_q[pipeReg][l3][q]||0:0;
         var sqLv=regL3Lv_q[pipeReg]&&regL3Lv_q[pipeReg][l3]?regL3Lv_q[pipeReg][l3][q]||0:0;
         _sqLv[q]=sqLv;
@@ -2885,7 +2882,6 @@ function renderBud(){
         var _teamRem=Math.max(0,tq-_teamWon);
         var _teamFcst=_teamRem>0?(_teamCP/_teamRem).toFixed(1)+"X":"—";
         var _teamLiveCvg=_teamRem>0?(_teamLv/_teamRem).toFixed(1)+"X":"—";
-        var _teamQ3=((_srgQLow[_qk]&&_srgQLow[_qk]["2026-Q3"])||0)/_sh;
         var _teamQ4=((_srgQLow[_qk]&&_srgQLow[_qk]["2026-Q4"])||0)/_sh;
         var _teamQ3Cvg=_teamRem>0?(_teamQ3/_teamRem).toFixed(1)+"X":"—";
         var _teamQ4Cvg=_teamRem>0?(_teamQ4/_teamRem).toFixed(1)+"X":"—";
@@ -2895,7 +2891,6 @@ function renderBud(){
         html+='<td style="'+td+';font-size:10px;color:#999">'+(tq?fmtE(tq):"—")+'</td>';
         html+='<td style="'+td+';font-size:10px;color:#999">'+(_teamWon?fmtE(_teamWon):"—")+'</td>';
         html+=cvgCell(_teamFcst,"font-size:10px;color:#999;");
-        html+=cvgCell(_teamQ3Cvg,"font-size:10px;color:#999;");
         html+=cvgCell(_teamQ4Cvg,"font-size:10px;color:#999;");
         html+=cvgCell(_teamLiveCvg,"font-size:10px;color:#999;");
         html+=cvgCell("—","font-size:10px;color:#999;");
@@ -2912,7 +2907,7 @@ function renderBud(){
   html+='<td style="'+td+';font-weight:700">'+fmtE(grandBW)+'</td>';
   html+=cvgCell(grandRem>0?(grandCP/grandRem).toFixed(1)+"X":"—");
   // Q326 and Q426 totals
-  ["2026-Q3","2026-Q4"].forEach(function(q){
+  ["2026-Q4"].forEach(function(q){
     var qBW=REGS.reduce(function(s,rg){var k=rg.replace(/^CS /,"");return s+(regBW_q[k]?regBW_q[k][q]||0:0);},0);
     var qLv=REGS.reduce(function(s,rg){var k=rg.replace(/^CS /,"");return s+(regLive_q[k]?regLive_q[k][q]||0:0);},0);
     var qBudget=REGS.reduce(function(s,rg){return s+(regQtr[rg][q]||0);},0);
@@ -3136,12 +3131,11 @@ function renderBud(){
   var thSW=thS.replace("white-space:nowrap","white-space:normal")+";max-width:60px;line-height:1.2";
   html+='<div style="display:flex;gap:16px;margin-bottom:20px;align-items:flex-start;margin-top:20px">';
   html+='<div style="flex:0 0 65%;min-width:0;display:flex;flex-direction:column;gap:16px">';
-  html+='<div class="cc"><div class="ch"><span>R4Q Budget by Sales Bag (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:24%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr>';
+  html+='<div class="cc"><div class="ch"><span>R4Q Budget by Sales Bag (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:24%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr>';
   html+='<th style="'+thL+'">Sales Bag</th>';
   html+='<th style="'+thSW+'">Budget</th>';
   html+='<th style="'+thSW+'">Won 2026</th>';
   html+='<th style="'+thSW+'">Fcst Cvg</th>';
-  html+='<th style="'+thSW+'">Live Cvg Q326</th>';
   html+='<th style="'+thSW+'">Live Cvg Q426</th>';
   html+='<th style="'+thSW+'">Live Cvg 2026</th>';
   html+='<th style="'+thSW+'">Live Cvg Q127</th>';
@@ -3160,7 +3154,7 @@ function renderBud(){
     html+='<td style="'+td+'">'+(bud?fmtE(bud):"—")+'</td>';
     html+='<td style="'+td+'">'+(bw?fmtE(bw):"—")+'</td>';
     html+=cvgCell(fcst);
-    ["2026-Q3","2026-Q4"].forEach(function(q){var qBW=sbBW_q[sb][q]||0,qLv=sbLv_q[sb][q]||0,qBudget=sbBudget_q[sb][q]||0,qRem=qBudget-qBW;html+=cvgCell(qRem>0?(qLv/qRem).toFixed(1)+"X":"—");});
+    ["2026-Q4"].forEach(function(q){var qBW=sbBW_q[sb][q]||0,qLv=sbLv_q[sb][q]||0,qBudget=sbBudget_q[sb][q]||0,qRem=qBudget-qBW;html+=cvgCell(qRem>0?(qLv/qRem).toFixed(1)+"X":"—");});
     html+=cvgCell(live);
     var sbQ1Bud27=(sbBudget_q[sb]["2026-Q1"]||0)*1.3;
     var sbQ1Live27=sbLv_q[sb]["2027-Q1"]||0;
@@ -3191,7 +3185,7 @@ function renderBud(){
       html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(ibud&&_sbDrillMode!=="src"?fmtE(ibud):"—")+'</td>';
       html+='<td style="'+td+';font-size:11px;color:var(--mu)">'+(ibw?fmtE(ibw):"—")+'</td>';
       html+=cvgCell(ifcst,"font-size:11px;");
-      ["2026-Q3","2026-Q4"].forEach(function(q){
+      ["2026-Q4"].forEach(function(q){
         var qBW=ibw_q[q]||0,qLv=ilv_q[q]||0,qRem=ibud-qBW;
         var qSbCvgV=qRem>0?(qLv/qRem).toFixed(1)+"X":"—";html+=cvgCell(qSbCvgV,"font-size:11px;");
       });
@@ -3208,7 +3202,7 @@ function renderBud(){
   html+='<td style="'+td+';font-weight:700">'+fmtE(gsbTot)+'</td>';
   html+='<td style="'+td+';font-weight:700">'+fmtE(gsbBW)+'</td>';
   html+=cvgCell(gsbRem>0?(gsbCP/gsbRem).toFixed(1)+"X":"—");
-  ["2026-Q3","2026-Q4"].forEach(function(q){var qBW=SBS.reduce(function(s,sb){return s+(sbBW_q[sb][q]||0);},0);var qLv=SBS.reduce(function(s,sb){return s+(sbLv_q[sb][q]||0);},0);var qBudget=SBS.reduce(function(s,sb){return s+(sbBudget_q[sb][q]||0);},0);var qRem=qBudget-qBW;html+=cvgCell(qRem>0?(qLv/qRem).toFixed(1)+"X":"—");});
+  ["2026-Q4"].forEach(function(q){var qBW=SBS.reduce(function(s,sb){return s+(sbBW_q[sb][q]||0);},0);var qLv=SBS.reduce(function(s,sb){return s+(sbLv_q[sb][q]||0);},0);var qBudget=SBS.reduce(function(s,sb){return s+(sbBudget_q[sb][q]||0);},0);var qRem=qBudget-qBW;html+=cvgCell(qRem>0?(qLv/qRem).toFixed(1)+"X":"—");});
   html+=cvgCell(gsbRem>0?(gsbLv/gsbRem).toFixed(1)+"X":"—");
   var gsbQ1Bud27=SBS.reduce(function(s,sb){return s+(sbBudget_q[sb]["2026-Q1"]||0);},0)*1.3;
   var gsbQ2Bud27=SBS.reduce(function(s,sb){return s+(sbBudget_q[sb]["2026-Q2"]||0);},0)*1.3;
