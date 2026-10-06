@@ -2807,7 +2807,6 @@ function renderBud(){
         var _teamLiveCvg=_teamRem>0?(_teamLv/_teamRem).toFixed(1)+"X":"—";
         var _qkL2=_resL2(_tsfx,_allSrgQLow)||_tsfx;
         var _teamQ4=((_allSrgQLow[_qkL2]&&_allSrgQLow[_qkL2]["2026-Q4"])||0)/_sh;
-        var _teamQ3Cvg=_teamRem>0?(_teamQ3/_teamRem).toFixed(1)+"X":"—";
         var _teamQ4Cvg=_teamRem>0?(_teamQ4/_teamRem).toFixed(1)+"X":"—";
         html+='<tr class="'+rgId+' bud-l3" style="display:'+(window._budRegExpanded&&window._budRegExpanded.has(rgId)?'':'none')+';background:#f5f8fe">';
         html+='<td style="padding:2px 6px 2px 48px;font-size:10px;color:#999;border-bottom:1px solid #f4f4f4">'+te.orig+'</td>';
@@ -2883,7 +2882,6 @@ function renderBud(){
         var _teamFcst=_teamRem>0?(_teamCP/_teamRem).toFixed(1)+"X":"—";
         var _teamLiveCvg=_teamRem>0?(_teamLv/_teamRem).toFixed(1)+"X":"—";
         var _teamQ4=((_srgQLow[_qk]&&_srgQLow[_qk]["2026-Q4"])||0)/_sh;
-        var _teamQ3Cvg=_teamRem>0?(_teamQ3/_teamRem).toFixed(1)+"X":"—";
         var _teamQ4Cvg=_teamRem>0?(_teamQ4/_teamRem).toFixed(1)+"X":"—";
         html+='<tr class="'+rgId+' '+_l3Id+'" style="display:none;background:#f5f8fe">';
         html+='<td style="padding:2px 6px 2px 62px;font-size:10px;color:#999;border-bottom:1px solid #f4f4f4">'+te.orig+'</td>';
