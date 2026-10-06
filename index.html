@@ -3408,6 +3408,20 @@ function renderBud(){
   html+='<div class="kpi kb"><div class="kl">Active MM Identifiers</div><div class="kv">'+uniqMM.toLocaleString()+'</div></div>';
   html+='<div class="kpi kb"><div class="kl">Handed Over</div><div class="kv">&euro;'+fmtE(hoEur)+'</div></div>';
   html+='</div>';
+  var _sdeAllQtrs=Array.from(new Set(pipeData.filter(function(p){return String(p["Create Quarter"]||"").startsWith("2026");}).map(function(p){return String(p["Create Quarter"]||"").trim();}))).sort();
+  if(_sdeAllQtrs.length){
+    var _qSet=window._pipeQtrSet||new Set();
+    var _qBtnOn='font-size:11px;padding:3px 10px;border:1px solid #012931;border-radius:3px;cursor:pointer;background:#012931;color:#fff;font-weight:600';
+    var _qBtnOff='font-size:11px;padding:3px 10px;border:1px solid #012931;border-radius:3px;cursor:pointer;background:#fff;color:#012931';
+    html+='<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px">';
+    html+='<span style="font-size:11px;color:#666;font-weight:600">Quarter:</span>';
+    html+='<button onclick="window._pipeQtrSet=new Set();renderSde();" style="'+(!_qSet.size?_qBtnOn:_qBtnOff)+'">All</button>';
+    _sdeAllQtrs.forEach(function(q){
+      var esc=q.replace(/'/g,"\\'");
+      html+='<button onclick="window._pipeQtrSet=new Set([\''+esc+'\']);renderSde();" style="'+(_qSet.has(q)?_qBtnOn:_qBtnOff)+'">'+q+'</button>';
+    });
+    html+='</div>';
+  }
   // Table 1: By MM Identifier
   var mmMap={},mmOpps={},mmHO={},mmEngType={};
   sdeRows.forEach(function(p){
