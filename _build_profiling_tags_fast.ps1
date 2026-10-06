@@ -81,10 +81,21 @@ foreach ($sid in $trackedSids) {
     $statsRow = $seqStats | Where-Object { $_."Sequence ID".Trim() -eq $sid } | Select-Object -First 1
     if (-not $statsRow) { continue }
     $tags = $statsRow.Tags.Trim().Trim('"') -split '[,\n]' | ForEach-Object { $_.Trim().Trim('"') } | Where-Object { $_ }
+    $tagKeys = @($tagToProf.Keys)
     foreach ($tag in $tags) {
+        $matchKey = $null
         if ($tagToProf[$tag]) {
-            if (-not $campProfTags[$wbs]) { $campProfTags[$wbs] = $tag }
-            foreach ($prof in $tagToProf[$tag]) {
+            $matchKey = $tag
+        } else {
+            foreach ($key in $tagKeys) {
+                if (($tag.StartsWith($key) -and $key.Length -ge 8) -or ($key.StartsWith($tag) -and $tag.Length -ge 8)) {
+                    $matchKey = $key; break
+                }
+            }
+        }
+        if ($matchKey) {
+            if (-not $campProfTags[$wbs]) { $campProfTags[$wbs] = $matchKey }
+            foreach ($prof in $tagToProf[$matchKey]) {
                 if ($allProfMeta[$prof.id] -and -not $allProfMeta[$prof.id]["wbs"]) {
                     $allProfMeta[$prof.id]["wbs"] = $wbs; $matchCount++
                 }
