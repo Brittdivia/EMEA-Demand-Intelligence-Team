@@ -2716,7 +2716,7 @@ function renderBud(){
       if(mu){
         if(!_sprMu1ForMu[mu])_sprMu1ForMu[mu]={};if(!_sprMu1ForMu[mu][k])_sprMu1ForMu[mu][k]={q:0,orig:mu1};_sprMu1ForMu[mu][k].q+=q;
         var _tt=String(r.team||"").trim();
-        if(_tt){var _tk=_tt.toLowerCase();if(!_sprTeamByMu1[mu])_sprTeamByMu1[mu]={};if(!_sprTeamByMu1[mu][k])_sprTeamByMu1[mu][k]={};if(!_sprTeamByMu1[mu][k][_tk])_sprTeamByMu1[mu][k][_tk]={q:0,orig:_tt};_sprTeamByMu1[mu][k][_tk].q+=q;}
+        if(_tt){var _tk=_tt.toLowerCase();if(!_sprTeamByMu1[mu])_sprTeamByMu1[mu]={};if(!_sprTeamByMu1[mu][k])_sprTeamByMu1[mu][k]={};if(!_sprTeamByMu1[mu][k][_tk])_sprTeamByMu1[mu][k][_tk]={q:0,orig:_tt,q_q:{}};var _rqtr=String(r.qtr||"").trim();if(_rqtr)_sprTeamByMu1[mu][k][_tk].q_q[_rqtr]=(_sprTeamByMu1[mu][k][_tk].q_q[_rqtr]||0)+q;_sprTeamByMu1[mu][k][_tk].q+=q;}
       }
     }
   });
@@ -2806,8 +2806,7 @@ function renderBud(){
         var _teamFcst=_teamRem>0?(_teamCP/_teamRem).toFixed(1)+"X":"—";
         var _teamLiveCvg=_teamRem>0?(_teamLv/_teamRem).toFixed(1)+"X":"—";
         var _qkL2=_resL2(_tsfx,_allSrgQLow)||_tsfx;
-        var _teamQ4=((_allSrgQLow[_qkL2]&&_allSrgQLow[_qkL2]["2026-Q4"])||0)/_sh;
-        var _teamQ4Cvg=_teamRem>0?(_teamQ4/_teamRem).toFixed(1)+"X":"—";
+        var _teamQ4=((_allSrgQLow[_qkL2]&&_allSrgQLow[_qkL2]["2026-Q4"])||0)/_sh;var _tqQ4=(te.q_q&&te.q_q["2026-Q4"]||0);var _teamQ4Cvg=_tqQ4>0?(_teamQ4/_tqQ4).toFixed(1)+"X":"—";
         html+='<tr class="'+rgId+' bud-l3" style="display:'+(window._budRegExpanded&&window._budRegExpanded.has(rgId)?'':'none')+';background:#f5f8fe">';
         html+='<td style="padding:2px 6px 2px 48px;font-size:10px;color:#999;border-bottom:1px solid #f4f4f4">'+te.orig+'</td>';
         html+='<td style="'+td+';font-size:10px;color:#999">—</td>';
@@ -2881,8 +2880,7 @@ function renderBud(){
         var _teamRem=Math.max(0,tq-_teamWon);
         var _teamFcst=_teamRem>0?(_teamCP/_teamRem).toFixed(1)+"X":"—";
         var _teamLiveCvg=_teamRem>0?(_teamLv/_teamRem).toFixed(1)+"X":"—";
-        var _teamQ4=((_srgQLow[_qk]&&_srgQLow[_qk]["2026-Q4"])||0)/_sh;
-        var _teamQ4Cvg=_teamRem>0?(_teamQ4/_teamRem).toFixed(1)+"X":"—";
+        var _teamQ4=((_srgQLow[_qk]&&_srgQLow[_qk]["2026-Q4"])||0)/_sh;var _tqQ4=(te.q_q&&te.q_q["2026-Q4"]||0);var _teamQ4Cvg=_tqQ4>0?(_teamQ4/_tqQ4).toFixed(1)+"X":"—";
         html+='<tr class="'+rgId+' '+_l3Id+'" style="display:none;background:#f5f8fe">';
         html+='<td style="padding:2px 6px 2px 62px;font-size:10px;color:#999;border-bottom:1px solid #f4f4f4">'+te.orig+'</td>';
         html+='<td style="'+td+';font-size:10px;color:#999">—</td>';
