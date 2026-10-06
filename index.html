@@ -6631,149 +6631,38 @@ function renderDtr(){
 
 
 
-  // Prospect detail table by profiling tag
+  // Profiling tags not connected to outreach
   (function(){
-    var _profTags=new Set();
-    var _profMetaSrcDet=Object.values(window.CAMP_PROF_META||{});
-    if(_dtrDmFilter){_profMetaSrcDet=_profMetaSrcDet.filter(function(m){var norm=normDDM1(String(m.ddm1||'')).toLowerCase();return Array.from(_dtrDmFilter).some(function(d){return normDDM1(d).toLowerCase()===norm;});});}
-    if(_dtrDmClickF){_profMetaSrcDet=_profMetaSrcDet.filter(function(m){return normDDM1(String(m.ddm1||'')).toLowerCase()===_dtrDmClickF;});}
-    _profMetaSrcDet.forEach(function(m){
-      var t=String(m.tagOut||m.tag||'').trim();if(t&&t!=='-'&&t!=='--')_profTags.add(t);
-    });
-    // Build tag → campaign WBS if tag's profiling request has a WBS in the calendar
-    var _calWbsSetDet=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
-    var _tagToCampCode={};
-    _profMetaSrcDet.forEach(function(m){
-      var t=String(m.tagOut||m.tag||'').trim();if(!t||t==='-'||t==='--')return;
-      var wbs=String(m.wbs||'').trim();if(!wbs)return;
-      if(_calWbsSetDet.has(wbs)){if(!_tagToCampCode[t])_tagToCampCode[t]=new Set();_tagToCampCode[t].add(wbs);}
-    });
-    var _detRows=[];
-    var _pidToSrcDet={};
-    (window.SEQ_PROSPECT_DATA||[]).forEach(function(p){if(p.pid&&p.src)_pidToSrcDet[String(p.pid)]=p.src;});
-    (window.PROSPECT_DATA||[]).forEach(function(p){
-      if(!p.tg)return;
-      var _src=_pidToSrcDet[String(p.id||'')]||'';
-      var _tp=(/zoom\s*info/i.test(_src)||/lead\s*genius/i.test(_src)||/enginy/i.test(_src)||/sales\s*navigator/i.test(_src)||/data\s*hive/i.test(_src))?'3rd Party':'';
-      String(p.tg).split(',').forEach(function(t){
-        t=t.trim();if(!t||!_profTags.has(t))return;
-        var _cc=_tagToCampCode[t]?Array.from(_tagToCampCode[t]).join(', '):'';
-        _detRows.push({tag:t,name:(p.fn||'')+' '+(p.ln||''),co:p.co||'',created:p.created||'',touched:p.touched||'',pn:p.pn||'',tp:_tp,eid:p.eid||'',campCode:_cc});
+    var _unmatchedMap={};
+    profMetaVals.forEach(function(m){
+      var d=String(m.ddm1||"").trim()||"(No DDM1)";
+      [m.tag,m.tagOut,m.tagEnr,m.tagWave2].forEach(function(f){
+        _splitDtrT(String(f||"")).forEach(function(t){
+          var matched=_allProsTagSet.has(t);
+          if(!matched){for(var _pi=0;_pi<_allProsTagArr.length;_pi++){var _pa=_allProsTagArr[_pi];if((t.startsWith(_pa)&&_pa.length>=8)||(_pa.startsWith(t)&&t.length>=8)){matched=true;break;}}}
+          if(!matched){if(!_unmatchedMap[t])_unmatchedMap[t]={tag:t,ddm1s:new Set()};_unmatchedMap[t].ddm1s.add(d);}
+        });
       });
     });
-    _detRows.sort(function(a,b){return a.tag.localeCompare(b.tag)||(b.touched||'').localeCompare(a.touched||'');});
-    window._profDetailRowsAll=_detRows;
-    // Unique personas for filter
-    var _detPersonas=Array.from(new Set(_detRows.map(function(r){return r.pn;}).filter(Boolean))).sort();
-    window._prosDetailFilters=window._prosDetailFilters||{persona:'',tp:'',eid:''};
-    function fmtDt(s){if(!s)return'—';var d=s.slice(0,10);return d==='0000-00-00'?'—':d;}
-    window._fmtDtPros=fmtDt;
-    function applyDetFilters(rows){
-      var f=window._prosDetailFilters||{};
-      if(window._profBridgeTagFilter)rows=rows.filter(function(r){return r.tag===window._profBridgeTagFilter;});
-      if(f.tp==='3rd Party')rows=rows.filter(function(r){return r.tp==='3rd Party';});
-      else if(f.tp==='not3p')rows=rows.filter(function(r){return r.tp!=='3rd Party';});
-      if(f.persona)rows=rows.filter(function(r){return r.pn===f.persona;});
-      if(f.eid==='yes')rows=rows.filter(function(r){return !!r.eid;});
-      else if(f.eid==='no')rows=rows.filter(function(r){return !r.eid;});
-      return rows;
-    }
-    function buildRows(rows){
-      var h='';
-      rows.forEach(function(row,i){
-        var bg=i%2===0?'#fff':'#F8FBFF';
-        var tpColor=row.tp?'#0a6640':'#B0B0B0';
-        var ccStyle=row.campCode?'font-weight:700;color:#00144A':'color:#B0B0B0';
-        h+='<tr style="border-bottom:1px solid #EBEBEB;background:'+bg+'">'
-          +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+row.tag+'">'+row.tag+'</td>'
-          +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+row.name+'</td>'
-          +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+row.co+'</td>'
-          +'<td style="padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+row.pn+'</td>'
-          +'<td style="padding:5px 10px;text-align:center;font-weight:700;font-size:10px;color:'+tpColor+'">'+row.tp+'</td>'
-          +'<td style="padding:5px 10px;font-size:10px;color:#555">'+row.eid+'</td>'
-          +'<td style="padding:5px 10px;font-size:10px;'+ccStyle+'" title="'+row.campCode+'">'+row.campCode+'</td>'
-          +'<td style="padding:5px 10px;text-align:right">'+fmtDt(row.created)+'</td>'
-          +'<td style="padding:5px 10px;text-align:right">'+fmtDt(row.touched)+'</td>'
-          +'</tr>';
-      });
-      return h;
-    }
-    window._prosDetailPage=0;
-    window._renderProsDetailTable=function(resetPage){
-      var tbody=document.getElementById('pros-detail-tbody');
-      var label=document.getElementById('pros-detail-label');
-      var pgEl=document.getElementById('pros-detail-pg');
-      if(!tbody)return;
-      if(resetPage)window._prosDetailPage=0;
-      var allRows=applyDetFilters(window._profDetailRowsAll||[]);
-      var total=allRows.length;
-      var pageSize=10;
-      var page=window._prosDetailPage||0;
-      var maxPage=Math.max(0,Math.ceil(total/pageSize)-1);
-      if(page>maxPage){page=maxPage;window._prosDetailPage=page;}
-      tbody.innerHTML=buildRows(allRows.slice(page*pageSize,(page+1)*pageSize));
-      var tag=window._profBridgeTagFilter;
-      var from=total===0?0:page*pageSize+1;
-      var to=Math.min((page+1)*pageSize,total);
-      if(label)label.textContent=(tag?'Prospects by Profiling Tag — '+tag:' Prospects by Profiling Tag')+' ('+from+'–'+to+' of '+total+')';
-      if(pgEl){
-        var atFirst=page===0,atLast=page>=maxPage;
-        pgEl.innerHTML='<button onclick="window._prosDetailPage=Math.max(0,(window._prosDetailPage||0)-1);window._renderProsDetailTable();" style="padding:2px 8px;font-size:11px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f3f4f6" '+(atFirst?'disabled':'')+'>&#8592; Prev</button>'
-          +'<span style="font-size:11px;color:#555;padding:0 8px">Page '+(page+1)+' of '+Math.max(1,maxPage+1)+'</span>'
-          +'<button onclick="window._prosDetailPage=(window._prosDetailPage||0)+1;window._renderProsDetailTable();" style="padding:2px 8px;font-size:11px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background:#f3f4f6" '+(atLast?'disabled':'')+'>Next &#8594;</button>';
-      }
-      var f=window._prosDetailFilters||{};
-      var elPn=document.getElementById('det-flt-persona');var elTp=document.getElementById('det-flt-tp');var elEid=document.getElementById('det-flt-eid');
-      if(elPn)elPn.value=f.persona||'';if(elTp)elTp.value=f.tp||'';if(elEid)elEid.value=f.eid||'';
-    };
-    var thD='background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0';
-    var selStyle='padding:3px 6px;font-size:11px;border:1px solid #ccc;border-radius:4px;background:#fff;cursor:pointer';
-    html+='<div id="pros-detail-section" style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;margin-bottom:6px">';
-    html+='<div class="sec" style="margin-bottom:0"><span id="pros-detail-label">Prospects by Profiling Tag</span></div>';
-    html+='<div style="display:flex;gap:6px;align-items:center">';
-    
-    html+='<button onclick="window._exportProfProsDetail()" style="padding:4px 12px;background:#00144A;color:#fff;border:none;border-radius:var(--r);font-size:11px;font-weight:600;cursor:pointer">&#11015; Export CSV</button>';
-    html+='</div></div>';
-    // Filters row
-    html+='<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">';
-    html+='<select id="det-flt-persona" style="'+selStyle+'" onchange="window._prosDetailFilters=window._prosDetailFilters||{};window._prosDetailFilters.persona=this.value;window._renderProsDetailTable(true)">';
-    html+='<option value="">All Personas</option>';
-    _detPersonas.forEach(function(p){html+='<option value="'+p+'">'+p+'</option>';});
-    html+='</select>';
-    html+='<select id="det-flt-tp" style="'+selStyle+'" onchange="window._prosDetailFilters=window._prosDetailFilters||{};window._prosDetailFilters.tp=this.value;window._renderProsDetailTable(true)">';
-    html+='<option value="">All Sources</option><option value="3rd Party">3rd Party</option><option value="not3p">Not 3rd Party</option>';
-    html+='</select>';
-    html+='<select id="det-flt-eid" style="'+selStyle+'" onchange="window._prosDetailFilters=window._prosDetailFilters||{};window._prosDetailFilters.eid=this.value;window._renderProsDetailTable(true)">';
-    html+='<option value="">All Ext IDs</option><option value="yes">Has External ID</option><option value="no">No External ID</option>';
-    html+='</select>';
-    html+='<button onclick="window._prosDetailFilters={};window._renderProsDetailTable(true);" style="padding:3px 8px;font-size:11px;background:#f3f4f6;border:1px solid #ccc;border-radius:4px;cursor:pointer">Reset Filters</button>';
+    var _unmatchedRows=Object.values(_unmatchedMap).sort(function(a,b){return a.tag.localeCompare(b.tag);});
+    var thU="background:#00144A;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;position:sticky;top:0";
+    html+='<div style="display:flex;align-items:center;margin-top:20px;margin-bottom:6px">';
+    html+='<div class="sec" style="margin-bottom:0">Profiling Tags Not in Outreach ('+_unmatchedRows.length+')</div>';
     html+='</div>';
-    html+='<div id="pros-detail-pg" style="display:flex;align-items:center;gap:6px;margin-bottom:6px"></div>';
-    window._exportProfProsDetail=function(){
-      var rows=applyDetFilters(window._profDetailRowsAll||[]);
-      var out=[['Tag','Name','Company','Persona','3rd Party','External ID','Campaign Code','Created','Last Contacted']];
-      rows.forEach(function(r){out.push([r.tag,r.name,r.co,r.pn,r.tp,r.eid,r.campCode,fmtDt(r.created),fmtDt(r.touched)]);});
-      function esc(v){v=String(v||'');return v.indexOf(',')>-1||v.indexOf('"')>-1?'"'+v.replace(/"/g,'""')+'"':v;}
-      var csv='﻿'+out.map(function(r){return r.map(esc).join(',');}).join('\n');
-      var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='prospects_by_profiling_tag.csv';a.click();
-    };
-    html+='<div class="cc"><div style="overflow:auto;max-height:500px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
-    html+='<th style="'+thD+';width:14%">Tag</th>';
-    html+='<th style="'+thD+';width:12%">Name</th>';
-    html+='<th style="'+thD+';width:16%">Company</th>';
-    html+='<th style="'+thD+';width:14%">Persona</th>';
-    html+='<th style="'+thD+';width:8%;text-align:center">3rd Party</th>';
-    html+='<th style="'+thD+';width:9%">Ext. ID</th>';
-    html+='<th style="'+thD+';width:10%">Campaign Code</th>';
-    html+='<th style="'+thD+';width:9%;text-align:right">Created</th>';
-    html+='<th style="'+thD+';width:9%;text-align:right">Last Contacted</th></tr></thead><tbody id="pros-detail-tbody">';
-    html+=buildRows(applyDetFilters(_detRows).slice(0,10));
+    html+='<div class="cc"><div style="overflow:auto;max-height:400px"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
+    html+='<th style="'+thU+'">Profiling Tag</th><th style="'+thU+'">DDM1</th>';
+    html+='</tr></thead><tbody>';
+    _unmatchedRows.forEach(function(row,i){
+      html+='<tr style="border-bottom:1px solid #EBEBEB;background:'+(i%2===0?'#fff':'#F8FBFF')+'">'
+        +'<td style="padding:5px 10px;font-family:monospace;white-space:nowrap">'+row.tag+'</td>'
+        +'<td style="padding:5px 10px;color:var(--mu)">'+Array.from(row.ddm1s).sort().join(', ')+'</td>'
+        +'</tr>';
+    });
     html+='</tbody></table></div></div>';
   })();
 
 
   page.innerHTML=html;
-  if(window._renderProsDetailTable)window._renderProsDetailTable();
   }catch(e){page.innerHTML='<div class="nr"><div class="ni">&#9888;</div><p><b>Error:</b> '+e.message+'</p></div>';console.error(e);}
 }
 
