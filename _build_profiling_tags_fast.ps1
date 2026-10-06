@@ -24,23 +24,34 @@ $campCodeToProf = @{}
 $allCreatedBy = New-Object System.Collections.Generic.HashSet[string]
 $allProfMeta = @{}
 
+function CleanStr($s) {
+    # Remove control chars (keep printable + space); escape backslash and quote for JSON
+    return ([regex]::Replace([string]$s, '[\x00-\x08\x0b\x0c\x0e-\x1f]', ' ')).Trim()
+}
+
 foreach ($row in $csvData) {
     $profId    = $row.ID.Trim()
     if (-not $profId) { continue }
-    $title     = $row.Title.Trim().Replace('\','\\').Replace('"','\"')
-    $ddm1      = $row.DDM1.Trim().Replace('"','\"')
-    $reqType   = $row.'Request Type'.Trim().Replace('"','\"')
-    $status    = $row.Status.Trim().Replace('"','\"')
-    $createdBy = $row.'Created By'.Trim().Replace('"','\"')
-    $campCode  = $row.'Campaign Code'.Trim().Replace('"','\"')
-    $tagPros   = $row.'Tag of Prospects'.Trim().Trim('"')
-    $tagOut    = $row.'Tag for Outreach'.Trim().Trim('"')
-    $tagEnr    = $row.'Tag of Enriched Accounts'.Trim().Trim('"')
-    $tagWave2  = $row.'Tag of Prospects (Wave2)'.Trim().Trim('"')
+    $title     = (CleanStr $row.Title).Replace('\','\\').Replace('"','\"')
+    $ddm1      = (CleanStr $row.DDM1).Replace('"','\"')
+    $reqType   = (CleanStr $row.'Request Type').Replace('"','\"')
+    $status    = (CleanStr $row.Status).Replace('"','\"')
+    $createdBy = (CleanStr $row.'Created By').Replace('"','\"')
+    $campCode  = (CleanStr $row.'Campaign Code').Replace('"','\"')
+    $tagPros   = (CleanStr $row.'Tag of Prospects').Trim('"')
+    $tagOut    = (CleanStr $row.'Tag for Outreach').Trim('"')
+    $tagEnr    = (CleanStr $row.'Tag of Enriched Accounts').Trim('"')
+    $tagWave2  = (CleanStr $row.'Tag of Prospects (Wave2)').Trim('"')
+    # Convert MM/DD/YYYY HH:MM -> YYYY-MM-DD
+    $createdRaw = $row.Created.Trim()
+    $created = ""
+    if ($createdRaw -match '^(\d{1,2})/(\d{1,2})/(\d{4})') {
+        $created = "$($Matches[3])-$($Matches[1].PadLeft(2,'0'))-$($Matches[2].PadLeft(2,'0'))"
+    }
 
     if ($createdBy) { [void]$allCreatedBy.Add($createdBy) }
 
-    $allProfMeta[$profId] = @{id=$profId;title=$title;ddm1=$ddm1;type=$reqType;status=$status;tag=$tagPros;tagOut=$tagOut;tagEnr=$tagEnr;tagWave2=$tagWave2;wbs="";createdBy=$createdBy;campaignCode=$campCode;created=""}
+    $allProfMeta[$profId] = @{id=$profId;title=$title;ddm1=$ddm1;type=$reqType;status=$status;tag=$tagPros;tagOut=$tagOut;tagEnr=$tagEnr;tagWave2=$tagWave2;wbs="";createdBy=$createdBy;campaignCode=$campCode;created=$created}
 
     if ($campCode) {
         $campCode -split '[,;\n]' | ForEach-Object { $_.Trim() } | Where-Object { $_ } | ForEach-Object {
@@ -86,7 +97,7 @@ Write-Host "Total matches: $matchCount"
 $tagsJson = ($campProfTags.GetEnumerator() | ForEach-Object { """$($_.Key -replace '"','\"')"":""$($_.Value -replace '"','\"')""" }) -join ","
 $metaEntries = $allProfMeta.GetEnumerator() | ForEach-Object {
     $k = $_.Key -replace '"','\"'; $v = $_.Value
-    """$k"":{""id"":""$($v.id)"",""title"":""$($v.title)"",""ddm1"":""$($v.ddm1)"",""type"":""$($v.type)"",""status"":""$($v.status)"",""tag"":""$($v.tag -replace '"','\"')"",""tagOut"":""$($v.tagOut -replace '"','\"')"",""tagEnr"":""$($v.tagEnr -replace '"','\"')"",""tagWave2"":""$($v.tagWave2 -replace '"','\"')"",""wbs"":""$($v.wbs -replace '"','\"')"",""createdBy"":""$($v.createdBy -replace '"','\"')"",""campaignCode"":""$($v.campaignCode -replace '"','\"')""}"
+    """$k"":{""id"":""$($v.id)"",""title"":""$($v.title)"",""ddm1"":""$($v.ddm1)"",""type"":""$($v.type)"",""status"":""$($v.status)"",""tag"":""$($v.tag -replace '"','\"')"",""tagOut"":""$($v.tagOut -replace '"','\"')"",""tagEnr"":""$($v.tagEnr -replace '"','\"')"",""tagWave2"":""$($v.tagWave2 -replace '"','\"')"",""wbs"":""$($v.wbs -replace '"','\"')"",""createdBy"":""$($v.createdBy -replace '"','\"')"",""campaignCode"":""$($v.campaignCode -replace '"','\"')"",""created"":""$($v.created)""}"
 }
 $metaJson = $metaEntries -join ","
 $codesEntries = $campCodeToProf.GetEnumerator() | ForEach-Object { """$($_.Key -replace '"','\"')"": {""id"":""$($_.Value.id)"",""title"":""$($_.Value.title)"",""ddm1"":""$($_.Value.ddm1 -replace '"','\"')"",""createdBy"":""$($_.Value.createdBy -replace '"','\"')""}" }

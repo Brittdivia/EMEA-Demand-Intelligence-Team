@@ -2720,7 +2720,7 @@ function renderBud(){
       }
     }
   });
-  ["Benelux","France","MEA North","MEA South","Nordic","UKI"].forEach(function(r){delete _sprTeamByMu1[r];});
+  ["Benelux","France","MEA North","MEA South","Nordic"].forEach(function(r){delete _sprTeamByMu1[r];});
   var _sprTeams=Array.from(new Set((window.SPR_DATA||[]).filter(function(r){var _si=String(r.iac||"").trim();return _si==="Digital"||_si==="Field"||_si==="PLT";}).map(function(r){return String(r.team||"").trim();}).filter(Boolean))).sort();
   html+='<div class="cc" style="flex:0 0 65%;min-width:0"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><span>RQ4 Budget by Region (kEUR)</span><div style="display:flex;align-items:center;gap:6px;font-weight:400"><label style="font-size:11px;color:var(--mu)">Team:</label><select onchange="window._sprTeamFilter=this.value||null;renderBud()" style="font-size:11px;padding:2px 4px;border:1px solid #ccc;border-radius:3px;max-width:220px"><option value="">All Teams</option>'+_sprTeams.map(function(t){return'<option value="'+t.replace(/"/g,'&quot;')+'"'+((window._sprTeamFilter===t)?' selected':'')+'>'+ t+'</option>';}).join('')+'</select></div></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
   html+='<th style="'+thL+'">Region</th>';
@@ -4316,10 +4316,25 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
           var grand=_detailGrandL2[l2k]||0;
           _sdeTcpL3[l3k]=grand>0?_brittTcpL3[l3k]*((_detailSdeL2[l2k]||0)/grand):0;
         });
+        var _sdeTcpDcm={
+          "frida wallsargard":27000,
+          "javier prieto":29400,
+          "egemen anil":29400,
+          "natalie raic":39000,
+          "sonali baliga":40600,
+          "daniele uggeri":42000,
+          "sophie baeyens":57000,
+          "cyril stutzmann":52300,
+          "mai magdy":48500,
+          "cesare osuji":49200,
+          "valentin frauca":41000,
+          "jesica garcia":75850,
+          "melanie cusin":54000
+        };
         var thT2="background:#012931;color:#fff;padding:5px 8px;font-size:11px;font-weight:700;white-space:nowrap";
         var tdT2="padding:5px 8px;font-size:12px;border-bottom:1px solid #f0f0f0";
         var _re2DimLabels={"reg":"Region","sb":"Sales Bag","mc":"Mastercode","sod":"SoD","dat":"DAT Support","dg":"DG Program","type":"Type","dcm":"DCM"};
-        var tblH='<div style="overflow:auto;height:366px;position:relative"><table style="width:100%;min-width:560px;border-collapse:collapse;font-size:12px"><thead><tr>'
+        var tblH='<div style="overflow:auto;'+(re2ViewMode==="dcm"?"":"height:366px;")+'position:relative"><table style="width:100%;min-width:560px;border-collapse:collapse;font-size:12px"><thead><tr>'
           +'<th style="'+thT2+';position:sticky;top:0;z-index:2">'+(_re2DimLabels[re2ViewMode]||re2ViewMode)+'</th>'
           +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right"># Camps</th>'
           +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">Target Pipeline</th>'
@@ -4335,7 +4350,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
           var tgt=_re2TgtPipe[r[0]]||_re2TgtPipe["CS "+r[0]]||_re2TgtPipeLower[r[0].toLowerCase()]||0;
           var att=tgt>0?(eur/(tgt/1000)*100).toFixed(0)+"%":"—";
           var fmtTgt=tgt>0?fmtE(tgt/1000):"—";
-          var sdeTcp=re2ViewMode==="reg"?(_sdeTcpL2[r[0].toLowerCase().replace(/^cs /,"")]||0):re2ViewMode==="l3"?(_sdeTcpL3[r[0].toLowerCase().replace(/^cs /,"")]||0):0;
+          var sdeTcp=re2ViewMode==="reg"?(_sdeTcpL2[r[0].toLowerCase().replace(/^cs /,"")]||0):re2ViewMode==="l3"?(_sdeTcpL3[r[0].toLowerCase().replace(/^cs /,"")]||0):re2ViewMode==="dcm"?(_sdeTcpDcm[r[0].toLowerCase()]||0):0;
           var fmtSdeTcp=sdeTcp>0?'€'+fmtE(sdeTcp):"—";
           var pct=totalEur>0?(eur/totalEur*100).toFixed(0)+"%":"—";
           tblH+='<tr><td style="'+tdT2+'">'+lbl+'</td>'
@@ -4352,7 +4367,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
         var totalTgt=Object.values(_re2TgtPipe).reduce(function(s,v){return s+v;},0);
         var totalAtt=totalTgt>0?(totalEur/(totalTgt/1000)*100).toFixed(0)+"%":"—";
         var fmtTotalTgt=totalTgt>0?fmtE(totalTgt/1000):"—";
-        var totalSdeTcp=re2ViewMode==="reg"?Object.values(_sdeTcpL2).reduce(function(s,v){return s+v;},0):re2ViewMode==="l3"?Object.values(_sdeTcpL3).reduce(function(s,v){return s+v;},0):0;
+        var totalSdeTcp=re2ViewMode==="reg"?Object.values(_sdeTcpL2).reduce(function(s,v){return s+v;},0):re2ViewMode==="l3"?Object.values(_sdeTcpL3).reduce(function(s,v){return s+v;},0):re2ViewMode==="dcm"?Object.values(_sdeTcpDcm).reduce(function(s,v){return s+v;},0):0;
         var fmtTotalSdeTcp=totalSdeTcp>0?'€'+fmtE(totalSdeTcp):"—";
         tblH+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td>'
           +'<td style="'+tdT2+';text-align:right">'+totalCamps.toLocaleString()+'</td>'
@@ -6567,7 +6582,7 @@ function renderDtr(){
   filtered.forEach(function(r){var raw=String(r["Demand Manager"]||"").trim();if(!raw)return;var key=normDDM1(raw).toLowerCase();if(!_calTagsByNormDcm[key])_calTagsByNormDcm[key]=new Set();Object.keys(r).filter(function(f){return f.toLowerCase().indexOf("tag")>=0;}).forEach(function(f){String(r[f]||"").split(/[,;\r\n]+/).forEach(function(t){t=t.trim();if(t)_calTagsByNormDcm[key].add(t.toLowerCase());});});});
   var _profTagsByNormDcm={};
   profMetaVals.forEach(function(m){if(!m.ddm1)return;var key=normDDM1(m.ddm1).toLowerCase();if(!_profTagsByNormDcm[key])_profTagsByNormDcm[key]=new Set();[m.tag,m.tagOut,m.tagEnr,m.tagWave2].forEach(function(f){_splitDtrT(String(f||"")).forEach(function(t){_profTagsByNormDcm[key].add(t);});});});
-  Object.keys(ddm1ReqMap).forEach(function(d){var key=normDDM1(d).toLowerCase();var pt=_profTagsByNormDcm[key]||new Set();var ct=_calTagsByNormDcm[key]||new Set();var n=0;pt.forEach(function(t){if(ct.has(t))n++;});ddm1ReqMap[d].tagMatch=n;});
+  Object.keys(ddm1ReqMap).forEach(function(d){var key=normDDM1(d).toLowerCase();var pt=_profTagsByNormDcm[key]||new Set();var ct=_calTagsByNormDcm[key]||new Set();var ctArr=Array.from(ct);var n=0;pt.forEach(function(t){if(ct.has(t)||ctArr.some(function(c){return(c.startsWith(t)&&t.length>=8)||(t.startsWith(c)&&c.length>=8);}))n++;});ddm1ReqMap[d].tagMatch=n;});
   var _wbsToSids={};Object.keys(_seqToWbs2).forEach(function(sid){var w=_seqToWbs2[sid];if(!_wbsToSids[w])_wbsToSids[w]=new Set();_wbsToSids[w].add(sid);});
   var _sidToPids={};(window.SEQ_PROSPECT_DATA||[]).forEach(function(sp){var sid=String(sp.sid||"").trim();var pid=String(sp.pid||"").trim();if(sid&&pid){if(!_sidToPids[sid])_sidToPids[sid]=new Set();_sidToPids[sid].add(pid);}});
   var _tagToPids={};(window.PROSPECT_DATA||[]).forEach(function(p){var pid=String(p.id||"").trim();if(!pid||!p.tg)return;String(p.tg).split(",").forEach(function(t){t=t.trim().toLowerCase();if(t){if(!_tagToPids[t])_tagToPids[t]=new Set();_tagToPids[t].add(pid);}});});
@@ -6596,13 +6611,15 @@ function renderDtr(){
     var _profTagSetDcm=new Set();
     function _splitTags(raw){return String(raw||"").split(/[\n,\/;()\[\]]+/).map(function(t){return t.trim().toLowerCase();}).filter(function(t){return t&&t.length>1&&t!=="-"&&t!=="--";});}
     profMetaVals.forEach(function(m){[m.tagOut,m.tag,m.tagEnr,m.tagWave2].forEach(function(f){_splitTags(String(f||"")).forEach(function(t){_profTagSetDcm.add(t);});});});
+    var _profTagPfxArr=Array.from(_profTagSetDcm);
+    function _tagPfx(t){if(_profTagSetDcm.has(t))return true;for(var _i=0;_i<_profTagPfxArr.length;_i++){var p=_profTagPfxArr[_i];if((t.startsWith(p)&&p.length>=8)||(p.startsWith(t)&&t.length>=8))return true;}return false;}
     var dcmTagMap={};
     (filtered||campData).forEach(function(r){
       var dcm=String(r["Demand Manager"]||"").trim();if(!dcm)dcm="(No DCM)";
       if(!dcmTagMap[dcm])dcmTagMap[dcm]={calTags:new Set(),matched:new Set()};
       Object.keys(r).filter(function(c){return c.toLowerCase().indexOf("tag")>=0;}).forEach(function(c){String(r[c]||"").split(/[,;\r\n]+/).forEach(function(t){t=t.trim().toLowerCase();if(!t)return;
           dcmTagMap[dcm].calTags.add(t);
-          if(_profTagSetDcm.has(t))dcmTagMap[dcm].matched.add(t);
+          if(_tagPfx(t))dcmTagMap[dcm].matched.add(t);
         });
       });
     });
