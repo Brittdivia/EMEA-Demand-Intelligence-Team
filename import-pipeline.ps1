@@ -122,6 +122,8 @@ for ($i = 1; $i -lt $rows.Count; $i++) {
     $fields += ',"Opp Description":"'             + (EscapeJson (GetByHeader 'Opp Description'))                + '"'
     $fields += ',"Channel Partner":"'             + (EscapeJson (GetByHeader 'Channel Partner'))                + '"'
     $fields += ',"Account Name":"'                + (EscapeJson (GetByHeader 'Account Name'))                   + '"'
+    $fields += ',"MM Pipe Source":"'              + (EscapeJson (GetByHeader 'MM Pipe Source'))                 + '"'
+    $fields += ',"Local Account Owner Name":"'    + (EscapeJson (GetByHeader 'Local Acct Owner'))               + '"'
 
     $pipeRows.Add('{' + $fields + '}')
 }
