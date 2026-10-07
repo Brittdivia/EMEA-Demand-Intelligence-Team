@@ -4260,6 +4260,20 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
     });
   }
   _re2pr.forEach(function(p){
+    // For non-reg/l3 modes, scope pipeline rows to the active region filter so DCM/SB/etc.
+    // totals reflect the same France opps as the reg-mode France row
+    if(re2ViewMode!=="reg"&&re2ViewMode!=="l3"){
+      if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){
+        var _pL2n=String(p["Region Lvl 2"]||"").trim().replace(/^CS /i,"");
+        var _rfN=new Set(Array.from(filters["Region Name (level 2)"]).map(function(v){return v.replace(/^CS /i,"").trim();}));
+        if(!_rfN.has(_pL2n))return;
+      }
+      if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){
+        var _pL3n=String(p["Region Lvl 3"]||"").trim().replace(/^CS /i,"");
+        var _rfL3N=new Set(Array.from(filters["Region Name (level 3)"]).map(function(v){return v.replace(/^CS /i,"").trim();}));
+        if(!_rfL3N.has(_pL3n))return;
+      }
+    }
     var wbs=String(p["Opp Campaign ID"]||"").trim();
     var _r2Reg=String(p["Region Lvl 2"]||"").trim();
     var _r3Reg=String(p["Region Lvl 3"]||"").trim();
