@@ -4237,7 +4237,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
   if(btnTbl){btnTbl.style.background=re2DataMode==="tbl"?"#012931":"";btnTbl.style.color=re2DataMode==="tbl"?"#fff":"";}
 
   // Build re2 data for any dimension
-  var re2Eur2={},re2Ops2={},re2Camp2={},re2SrcEur2={};
+  var re2Eur2={},re2Ops2={},re2Camp2={},re2SrcEur2={},re2SdeHo2={};
   var _re2CampSeen={};
   var _re2CampData=(re2ViewMode==="reg"||re2ViewMode==="l3")?_re2prData:data;
   _re2CampData.forEach(function(r){
@@ -4297,6 +4297,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
     var eur=parseFloat(p["Eur"]||0)||0;var oid=String(p["Opportunity ID"]||"");
     keys.forEach(function(k){if(!k)return;re2Eur2[k]=(re2Eur2[k]||0)+eur;if(!re2Ops2[k])re2Ops2[k]=new Set();if(oid)re2Ops2[k].add(oid);});
     if(re2ViewMode==="reg"&&eur){var _re2SrcLbl=String(p["MM Pipe Source"]||"").trim();if(_re2SrcLbl)keys.forEach(function(k){if(!k)return;if(!re2SrcEur2[k])re2SrcEur2[k]={};re2SrcEur2[k][_re2SrcLbl]=(re2SrcEur2[k][_re2SrcLbl]||0)+eur;});}
+    if(eur&&String(p["TCP Pipeline Source Desc"]||"").trim()==="Digital Hub"&&hasHod(p["SDE Handover Date"])){keys.forEach(function(k){if(!k)return;re2SdeHo2[k]=(re2SdeHo2[k]||0)+eur;});}
   });
   if(re2ViewMode==="mc"){re2Camp2={};_re2pr.forEach(function(p){var mc=String(p["SAP Mastercode"]||"").trim();if(mc)re2Camp2[mc]=(re2Camp2[mc]||0)+1;});}
   if(re2ViewMode==="l3"){re2Camp2={};_re2pr.forEach(function(p){var l3=String(p["Region Lvl 3"]||"").trim();if(l3&&_re2ValidL3&&_re2ValidL3.has(l3))re2Camp2[l3]=(re2Camp2[l3]||0)+1;});}
@@ -4452,6 +4453,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
           +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">Target Pipeline</th>'
           +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">SDE HO Target</th>'
           +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">Pipeline Created</th>'
+          +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">SDE HO</th>'
           +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">Opps</th>'
           +(re2ViewMode==="reg"?_re2MMSrcCols.map(function(s){return'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">'+s+'</th>';}).join(""):"")
           +'</tr></thead><tbody>';
@@ -4470,6 +4472,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
             +'<td style="'+tdT2+';text-align:right">'+(tgt?'€'+fmtTgt:"—")+'</td>'
             +'<td style="'+tdT2+';text-align:right">'+fmtTcpTgt+'</td>'
             +'<td style="'+tdT2+';text-align:right">€'+fmtE(eur)+'</td>'
+            +'<td style="'+tdT2+';text-align:right">'+(re2SdeHo2[r[0]]>0?'€'+fmtE(re2SdeHo2[r[0]]):"—")+'</td>'
             +'<td style="'+tdT2+';text-align:right">'+opps+'</td>'
             +(re2ViewMode==="reg"?_re2MMSrcCols.map(function(s){var v=(re2SrcEur2[r[0]]&&re2SrcEur2[r[0]][s])||0;return'<td style="'+tdT2+';text-align:right">'+(v>0?'€'+fmtE(v):"—")+'</td>';}).join(""):"")
             +'</tr>';
@@ -4484,6 +4487,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
           +'<td style="'+tdT2+';text-align:right">'+(totalTgt?'€'+fmtTotalTgt:"—")+'</td>'
           +'<td style="'+tdT2+';text-align:right">'+fmtTotalTcpTgt+'</td>'
           +'<td style="'+tdT2+';text-align:right">€'+(totalEur>=1000?(totalEur/1000).toFixed(0)+"M":totalEur.toFixed(0)+"K")+'</td>'
+          +(function(){var t=re2Sorted2.reduce(function(a,r){return a+(re2SdeHo2[r[0]]||0);},0);return'<td style="'+tdT2+';text-align:right">'+(t>0?'€'+fmtE(t):"—")+'</td>';})()
           +'<td style="'+tdT2+';text-align:right">'+totalOpps.toLocaleString()+'</td>'
           +(re2ViewMode==="reg"?_re2MMSrcCols.map(function(s){var tot=re2Sorted2.reduce(function(a,r){return a+((re2SrcEur2[r[0]]&&re2SrcEur2[r[0]][s])||0);},0);return'<td style="'+tdT2+';text-align:right">'+(tot>0?'€'+fmtE(tot):"—")+'</td>';}).join(""):"")
           +'</tr>';
