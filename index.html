@@ -4452,8 +4452,8 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
           +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right"># Camps</th>'
           +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">Target Pipeline</th>'
           +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">SDE HO Target</th>'
-          +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">Pipeline Created</th>'
           +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">SDE HO</th>'
+          +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">Pipeline Created</th>'
           +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">Opps</th>'
           +(re2ViewMode==="reg"?_re2MMSrcCols.map(function(s){return'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">'+s+'</th>';}).join(""):"")
           +'</tr></thead><tbody>';
@@ -4471,8 +4471,8 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
             +'<td style="'+tdT2+';text-align:right">'+(camps||0)+'</td>'
             +'<td style="'+tdT2+';text-align:right">'+(tgt?'€'+fmtTgt:"—")+'</td>'
             +'<td style="'+tdT2+';text-align:right">'+fmtTcpTgt+'</td>'
-            +'<td style="'+tdT2+';text-align:right">€'+fmtE(eur)+'</td>'
             +'<td style="'+tdT2+';text-align:right">'+(re2SdeHo2[r[0]]>0?'€'+fmtE(re2SdeHo2[r[0]]):"—")+'</td>'
+            +'<td style="'+tdT2+';text-align:right">€'+fmtE(eur)+'</td>'
             +'<td style="'+tdT2+';text-align:right">'+opps+'</td>'
             +(re2ViewMode==="reg"?_re2MMSrcCols.map(function(s){var v=(re2SrcEur2[r[0]]&&re2SrcEur2[r[0]][s])||0;return'<td style="'+tdT2+';text-align:right">'+(v>0?'€'+fmtE(v):"—")+'</td>';}).join(""):"")
             +'</tr>';
@@ -4486,9 +4486,8 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
           +'<td style="'+tdT2+';text-align:right">'+totalCamps.toLocaleString()+'</td>'
           +'<td style="'+tdT2+';text-align:right">'+(totalTgt?'€'+fmtTotalTgt:"—")+'</td>'
           +'<td style="'+tdT2+';text-align:right">'+fmtTotalTcpTgt+'</td>'
-          +'<td style="'+tdT2+';text-align:right">€'+(totalEur>=1000?(totalEur/1000).toFixed(0)+"M":totalEur.toFixed(0)+"K")+'</td>'
           +(function(){var t=re2Sorted2.reduce(function(a,r){return a+(re2SdeHo2[r[0]]||0);},0);return'<td style="'+tdT2+';text-align:right">'+(t>0?'€'+fmtE(t):"—")+'</td>';})()
-          +'<td style="'+tdT2+';text-align:right">'+totalOpps.toLocaleString()+'</td>'
+          +'<td style="'+tdT2+';text-align:right">€'+(totalEur>=1000?(totalEur/1000).toFixed(0)+"M":totalEur.toFixed(0)+"K")+'</td>'          +'<td style="'+tdT2+';text-align:right">'+totalOpps.toLocaleString()+'</td>'
           +(re2ViewMode==="reg"?_re2MMSrcCols.map(function(s){var tot=re2Sorted2.reduce(function(a,r){return a+((re2SrcEur2[r[0]]&&re2SrcEur2[r[0]][s])||0);},0);return'<td style="'+tdT2+';text-align:right">'+(tot>0?'€'+fmtE(tot):"—")+'</td>';}).join(""):"")
           +'</tr>';
         tblH+='</tbody></table></div>';
