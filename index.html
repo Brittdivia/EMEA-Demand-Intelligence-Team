@@ -1,4 +1,4 @@
-﻿??<!DOCTYPE html>
+??<!DOCTYPE html>
 <!-- saved from url=(0058)file:///C:/Users/I572929/campaign-calendar-site/index.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
@@ -294,7 +294,7 @@ window.PROFILING_ACCT_REQUESTED=306028;</script>
 <script>
 window.onerror=function(msg,src,line,col,err){document.getElementById("exePage").innerHTML='<div style="padding:20px;color:red"><b>JS Error:</b> '+msg+' (line '+line+')</div>';return false;};
 var SPLIT_KEYS=new Set(["IAC","SoD","Sales Bag","Sub Sales Bag","Starting Quarter","Executor","Region Name (level 3)"]);
-var drmFilters=new Set();var mmPipeSrcFilters=new Set();var eurMinFilter=1;var eurMaxFilter=null;var regSummaryCache={};var TOTAL_2026_PIPELINE=1935778.13;
+var drmFilters=new Set();var mmPipeSrcFilters=new Set();var tcpPipeSrcFilters=new Set();var eurMinFilter=1;var eurMaxFilter=null;var regSummaryCache={};var TOTAL_2026_PIPELINE=1935778.13;
 var campData=[],pipeData=[],outData=[],filtered=[];
 var filters={},srchQ="",sCol=null,sDir=1,pg=1,pgSz=100,activeTab="bud",charts={};
 var anaFilter={};
@@ -374,7 +374,8 @@ document.addEventListener("DOMContentLoaded",function(){
   pipeData=((window._pipeWeek==='w37'?window.PIPE_DATA_W37:(window._pipeWeek==='w38'?window.PIPE_DATA_W38:(window._pipeWeek==='w39'?window.PIPE_DATA_W39:(window._pipeWeek==='w40'?window.PIPE_DATA_W40:null))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});
   pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);})
   pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});
-window._setPipeWeek=function(w){window._pipeWeek=w;var vn=w==='w37'?'PIPE_DATA_W37':w==='w38'?'PIPE_DATA_W38':w==='w39'?'PIPE_DATA_W39':'PIPE_DATA_W40';var src=w==='w37'?'data-pipe-w37.js':w==='w38'?'data-pipe-w38.js':w==='w39'?'data-pipe-w39.js':'data-pipe-w40.js';function _apply(){pipeData=((w==='w37'?window.PIPE_DATA_W37:(w==='w38'?window.PIPE_DATA_W38:(w==='w39'?window.PIPE_DATA_W39:(w==='w40'?window.PIPE_DATA_W40:null))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});syncDrmBtn();mmPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});syncMmpsBtn();applyFilters();renderBud();if(activeTab==='ana')renderAna();}if(window[vn]){_apply();return;}document.getElementById('budPage').innerHTML='<div class="ap"><div style="padding:40px;text-align:center;color:#666;font-size:14px">Loading pipeline data...</div></div>';var s=document.createElement('script');s.src=src;s.onload=function(){_apply();};document.head.appendChild(s);};;
+  pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});
+window._setPipeWeek=function(w){window._pipeWeek=w;var vn=w==='w37'?'PIPE_DATA_W37':w==='w38'?'PIPE_DATA_W38':w==='w39'?'PIPE_DATA_W39':'PIPE_DATA_W40';var src=w==='w37'?'data-pipe-w37.js':w==='w38'?'data-pipe-w38.js':w==='w39'?'data-pipe-w39.js':'data-pipe-w40.js';function _apply(){pipeData=((w==='w37'?window.PIPE_DATA_W37:(w==='w38'?window.PIPE_DATA_W38:(w==='w39'?window.PIPE_DATA_W39:(w==='w40'?window.PIPE_DATA_W40:null))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});syncDrmBtn();mmPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});syncMmpsBtn();tcpPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});syncTcpSrcBtn();applyFilters();renderBud();if(activeTab==='ana')renderAna();}if(window[vn]){_apply();return;}document.getElementById('budPage').innerHTML='<div class="ap"><div style="padding:40px;text-align:center;color:#666;font-size:14px">Loading pipeline data...</div></div>';var s=document.createElement('script');s.src=src;s.onload=function(){_apply();};document.head.appendChild(s);};;
   if(!window._pipeWeek){window._setPipeWeek('w40');}
   outData=window.OUT_DATA||JSON.parse(document.getElementById("d-out").textContent);
   FD.forEach(function(f){filters[f.k]=new Set();});
@@ -497,6 +498,7 @@ function buildFbar(){
   FD.forEach(function(fd){
     // WBS Code, Executor, DAT, DG Program, Partner only on sub-tabs
     if((fd.k==="Campaign/WBS Code"||fd.k==="Executor"||fd.k==="Digital Assets team support"||fd.k==="DG Program"||fd.k==="Partner")&&!_subTabs.has(activeTab))return;
+    if(activeTab==="exe"&&(fd.k==="Starting Quarter"||fd.k==="Campaign/WBS Code"||fd.k==="Executor"||fd.k==="DG Program"||fd.k==="Partner"||fd.k==="Digital Assets team support"))return;
     if((activeTab==="bud"||activeTab==="exe")&&(fd.k==="Demand Manager"||fd.k==="Status"||fd.k==="SoD"||fd.k==="Campaign Name"||fd.k==="AI Focused?"))return;
     if(activeTab==="cal"&&fd.k==="AI Focused?")return;
     if(!_subTabs.has(activeTab)&&fd.k==="Starting Quarter")return;
@@ -511,12 +513,14 @@ function buildFbar(){
     ins(w,!_anaRow1.has(fd.k));
   });
   // DRM Category button
+  if(activeTab!=='cal'){
   var drmN=drmFilters.size;
   var drmBtn=document.createElement("div");drmBtn.className="fbi";drmBtn.id="drm-fbi";
   drmBtn.innerHTML="<button class=\"fbtn"+(drmN?" on":"")+"\" id=\"drm-fbtn\" onclick=\"toggleDrmDD()\">DRM Category <span class=\"fc\" id=\"drm-fc\" style=\"display:"+(drmN?"inline-block":"none")+"\">"+drmN+"</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
     +"<div class=\"fdd\" id=\"drm-fdd\"><div class=\"fdh\"><span class=\"fdt\">DRM Category</span><button class=\"fdc\" onclick=\"clearDrmFilter()\">Clear</button></div>"
     +"<div class=\"fdo\" id=\"drm-fdo\"></div></div>";
   div.parentNode.insertBefore(drmBtn,div);
+  }
   var _allMmps=new Set(pipeData.map(function(p){return String(p["MM Pipe Source"]||"").trim();}).filter(Boolean));
   var _mmpsFiltered=_allMmps.size>0&&Array.from(_allMmps).some(function(v){return !mmPipeSrcFilters.has(v);});
   var _mmpsN=_mmpsFiltered?Array.from(_allMmps).filter(function(v){return !mmPipeSrcFilters.has(v);}).length:0;
@@ -524,8 +528,16 @@ function buildFbar(){
   mmpsBtn.innerHTML="<button class=\"fbtn"+(_mmpsFiltered?" on":"")+"\" id=\"mmps-fbtn\" onclick=\"toggleMmpsDD()\">MM Pipe Source <span class=\"fc\" id=\"mmps-fc\" style=\"display:"+(_mmpsFiltered?"inline-block":"none")+"\">"+_mmpsN+"</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
     +"<div class=\"fdd\" id=\"mmps-fdd\"><div class=\"fdh\"><span class=\"fdt\">MM Pipe Source</span><button class=\"fdc\" onclick=\"clearMmpsFilter()\">Clear</button></div>"
     +"<div class=\"fdo\" id=\"mmps-fdo\"></div></div>";
-  div.parentNode.insertBefore(mmpsBtn,div);
-  var eurBtn=document.createElement("div");eurBtn.className="fbi";eurBtn.id="eur-fbi";
+  if(activeTab!=="cal")div.parentNode.insertBefore(mmpsBtn,div);
+  var _allTcpSrc=new Set(pipeData.map(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim();}).filter(Boolean));
+  var _tcpSrcFiltered=_allTcpSrc.size>0&&Array.from(_allTcpSrc).some(function(v){return !tcpPipeSrcFilters.has(v);});
+  var _tcpSrcN=_tcpSrcFiltered?Array.from(_allTcpSrc).filter(function(v){return !tcpPipeSrcFilters.has(v);}).length:0;
+  var tcpSrcBtn=document.createElement("div");tcpSrcBtn.className="fbi";tcpSrcBtn.id="tcpsrc-fbi";
+  tcpSrcBtn.innerHTML="<button class=\"fbtn"+(_tcpSrcFiltered?" on":"")+"\" id=\"tcpsrc-fbtn\" onclick=\"toggleTcpSrcDD()\">TCP Pipe Source <span class=\"fc\" id=\"tcpsrc-fc\" style=\"display:"+(_tcpSrcFiltered?"inline-block":"none")+"\">"+_tcpSrcN+"</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
+    +"<div class=\"fdd\" id=\"tcpsrc-fdd\"><div class=\"fdh\"><span class=\"fdt\">TCP Pipeline Source</span><button class=\"fdc\" onclick=\"clearTcpSrcFilter()\">Clear</button></div>"
+    +"<div class=\"fdo\" id=\"tcpsrc-fdo\"></div></div>";
+  if(activeTab==="exe"||activeTab==="bud")div.parentNode.insertBefore(tcpSrcBtn,div);
+  if(activeTab!=="cal"){var eurBtn=document.createElement("div");eurBtn.className="fbi";eurBtn.id="eur-fbi";
   eurBtn.innerHTML="<button class=\"fbtn"+((eurMinFilter!==null||eurMaxFilter!==null)?" on":"")+"\" id=\"eur-fbtn\" onclick=\"toggleEurFilter()\">Opp &euro; <span id=\"eur-val\">"+(eurMinFilter!==null&&eurMaxFilter!==null?"&ge;"+eurMinFilter+" &lt;"+eurMaxFilter:eurMinFilter!==null?"&gt;"+eurMinFilter:eurMaxFilter!==null?"&lt;"+eurMaxFilter:"All")+"</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
     +"<div class=\"fdd\" id=\"eur-fdd\"><div class=\"fdh\"><span class=\"fdt\">Opp Value Range</span><button class=\"fdc\" onclick=\"clearEurFilter()\">Clear</button></div>"
     +"<div style=\"padding:10px 12px\"><div style=\"font-size:11px;color:var(--mu);margin-bottom:3px\">&euro; &ge; (minimum)</div><input type=\"number\" id=\"eur-input\" placeholder=\"e.g. 1\" value=\""+(eurMinFilter!==null?eurMinFilter:"")+"\" style=\"width:100%;border:1px solid var(--bd);border-radius:var(--r);padding:5px 8px;font-size:12px;outline:none;box-sizing:border-box\"/>"
@@ -533,6 +545,7 @@ function buildFbar(){
     +"<button onclick=\"applyEurFilter()\" style=\"margin-top:8px;width:100%;padding:6px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-size:12px\">Apply</button></div>"
     +"</div>";
   div.parentNode.insertBefore(eurBtn,div);
+  }
   // Execution Quarter filter — calendar tab only
   if(activeTab==="cal"){
     function getExecQtr(dateStr){
@@ -562,7 +575,7 @@ function buildFbar(){
       +"<div class=\"fdo\" id=\"fdo_AI_Focused_\">"+buildOpts("AI Focused?")+"</div></div>";
     div.parentNode.insertBefore(_aiBtn,div);
   }
-  if(_subTabs.has(activeTab)||activeTab==='bud'){
+  if((_subTabs.has(activeTab)||activeTab==='bud')&&activeTab!=='cal'){
   if(!window._pipeQtrSet)window._pipeQtrSet=new Set();
   var pipeQtrs=Array.from(new Set(pipeData.map(function(p){return String(p["Create Quarter"]||"").trim();}).filter(function(q){return q.startsWith("2026");}))). sort();
   var pqN=window._pipeQtrSet.size;
@@ -588,9 +601,22 @@ function buildFbar(){
     +"</div></div>";
   div.parentNode.insertBefore(cqBtn,div);ins(cqBtn,false,true);
   } // end closing quarter
+  // Team filter — bud (Coverage Overview) tab only, uses SPR_DATA teams
+  if(activeTab==="bud"){
+    var _sprTeamsF=Array.from(new Set((window.SPR_DATA||[]).filter(function(r){var _si=String(r.iac||"").trim();return _si==="Digital"||_si==="Field"||_si==="PLT";}).map(function(r){return String(r.team||"").trim();}).filter(Boolean))).sort();
+    var curSprTeam=window._sprTeamFilter||"";
+    var sprTeamN=curSprTeam?1:0;
+    var sprTeamBtn=document.createElement("div");sprTeamBtn.className="fbi";sprTeamBtn.id="sprteam-fbi";
+    sprTeamBtn.innerHTML="<button class=\"fbtn"+(sprTeamN?" on":"")+"\" id=\"sprteam-fbtn\" onclick=\"toggleSprTeamDD()\">Team <span class=\"fc\" id=\"sprteam-fc\" style=\"display:"+(sprTeamN?"inline-block":"none")+"\">1</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
+      +"<div class=\"fdd\" id=\"sprteam-fdd\"><div class=\"fdh\"><span class=\"fdt\">Team</span><button class=\"fdc\" onclick=\"clearSprTeamFilter()\">Clear</button></div>"
+      +"<div class=\"fdo\" id=\"sprteam-fdo\">"
+      +_sprTeamsF.map(function(t){return"<label class=\"dopt\"><input type=\"radio\" name=\"sprteam\" "+(t===curSprTeam?"checked":"")+" onchange=\"window._sprTeamFilter='"+t.replace(/'/g,"\\'")+"';renderBud();buildFbar();\"/><span class=\"ot\">"+t+"</span></label>";}).join("")
+      +"</div></div>";
+    div.parentNode.insertBefore(sprTeamBtn,div);
+  }
   // WBS, Campaign Name, Executor, DAT, DG Program — already in FD loop, no extra needed
   if(false){_subTabs;} // keep _subTabs reference live
-  if(_subTabs.has(activeTab)&&activeTab!=="out"){
+  if(_subTabs.has(activeTab)&&activeTab!=="out"&&activeTab!=="cal"){
   var _mmRegF=filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size?new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim();})):null;
   var mmIds=Array.from(new Set(pipeData.filter(function(p){return !_mmRegF||_mmRegF.has(String(p["Region Lvl 2"]||"").trim());}).map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean))).sort();
   var curMmId=window._mmIdFilter||"";
@@ -763,12 +789,17 @@ function clearFilter(key){
 }
 function clearAll(){
   FD.forEach(function(f){filters[f.k].clear();});
-  drmFilters.clear();syncDrmBtn();mmPipeSrcFilters.clear();syncMmpsBtn();eurMinFilter=null;eurMaxFilter=null;syncEurBtn();
+  drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});syncDrmBtn();
+  mmPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});syncMmpsBtn();
+  tcpPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});syncTcpSrcBtn();
+  eurMinFilter=null;eurMaxFilter=null;syncEurBtn();
   window._execQtrFilter="";
+  window._exeSrcFilter=null;window._exeRegFilter=null;window._exeProdFilter=null;
+  window._budFocus=null;window._sprTeamFilter=null;window._pipeQtrSet=new Set();window._pipeCloseQtrSet=new Set();
   srchQ="";var srchEl=document.getElementById("srch");if(srchEl)srchEl.value="";
   pg=1;closeAllDD();applyFilters();
-  FD.forEach(function(f){syncBtn(f.k);});updateTags();syncCab();
-  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="dtr")renderDtr();if(activeTab==="exe")renderExe();
+  FD.forEach(function(f){syncBtn(f.k);});updateTags();syncCab();buildFbar();
+  if(activeTab==="ana")renderAna();if(activeTab==="out")renderOut();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="dtr")renderDtr();if(activeTab==="bud")renderBud();
 }
 function syncBtn(key){
   var s=sk(key),n=filters[key].size;
@@ -938,7 +969,7 @@ function toggleDrmF(val,checked){
 }
 function clearDrmFilter(){
   drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);})
-window._setPipeWeek=function(w){window._pipeWeek=w;var vn=w==='w37'?'PIPE_DATA_W37':w==='w38'?'PIPE_DATA_W38':w==='w39'?'PIPE_DATA_W39':'PIPE_DATA_W40';var src=w==='w37'?'data-pipe-w37.js':w==='w38'?'data-pipe-w38.js':w==='w39'?'data-pipe-w39.js':'data-pipe-w40.js';function _apply(){pipeData=((w==='w37'?window.PIPE_DATA_W37:(w==='w38'?window.PIPE_DATA_W38:(w==='w39'?window.PIPE_DATA_W39:(w==='w40'?window.PIPE_DATA_W40:null))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});syncDrmBtn();mmPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});syncMmpsBtn();applyFilters();renderBud();if(activeTab==='ana')renderAna();}if(window[vn]){_apply();return;}document.getElementById('budPage').innerHTML='<div class="ap"><div style="padding:40px;text-align:center;color:#666;font-size:14px">Loading pipeline data...</div></div>';var s=document.createElement('script');s.src=src;s.onload=function(){_apply();};document.head.appendChild(s);};;syncDrmBtn();eurMinFilter=null;syncEurBtn();syncCab();buildDrmDD();
+window._setPipeWeek=function(w){window._pipeWeek=w;var vn=w==='w37'?'PIPE_DATA_W37':w==='w38'?'PIPE_DATA_W38':w==='w39'?'PIPE_DATA_W39':'PIPE_DATA_W40';var src=w==='w37'?'data-pipe-w37.js':w==='w38'?'data-pipe-w38.js':w==='w39'?'data-pipe-w39.js':'data-pipe-w40.js';function _apply(){pipeData=((w==='w37'?window.PIPE_DATA_W37:(w==='w38'?window.PIPE_DATA_W38:(w==='w39'?window.PIPE_DATA_W39:(w==='w40'?window.PIPE_DATA_W40:null))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});syncDrmBtn();mmPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});syncMmpsBtn();tcpPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});syncTcpSrcBtn();applyFilters();renderBud();if(activeTab==='ana')renderAna();}if(window[vn]){_apply();return;}document.getElementById('budPage').innerHTML='<div class="ap"><div style="padding:40px;text-align:center;color:#666;font-size:14px">Loading pipeline data...</div></div>';var s=document.createElement('script');s.src=src;s.onload=function(){_apply();};document.head.appendChild(s);};;syncDrmBtn();eurMinFilter=null;syncEurBtn();syncCab();buildDrmDD();
   if(activeTab==="ana")renderAna();if(activeTab==="exe")renderExe();if(activeTab==="pdel")renderPdel();if(activeTab==="bud")renderBud();
 }
 function syncDrmBtn(){
@@ -951,7 +982,12 @@ function syncDrmBtn(){
 }
 function buildMmpsDD(){
   var counts={};
-  pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(!v)return;counts[v]=(counts[v]||0)+1;});
+  var _allTcpSrc=new Set(pipeData.map(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim();}).filter(Boolean));
+  var _tcpFiltered=_allTcpSrc.size>0&&Array.from(_allTcpSrc).some(function(v){return !tcpPipeSrcFilters.has(v);});
+  pipeData.forEach(function(p){
+    if(_tcpFiltered&&!tcpPipeSrcFilters.has(String(p["TCP Pipeline Source Desc"]||"").trim()))return;
+    var v=String(p["MM Pipe Source"]||"").trim();if(!v)return;counts[v]=(counts[v]||0)+1;
+  });
   var opts=Object.keys(counts).sort(function(a,b){return a.localeCompare(b);});
   var el=document.getElementById("mmps-fdo");if(!el)return;
   if(!opts.length){el.innerHTML='<div style="padding:8px 12px;font-size:12px;color:#888">No MM Pipe Source data in current pipeline week</div>';return;}
@@ -983,6 +1019,58 @@ function syncMmpsBtn(){
   var isFiltered=Array.from(allMmps).some(function(v){return !mmPipeSrcFilters.has(v);});
   var n=Array.from(allMmps).filter(function(v){return !mmPipeSrcFilters.has(v);}).length;
   btn.classList.toggle("on",isFiltered);fc.textContent=isFiltered?n:0;fc.style.display=isFiltered?"inline-block":"none";
+}
+
+function buildTcpSrcDD(){
+  var counts={};
+  pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(!v)return;counts[v]=(counts[v]||0)+1;});
+  var opts=Object.keys(counts).sort(function(a,b){return a.localeCompare(b);});
+  var el=document.getElementById("tcpsrc-fdo");if(!el)return;
+  if(!opts.length){el.innerHTML='<div style="padding:8px 12px;font-size:12px;color:#888">No TCP Pipeline Source data</div>';return;}
+  el.innerHTML=opts.map(function(opt){
+    var chk=tcpPipeSrcFilters.has(opt)?"checked":"";
+    var eq=opt.replace(/"/g,"&quot;");var ep=opt.replace(/'/g,"\\'");
+    return "<label class=\"dopt\"><input type=\"checkbox\" "+chk+" value=\""+eq+"\" onchange=\"toggleTcpSrcF('"+ep+"',this.checked)\"/><span class=\"ot\">"+opt+"</span><span class=\"on2\">"+counts[opt]+"</span></label>";
+  }).join("");
+}
+function toggleTcpSrcDD(){
+  var dd=document.getElementById("tcpsrc-fdd"),btn=document.getElementById("tcpsrc-fbtn");
+  var was=dd.classList.contains("on");closeAllDD();
+  if(!was){buildTcpSrcDD();dd.classList.add("on");btn.classList.add("on");}
+}
+function toggleTcpSrcF(val,checked){
+  if(checked)tcpPipeSrcFilters.add(val);else tcpPipeSrcFilters.delete(val);
+  syncTcpSrcBtn();syncCab();
+  if(activeTab==="exe")renderExe();if(activeTab==="bud")renderBud();
+}
+function clearTcpSrcFilter(){
+  tcpPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});
+  syncTcpSrcBtn();syncCab();
+  if(activeTab==="exe")renderExe();if(activeTab==="bud")renderBud();
+}
+function syncTcpSrcBtn(){
+  var btn=document.getElementById("tcpsrc-fbtn"),fc=document.getElementById("tcpsrc-fc");
+  if(!btn)return;
+  var allTcpSrc=new Set(pipeData.map(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim();}).filter(Boolean));
+  var isFiltered=Array.from(allTcpSrc).some(function(v){return !tcpPipeSrcFilters.has(v);});
+  var n=Array.from(allTcpSrc).filter(function(v){return !tcpPipeSrcFilters.has(v);}).length;
+  btn.classList.toggle("on",isFiltered);fc.textContent=isFiltered?n:0;fc.style.display=isFiltered?"inline-block":"none";
+}
+
+function toggleSprTeamDD(){
+  var dd=document.getElementById("sprteam-fdd"),btn=document.getElementById("sprteam-fbtn");
+  var was=dd.classList.contains("on");closeAllDD();
+  if(!was){dd.classList.add("on");btn.classList.add("on");}
+}
+function clearSprTeamFilter(){
+  window._sprTeamFilter=null;syncSprTeamBtn();
+  if(activeTab==="bud"){renderBud();buildFbar();}
+}
+function syncSprTeamBtn(){
+  var btn=document.getElementById("sprteam-fbtn"),fc=document.getElementById("sprteam-fc");
+  if(!btn)return;
+  var on=!!window._sprTeamFilter;
+  btn.classList.toggle("on",on);fc.textContent=1;fc.style.display=on?"inline-block":"none";
 }
 
 function applyFilters(){
@@ -1114,6 +1202,7 @@ function getPipeRows(data){
     if(!String(p["Create Quarter"]||"").startsWith("2026"))return false;
     if(drmFilters.size&&!drmFilters.has(String(p["DRM Category"]||"").trim()))return false;
     if(mmPipeSrcFilters.size&&!mmPipeSrcFilters.has(String(p["MM Pipe Source"]||"").trim()))return false;
+    if(tcpPipeSrcFilters.size&&!tcpPipeSrcFilters.has(String(p["TCP Pipeline Source Desc"]||"").trim()))return false;
     if(eurMinFilter!==null&&(parseFloat(p["Eur"]||0)||0)<eurMinFilter)return false;
     if(eurMaxFilter!==null&&(parseFloat(p["Eur"]||0)||0)>=eurMaxFilter)return false;
     var wbs=String(p["Opp Campaign ID"]||"").trim();
@@ -1296,7 +1385,7 @@ function renderExe(){try{
   var _exeProdFilter=window._exeProdFilter||null;
   function _passChartF(p){
     if(_exeRegFilter){var _cl2=String(p["Region Lvl 2"]||"").trim();var _cl3=String(p["Region Lvl 3"]||"").trim();if(_cl2!==_exeRegFilter&&_cl3!==_exeRegFilter)return false;}
-    if(window._exeSrcFilter){var _csfm={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_csfm[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return false;}
+    if(window._exeSrcFilter){var _csfm={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if((_csfm[String(p["TCP Pipeline Source Desc"]||"").trim()]||"Other")!==window._exeSrcFilter)return false;}
     if(_exeProdFilter){var _csol=String(p["Solution Area (L1)"]||"").trim();var _cssol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_csol!==_exeProdFilter&&_cssol!==_exeProdFilter)return false;}
     return true;
   }
@@ -1395,11 +1484,9 @@ function renderExe(){try{
   html+='<div class="kpi kb"><div class="kl">HO Rate</div><div class="kv">'+allHoRate+'</div></div>';
   html+='</div>';
   html+='</div>';
-  html+='<div style="display:flex;gap:16px;margin-top:16px">';
-  html+='<div class="cc" style="flex:1;min-width:0;height:200px;display:flex;flex-direction:column"><div class="ch" style="display:flex;align-items:center;gap:8px">Total Pipeline Created 2026 vs TCP Target — by TCP Source'+(window._exeSrcFilter?'<span style="background:#012931;color:#fff;border-radius:3px;padding:1px 6px;font-size:10px;cursor:pointer" onclick="window._exeSrcFilter=null;renderExe()">'+window._exeSrcFilter+' ×</span>':'')+(window._exeRegFilter?'<span style="background:#012931;color:#fff;border-radius:3px;padding:1px 6px;font-size:10px;cursor:pointer" onclick="window._exeRegFilter=null;renderExe()">'+window._exeRegFilter+' ×</span>':'')+(window._exeProdFilter?'<span style="background:#012931;color:#fff;border-radius:3px;padding:1px 6px;font-size:10px;cursor:pointer" onclick="window._exeProdFilter=null;renderExe()">'+window._exeProdFilter+' ×</span>':'')+'</div><div style="padding:8px;flex:1;position:relative"><canvas id="exe-src-pipeline"></canvas></div></div>';
-  html+='<div id="exe-pipe-src-tbl" style="flex:1;min-width:0"></div>';
+  html+='<div style="margin-top:16px">';
+  html+='<div id="exe-pipe-src-tbl" style="width:100%"></div>';
   html+='</div>';
-  html+='<div style="margin-top:16px;width:100%" id="exe-pipe-reg-tbl-wrap"></div>';
   html+='<div style="display:flex;gap:16px;margin-top:16px">';
   html+='<div id="exe-prod-cal-tbl" style="flex:1;min-width:0"></div>';
   html+='<div class="cc" style="flex:1;min-width:0"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><div>Product Breakdown &mdash; by Sales Bag'+(window._exeProdFilter?'<span style="background:#012931;color:#fff;border-radius:3px;padding:1px 6px;font-size:10px;cursor:pointer;margin-left:6px" onclick="window._exeProdFilter=null;renderExe()">'+window._exeProdFilter+' ×</span>':'')+(window._exeSrcFilter?'<span style="background:#012931;color:#fff;border-radius:3px;padding:1px 6px;font-size:10px;cursor:pointer;margin-left:6px" onclick="window._exeSrcFilter=null;renderExe()">'+window._exeSrcFilter+' ×</span>':'')+(window._exeRegFilter?'<span style="background:#012931;color:#fff;border-radius:3px;padding:1px 6px;font-size:10px;cursor:pointer;margin-left:6px" onclick="window._exeRegFilter=null;renderExe()">'+window._exeRegFilter+' ×</span>':'')+'<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline &euro; (k&euro;) stacked by product family</span><br><span id="exe-prod-info" style="font-size:10px;font-weight:400;color:var(--mu)"></span></div><div style="display:flex;gap:3px"><button id="exe-prod-btn-sb" onclick="window.prodStackMode=\'sb\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">Sales Bag</button><button id="exe-prod-btn-ssb" onclick="window.prodStackMode=\'ssb\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">Sub Sales Bag</button><button id="exe-prod-btn-l2" onclick="window.prodRegMode=\'l2\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L2</button><button id="exe-prod-btn-l3" onclick="window.prodRegMode=\'l3\';renderExe()" style="font-size:10px;padding:2px 6px;cursor:pointer;border:1px solid var(--bd);border-radius:3px">L3</button></div></div><div style="padding:8px;height:200px"><canvas id="exe-prod-mu"></canvas></div></div>';
@@ -1414,6 +1501,7 @@ function renderExe(){try{
   html+='<div class="cc" style="flex:1;min-width:0"><div class="ch">ACV &euro; - by SDE Engagement Type<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline ACV by engagement type &mdash; all stages (k&euro;)</span></div><div style="padding:8px;height:240px"><canvas id="exe-tcp-pie"></canvas></div></div>';
   html+='</div>';
   html+='<div class="cc" style="margin-top:16px"><div class="ch">Pipeline Created by Month &mdash; YTD 2026<br><span style="font-size:10px;font-weight:400;color:var(--mu)">Pipeline ACV (k&euro;) created each month &mdash; all active filters applied</span></div><div style="padding:8px;height:220px"><canvas id="exe-monthly-pipe"></canvas></div></div>';
+  html+='<div id="exe-pipe-dtl-wrap" style="margin-top:16px"></div>';
   p.innerHTML=html;
   // Now render charts
   (function(){
@@ -1538,7 +1626,7 @@ function renderExe(){try{
               datalabels:isLast?{anchor:"end",align:"end",display:true,formatter:function(v,ctx){return "€"+fmtE(prodTotals[ctx.dataIndex]);},font:{size:9,weight:"600"},color:"#32363A"}:{display:false}};
           })
         },
-        options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},onClick:function(evt,elements){if(elements&&elements.length){var prod=prodList[elements[0].datasetIndex];window._exeProdFilter=(window._exeProdFilter===prod)?null:prod;}else{window._exeProdFilter=null;}renderExe();},plugins:{legend:{display:true,position:"bottom",labels:{font:{size:9},boxWidth:10}},datalabels:{display:true}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
+        options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},onClick:function(evt,elements){if(elements&&elements.length){var prod=prodList[elements[0].datasetIndex];window._exeProdFilter=(window._exeProdFilter===prod)?null:prod;}else{window._exeProdFilter=null;}setTimeout(function(){renderExe();},0);},plugins:{legend:{display:true,position:"bottom",labels:{font:{size:9},boxWidth:10}},datalabels:{display:true}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,ticks:{callback:function(v){return "€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
     }
     // Chart 3: IAC or DRM by Market Unit
@@ -1834,7 +1922,7 @@ function renderExe(){try{
           ]
         },
         options:{responsive:true,maintainAspectRatio:false,
-          onClick:function(evt,elements){if(elements&&elements.length){var reg=regPipeOrder[elements[0].index];window._exeRegFilter=(window._exeRegFilter===reg)?null:reg;}else{window._exeRegFilter=null;}renderExe();},
+          onClick:function(evt,elements){if(elements&&elements.length){var reg=regPipeOrder[elements[0].index];window._exeRegFilter=(window._exeRegFilter===reg)?null:reg;}else{window._exeRegFilter=null;}setTimeout(function(){renderExe();},0);},
           plugins:{legend:{display:true,position:"top",labels:{font:{size:11},boxWidth:12}},
             datalabels:{display:true},
             tooltip:{callbacks:{label:function(ctx){
@@ -1855,11 +1943,16 @@ function renderExe(){try{
     if(_srcTbl){
       var _srcMap2={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};
       var _calWBSSetTbl=window._exeCalMode?new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean)):null;
-      var _srcTotals={},_srcHO={},_srcGBIds={},_srcEngType={};
-      var _reg2Totals={},_reg2HO={},_reg2L3Totals={},_reg2L3HO={};
-      var _reg3Totals={},_reg3HO={};
+      var _calWBSAll=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
+      var _srcTotals={},_srcHO={},_srcGBIds={},_srcEngType={},_srcCalPipe={},_srcMmps={};
+      var _reg2Totals={},_reg2HO={},_reg2L3Totals={},_reg2L3HO={},_reg2CalPipe={};
+      var _reg3Totals={},_reg3HO={},_reg3CalPipe={},_reg2L3CalPipe={};
       pipeData.forEach(function(p){
         if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+        if(drmFilters.size&&!drmFilters.has(String(p["DRM Category"]||"").trim()))return;
+        if(mmPipeSrcFilters.size&&!mmPipeSrcFilters.has(String(p["MM Pipe Source"]||"").trim()))return;
+        if(tcpPipeSrcFilters.size&&!tcpPipeSrcFilters.has(String(p["TCP Pipeline Source Desc"]||"").trim()))return;
+        if(eurMinFilter!==null&&(parseFloat(p["Eur"]||0)||0)<eurMinFilter)return;
         if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
         if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
         if(window._pipeCloseQtrSet&&window._pipeCloseQtrSet.size&&!window._pipeCloseQtrSet.has(String(p["Closing Qtr"]||"").trim()))return;
@@ -1876,6 +1969,7 @@ function renderExe(){try{
         _srcTotals[src]=(_srcTotals[src]||0)+eur;
         if(hod)_srcHO[src]=(_srcHO[src]||0)+eur;
         if(gbId){if(!_srcGBIds[src])_srcGBIds[src]=new Set();_srcGBIds[src].add(gbId);}
+        var mmps=String(p["MM Pipe Source"]||"").trim();if(mmps){if(!_srcMmps[src])_srcMmps[src]={};_srcMmps[src][mmps]=(_srcMmps[src][mmps]||0)+eur;}
         var eng=String(p["SDE Engagement Type"]||"").trim();
         if(eng&&eng!=="(No Value)"&&eng!=="(no value)"){if(!_srcEngType[src])_srcEngType[src]={};_srcEngType[src][eng]=(_srcEngType[src][eng]||0)+eur;}
         var l2k=String(p["Region Lvl 2"]||"").trim().replace(/^CS /,"").toLowerCase()||"other";
@@ -1884,11 +1978,13 @@ function renderExe(){try{
         var l3k=String(p["Region Lvl 3"]||"").trim().replace(/^CS /,"").toLowerCase()||"other";
         _reg3Totals[l3k]=(_reg3Totals[l3k]||0)+eur;
         if(hod)_reg3HO[l3k]=(_reg3HO[l3k]||0)+eur;if(!_reg2L3Totals[l2k])_reg2L3Totals[l2k]={};_reg2L3Totals[l2k][l3k]=(_reg2L3Totals[l2k][l3k]||0)+eur;if(hod){if(!_reg2L3HO[l2k])_reg2L3HO[l2k]={};_reg2L3HO[l2k][l3k]=(_reg2L3HO[l2k][l3k]||0)+eur;}
+        var _wbs=String(p["Opp Campaign ID"]||"").trim();if(_calWBSAll.has(_wbs)){_srcCalPipe[src]=(_srcCalPipe[src]||0)+eur;_reg2CalPipe[l2k]=(_reg2CalPipe[l2k]||0)+eur;_reg3CalPipe[l3k]=(_reg3CalPipe[l3k]||0)+eur;if(!_reg2L3CalPipe[l2k])_reg2L3CalPipe[l2k]={};_reg2L3CalPipe[l2k][l3k]=(_reg2L3CalPipe[l2k][l3k]||0)+eur;}
       });
       var _srcOrder=["SDE","Marketing","Sales","Partner","CSM","Other"].filter(function(s){return _srcTotals[s];});
       var _srcGrand=_srcOrder.reduce(function(s,k){return s+_srcTotals[k];},0);
       var _srcHOGrand=_srcOrder.reduce(function(s,k){return s+(_srcHO[k]||0);},0);
       // TCP targets by source
+      var _allowedSrcs2=tcpPipeSrcFilters.size>0?new Set(Array.from(tcpPipeSrcFilters).map(function(v){return _srcMap2[v]||"Other";})):null;
       var _srcTcpTgt={};
       var _brittRNrm={"benelux":"Benelux","france":"France","italy":"Italy","mea north":"MEA North","mea south":"MEA South","nordic":"Nordic","southern europe":"Southern Europe","uki":"UKI"};
       var _brittL3Nrm2={"belux":"BeLux","egypt & iraq":"EGYPT & IRAQ","egypt":"EGYPT","turkiye":"Türkiye","türkiye":"Türkiye"};
@@ -1913,8 +2009,8 @@ function renderExe(){try{
         _detailSrcRaw[src]=(_detailSrcRaw[src]||0)+(parseFloat(t.target)||0);
         _detailGrandRaw+=(parseFloat(t.target)||0);
       });
-      if(_detailGrandRaw>0){Object.keys(_detailSrcRaw).forEach(function(s){_srcTcpTgt[s]=_brittTotalSrc*(_detailSrcRaw[s]/_detailGrandRaw);});}
-      else{Object.keys(_detailSrcRaw).forEach(function(s){_srcTcpTgt[s]=_detailSrcRaw[s];});}
+      if(_detailGrandRaw>0){Object.keys(_detailSrcRaw).forEach(function(s){if(_allowedSrcs2&&!_allowedSrcs2.has(s))return;_srcTcpTgt[s]=_brittTotalSrc*(_detailSrcRaw[s]/_detailGrandRaw);});}
+      else{Object.keys(_detailSrcRaw).forEach(function(s){if(_allowedSrcs2&&!_allowedSrcs2.has(s))return;_srcTcpTgt[s]=_detailSrcRaw[s];});}
       if(_brittL3Fs){
         var _srcTotalsL2={};
         pipeData.forEach(function(p){
@@ -1945,8 +2041,41 @@ function renderExe(){try{
         var l3k=l3Raw.replace(/^CS /,"").toLowerCase();
         if(l3k){_reg3TcpTgt[l3k]=(_reg3TcpTgt[l3k]||0)+tgt;if(!_reg2L3TcpTgt[l2k])_reg2L3TcpTgt[l2k]={};_reg2L3TcpTgt[l2k][l3k]=(_reg2L3TcpTgt[l2k][l3k]||0)+tgt;}
       });
+      // When a source filter is active, scale regional TCP targets by the source's fraction per region
+      if(window._exeSrcFilter||_allowedSrcs2){
+        var _dtlSrcReg={},_dtlRegTot={};
+        (window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");}).forEach(function(t){
+          if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(t.qtr||"").trim()))return;
+          if(_brittL2Fs){var _tmuf=String(t.mu||"").replace(/^CS /,"").trim();var _tnrmf=_brittRNrm[_tmuf.toLowerCase()]||_tmuf;if(!_brittL2Fs.has(_tnrmf))return;}
+          if(_exeSbActF){var _dtSaf2=String(t.sa||"").trim();if(!_exeSbActF.has(_dtSaf2))return;}
+          var _src2=String(t.src||"").trim();if(!_src2)return;
+          var _mu2=String(t.mu||"").replace(/^CS /,"").trim().toLowerCase();if(!_mu2)return;
+          if(!_dtlSrcReg[_src2])_dtlSrcReg[_src2]={};
+          _dtlSrcReg[_src2][_mu2]=(_dtlSrcReg[_src2][_mu2]||0)+(parseFloat(t.target)||0);
+          _dtlRegTot[_mu2]=(_dtlRegTot[_mu2]||0)+(parseFloat(t.target)||0);
+        });
+        var _srcRegFracMap={};var _effSrcs=window._exeSrcFilter?[window._exeSrcFilter]:(_allowedSrcs2?Array.from(_allowedSrcs2):[]);_effSrcs.forEach(function(s){var rm=_dtlSrcReg[s]||{};Object.keys(rm).forEach(function(mu){_srcRegFracMap[mu]=(_srcRegFracMap[mu]||0)+rm[mu];});});
+        var _l3L2Map={};
+        (window.TCP_TARGETS_BRITT||[]).forEach(function(t){
+          var _bl2=String(t["Region Lvl 2"]||"").trim().replace(/^CS /,"");
+          var _bl3=String(t["Region Lvl 3"]||"").trim().replace(/^CS /,"");
+          if(_bl2&&_bl3)_l3L2Map[_bl3.toLowerCase()]=_bl2.toLowerCase();
+        });
+        Object.keys(_reg2TcpTgt).forEach(function(l2k){
+          var _tot=_dtlRegTot[l2k]||0;
+          var _frac=_tot>0?(_srcRegFracMap[l2k]||0)/_tot:0;
+          _reg2TcpTgt[l2k]=_reg2TcpTgt[l2k]*_frac;
+          if(_reg2L3TcpTgt[l2k])Object.keys(_reg2L3TcpTgt[l2k]).forEach(function(l3k){_reg2L3TcpTgt[l2k][l3k]=_reg2L3TcpTgt[l2k][l3k]*_frac;});
+        });
+        Object.keys(_reg3TcpTgt).forEach(function(l3k){
+          var _l2k=_l3L2Map[l3k]||"";
+          var _tot=_dtlRegTot[_l2k]||0;
+          var _frac=_tot>0?(_srcRegFracMap[_l2k]||0)/_tot:0;
+          _reg3TcpTgt[l3k]=_reg3TcpTgt[l3k]*_frac;
+        });
+      }
       // Render
-      var _tblMode=window._pipeSrcTblMode||"reg2";if(!window._tcpR2Exp)window._tcpR2Exp=new Set();window._tcpR2Keys=[];window._tcpTogR2=function(i){var k=window._tcpR2Keys[i];window._tcpR2Exp.has(k)?window._tcpR2Exp.delete(k):window._tcpR2Exp.add(k);renderExe();};
+      var _tblMode=window._pipeSrcTblMode||"src";if(!window._tcpR2Exp)window._tcpR2Exp=new Set();window._tcpR2Keys=[];window._tcpTogR2=function(i){var k=window._tcpR2Keys[i];window._tcpR2Exp.has(k)?window._tcpR2Exp.delete(k):window._tcpR2Exp.add(k);renderExe();};if(!window._tcpSrcMpsExp)window._tcpSrcMpsExp=new Set();window._tcpSrcMpsKeys=[];window._tcpTogSrcMps=function(i){var k=window._tcpSrcMpsKeys[i];window._tcpSrcMpsExp.has(k)?window._tcpSrcMpsExp.delete(k):window._tcpSrcMpsExp.add(k);renderExe()};
       var thT="background:#012931;color:#fff;padding:6px 6px;font-size:10px;font-weight:700;text-align:left;white-space:normal;line-height:1.3";
       var thTR=thT+";text-align:right";
       var tdT="padding:4px 6px;font-size:11px;border-bottom:1px solid #f0f0f0";
@@ -1959,21 +2088,21 @@ function renderExe(){try{
       ["reg2","reg3","src"].forEach(function(m){tbl+='<button onclick="window._pipeSrcTblMode=\''+m+'\';renderExe();" style="'+_btnS+(_tblMode===m?'background:#012931;color:#fff':'background:#fff;color:#012931')+'">'+_modeLabels[m]+'</button>';});
       tbl+='</span></div><div style="max-height:240px;overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>';
       var _dimLabel=_tblMode==="src"?"TCP Source":_tblMode==="reg3"?"Region L3":"Region";
-      tbl+='<th style="'+thT+'">'+_dimLabel+'</th><th style="'+thTR+'">TCP Target</th><th style="'+thTR+'">Pipeline Created</th><th style="'+thTR+'">% Contrib.</th><th style="'+thTR+'">Handed Over</th><th style="'+thTR+'">HO %</th></tr></thead><tbody>';
-      var _dRows,_dTotals,_dHO,_dTcp,_dGrand,_dHOGrand,_dTcpGrand;
+      tbl+='<th style="'+thT+'">'+_dimLabel+'</th><th style="'+thTR+'">TCP Target</th><th style="'+thTR+'">Pipeline Created</th><th style="'+thTR+'">% Contrib.</th><th style="'+thTR+'">Handed Over</th><th style="'+thTR+'">HO %</th><th style="'+thTR+'">Cal-linked</th><th style="'+thTR+'">Cal %</th></tr></thead><tbody>';
+      var _dRows,_dTotals,_dHO,_dTcp,_dGrand,_dHOGrand,_dTcpGrand,_dCal;
       if(_tblMode==="src"){
-        _dRows=_srcOrder;_dTotals=_srcTotals;_dHO=_srcHO;_dTcp=_srcTcpTgt;
+        _dRows=_srcOrder;_dTotals=_srcTotals;_dHO=_srcHO;_dTcp=_srcTcpTgt;_dCal=_srcCalPipe;
         _dGrand=_srcGrand;_dHOGrand=_srcHOGrand;
         _dTcpGrand=Object.values(_srcTcpTgt).reduce(function(s,v){return s+v;},0);
       } else if(_tblMode==="reg3"){
         _dRows=Object.keys(_reg3Totals).sort(function(a,b){return _reg3Totals[b]-_reg3Totals[a];});
-        _dTotals=_reg3Totals;_dHO=_reg3HO;_dTcp=_reg3TcpTgt;
+        _dTotals=_reg3Totals;_dHO=_reg3HO;_dTcp=_reg3TcpTgt;_dCal=_reg3CalPipe;
         _dGrand=_dRows.reduce(function(s,k){return s+_reg3Totals[k];},0);
         _dHOGrand=_dRows.reduce(function(s,k){return s+(_reg3HO[k]||0);},0);
         _dTcpGrand=Object.values(_reg3TcpTgt).reduce(function(s,v){return s+v;},0);
       } else {
         _dRows=Object.keys(_reg2Totals).sort(function(a,b){return _reg2Totals[b]-_reg2Totals[a];});
-        _dTotals=_reg2Totals;_dHO=_reg2HO;_dTcp=_reg2TcpTgt;
+        _dTotals=_reg2Totals;_dHO=_reg2HO;_dTcp=_reg2TcpTgt;_dCal=_reg2CalPipe;
         _dGrand=_dRows.reduce(function(s,k){return s+_reg2Totals[k];},0);
         _dHOGrand=_dRows.reduce(function(s,k){return s+(_reg2HO[k]||0);},0);
         _dTcpGrand=Object.values(_reg2TcpTgt).reduce(function(s,v){return s+v;},0);
@@ -1984,412 +2113,38 @@ function renderExe(){try{
         var hoPct=v>0?(ho/v*100).toFixed(0)+"%":"—";
         var tgt=_dTcp[k]||0;var att=tgt>0?(v/tgt*100).toFixed(0)+"%":"—";
         var lbl=_tblMode==="src"?k:_tblMode==="reg2"?(_l2Disp[k]||k.replace(/\b\w/g,function(c){return c.toUpperCase();})):k.replace(/\b\w/g,function(c){return c.toUpperCase();});
-        var expBtn2='';if(_tblMode==="reg2"){var _ki=window._tcpR2Keys.push(k)-1;var _kExp=window._tcpR2Exp.has(k);var _hasL3=Object.keys(_reg2L3Totals[k]||{}).length>0;expBtn2=_hasL3?'<span onclick="event.stopPropagation();_tcpTogR2('+_ki+')" style="cursor:pointer;margin-right:4px;font-size:10px;line-height:1;user-select:none;font-weight:700">'+(_kExp?'&#8722;':'&#43;')+'</span>':'<span style="display:inline-block;width:16px;margin-right:4px"></span>';}
-        tbl+='<tr><td style="'+tdT+'">'+expBtn2+lbl+'</td><td style="'+tdT+';text-align:right">'+(tgt?fmtT(tgt):"—")+'</td><td style="'+tdT+';text-align:right">'+fmtT(v)+'</td><td style="'+tdT+';text-align:right">'+pct+'</td><td style="'+tdT+';text-align:right">'+(ho?fmtT(ho):"—")+'</td><td style="'+tdT+';text-align:right">'+hoPct+'</td></tr>';
-        if(_tblMode==="reg2"&&window._tcpR2Exp.has(k)){var _l3M=_reg2L3Totals[k]||{},_l3HM=_reg2L3HO[k]||{},_l3TM=_reg2L3TcpTgt[k]||{};Object.keys(_l3M).sort(function(a,b){return _l3M[b]-_l3M[a];}).forEach(function(l3k){var v3=_l3M[l3k]||0,ho3=_l3HM[l3k]||0,tgt3=_l3TM[l3k]||0;var pct3=_dGrand>0?(v3/_dGrand*100).toFixed(1)+"%":"-";var hoPct3=v3>0?(ho3/v3*100).toFixed(0)+"%":"-";var l3Lbl=l3k.replace(/\b\w/g,function(c){return c.toUpperCase();});tbl+='<tr style="background:#f9fbfb"><td style="'+tdT+';padding-left:22px">'+l3Lbl+'</td><td style="'+tdT+';text-align:right">'+(tgt3?fmtT(tgt3):"-")+'</td><td style="'+tdT+';text-align:right">'+fmtT(v3)+'</td><td style="'+tdT+';text-align:right">'+pct3+'</td><td style="'+tdT+';text-align:right">'+(ho3?fmtT(ho3):"-")+'</td><td style="'+tdT+';text-align:right">'+hoPct3+'</td></tr>';});}
+        var _srcDispExe={"SDE":"Digital hub"};
+        var _dispLbl=_tblMode==="src"?(_srcDispExe[k]||k):lbl;
+        var _rowIsActive=_tblMode==="src"?(window._exeSrcFilter===k):(window._exeRegFilter===lbl);
+        var _rowOnClick=_tblMode==="src"?'window._exeSrcFilter=window._exeSrcFilter===\''+k+'\'?null:\''+k+'\';renderExe();':'window._exeRegFilter=window._exeRegFilter===\''+lbl.replace(/'/g,"\\'")+'\'?null:\''+lbl.replace(/'/g,"\\'")+'\';renderExe();';
+        var expBtn2='';if(_tblMode==="reg2"){var _ki=window._tcpR2Keys.push(k)-1;var _kExp=window._tcpR2Exp.has(k);var _hasL3=Object.keys(_reg2L3Totals[k]||{}).length>0;expBtn2=_hasL3?'<span onclick="event.stopPropagation();_tcpTogR2('+_ki+')" style="cursor:pointer;margin-right:4px;font-size:10px;line-height:1;user-select:none;font-weight:700">'+(_kExp?'&#8722;':'&#43;')+'</span>':'<span style="display:inline-block;width:16px;margin-right:4px"></span>';}else if(_tblMode==="src"){var _si=window._tcpSrcMpsKeys.push(k)-1;var _sExp=window._tcpSrcMpsExp.has(k);var _hasMps=Object.keys(_srcMmps[k]||{}).length>0;expBtn2=_hasMps?'<span onclick="event.stopPropagation();_tcpTogSrcMps('+_si+')" style="cursor:pointer;margin-right:4px;font-size:10px;line-height:1;user-select:none;font-weight:700">'+(_sExp?'&#8722;':'&#43;')+'</span>':'<span style="display:inline-block;width:16px;margin-right:4px"></span>';}
+        tbl+='<tr onclick="'+_rowOnClick+'" style="cursor:pointer;background:'+(_rowIsActive?'#cce5f0':'')+'"><td style="'+tdT+'">'+expBtn2+_dispLbl+'</td><td style="'+tdT+';text-align:right">'+(tgt?fmtT(tgt):"—")+'</td><td style="'+tdT+';text-align:right">'+fmtT(v)+'</td><td style="'+tdT+';text-align:right">'+pct+'</td><td style="'+tdT+';text-align:right">'+(ho?fmtT(ho):"—")+'</td><td style="'+tdT+';text-align:right">'+hoPct+'</td><td style="'+tdT+';text-align:right">'+(_dCal[k]?fmtT(_dCal[k]):"—")+'</td><td style="'+tdT+';text-align:right">'+(_dCal[k]&&v>0?(_dCal[k]/v*100).toFixed(0)+"%":"—")+'</td></tr>';
+        if(_tblMode==="reg2"&&window._tcpR2Exp.has(k)){var _l3M=_reg2L3Totals[k]||{},_l3HM=_reg2L3HO[k]||{},_l3TM=_reg2L3TcpTgt[k]||{},_l3CM=_reg2L3CalPipe[k]||{};Object.keys(_l3M).sort(function(a,b){return _l3M[b]-_l3M[a];}).forEach(function(l3k){var v3=_l3M[l3k]||0,ho3=_l3HM[l3k]||0,tgt3=_l3TM[l3k]||0,cal3=_l3CM[l3k]||0;var pct3=_dGrand>0?(v3/_dGrand*100).toFixed(1)+"%":"-";var hoPct3=v3>0?(ho3/v3*100).toFixed(0)+"%":"-";var l3Lbl=l3k.replace(/\b\w/g,function(c){return c.toUpperCase();});tbl+='<tr style="background:#f9fbfb"><td style="'+tdT+';padding-left:22px">'+l3Lbl+'</td><td style="'+tdT+';text-align:right">'+(tgt3?fmtT(tgt3):"-")+'</td><td style="'+tdT+';text-align:right">'+fmtT(v3)+'</td><td style="'+tdT+';text-align:right">'+pct3+'</td><td style="'+tdT+';text-align:right">'+(ho3?fmtT(ho3):"-")+'</td><td style="'+tdT+';text-align:right">'+hoPct3+'</td><td style="'+tdT+';text-align:right">'+(cal3?fmtT(cal3):"-")+'</td><td style="'+tdT+';text-align:right">'+(cal3&&v3>0?(cal3/v3*100).toFixed(0)+"%":"-")+'</td></tr>';});}
+        if(_tblMode==="src"&&window._tcpSrcMpsExp.has(k)){var _mpsMap=_srcMmps[k]||{};Object.keys(_mpsMap).sort(function(a,b){return _mpsMap[b]-_mpsMap[a];}).forEach(function(mps){var vm=_mpsMap[mps]||0;var pctm=_dGrand>0?(vm/_dGrand*100).toFixed(1)+"%":"-";tbl+='<tr style="background:#f9fbfb"><td style="'+tdT+';padding-left:22px">'+mps+'</td><td style="'+tdT+';text-align:right">—</td><td style="'+tdT+';text-align:right">'+fmtT(vm)+'</td><td style="'+tdT+';text-align:right">'+pctm+'</td><td style="'+tdT+';text-align:right">—</td><td style="'+tdT+';text-align:right">—</td><td style="'+tdT+';text-align:right">—</td><td style="'+tdT+';text-align:right">—</td></tr>';});}
       });
       var _grandAtt=_dTcpGrand>0?(_dGrand/_dTcpGrand*100).toFixed(0)+"%":"—";
       var _allGBIds=new Set();_srcOrder.forEach(function(s){if(_srcGBIds[s])_srcGBIds[s].forEach(function(id){_allGBIds.add(id);});});
-      tbl+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT+'">Total</td><td style="'+tdT+';text-align:right">'+(_dTcpGrand?fmtT(_dTcpGrand):"—")+'</td><td style="'+tdT+';text-align:right">'+fmtT(_dGrand)+'</td><td style="'+tdT+';text-align:right">100%</td><td style="'+tdT+';text-align:right">'+fmtT(_dHOGrand)+'</td><td style="'+tdT+';text-align:right">'+(_dGrand>0?(_dHOGrand/_dGrand*100).toFixed(0)+"%":"—")+'</td></tr>';
+      var _calGrand=Object.values(_dCal).reduce(function(s,v){return s+v;},0);
+      tbl+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT+'">Total</td><td style="'+tdT+';text-align:right">'+(_dTcpGrand?fmtT(_dTcpGrand):"—")+'</td><td style="'+tdT+';text-align:right">'+fmtT(_dGrand)+'</td><td style="'+tdT+';text-align:right">100%</td><td style="'+tdT+';text-align:right">'+fmtT(_dHOGrand)+'</td><td style="'+tdT+';text-align:right">'+(_dGrand>0?(_dHOGrand/_dGrand*100).toFixed(0)+"%":"—")+'</td><td style="'+tdT+';text-align:right">'+(_calGrand?fmtT(_calGrand):"—")+'</td><td style="'+tdT+';text-align:right">'+(_calGrand&&_dGrand>0?(_calGrand/_dGrand*100).toFixed(0)+"%":"—")+'</td></tr>';
       tbl+='</tbody></table></div></div>';
       _srcTbl.innerHTML=tbl;
     }
-    // Pipeline Created 2026 by Region table
-    var _regTbl=document.getElementById("exe-pipe-reg-tbl-wrap");
-    if(_regTbl){
-      var _regData={};
-      pipeData.forEach(function(p){
-        if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
-        if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
-        if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
-        if(window._pipeCloseQtrSet&&window._pipeCloseQtrSet.size&&!window._pipeCloseQtrSet.has(String(p["Closing Qtr"]||"").trim()))return;
-        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rf5=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rf5.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
-        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rf5L3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rf5L3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
-        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
-        if(window._exeSrcFilter){var _srfMap={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfMap[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
-        if(_exeRegFilter){var _rdL2=String(p["Region Lvl 2"]||"").trim();var _rdL3=String(p["Region Lvl 3"]||"").trim();if(_rdL2!==_exeRegFilter&&_rdL3!==_exeRegFilter)return;}
-        if(_exeProdFilter){var _rdSol=String(p["Solution Area (L1)"]||"").trim();var _rdSsol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_rdSol!==_exeProdFilter&&_rdSsol!==_exeProdFilter)return;}
-        if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
-        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
-        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
-        var team=String(p["IC_ACCOUNT_SRG_TEXT"]||"").trim();
-        var eur=parseFloat(p["Eur"]||0)||0;
-        var isWon=String(p["DRM Category"]||"").trim()==="Booked/Won";
-        var isDisc=String(p["DRM Category"]||"").trim()==="Disc/Lost";
-        if(!_regData[l2])_regData[l2]={pipe:0,won:0,disc:0,l3s:{}};
-        _regData[l2].pipe+=eur;if(isWon)_regData[l2].won+=eur;if(isDisc)_regData[l2].disc+=eur;
-        if(!_regData[l2].l3s[l3])_regData[l2].l3s[l3]={pipe:0,won:0,disc:0,teams:{}};
-        _regData[l2].l3s[l3].pipe+=eur;if(isWon)_regData[l2].l3s[l3].won+=eur;if(isDisc)_regData[l2].l3s[l3].disc+=eur;
-        if(team){if(!_regData[l2].l3s[l3].teams[team])_regData[l2].l3s[l3].teams[team]={pipe:0,won:0,disc:0};_regData[l2].l3s[l3].teams[team].pipe+=eur;if(isWon)_regData[l2].l3s[l3].teams[team].won+=eur;if(isDisc)_regData[l2].l3s[l3].teams[team].disc+=eur;}
-      });
-      var _regDataCl={};
-      pipeData.forEach(function(p){
-        if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
-        if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
-        if(!String(p["Closing Qtr"]||"").startsWith("2026"))return;
-        if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
-        if(window._pipeCloseQtrSet&&window._pipeCloseQtrSet.size&&!window._pipeCloseQtrSet.has(String(p["Closing Qtr"]||"").trim()))return;
-        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfCl=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfCl.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
-        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfClL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfClL3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
-        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
-        if(window._exeSrcFilter){var _srfCl={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfCl[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
-        if(_exeRegFilter){var _rClL2=String(p["Region Lvl 2"]||"").trim();var _rClL3=String(p["Region Lvl 3"]||"").trim();if(_rClL2!==_exeRegFilter&&_rClL3!==_exeRegFilter)return;}
-        if(_exeProdFilter){var _rClSol=String(p["Solution Area (L1)"]||"").trim();var _rClSsol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_rClSol!==_exeProdFilter&&_rClSsol!==_exeProdFilter)return;}
-        if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
-        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
-        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
-        var team=String(p["IC_ACCOUNT_SRG_TEXT"]||"").trim();
-        var eur=parseFloat(p["Eur"]||0)||0;
-        var drm=String(p["DRM Category"]||"").trim();
-        var isWonCl=drm==="Booked/Won";var isDiscCl=drm==="Disc/Lost";
-        if(!_regDataCl[l2])_regDataCl[l2]={pipe:0,won:0,disc:0,l3s:{}};
-        _regDataCl[l2].pipe+=eur;if(isWonCl)_regDataCl[l2].won+=eur;if(isDiscCl)_regDataCl[l2].disc+=eur;
-        if(!_regDataCl[l2].l3s[l3])_regDataCl[l2].l3s[l3]={pipe:0,won:0,disc:0,teams:{}};
-        _regDataCl[l2].l3s[l3].pipe+=eur;if(isWonCl)_regDataCl[l2].l3s[l3].won+=eur;if(isDiscCl)_regDataCl[l2].l3s[l3].disc+=eur;
-        if(team){if(!_regDataCl[l2].l3s[l3].teams[team])_regDataCl[l2].l3s[l3].teams[team]={pipe:0,won:0,disc:0};_regDataCl[l2].l3s[l3].teams[team].pipe+=eur;if(isWonCl)_regDataCl[l2].l3s[l3].teams[team].won+=eur;if(isDiscCl)_regDataCl[l2].l3s[l3].teams[team].disc+=eur;}
-      });
-      var _regDE={};
-      pipeData.forEach(function(p){
-        var drm=String(p["DRM Category"]||"").trim();
-        if(drm!=="Disc/Lost"&&drm!=="Excluded from Pipeline")return;
-        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfD=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfD.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
-        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfDL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfDL3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
-        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
-        if(window._exeSrcFilter){var _srfDE={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfDE[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
-        if(_exeRegFilter){var _rDL2=String(p["Region Lvl 2"]||"").trim();var _rDL3=String(p["Region Lvl 3"]||"").trim();if(_rDL2!==_exeRegFilter&&_rDL3!==_exeRegFilter)return;}
-        if(_exeProdFilter){var _rDSol=String(p["Solution Area (L1)"]||"").trim();var _rDSsol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_rDSol!==_exeProdFilter&&_rDSsol!==_exeProdFilter)return;}
-        if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
-        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
-        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
-        var team=String(p["IC_ACCOUNT_SRG_TEXT"]||"").trim();
-        var eur=parseFloat(p["Eur"]||0)||0;
-        if(!_regDE[l2])_regDE[l2]={disc:0,excl:0,l3s:{}};
-        if(drm==="Disc/Lost")_regDE[l2].disc+=eur;else _regDE[l2].excl+=eur;
-        if(!_regDE[l2].l3s[l3])_regDE[l2].l3s[l3]={disc:0,excl:0,teams:{}};
-        if(drm==="Disc/Lost")_regDE[l2].l3s[l3].disc+=eur;else _regDE[l2].l3s[l3].excl+=eur;
-        if(team){if(!_regDE[l2].l3s[l3].teams[team])_regDE[l2].l3s[l3].teams[team]={disc:0,excl:0};if(drm==="Disc/Lost")_regDE[l2].l3s[l3].teams[team].disc+=eur;else _regDE[l2].l3s[l3].teams[team].excl+=eur;}
-      });
-      var _closeCategories=new Set(["Booked/Won","Committed","Probable","Upside","Disc/Lost"]);
-      var _regClose={};
-      pipeData.forEach(function(p){
-        var drm=String(p["DRM Category"]||"").trim();
-        if(!_closeCategories.has(drm))return;
-        if(!String(p["Closing Qtr"]||"").startsWith("2026"))return;
-        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfC=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfC.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
-        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfCL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfCL3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
-        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
-        if(window._exeSrcFilter){var _srfC={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfC[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
-        if(_exeRegFilter){var _rCL2=String(p["Region Lvl 2"]||"").trim();var _rCL3=String(p["Region Lvl 3"]||"").trim();if(_rCL2!==_exeRegFilter&&_rCL3!==_exeRegFilter)return;}
-        if(_exeProdFilter){var _rCSol=String(p["Solution Area (L1)"]||"").trim();var _rCSsol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_rCSol!==_exeProdFilter&&_rCSsol!==_exeProdFilter)return;}
-        if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
-        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
-        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
-        var team=String(p["IC_ACCOUNT_SRG_TEXT"]||"").trim();
-        var eur=parseFloat(p["Eur"]||0)||0;
-        if(!_regClose[l2])_regClose[l2]={close:0,won:0,disc:0,l3s:{}};
-        _regClose[l2].close+=eur;if(drm==="Booked/Won")_regClose[l2].won+=eur;if(drm==="Disc/Lost")_regClose[l2].disc+=eur;
-        if(!_regClose[l2].l3s[l3])_regClose[l2].l3s[l3]={close:0,won:0,disc:0,teams:{}};
-        _regClose[l2].l3s[l3].close+=eur;if(drm==="Booked/Won")_regClose[l2].l3s[l3].won+=eur;if(drm==="Disc/Lost")_regClose[l2].l3s[l3].disc+=eur;
-        if(team){if(!_regClose[l2].l3s[l3].teams[team])_regClose[l2].l3s[l3].teams[team]={close:0,won:0,disc:0};_regClose[l2].l3s[l3].teams[team].close+=eur;if(drm==="Booked/Won")_regClose[l2].l3s[l3].teams[team].won+=eur;if(drm==="Disc/Lost")_regClose[l2].l3s[l3].teams[team].disc+=eur;}
-      });
-      var _liveCategories=new Set(["Upside","Probable","Committed"]);
-      var _regLive={};
-      pipeData.forEach(function(p){
-        var drm=String(p["DRM Category"]||"").trim();
-        if(!_liveCategories.has(drm))return;
-        if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
-        if(!String(p["Closing Qtr"]||"").startsWith("2026"))return;
-        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfLv=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfLv.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
-        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfLvL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfLvL3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
-        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
-        if(window._exeSrcFilter){var _srfLv={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfLv[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
-        if(_exeRegFilter){var _rLvL2=String(p["Region Lvl 2"]||"").trim();var _rLvL3=String(p["Region Lvl 3"]||"").trim();if(_rLvL2!==_exeRegFilter&&_rLvL3!==_exeRegFilter)return;}
-        if(_exeProdFilter){var _rLvSol=String(p["Solution Area (L1)"]||"").trim();var _rLvSsol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_rLvSol!==_exeProdFilter&&_rLvSsol!==_exeProdFilter)return;}
-        if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
-        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
-        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
-        var team=String(p["IC_ACCOUNT_SRG_TEXT"]||"").trim();
-        var eur=parseFloat(p["Eur"]||0)||0;
-        if(!_regLive[l2])_regLive[l2]={live:0,l3s:{}};
-        _regLive[l2].live+=eur;
-        if(!_regLive[l2].l3s[l3])_regLive[l2].l3s[l3]={live:0,teams:{}};
-        _regLive[l2].l3s[l3].live+=eur;
-        if(team){if(!_regLive[l2].l3s[l3].teams[team])_regLive[l2].l3s[l3].teams[team]={live:0};_regLive[l2].l3s[l3].teams[team].live+=eur;}
-      });
-      var _regOldLive={};
-      pipeData.forEach(function(p){
-        var drm=String(p["DRM Category"]||"").trim();
-        if(!_closeCategories.has(drm))return;
-        if(drm==="Disc/Lost")return;
-        if(String(p["Create Quarter"]||"").startsWith("2026"))return;
-        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfOl=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfOl.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
-        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfOlL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfOlL3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
-        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
-        if(window._exeSrcFilter){var _srfOl={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfOl[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
-        if(_exeRegFilter){var _rOlL2=String(p["Region Lvl 2"]||"").trim();var _rOlL3=String(p["Region Lvl 3"]||"").trim();if(_rOlL2!==_exeRegFilter&&_rOlL3!==_exeRegFilter)return;}
-        if(_exeProdFilter){var _rOlSol=String(p["Solution Area (L1)"]||"").trim();var _rOlSsol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_rOlSol!==_exeProdFilter&&_rOlSsol!==_exeProdFilter)return;}
-        if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
-        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
-        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
-        var eur=parseFloat(p["Eur"]||0)||0;
-        if(!_regOldLive[l2])_regOldLive[l2]={pipe:0,won:0,l3s:{}};
-        _regOldLive[l2].pipe+=eur;if(drm==="Booked/Won")_regOldLive[l2].won+=eur;
-        if(!_regOldLive[l2].l3s[l3])_regOldLive[l2].l3s[l3]={pipe:0,won:0};
-        _regOldLive[l2].l3s[l3].pipe+=eur;if(drm==="Booked/Won")_regOldLive[l2].l3s[l3].won+=eur;
-      });
-      var _regNewClose={};
-      pipeData.forEach(function(p){
-        var drm=String(p["DRM Category"]||"").trim();
-        if(!_closeCategories.has(drm))return;
-        if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
-        if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
-        if(window._pipeCloseQtrSet&&window._pipeCloseQtrSet.size&&!window._pipeCloseQtrSet.has(String(p["Closing Qtr"]||"").trim()))return;
-        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfNc=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfNc.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
-        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfNcL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfNcL3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
-        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
-        if(window._exeSrcFilter){var _srfNc={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfNc[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
-        if(_exeRegFilter){var _rNcL2=String(p["Region Lvl 2"]||"").trim();var _rNcL3=String(p["Region Lvl 3"]||"").trim();if(_rNcL2!==_exeRegFilter&&_rNcL3!==_exeRegFilter)return;}
-        if(_exeProdFilter){var _rNcSol=String(p["Solution Area (L1)"]||"").trim();var _rNcSsol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_rNcSol!==_exeProdFilter&&_rNcSsol!==_exeProdFilter)return;}
-        if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
-        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
-        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
-        var eur=parseFloat(p["Eur"]||0)||0;
-        if(!_regNewClose[l2])_regNewClose[l2]={pipe:0,won:0,l3s:{}};
-        _regNewClose[l2].pipe+=eur;if(drm==="Booked/Won")_regNewClose[l2].won+=eur;
-        if(!_regNewClose[l2].l3s[l3])_regNewClose[l2].l3s[l3]={pipe:0,won:0};
-        _regNewClose[l2].l3s[l3].pipe+=eur;if(drm==="Booked/Won")_regNewClose[l2].l3s[l3].won+=eur;
-      });
-
-      var regNewQ1_27={},regL3NewQ1_27={};
-      pipeData.forEach(function(p){
-        var drm=String(p["DRM Category"]||"").trim();
-        if(drm!=="Committed"&&drm!=="Probable"&&drm!=="Upside")return;
-        if(String(p["Closing Qtr"]||"").trim()!=="2027-Q1")return;
-        if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
-        if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
-        if(window._pipeCloseQtrSet&&window._pipeCloseQtrSet.size&&!window._pipeCloseQtrSet.has(String(p["Closing Qtr"]||"").trim()))return;
-        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfQ27=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfQ27.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
-        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfQ27L3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfQ27L3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
-        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
-        if(window._exeSrcFilter){var _srfQ27={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfQ27[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
-        if(_exeRegFilter){var _rQ27L2=String(p["Region Lvl 2"]||"").trim();var _rQ27L3=String(p["Region Lvl 3"]||"").trim();if(_rQ27L2!==_exeRegFilter&&_rQ27L3!==_exeRegFilter)return;}
-        if(_exeProdFilter){var _rQ27Sol=String(p["Solution Area (L1)"]||"").trim();var _rQ27Ssol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_rQ27Sol!==_exeProdFilter&&_rQ27Ssol!==_exeProdFilter)return;}
-        if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
-        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
-        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
-        var eur=parseFloat(p["Eur"]||0)||0;
-        regNewQ1_27[l2]=(regNewQ1_27[l2]||0)+eur;
-        if(!regL3NewQ1_27[l2])regL3NewQ1_27[l2]={};
-        regL3NewQ1_27[l2][l3]=(regL3NewQ1_27[l2][l3]||0)+eur;
-      });
-      var _regOldClose26={},_regL3OldClose26={};
-      pipeData.forEach(function(p){
-        var drm=String(p["DRM Category"]||"").trim();
-        if(drm!=="Committed"&&drm!=="Probable"&&drm!=="Upside")return;
-        if(String(p["Create Quarter"]||"").startsWith("2026"))return;
-        if(!String(p["Closing Qtr"]||"").startsWith("2026"))return;
-        if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
-        if(window._pipeCloseQtrSet&&window._pipeCloseQtrSet.size&&!window._pipeCloseQtrSet.has(String(p["Closing Qtr"]||"").trim()))return;
-        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfOc=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfOc.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
-        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfOcL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfOcL3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
-        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
-        if(window._exeSrcFilter){var _srfOc={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfOc[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
-        if(_exeRegFilter){var _rOcL2=String(p["Region Lvl 2"]||"").trim();var _rOcL3=String(p["Region Lvl 3"]||"").trim();if(_rOcL2!==_exeRegFilter&&_rOcL3!==_exeRegFilter)return;}
-        if(_exeProdFilter){var _rOcSol=String(p["Solution Area (L1)"]||"").trim();var _rOcSsol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_rOcSol!==_exeProdFilter&&_rOcSsol!==_exeProdFilter)return;}
-        if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
-        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
-        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
-        var eur=parseFloat(p["Eur"]||0)||0;
-        _regOldClose26[l2]=(_regOldClose26[l2]||0)+eur;
-        if(!_regL3OldClose26[l2])_regL3OldClose26[l2]={};
-        _regL3OldClose26[l2][l3]=(_regL3OldClose26[l2][l3]||0)+eur;
-      });
-      var _regExclQ4={},_regL3ExclQ4={},_gExclQ4=0;
-      pipeData.forEach(function(p){
-        if(String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline")return;
-        if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
-        if(String(p["Closing Qtr"]||"").trim()!=="2026-Q4")return;
-        if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
-        if(window._pipeCloseQtrSet&&window._pipeCloseQtrSet.size&&!window._pipeCloseQtrSet.has(String(p["Closing Qtr"]||"").trim()))return;
-        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfEq=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfEq.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
-        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfEqL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfEqL3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
-        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
-        if(window._exeSrcFilter){var _srfEq={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_srfEq[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._exeSrcFilter)return;}
-        if(_exeRegFilter){var _rEqL2=String(p["Region Lvl 2"]||"").trim();var _rEqL3=String(p["Region Lvl 3"]||"").trim();if(_rEqL2!==_exeRegFilter&&_rEqL3!==_exeRegFilter)return;}
-        if(_exeProdFilter){var _rEqSol=String(p["Solution Area (L1)"]||"").trim();var _rEqSsol=String(p["Sub-Solution Area (L2)"]||"").trim();if(_rEqSol!==_exeProdFilter&&_rEqSsol!==_exeProdFilter)return;}
-        if(_calWBSSetTbl&&!_calWBSSetTbl.has(String(p["Opp Campaign ID"]||"").trim()))return;
-        var l2=String(p["Region Lvl 2"]||"").trim()||"Other";
-        var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
-        var eur=parseFloat(p["Eur"]||0)||0;
-        _regExclQ4[l2]=(_regExclQ4[l2]||0)+eur;
-        if(!_regL3ExclQ4[l2])_regL3ExclQ4[l2]={};
-        _regL3ExclQ4[l2][l3]=(_regL3ExclQ4[l2][l3]||0)+eur;
-        _gExclQ4+=eur;
-      });      var _regTcpTgt={};
-      (window.TCP_TARGETS_BRITT||[]).forEach(function(t){
-        var muRaw=String(t["Region Lvl 2"]||"").trim().replace(/^CS /,"").toLowerCase();if(!muRaw)return;
-        var l3Raw=(String(t["Region Lvl 3"]||"").trim().replace(/^CS /,"")||"Other").toLowerCase();
-        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfT=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfT.has(muRaw.toLowerCase()))return;}
-        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfTL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfTL3.has(l3Raw.toLowerCase()))return;}
-        if(_exeRegFilter){var _reTF=String(_exeRegFilter).replace(/^CS /,"").toLowerCase();if(muRaw!==_reTF&&l3Raw!==_reTF)return;}
-        if(_exeProdFilter){var _tSol=String(t["Solution Area (L1)"]||"").trim();var _tSsol=String(t["Sub-Solution Area (L2)"]||"").trim();if(_tSol!==_exeProdFilter&&_tSsol!==_exeProdFilter)return;}
-        var tgt=parseFloat(t["TCP Req d"])||0;
-        if(!_regTcpTgt[muRaw])_regTcpTgt[muRaw]={tgt:0,l3s:{}};
-        _regTcpTgt[muRaw].tgt+=tgt;
-        if(!_regTcpTgt[muRaw].l3s[l3Raw])_regTcpTgt[muRaw].l3s[l3Raw]=0;
-        _regTcpTgt[muRaw].l3s[l3Raw]+=tgt;
-      });
-      if(!window._rtExpL2)window._rtExpL2=new Set();
-      if(!window._rtExpL3)window._rtExpL3=new Set();
-      window._rtL2Keys=[];window._rtL3Keys=[];window._tbl2xL2Keys=[];
-      window._rtTogL2=function(i){var k=window._rtL2Keys[i];window._rtExpL2.has(k)?window._rtExpL2.delete(k):window._rtExpL2.add(k);renderExe();};
-      window._rtTogL3=function(i){var k=window._rtL3Keys[i];window._rtExpL3.has(k)?window._rtExpL3.delete(k):window._rtExpL3.add(k);renderExe();};
-if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(i){var k=window._tbl2xL2Keys[i];window._tbl2xExpL2.has(k)?window._tbl2xExpL2.delete(k):window._tbl2xExpL2.add(k);renderExe();};
-      var _l2Order=Object.keys(_regData).sort(function(a,b){return _regData[b].pipe-_regData[a].pipe;});
-      var _regBudgetByKey={};
-      var _regNormBud={"mea north":"mea north","mea south":"mea south","benelux":"benelux","france":"france","italy":"italy","nordic":"nordic","southern europe":"southern europe","uki":"uki"};
-      (window.BUDGET_DATA||[]).forEach(function(r){if(!String(r.qtr||"").startsWith("2026"))return;var k=String(r.reg||"").toLowerCase().trim();_regBudgetByKey[k]=(_regBudgetByKey[k]||0)+(parseFloat(r.eur)||0);});
-      function _getBudL2(l2){return _regBudgetByKey[l2.replace(/^CS /,"").toLowerCase().trim()]||0;}
-      var _regGrand={pipe:0,won:0,pipeWon:0,pipeDisc:0,cl26Pipe:0,cl26Won:0,cl26Disc:0,disc:0,excl:0,close:0,wonAll:0,liveYTD:0,tcpTgt:0,budget:0};_l2Order.forEach(function(k){_regGrand.pipe+=_regData[k].pipe;_regGrand.won+=_regData[k].won;_regGrand.pipeWon+=_regData[k].won;_regGrand.pipeDisc+=(_regData[k].disc||0);var _dcl=_regDataCl[k]||{pipe:0,won:0,disc:0};_regGrand.cl26Pipe+=_dcl.pipe;_regGrand.cl26Won+=_dcl.won;_regGrand.cl26Disc+=_dcl.disc;var _gde=_regClose[k]||{disc:0};_regGrand.disc+=_gde.disc;_regGrand.excl+=_gde.excl||0;var _gcl=_regClose[k]||{close:0,won:0};_regGrand.close+=_gcl.close;_regGrand.wonAll+=_gcl.won;_regGrand.liveYTD+=(_regLive[k]||{live:0}).live;_regGrand.tcpTgt+=(_regTcpTgt[k.replace(/^CS /,"").toLowerCase()]||{tgt:0}).tgt;_regGrand.budget+=_getBudL2(k);});
-      var thT2="background:#012931;color:#fff;padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap";
-      var thTR2=thT2+";text-align:right";
-      var thTR2L=thTR2.replace("#012931","#1a4a55");
-      var thTR2L2=thTR2.replace("#012931","#2d6475");
-      var tdT2="padding:5px 10px;font-size:12px;border-bottom:1px solid #f0f0f0";
-      var _pEx=!!window._pipeExpCols;
-      var _brkEx=!!window._tbl2xBrkExp;
-      var _gapEx=!!window._tbl2xGapExp;
-      var _pTogBtn='<span onclick="window._pipeExpCols='+(_pEx?'false':'true')+';renderExe()" style="cursor:pointer;margin-left:4px;font-weight:900;font-size:13px;line-height:1;opacity:0.8">'+(_pEx?'&#8722;':'+')+'</span>';
-      var _pNEx=!!window._pipeNetExpCols;
-      var _pNTogBtn='<span onclick="window._pipeNetExpCols='+(_pNEx?'false':'true')+';renderExe()" style="cursor:pointer;margin-left:4px;font-weight:900;font-size:13px;line-height:1;opacity:0.8">'+(_pNEx?'&#8722;':'+')+'</span>';
-      var _pCYEx=!!window._pipeCYExpCols;
-      var _pCYTogBtn='<span onclick="window._pipeCYExpCols='+(_pCYEx?'false':'true')+';renderExe()" style="cursor:pointer;margin-left:4px;font-weight:900;font-size:13px;line-height:1;opacity:0.8">'+(_pCYEx?'&#8722;':'+')+'</span>';
-      var _wrData=window.WIN_RATE_DATA||[];
-      function _getWR(regKey,l3Key){
-        var isMEAS=regKey==="mea south";
-        return{old:"6%",nw:isMEAS?"10%":"20%"};
-      }
-      var tbl2='<div class="cc"><div class="ch">Weekly Pipeline Trends</div><div style="max-height:300px;overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>';
-      var _weeksYTD=Math.max(1,Math.round((new Date()-new Date('2026-01-01'))/(7*24*3600*1000)));
-      tbl2+='<th style="'+thT2+'"></th><th colspan='+(_pEx?6:2)+' style="'+thT2+'"></th><th style="'+thTR2L+'"></th>'+(_pNEx?'<th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th>':'')+'<th style="'+thTR2+'"></th><th style="'+thTR2+'"></th>'+(_pCYEx?'<th style="'+thTR2L2+'"></th><th style="'+thTR2L2+'"></th>':'')+'</tr><tr><th style="'+thT2+'">Region</th><th style="'+thTR2+'">Budget</th><th style="'+thTR2+'">Total pipeline'+_pTogBtn+'</th>'+(_pEx?'<th style="'+thTR2L+'">Won</th><th style="'+thTR2L+'">Disc lost</th><th style="'+thTR2L+'">Live</th><th style="'+thTR2L+'">New Pipeline closing 2026</th>':'')+'<th style="'+thTR2L+'">Net pipeline / week'+_pNTogBtn+'</th>'+(_pNEx?'<th style="'+thTR2L+'">Created / week</th><th style="'+thTR2L+'">Won / week</th><th style="'+thTR2L+'">Disc / week</th>':'')+'<th style="'+thTR2+'">TCP Target</th><th style="'+thTR2+'">Created YTD'+_pCYTogBtn+'</th>'+(_pCYEx?'<th style="'+thTR2L2+'">Won / week cl.2026</th><th style="'+thTR2L2+'">Disc / week cl.2026</th>':'')+'</tr></thead><tbody>';
-      _l2Order.forEach(function(l2){
-        var d=_regData[l2];
-        var l2i=window._rtL2Keys.push(l2)-1;
-        var isExpL2=window._rtExpL2.has(l2);
-        var wonPct=d.pipe>0?(d.won/d.pipe*100).toFixed(0)+"%":"—";
-        var l3Keys=Object.keys(d.l3s).sort(function(a,b){return d.l3s[b].pipe-d.l3s[a].pipe;});
-        var expBtn='<span onclick="_rtTogL2('+l2i+')" style="cursor:pointer;margin-right:4px;user-select:none">'+(isExpL2?'&#9660;':'&#9654;')+'</span>';
-        var _clObjL2=_regClose[l2]||{close:0,won:0,disc:0};
-        var _clL2=_clObjL2.close;var _wonAllL2=_clObjL2.won;var _discL2=_clObjL2.disc;
-        var _liveL2=(_regLive[l2]||{live:0}).live;
-        var _netL2=_clL2-_discL2-_wonAllL2;
-        var _tcpL2=(_regTcpTgt[l2.replace(/^CS /,"").toLowerCase()]||{tgt:0}).tgt;
-        var _budL2=_getBudL2(l2);var _liveCvgL2=(_budL2-_wonAllL2)>0?(_netL2/(_budL2-_wonAllL2)).toFixed(1)+"X":"—";
-        var _dcl2=_regDataCl[l2]||{pipe:0,won:0,disc:0};var _wrL2=_getWR(l2.replace(/^CS /,"").toLowerCase(),null);var _oldLvL2=(_regOldLive[l2]||{pipe:0}).pipe;var _oldWonL2=(_regOldLive[l2]||{won:0}).won;var _newLvL2=(_regNewClose[l2]||{pipe:0}).pipe;var _newWonL2=(_regNewClose[l2]||{won:0}).won;var _wrOldNum=_wrL2.old!=="—"?parseInt(_wrL2.old)/100:null;var _wrNewNum=_wrL2.nw!=="—"?parseInt(_wrL2.nw)/100:null;var _oldBkgRawL2=_wrOldNum!==null?(_oldLvL2*_wrOldNum)-_oldWonL2:0;var _effOldBkgL2=_oldWonL2;var _newBkgRawL2=_wrNewNum!==null?(_newLvL2-_newWonL2)*_wrNewNum:0;var _oldBkgL2=_oldBkgRawL2?fmtE(_oldBkgRawL2):"—";var _newBkgL2=_newBkgRawL2?fmtE(_newBkgRawL2):"—";var _newAllBkgRawL2=_wrNewNum!==null?(_newLvL2*_wrNewNum)-_newWonL2:0;var _newAllBkgL2=_newAllBkgRawL2?fmtE(_newAllBkgRawL2):"—";var _effOldExpRawL2=(_wrOldNum!==null&&(_oldLvL2*_wrOldNum)>_oldWonL2)?_oldLvL2*_wrOldNum-_oldWonL2:0;var _gapRawL2=_budL2?_budL2-_effOldExpRawL2-_oldWonL2-(_wrNewNum!==null?_newLvL2*_wrNewNum-_newWonL2:0):null;var _gapL2=_gapRawL2!==null?fmtE(_gapRawL2):"—";var _gapBkgRawL2=(_gapRawL2!==null&&_wrNewNum)?_gapRawL2/_wrNewNum:null;var _gapBkgL2=_gapBkgRawL2!==null?fmtE(_gapBkgRawL2):"—";var _tcpGapL2=_tcpL2-d.pipe;var _pctDiffL2=(_gapBkgRawL2!==null&&_tcpGapL2!==0)?((_gapBkgRawL2-_tcpGapL2)/Math.abs(_tcpGapL2)*100).toFixed(0)+"%":"—";
-        tbl2+='<tr style="background:#eef3f3"><td style="'+tdT2+';font-weight:600">'+expBtn+fmtReg(l2)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_getBudL2(l2)?fmtE(_getBudL2(l2)):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_clL2?fmtE(_clL2):"—")+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(_wonAllL2?fmtE(_wonAllL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_discL2?fmtE(_discL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(_netL2)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_dcl2.pipe?fmtE(_dcl2.pipe):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE((d.pipe-_discL2)/_weeksYTD)+'</td>'+(_pNEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(d.pipe/_weeksYTD)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_wonAllL2?fmtE(_wonAllL2/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_discL2?fmtE(_discL2/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+(_tcpL2?fmtE(_tcpL2):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(d.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(_dcl2.won?fmtE(_dcl2.won/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(_dcl2.disc?fmtE(_dcl2.disc/_weeksYTD):"—")+'</td>':'')+'</tr>';
-        if(isExpL2){l3Keys.forEach(function(l3){
-          var d3=d.l3s[l3];
-          var l3k=l2+'||'+l3;
-          var l3i=window._rtL3Keys.push(l3k)-1;
-          var isExpL3=window._rtExpL3.has(l3k);
-          var wonPct3=d3.pipe>0?(d3.won/d3.pipe*100).toFixed(0)+"%":"—";
-          var teamKeys=Object.keys(d3.teams).sort(function(a,b){return d3.teams[b].pipe-d3.teams[a].pipe;});
-          var expBtn3=teamKeys.length?'<span onclick="_rtTogL3('+l3i+')" style="cursor:pointer;margin-right:4px;user-select:none">'+(isExpL3?'&#9660;':'&#9654;')+'</span>':'<span style="display:inline-block;width:14px;margin-right:4px"></span>';
-          var _clObjL3=((_regClose[l2]||{l3s:{}}).l3s[l3]||{close:0,won:0,disc:0});
-          var _clL3=_clObjL3.close;var _wonAllL3=_clObjL3.won;var _discL3=_clObjL3.disc;
-          var _liveL3=((_regLive[l2]||{l3s:{}}).l3s[l3]||{live:0}).live;
-          var _netL3=_clL3-_discL3-_wonAllL3;
-          var _tcpL3=((_regTcpTgt[l2.replace(/^CS /,"").toLowerCase()]||{l3s:{}}).l3s[l3.toLowerCase()])||0;
-          var _dclL3=((_regDataCl[l2]||{l3s:{}}).l3s[l3]||{pipe:0,won:0,disc:0});var _wrL3=_getWR(l2.replace(/^CS /,"").toLowerCase(),l3.toLowerCase());var _oldLvL3=((_regOldLive[l2]||{l3s:{}}).l3s[l3]||{pipe:0}).pipe;var _oldWonL3=((_regOldLive[l2]||{l3s:{}}).l3s[l3]||{won:0}).won;var _newLvL3=((_regNewClose[l2]||{l3s:{}}).l3s[l3]||{pipe:0}).pipe;var _newWonL3=((_regNewClose[l2]||{l3s:{}}).l3s[l3]||{won:0}).won;var _wrOldNumL3=_wrL3.old!=="—"?parseInt(_wrL3.old)/100:null;var _wrNewNumL3=_wrL3.nw!=="—"?parseInt(_wrL3.nw)/100:null;var _oldBkgRawL3=_wrOldNumL3!==null?(_oldLvL3*_wrOldNumL3)-_oldWonL3:0;var _effOldBkgL3=_oldWonL3;var _newBkgRawL3=_wrNewNumL3!==null?(_newLvL3-_newWonL3)*_wrNewNumL3:0;var _oldBkgL3=_oldBkgRawL3?fmtE(_oldBkgRawL3):"—";var _newBkgL3=_newBkgRawL3?fmtE(_newBkgRawL3):"—";var _newAllBkgRawL3=_wrNewNumL3!==null?(_newLvL3*_wrNewNumL3)-_newWonL3:0;var _newAllBkgL3=_newAllBkgRawL3?fmtE(_newAllBkgRawL3):"—";var _effOldExpRawL3=(_wrOldNumL3!==null&&(_oldLvL3*_wrOldNumL3)>_oldWonL3)?_oldLvL3*_wrOldNumL3-_oldWonL3:0;var _gapRawL3=_tcpL3?_tcpL3-_effOldExpRawL3-_oldWonL3-(_wrNewNumL3!==null?_newLvL3*_wrNewNumL3-_newWonL3:0):null;var _gapL3=_gapRawL3!==null?fmtE(_gapRawL3):"—";var _gapBkgRawL3=(_gapRawL3!==null&&_wrNewNumL3)?_gapRawL3/_wrNewNumL3:null;var _gapBkgL3=_gapBkgRawL3!==null?fmtE(_gapBkgRawL3):"—";var _tcpGapL3=_tcpL3-d3.pipe;var _pctDiffL3=(_gapBkgRawL3!==null&&_tcpGapL3!==0)?((_gapBkgRawL3-_tcpGapL3)/Math.abs(_tcpGapL3)*100).toFixed(0)+"%":"—";
-          tbl2+='<tr><td style="'+tdT2+';padding-left:22px">'+expBtn3+l3+'</td><td style="'+tdT2+';text-align:right">'+(_tcpL3?fmtE(_tcpL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_clL3?fmtE(_clL3):"—")+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right">'+(_wonAllL3?fmtE(_wonAllL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_discL3?fmtE(_discL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_netL3)+'</td><td style="'+tdT2+';text-align:right">'+(_dclL3.pipe?fmtE(_dclL3.pipe):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+fmtE((d3.pipe-_discL3)/_weeksYTD)+'</td>'+(_pNEx?'<td style="'+tdT2+';text-align:right">'+fmtE(d3.pipe/_weeksYTD)+'</td><td style="'+tdT2+';text-align:right">'+(_wonAllL3?fmtE(_wonAllL3/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_discL3?fmtE(_discL3/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+(_tcpL3?fmtE(_tcpL3):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(d3.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right">'+(_dclL3.won?fmtE(_dclL3.won/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_dclL3.disc?fmtE(_dclL3.disc/_weeksYTD):"—")+'</td>':'')+'</tr>';
-          if(isExpL3){teamKeys.forEach(function(tm){
-            var dt=d3.teams[tm];
-            var wonPctT=dt.pipe>0?(dt.won/dt.pipe*100).toFixed(0)+"%":"—";
-            var _clObjTm=(((_regClose[l2]||{l3s:{}}).l3s[l3]||{teams:{}}).teams[tm]||{close:0,won:0,disc:0});
-            var _clTm=_clObjTm.close;var _wonAllTm=_clObjTm.won;var _discTm=_clObjTm.disc;
-            var _liveTm=(((_regLive[l2]||{l3s:{}}).l3s[l3]||{teams:{}}).teams[tm]||{live:0}).live;
-            var _netTm=_clTm-_discTm-_wonAllTm;
-            var _dclTm=(((_regDataCl[l2]||{l3s:{}}).l3s[l3]||{teams:{}}).teams[tm]||{pipe:0,won:0,disc:0});
-            tbl2+='<tr style="background:#fafafa"><td style="'+tdT2+';padding-left:40px;font-size:11px;color:#555">'+tm+'</td><td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_clTm?fmtE(_clTm):"—")+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right;font-size:11px">'+(_wonAllTm?fmtE(_wonAllTm):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_discTm?fmtE(_discTm):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+fmtE(_netTm)+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_dclTm.pipe?fmtE(_dclTm.pipe):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-size:11px">'+fmtE((dt.pipe-_discTm)/_weeksYTD)+'</td>'+(_pNEx?'<td style="'+tdT2+';text-align:right;font-size:11px">'+fmtE(dt.pipe/_weeksYTD)+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_wonAllTm?fmtE(_wonAllTm/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_discTm?fmtE(_discTm/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-size:11px">—</td><td style="'+tdT2+';text-align:right;font-size:11px">'+fmtE(dt.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right;font-size:11px">'+(_dclTm.won?fmtE(_dclTm.won/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right;font-size:11px">'+(_dclTm.disc?fmtE(_dclTm.disc/_weeksYTD):"—")+'</td>':'')+'</tr>';
-          });}
-        });}
-      });
-      var _grandLiveCvg=(_regGrand.budget-_regGrand.wonAll)>0?((_regGrand.close-_regGrand.disc-_regGrand.wonAll)/(_regGrand.budget-_regGrand.wonAll)).toFixed(1)+"X":"—";
-      tbl2+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td><td style="'+tdT2+';text-align:right">'+(_regGrand.budget?fmtE(_regGrand.budget):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.close?fmtE(_regGrand.close):"—")+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right">'+(_regGrand.wonAll?fmtE(_regGrand.wonAll):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.disc?fmtE(_regGrand.disc):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.close-_regGrand.disc-_regGrand.wonAll)+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Pipe?fmtE(_regGrand.cl26Pipe):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+fmtE((_regGrand.pipe-_regGrand.disc)/_weeksYTD)+'</td>'+(_pNEx?'<td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.pipe/_weeksYTD)+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.wonAll?fmtE(_regGrand.wonAll/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.disc?fmtE(_regGrand.disc/_weeksYTD):"—")+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+(_regGrand.tcpTgt?fmtE(_regGrand.tcpTgt):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Won?fmtE(_regGrand.cl26Won/_weeksYTD):"—")+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Disc?fmtE(_regGrand.cl26Disc/_weeksYTD):"—")+'</td>':'')+'</tr>';
-      tbl2+='</tbody></table></div></div>';
-      // Second table: pipeline closing forecast (reduced columns)
-      var tbl2x='<div class="cc"><div class="ch">Pipeline closing 2026 and TCP needs</div><div style="max-height:300px;overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>';
-      tbl2x+='<th style="'+thT2+'"></th><th colspan='+(_pEx?3:1)+' style="'+thT2+';text-align:center;background:#1a4a55">Closing 2026</th><th style="'+thTR2+'"></th>'+(_pCYEx?'<th style="'+thTR2L2+'"></th><th style="'+thTR2L2+'"></th>':'')+'<th style="'+thTR2L+'"></th>'+(_brkEx?'<th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th>':'')+'<th style="'+thTR2L+'"></th>'+(_gapEx?'<th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th><th style="'+thTR2L+'"></th>':'')+'<th style="'+thTR2L+'"></th></tr><tr>';
-      tbl2x+='<th style="'+thT2+'">Region</th><th style="'+thTR2+'">Budget</th>'+(_pEx?'<th style="'+thTR2L+'">Old pipeline closing 2026</th><th style="'+thTR2L+'">New Pipeline closing 2026</th>':'')+'<th style="'+thTR2+'">Created YTD</th>'+(_pCYEx?'<th style="'+thTR2L2+'">Won / week cl.2026</th><th style="'+thTR2L2+'">Disc / week cl.2026</th>':'')+'<th style="'+thTR2L+';cursor:pointer" onclick="window._tbl2xBrkExp=!window._tbl2xBrkExp;renderExe()">Remaining budget to cover '+(_brkEx?'&#9660;':'&#9654;')+'</th>'+(_brkEx?'<th style="'+thTR2L+'">YTD * new WR</th><th style="'+thTR2L+';color:red">YTD*WR - Won</th><th style="'+thTR2L+'">YTD created won</th><th style="'+thTR2L+'">Old PL won</th>':'')+'<th style="'+thTR2L+';cursor:pointer" onclick="window._tbl2xGapExp=!window._tbl2xGapExp;renderExe()">Pipeline needed to cover gap '+(_gapEx?'&#9660;':'&#9654;')+'</th>'+(_gapEx?'<th style="'+thTR2L+'">New PL Q1-27</th><th style="'+thTR2L+'">Old PL C2026 C/P/U</th><th style="'+thTR2L+'">Excl. Cr.26 Cl.Q426</th>':'')+'<th style="'+thTR2L+'">Pipeline needed vs TCP gap %</th></tr></thead><tbody>';
-      _l2Order.forEach(function(l2x){
-        var dx=_regData[l2x];
-        var l2kx=l2x.replace(/^CS /,'').toLowerCase();
-        var l2xi=window._tbl2xL2Keys.push(l2x)-1;var isExpL2x=window._tbl2xExpL2.has(l2x);var expBtnx='<span onclick="_tbl2xTogL2('+l2xi+')" style="cursor:pointer;margin-right:4px;user-select:none">'+(isExpL2x?'&#9660;':'&#9654;')+'</span>';
-        var budx=_getBudL2(l2x);
-        var dclx=_regDataCl[l2x]||{pipe:0,won:0,disc:0};
-        var wrx=_getWR(l2kx,null);
-        var oldLvx=(_regOldLive[l2x]||{pipe:0}).pipe;
-        var oldWonx=(_regOldLive[l2x]||{won:0}).won;
-        var newLvx=(_regNewClose[l2x]||{pipe:0}).pipe;
-        var newWonx=(_regNewClose[l2x]||{won:0}).won;
-        var wrOldNx=wrx.old!=='-'?parseInt(wrx.old)/100:null;
-        var wrNewNx=wrx.nw!=='-'?parseInt(wrx.nw)/100:null;
-        var oldBkgRx=wrOldNx!==null?(oldLvx*wrOldNx)-oldWonx:0;
-        var oldBkgx=oldBkgRx?fmtE(oldBkgRx):'-';
-        var newAllBkgRx=wrNewNx!==null?(newLvx*wrNewNx)-newWonx:0;
-        var newAllBkgx=newAllBkgRx?fmtE(newAllBkgRx):'-';
-        var effOldExpRx=(wrOldNx!==null&&(oldLvx*wrOldNx)>oldWonx)?oldLvx*wrOldNx-oldWonx:0;
-        var gapRx=budx?budx-newAllBkgRx-dclx.won-oldWonx:null;
-        var gapx=gapRx!==null?fmtE(gapRx):'-';
-        var gapBkgRx=gapRx!==null?gapRx/0.35:null;
-        var gapBkgx=gapBkgRx!==null?fmtE(gapBkgRx):'-';
-        var tcpx=(_regTcpTgt[l2kx]||{tgt:0}).tgt;
-        var oldClose26x=_regOldClose26[l2x]||0;
-        var exclQ4x=_regExclQ4[l2x]||0;
-        var tcpGapx=tcpx-dx.pipe;
-        var pctDiffx=(gapBkgRx!==null&&tcpGapx!==0)?((gapBkgRx-tcpGapx)/Math.abs(tcpGapx)*100).toFixed(0)+'%':'-';
-        tbl2x+='<tr style="background:#eef3f3"><td style="'+tdT2+';font-weight:600">'+expBtnx+fmtReg(l2x)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(budx?fmtE(budx):'-')+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(oldLvx?fmtE(oldLvx):'-')+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(dclx.pipe?fmtE(dclx.pipe):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(dx.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(dclx.won?fmtE(dclx.won/_weeksYTD):'-')+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(dclx.disc?fmtE(dclx.disc/_weeksYTD):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+gapx+'</td>'+(_brkEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(wrNewNx?fmtE(dx.pipe*wrNewNx):"-")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(wrNewNx?fmtE(dx.pipe*wrNewNx-dclx.won):"-")+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(dclx.won?fmtE(dclx.won):'-')+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(oldWonx?fmtE(oldWonx):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+gapBkgx+'</td>'+(_gapEx?'<td style="'+tdT2+';text-align:right;font-weight:600">'+(regNewQ1_27[l2x]?fmtE(regNewQ1_27[l2x]):'-')+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(oldClose26x?fmtE(oldClose26x):'-')+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(exclQ4x?fmtE(exclQ4x):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right;font-weight:600">'+pctDiffx+'</td></tr>';
-        var l3ksx=Object.keys(dx.l3s).sort(function(a,b){return (dx.l3s[b]||{pipe:0}).pipe-(dx.l3s[a]||{pipe:0}).pipe;});
-        if(isExpL2x)l3ksx.forEach(function(l3x){
-          var d3x=dx.l3s[l3x];
-          var tcpL3x=((_regTcpTgt[l2kx]||{l3s:{}}).l3s[l3x.toLowerCase()])||0;
-          var dclL3x=((_regDataCl[l2x]||{l3s:{}}).l3s[l3x]||{pipe:0,won:0,disc:0});
-          var wrL3x=_getWR(l2kx,l3x.toLowerCase());
-          var oldLvL3x=((_regOldLive[l2x]||{l3s:{}}).l3s[l3x]||{pipe:0}).pipe;
-          var oldWonL3x=((_regOldLive[l2x]||{l3s:{}}).l3s[l3x]||{won:0}).won;
-          var newLvL3x=((_regNewClose[l2x]||{l3s:{}}).l3s[l3x]||{pipe:0}).pipe;
-          var newWonL3x=((_regNewClose[l2x]||{l3s:{}}).l3s[l3x]||{won:0}).won;
-          var wrOldNL3x=wrL3x.old!=='-'?parseInt(wrL3x.old)/100:null;
-          var wrNewNL3x=wrL3x.nw!=='-'?parseInt(wrL3x.nw)/100:null;
-          var oldBkgRL3x=wrOldNL3x!==null?(oldLvL3x*wrOldNL3x)-oldWonL3x:0;
-          var oldBkgL3x=oldBkgRL3x?fmtE(oldBkgRL3x):'-';
-          var newAllBkgRL3x=wrNewNL3x!==null?(newLvL3x*wrNewNL3x)-newWonL3x:0;
-          var newAllBkgL3x=newAllBkgRL3x?fmtE(newAllBkgRL3x):'-';
-          var effOldExpRL3x=(wrOldNL3x!==null&&(oldLvL3x*wrOldNL3x)>oldWonL3x)?oldLvL3x*wrOldNL3x-oldWonL3x:0;
-          var gapRL3x=tcpL3x?tcpL3x-newAllBkgRL3x-dclL3x.won-oldWonL3x:null;
-          var gapL3x=gapRL3x!==null?fmtE(gapRL3x):'-';
-          var gapBkgRL3x=gapRL3x!==null?gapRL3x/0.35:null;
-          var gapBkgL3x=gapBkgRL3x!==null?fmtE(gapBkgRL3x):'-';
-          var oldClose26L3x=(_regL3OldClose26[l2x]||{})[l3x]||0;
-          var exclQ4L3x=(_regL3ExclQ4[l2x]||{})[l3x]||0;
-          var tcpGapL3x=tcpL3x-d3x.pipe;
-          var pctDiffL3x=(gapBkgRL3x!==null&&tcpGapL3x!==0)?((gapBkgRL3x-tcpGapL3x)/Math.abs(tcpGapL3x)*100).toFixed(0)+'%':'-';
-          tbl2x+='<tr><td style="'+tdT2+';padding-left:22px">'+l3x+'</td><td style="'+tdT2+';text-align:right">'+(tcpL3x?fmtE(tcpL3x):'-')+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right">'+(oldLvL3x?fmtE(oldLvL3x):'-')+'</td><td style="'+tdT2+';text-align:right">'+(dclL3x.pipe?fmtE(dclL3x.pipe):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+fmtE(d3x.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right">'+(dclL3x.won?fmtE(dclL3x.won/_weeksYTD):'-')+'</td><td style="'+tdT2+';text-align:right">'+(dclL3x.disc?fmtE(dclL3x.disc/_weeksYTD):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+gapL3x+'</td>'+(_brkEx?'<td style="'+tdT2+';text-align:right">'+(wrNewNL3x?fmtE(d3x.pipe*wrNewNL3x):"-")+'</td><td style="'+tdT2+';text-align:right">'+(wrNewNL3x?fmtE(d3x.pipe*wrNewNL3x-dclL3x.won):"-")+'</td><td style="'+tdT2+';text-align:right">'+(dclL3x.won?fmtE(dclL3x.won):'-')+'</td><td style="'+tdT2+';text-align:right">'+(oldWonL3x?fmtE(oldWonL3x):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+gapBkgL3x+'</td>'+(_gapEx?'<td style="'+tdT2+';text-align:right">'+((regL3NewQ1_27[l2x]||{})[l3x]?fmtE((regL3NewQ1_27[l2x]||{})[l3x]):'-')+'</td><td style="'+tdT2+';text-align:right">'+(oldClose26L3x?fmtE(oldClose26L3x):'-')+'</td><td style="'+tdT2+';text-align:right">'+(exclQ4L3x?fmtE(exclQ4L3x):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+pctDiffL3x+'</td></tr>';
-        });
-      });
-      tbl2x+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td><td style="'+tdT2+';text-align:right">'+(_regGrand.budget?fmtE(_regGrand.budget):'-')+'</td>'+(_pEx?'<td style="'+tdT2+';text-align:right">-</td><td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Pipe?fmtE(_regGrand.cl26Pipe):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">'+fmtE(_regGrand.pipe)+'</td>'+(_pCYEx?'<td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Won?fmtE(_regGrand.cl26Won/_weeksYTD):'-')+'</td><td style="'+tdT2+';text-align:right">'+(_regGrand.cl26Disc?fmtE(_regGrand.cl26Disc/_weeksYTD):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">-</td>'+(_brkEx?'<td style="'+tdT2+';text-align:right">-</td><td style="'+tdT2+';text-align:right">-</td><td style="'+tdT2+';text-align:right">-</td><td style="'+tdT2+';text-align:right">-</td>':'')+'<td style="'+tdT2+';text-align:right">-</td>'+(_gapEx?'<td style="'+tdT2+';text-align:right">-</td><td style="'+tdT2+';text-align:right">-</td><td style="'+tdT2+';text-align:right">'+(_gExclQ4?fmtE(_gExclQ4):'-')+'</td>':'')+'<td style="'+tdT2+';text-align:right">-</td></tr>';
-      tbl2x+='</tbody></table></div></div>';
-      tbl2+=tbl2x;
-
       // Calendar contribution % by region
+      var thT2="background:#012931;color:#fff;padding:6px 6px;font-size:10px;font-weight:700;text-align:left;white-space:normal;line-height:1.3";
+      var thTR2=thT2+";text-align:right";
+      var tdT2="padding:4px 6px;font-size:11px;border-bottom:1px solid #f0f0f0";
       var _calWBSSet2=new Set(campData.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
       var _regCal={},_regAll={},_regAllL3={},_regCalL3={};
       var _srcCal={},_srcAll={};
+      var _sbAll={},_sbSubAll={},_sbPipeAll={},_sbPipeAll2={};
+      var _wbsToSBMap={},_wbsToSSBMap={};
+      campData.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();if(!w)return;var sbs=(r["Sales Bag"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);_wbsToSBMap[w]=sbs;var ssb=String(r["Sub Sales Bag"]||"").trim();if(ssb.indexOf(" - ")>-1)ssb=ssb.substring(ssb.indexOf(" - ")+3).trim();if(ssb)_wbsToSSBMap[w]=ssb;});
       var _tcpSrcMap3={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};
       pipeData.forEach(function(p){
         if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
         if(drmFilters.size&&!drmFilters.has(String(p["DRM Category"]||"").trim()))return;
         if(mmPipeSrcFilters.size&&!mmPipeSrcFilters.has(String(p["MM Pipe Source"]||"").trim()))return;
+        if(tcpPipeSrcFilters.size&&!tcpPipeSrcFilters.has(String(p["TCP Pipeline Source Desc"]||"").trim()))return;
         if(eurMinFilter!==null&&(parseFloat(p["Eur"]||0)||0)<eurMinFilter)return;
         if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
         if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
@@ -2398,10 +2153,12 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
         if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfCL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfCL3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
         if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
         if(_exeSbActF){var _rcSol=_exePipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_exeSbActF.has(_rcSol))return;}
+        if(!_passChartF(p))return;
         var reg=String(p["Region Lvl 2"]||"").trim()||"Other";
         var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
         var eur=parseFloat(p["Eur"]||0)||0;
-        var isCalLinked=_calWBSSet2.has(String(p["Opp Campaign ID"]||"").trim());
+        var _oppWbs=String(p["Opp Campaign ID"]||"").trim();
+        var isCalLinked=_calWBSSet2.has(_oppWbs);
         _regAll[reg]=(_regAll[reg]||0)+eur;
         if(isCalLinked)_regCal[reg]=(_regCal[reg]||0)+eur;
         if(!_regAllL3[reg])_regAllL3[reg]={};
@@ -2409,23 +2166,30 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
         if(isCalLinked){if(!_regCalL3[reg])_regCalL3[reg]={};_regCalL3[reg][l3]=(_regCalL3[reg][l3]||0)+eur;}
         var src=_tcpSrcMap3[String(p["TCP Pipeline Source Desc"]||"").trim()]||"Other";
         _srcAll[src]=(_srcAll[src]||0)+eur;
-        if(isCalLinked)_srcCal[src]=(_srcCal[src]||0)+eur;
+        var _solSBx=_exePipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();
+        if(_solSBx)_sbPipeAll2[_solSBx]=(_sbPipeAll2[_solSBx]||0)+eur;
+        (_wbsToSBMap[_oppWbs]||[]).forEach(function(sb){if(sb)_sbPipeAll[sb]=(_sbPipeAll[sb]||0)+eur;});
+        if(isCalLinked){_srcCal[src]=(_srcCal[src]||0)+eur;var _wbsSBs=_wbsToSBMap[_oppWbs]||[];var _wbsSSB=_wbsToSSBMap[_oppWbs]||"";_wbsSBs.forEach(function(sb){if(!sb)return;_sbAll[sb]=(_sbAll[sb]||0)+eur;if(_wbsSSB){if(!_sbSubAll[sb])_sbSubAll[sb]={};_sbSubAll[sb][_wbsSSB]=(_sbSubAll[sb][_wbsSSB]||0)+eur;}});}
       });
+      var _sbTcpTgt={};(function(){var _sbR={},_sbG=0;var _sM2={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};var _sbAS2=tcpPipeSrcFilters.size>0?new Set(Array.from(tcpPipeSrcFilters).map(function(v){return _sM2[v]||"Other";})):null;(window.TCP_TARGETS_DETAIL||[]).forEach(function(t){if(!String(t.qtr||"").startsWith("2026"))return;if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(t.qtr||"").trim()))return;if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _sbRF=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim();}));if(!_sbRF.has(String(t.mu||"").replace(/^CS /,"").trim()))return;}if(_sbAS2&&!_sbAS2.has(String(t.src||"").trim()))return;var sa=String(t.sa||"").trim();if(!sa)return;_sbR[sa]=(_sbR[sa]||0)+(parseFloat(t.target)||0);_sbG+=(parseFloat(t.target)||0);});var _sbBr=(_brittTotalSrc||0);if(_sbG>0&&_sbBr>0){Object.keys(_sbR).forEach(function(sa){_sbTcpTgt[sa]=_sbBr*(_sbR[sa]/_sbG);});}else{Object.keys(_sbR).forEach(function(sa){_sbTcpTgt[sa]=_sbR[sa];});}})();
       var _regCalOrder=Object.keys(_regAll).sort(function(a,b){return _regAll[b]-_regAll[a];});
       var _regAllGrand=_regCalOrder.reduce(function(s,r){return s+(_regAll[r]||0);},0);
       var _regCalGrand=_regCalOrder.reduce(function(s,r){return s+(_regCal[r]||0);},0);
       if(!window._rcExpL2)window._rcExpL2=new Set();
       window._rcL2Keys=[];
       window._rcTogL2=function(i){var k=window._rcL2Keys[i];window._rcExpL2.has(k)?window._rcExpL2.delete(k):window._rcExpL2.add(k);renderExe();};
-      if(!window.hasOwnProperty('_tcpCalView'))window._tcpCalView='reg';
-      var _tcpViewBtns=[['reg','By Region'],['src','By TCP Source']].map(function(opt){
+      if(!window._rcExpSB)window._rcExpSB=new Set();
+      window._rcSBKeys=[];
+      window._rcTogSB=function(i){var k=window._rcSBKeys[i];window._rcExpSB.has(k)?window._rcExpSB.delete(k):window._rcExpSB.add(k);renderExe();};
+      if(!window.hasOwnProperty('_tcpCalView'))window._tcpCalView='sb';
+      var _tcpViewBtns=[['reg','By Region'],['src','By TCP Source'],['sb','By Sales Bag']].map(function(opt){
         var sel=window._tcpCalView===opt[0];
         var oc='window._tcpCalView=\''+opt[0]+'\';renderExe()';
-        return '<span onclick="'+oc+'" style="cursor:pointer;padding:2px 10px;border-radius:10px;font-size:11px;white-space:nowrap;border:1px solid '+(sel?'#0070F2':'#ccc')+';background:'+(sel?'#0070F2':'transparent')+';color:'+(sel?'#fff':'#555')+'">'+opt[1]+'</span>';
+        return '<button onclick="'+oc+'" style="'+_btnS+(sel?'background:#012931;color:#fff':'background:#fff;color:#012931')+'">'+opt[1]+'</button>';
       }).join(' ');
       var tbl3='<div class="cc"><div class="ch" style="display:flex;align-items:center;flex-wrap:wrap;gap:8px"><span>% Pipeline Contribution from Campaign Calendar</span><span style="display:flex;gap:4px;font-weight:400">'+_tcpViewBtns+'</span></div><div><table style="width:100%;border-collapse:collapse"><thead><tr>';
       if(window._tcpCalView==='src'){
-        tbl3+='<th style="'+thT2+'">TCP Source</th><th style="'+thTR2+'">Total Pipeline</th><th style="'+thTR2+'">Calendar-linked</th><th style="'+thTR2+'">% from Calendar</th></tr></thead><tbody>';
+        tbl3+='<th style="'+thT2+'">TCP Source</th><th style="'+thTR2+'">TCP Target</th><th style="'+thTR2+'">Pipeline Created</th><th style="'+thTR2+'">Cal-linked</th><th style="'+thTR2+'">% from Cal</th></tr></thead><tbody>';
         var _srcOrder2=["SDE","Marketing","Sales","Partner","CSM","Other"];
         var _srcAllGrand=0,_srcCalGrand=0;
         _srcOrder2.forEach(function(s){
@@ -2433,30 +2197,53 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
           if(!tot)return;
           _srcAllGrand+=tot;_srcCalGrand+=cal;
           var pct=tot>0?(cal/tot*100).toFixed(1)+"%":"—";
-          tbl3+='<tr style="background:#eef3f3"><td style="'+tdT2+';font-weight:600">'+s+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(tot)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(cal?fmtE(cal):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:700">'+pct+'</td></tr>';
+          var tgt2=(_srcTcpTgt||{})[s]||0;
+          tbl3+='<tr><td style="'+tdT2+'">'+s+'</td><td style="'+tdT2+';text-align:right">'+(tgt2?fmtE(tgt2):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(tot)+'</td><td style="'+tdT2+';text-align:right">'+(cal?fmtE(cal):"—")+'</td><td style="'+tdT2+';text-align:right">'+pct+'</td></tr>';
         });
-        tbl3+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td><td style="'+tdT2+';text-align:right">'+fmtE(_srcAllGrand)+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_srcCalGrand)+'</td><td style="'+tdT2+';text-align:right">'+(_srcAllGrand>0?(_srcCalGrand/_srcAllGrand*100).toFixed(1)+"%":"—")+'</td></tr>';
+        var _srcTcpTgtGrand2=Object.values(_srcTcpTgt||{}).reduce(function(s,v){return s+v;},0);
+        tbl3+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td><td style="'+tdT2+';text-align:right">'+(_srcTcpTgtGrand2?fmtE(_srcTcpTgtGrand2):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_srcAllGrand)+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_srcCalGrand)+'</td><td style="'+tdT2+';text-align:right">'+(_srcAllGrand>0?(_srcCalGrand/_srcAllGrand*100).toFixed(1)+"%":"—")+'</td></tr>';
+      } else if(window._tcpCalView==='sb'){
+        tbl3+='<th style="'+thT2+'">Sales Bag</th><th style="'+thTR2+'">TCP Target</th><th style="'+thTR2+'">Pipeline Created</th><th style="'+thTR2+'">Cal-linked</th><th style="'+thTR2+'">% from Cal</th></tr></thead><tbody>';
+        var _sbOrder=Object.keys(_sbPipeAll2).sort(function(a,b){return _sbPipeAll2[b]-_sbPipeAll2[a];});
+        _sbOrder.forEach(function(sb){
+          var pipe=_sbPipeAll2[sb]||0,cal=_sbAll[sb]||0;
+          var sbi=window._rcSBKeys.push(sb)-1;
+          var isExpSB=window._rcExpSB.has(sb);
+          var subs=_sbSubAll[sb]||{};
+          var subKeys=Object.keys(subs).sort(function(a,b){return subs[b]-subs[a];});
+          var expBtn=subKeys.length?'<span onclick="_rcTogSB('+sbi+')" style="cursor:pointer;margin-right:4px;font-size:10px;line-height:1;user-select:none;font-weight:700">'+(isExpSB?'&#8722;':'&#43;')+'</span>':'<span style="display:inline-block;width:16px;margin-right:4px"></span>';
+          var sbTgt=(_sbTcpTgt||{})[sb]||0;
+          var pct=pipe>0?(cal/pipe*100).toFixed(1)+"%":"—";
+          tbl3+='<tr><td style="'+tdT2+'">'+expBtn+sb+'</td><td style="'+tdT2+';text-align:right">'+(sbTgt?fmtE(sbTgt):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(pipe)+'</td><td style="'+tdT2+';text-align:right">'+(cal?fmtE(cal):"—")+'</td><td style="'+tdT2+';text-align:right">'+pct+'</td></tr>';
+          if(isExpSB){subKeys.forEach(function(ssb){var ssbCal=subs[ssb]||0;var ssbPct=pipe>0?(ssbCal/pipe*100).toFixed(1)+"%":"—";tbl3+='<tr><td style="'+tdT2+';padding-left:22px">'+ssb+'</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">'+fmtE(ssbCal)+'</td><td style="'+tdT2+';text-align:right;font-weight:700">'+ssbPct+'</td></tr>';});}
+        });
+        var _sbPipeGrand=_sbOrder.reduce(function(s,k){return s+(_sbPipeAll2[k]||0);},0);
+        var _sbGrand=_sbOrder.reduce(function(s,k){return s+(_sbAll[k]||0);},0);
+        var _sbTcpTgtGrand=Object.keys(_sbTcpTgt||{}).reduce(function(s,k){return s+(_sbTcpTgt[k]||0);},0);
+        tbl3+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td><td style="'+tdT2+';text-align:right">'+(_sbTcpTgtGrand?fmtE(_sbTcpTgtGrand):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_sbPipeGrand)+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_sbGrand)+'</td><td style="'+tdT2+';text-align:right">'+(_sbPipeGrand>0?(_sbGrand/_sbPipeGrand*100).toFixed(1)+"%":"—")+'</td></tr>';
       } else {
-        tbl3+='<th style="'+thT2+'">Region</th><th style="'+thTR2+'">Total Pipeline</th><th style="'+thTR2+'">Calendar-linked</th><th style="'+thTR2+'">% from Calendar</th></tr></thead><tbody>';
+        tbl3+='<th style="'+thT2+'">Region</th><th style="'+thTR2+'">TCP Target</th><th style="'+thTR2+'">Total Pipeline</th><th style="'+thTR2+'">Calendar-linked</th><th style="'+thTR2+'">% from Calendar</th></tr></thead><tbody>';
         _regCalOrder.forEach(function(r){
           var tot=_regAll[r]||0,cal=_regCal[r]||0;
           var pct=tot>0?(cal/tot*100).toFixed(1)+"%":"—";
+          var regKey=r.replace(/^CS /,"").toLowerCase();
+          var regTgt=(_reg2TcpTgt||{})[regKey]||0;
           var ri=window._rcL2Keys.push(r)-1;
           var isExp=window._rcExpL2.has(r);
           var l3Map=_regAllL3[r]||{};
           var l3Keys=Object.keys(l3Map).sort(function(a,b){return l3Map[b]-l3Map[a];});
-          var expBtn=l3Keys.length?'<span onclick="_rcTogL2('+ri+')" style="cursor:pointer;margin-right:4px;user-select:none">'+(isExp?'&#9660;':'&#9654;')+'</span>':'<span style="display:inline-block;width:14px;margin-right:4px"></span>';
-          tbl3+='<tr style="background:#eef3f3"><td style="'+tdT2+';font-weight:600">'+expBtn+fmtReg(r)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+fmtE(tot)+'</td><td style="'+tdT2+';text-align:right;font-weight:600">'+(cal?fmtE(cal):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:700">'+pct+'</td></tr>';
+          var expBtn=l3Keys.length?'<span onclick="_rcTogL2('+ri+')" style="cursor:pointer;margin-right:4px;font-size:10px;line-height:1;user-select:none;font-weight:700">'+(isExp?'&#8722;':'&#43;')+'</span>':'<span style="display:inline-block;width:16px;margin-right:4px"></span>';
+          tbl3+='<tr><td style="'+tdT2+'">'+expBtn+fmtReg(r)+'</td><td style="'+tdT2+';text-align:right">'+(regTgt?fmtE(regTgt):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(tot)+'</td><td style="'+tdT2+';text-align:right">'+(cal?fmtE(cal):"—")+'</td><td style="'+tdT2+';text-align:right">'+pct+'</td></tr>';
           if(isExp){l3Keys.forEach(function(l3){
             var tot3=l3Map[l3]||0,cal3=(_regCalL3[r]||{})[l3]||0;
             var pct3=tot3>0?(cal3/tot3*100).toFixed(1)+"%":"—";
-            tbl3+='<tr><td style="'+tdT2+';padding-left:22px">'+l3+'</td><td style="'+tdT2+';text-align:right">'+fmtE(tot3)+'</td><td style="'+tdT2+';text-align:right">'+(cal3?fmtE(cal3):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:700">'+pct3+'</td></tr>';
+            tbl3+='<tr><td style="'+tdT2+';padding-left:22px">'+l3+'</td><td style="'+tdT2+';text-align:right">—</td><td style="'+tdT2+';text-align:right">'+fmtE(tot3)+'</td><td style="'+tdT2+';text-align:right">'+(cal3?fmtE(cal3):"—")+'</td><td style="'+tdT2+';text-align:right;font-weight:700">'+pct3+'</td></tr>';
           });}
         });
-        tbl3+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td><td style="'+tdT2+';text-align:right">'+fmtE(_regAllGrand)+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_regCalGrand)+'</td><td style="'+tdT2+';text-align:right">'+(_regAllGrand>0?(_regCalGrand/_regAllGrand*100).toFixed(1)+"%":"—")+'</td></tr>';
+        var _reg2TcpTgtGrand=Object.keys(_reg2TcpTgt||{}).reduce(function(s,k){return s+(_reg2TcpTgt[k]||0);},0);
+        tbl3+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT2+'">Total</td><td style="'+tdT2+';text-align:right">'+(_reg2TcpTgtGrand?fmtE(_reg2TcpTgtGrand):"—")+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_regAllGrand)+'</td><td style="'+tdT2+';text-align:right">'+fmtE(_regCalGrand)+'</td><td style="'+tdT2+';text-align:right">'+(_regAllGrand>0?(_regCalGrand/_regAllGrand*100).toFixed(1)+"%":"—")+'</td></tr>';
       }
       tbl3+='</tbody></table></div></div>';
-      _regTbl.innerHTML=tbl2;
       // Build source × quarter data for the by-source table
       var _srcQtrMap2={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};
       var _sqData={'all':{}};['2026-Q1','2026-Q2','2026-Q3','2026-Q4'].forEach(function(q){_sqData[q]={};});
@@ -2483,7 +2270,6 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
       if(_prodCalTbl)_prodCalTbl.innerHTML=tbl3;
       var _prodRow=document.getElementById("exe-prod-cal-row");
       if(_prodRow)_prodRow.innerHTML='';
-    }
     // Pipeline vs TCP Target by TCP Source
     var SRC_MAP={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};
     var SRC_ORDER=["SDE","Marketing","Sales","Partner","CSM"];
@@ -2534,45 +2320,15 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
       });
       SRC_ORDER.forEach(function(src){var ratio=_srcPipeL2[src]>0?((srcPipe[src]||0)/_srcPipeL2[src]):0;srcTgt[src]=(srcTgt[src]||0)*ratio;});
     }
-    var cSrcPipe=document.getElementById("exe-src-pipeline");
-    if(cSrcPipe){
-      if(charts["exe-src-pipeline"])charts["exe-src-pipeline"].destroy();
-      charts["exe-src-pipeline"]=new Chart(cSrcPipe.getContext("2d"),{
-        type:"bar",
-        data:{
-          labels:SRC_ORDER,
-          datasets:[
-            {label:"Pipeline Created 2026",data:SRC_ORDER.map(function(s){return Math.round(srcPipe[s]||0);}),backgroundColor:PAL[0],borderWidth:0,
-              datalabels:{display:true,anchor:"end",align:"top",formatter:function(v){return v>=1?fmtE(v):"";},font:{size:9,weight:"bold"},color:PAL[0]}},
-            {label:"TCP Target",data:SRC_ORDER.map(function(s){return srcTgt[s]?Math.round(srcTgt[s]):null;}),
-              type:"line",borderColor:PAL[1],backgroundColor:"transparent",borderWidth:2,pointRadius:4,pointBackgroundColor:PAL[1],
-              order:0,datalabels:{display:true,anchor:"end",align:"top",formatter:function(v){return v?fmtE(v):"";},font:{size:9,weight:"bold"},color:PAL[1]}}
-          ]
-        },
-        options:{responsive:true,maintainAspectRatio:false,
-          onClick:function(evt,elements){if(elements&&elements.length){var idx=elements[0].index;var src=SRC_ORDER[idx];window._exeSrcFilter=(window._exeSrcFilter===src)?null:src;renderExe();}},
-          layout:{padding:{top:20}},
-          plugins:{legend:{display:true,position:"top",labels:{font:{size:11},boxWidth:12}},
-            datalabels:{display:true},
-            tooltip:{callbacks:{label:function(ctx){
-              var s=SRC_ORDER[ctx.dataIndex];
-              if(ctx.dataset.label==="TCP Target")return"TCP Target: —"+fmtE(srcTgt[s]||0);
-              var tgt=srcTgt[s]||0;
-              return"Pipeline: —"+fmtE(srcPipe[s]||0)+(tgt>0?" ("+((srcPipe[s]||0)/tgt*100).toFixed(0)+"% of target)":"");
-            }}}},
-          scales:{x:{grid:{display:false},ticks:{font:{size:11}}},
-            y:{ticks:{callback:function(v){return"€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
-      });
-    }
     // Monthly pipeline chart
     var _mthLabels=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
     var _mthPipe={};
     pr2All.forEach(function(row){
       var cd=String(row["Create Date"]||"").trim();
-      if(!cd.startsWith("2026"))return;
-      var m=parseInt(cd.substring(5,7),10)-1;
+      if(cd.length<10||cd.substring(6,10)!=="2026")return;
+      var m=parseInt(cd.substring(3,5),10)-1;
       if(m<0||m>11)return;
-      _mthPipe[m]=(_mthPipe[m]||0)+(row["Eur"]||0)/1000;
+      _mthPipe[m]=(_mthPipe[m]||0)+(parseFloat(row["Eur"]||0)||0);
     });
     var _mthMax=0;
     for(var _mi=11;_mi>=0;_mi--){if(_mthPipe[_mi]){_mthMax=_mi;break;}}
@@ -2580,7 +2336,8 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
     for(var _mi2=0;_mi2<=_mthMax;_mi2++){_mthL.push(_mthLabels[_mi2]);_mthD.push(Math.round(_mthPipe[_mi2]||0));}
     var _mthCvs=document.getElementById("exe-monthly-pipe");
     if(_mthCvs&&_mthD.length){
-      new Chart(_mthCvs.getContext("2d"),{
+      if(charts["exe-monthly-pipe"])charts["exe-monthly-pipe"].destroy();
+      charts["exe-monthly-pipe"]=new Chart(_mthCvs.getContext("2d"),{
         type:"bar",
         data:{labels:_mthL,datasets:[{label:"Pipeline Created",data:_mthD,backgroundColor:PAL[0],borderRadius:4,
           datalabels:{display:true,anchor:"end",align:"top",formatter:function(v){return v>=500?fmtE(v):"";},font:{size:9,weight:"bold"},color:PAL[0]}}]},
@@ -2590,6 +2347,83 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
           scales:{x:{grid:{display:false},ticks:{font:{size:11}}},
             y:{ticks:{callback:function(v){return"€"+fmtE(v);}},grid:{color:"#f0f0f0"}}}}
       });
+    }
+    // Pipeline detail table
+    var _exePipeDtlWrap=document.getElementById("exe-pipe-dtl-wrap");
+    if(_exePipeDtlWrap){
+      var _exeDtlExp=!!window._exePipeDtlExp;
+      var _exeRegNorm={"benelux":"Benelux","france":"France","italy":"Italy","mea north":"MEA North","mea south":"MEA South","nordic":"Nordic","southern europe":"Southern Europe","uki":"UKI"};
+      var _exePipeSolMap2={"BAIP - Data & AI":"Data & AI","BAIP - Business Analytics":"Business Analytics","HXM - Human Experience Management":"HXM","SCM - Supply Chain Management":"SCM","BCM - Business Critical MCA & Services":"BCM","BCM - Business Critical":"BCM","ISPM - Intelligent Spend & Business Network":"ISBN","BTP - Business Technology Platform":"BTP","RISE with SAP":"RISE","GROW with SAP":"GROW","CX - Customer Experience":"CX"};
+      var _exeDtlRows=[];
+      pipeData.forEach(function(p){
+        if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+        if(drmFilters.size&&!drmFilters.has(String(p["DRM Category"]||"").trim()))return;
+        if(mmPipeSrcFilters.size&&!mmPipeSrcFilters.has(String(p["MM Pipe Source"]||"").trim()))return;
+        if(tcpPipeSrcFilters.size&&!tcpPipeSrcFilters.has(String(p["TCP Pipeline Source Desc"]||"").trim()))return;
+        if(eurMinFilter!==null&&(parseFloat(p["Eur"]||0)||0)<eurMinFilter)return;
+        if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
+        if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
+        if(window._pipeCloseQtrSet&&window._pipeCloseQtrSet.size&&!window._pipeCloseQtrSet.has(String(p["Closing Qtr"]||"").trim()))return;
+        if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rf=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim();}));if(!_rf.has(String(p["Region Lvl 2"]||"").trim()))return;}
+        if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rl3f=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim();}));if(!_rl3f.has(String(p["Region Lvl 3"]||"").trim()))return;}
+        if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
+        if(_exeSbActF){var _pSol=_exePipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_exeSbActF.has(_pSol))return;}
+        if(!_passChartF(p))return;
+        var _dr2=String(p["Region Lvl 2"]||"").trim();var _dreg=_exeRegNorm[_dr2.toLowerCase()]||_dr2;
+        var _dSb=_exePipeSolMap2[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();
+        _exeDtlRows.push({oid:String(p["Opportunity ID"]||""),desc:String(p["Opp Description"]||""),cqtr:String(p["Create Quarter"]||""),clqtr:String(p["Closing Qtr"]||""),tcp:String(p["TCP Pipeline Source Desc"]||""),cp:String(p["Channel Partner"]||""),eur:parseFloat(p["Eur"]||0)||0,drm:String(p["DRM Category"]||""),laon:String(p["Local Account Owner Name"]||""),reg:_dreg,rl3:String(p["Region Lvl 3"]||"").trim(),mps:String(p["MM Pipe Source"]||""),sb:_dSb,ssb:String(p["Sub-Solution Area (L2)"]||"")});
+      });
+      _exeDtlRows.sort(function(a,b){return b.eur-a.eur;});window._exeDtlRows=_exeDtlRows;
+      var _edShown=Math.min(_exeDtlRows.length,1000);
+      var _edHtml='<div style="padding:0 12px 16px 12px">';
+      _edHtml+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">';
+      _edHtml+='<b style="font-size:13px;color:#00144A">Pipeline Detail</b>';
+      _edHtml+='<button onclick="window._exePipeDtlExp=!window._exePipeDtlExp;renderExe()" style="padding:3px 10px;font-size:11px;border:1px solid #ccc;border-radius:4px;background:#f5f5f5;cursor:pointer">'+(_exeDtlExp?'&#9660; Hide':'&#9654; Show')+'</button>';
+      _edHtml+='<button onclick="exportExeDtl()" style="padding:3px 10px;font-size:11px;background:var(--bl);color:#fff;border:none;border-radius:4px;cursor:pointer">&#11015; Export CSV</button>';
+      _edHtml+='</div>';
+      if(_exeDtlExp){
+        _edHtml+='<div style="font-size:11px;color:#888;margin-bottom:4px">'+_exeDtlRows.length.toLocaleString()+' records'+(_exeDtlRows.length>1000?' &mdash; showing top 1000 by EUR':'')+' sorted by EUR desc</div>';
+        _edHtml+='<div style="overflow-x:auto;max-height:500px;overflow-y:auto;border:1px solid #ddd;border-radius:4px">';
+        _edHtml+='<table style="border-collapse:collapse;font-size:12px;width:100%;min-width:1500px">';
+        _edHtml+='<thead><tr style="background:#00144A;color:#fff;position:sticky;top:0;z-index:1">';
+        _edHtml+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Opp ID</th>';
+        _edHtml+='<th style="padding:6px 8px;text-align:left;font-weight:600">Opp Description</th>';
+        _edHtml+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Region L2</th>';
+        _edHtml+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Region L3</th>';
+        _edHtml+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Create Qtr</th>';
+        _edHtml+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Close Qtr</th>';
+        _edHtml+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">TCP Source</th>';
+        _edHtml+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">MM Pipe Source</th>';
+        _edHtml+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Sales Bag</th>';
+        _edHtml+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Sub Sales Bag</th>';
+        _edHtml+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Channel Partner</th>';
+        _edHtml+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Local Account Owner</th>';
+        _edHtml+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">DRM Category</th>';
+        _edHtml+='<th style="padding:6px 8px;text-align:right;white-space:nowrap;font-weight:600">EUR</th>';
+        _edHtml+='</tr></thead><tbody>';
+        for(var _edi=0;_edi<_edShown;_edi++){
+          var _edr=_exeDtlRows[_edi];var _ebg=_edi%2===0?'#fff':'#f8f9fa';
+          _edHtml+='<tr style="background:'+_ebg+'">';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap;font-size:11px">'+(_edr.oid||'&mdash;')+'</td>';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+_edr.desc.replace(/"/g,'&quot;')+'">'+_edr.desc+'</td>';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_edr.reg||'')+'</td>';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_edr.rl3||'')+'</td>';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+_edr.cqtr+'</td>';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+_edr.clqtr+'</td>';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+_edr.tcp+'</td>';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_edr.mps||'')+'</td>';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_edr.sb||'')+'</td>';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_edr.ssb||'')+'</td>';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_edr.cp||'')+'</td>';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_edr.laon||'')+'</td>';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+_edr.drm+'</td>';
+          _edHtml+='<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap">'+fmtE(_edr.eur)+'</td>';
+          _edHtml+='</tr>';
+        }
+        _edHtml+='</tbody></table></div>';
+      }
+      _edHtml+='</div>';
+      _exePipeDtlWrap.innerHTML=_edHtml;
     }
   })();
 }catch(e){var _ep=document.getElementById("exePage");if(_ep)_ep.innerHTML="<div class=\"nr\"><p><b>Error:</b> "+e.message+"</p></div>";console.error(e);}
@@ -2671,6 +2505,8 @@ function renderBud(){
   var totRow="background:#f7f7f7;font-weight:700";
   var cvgColor=function(v){var n=parseFloat(v);if(isNaN(n))return"";return n>=2.5?"color:#0a6640":n>=1.0?"color:#804000":"color:#8B0000";};
   var cvgCell=function(val,extra){var c=cvgColor(val);return'<td style="'+td+';font-weight:700;'+(extra||"")+c+'">'+val+'</td>';};
+  var _cvgClickHnd="event.stopPropagation();var _k=this.dataset.bfk,_v=this.dataset.bfv,_d=this.dataset.drms.split(','),_pfx=this.dataset.cqpfx||null,_ex=this.dataset.cqex||null;var _nf={key:_k,val:_v,drms:_d,closeQPfx:_pfx,closeQExact:_ex};var _same=window._budFocus&&window._budFocus.key===_k&&window._budFocus.val===_v&&window._budFocus.drms&&window._budFocus.drms.join(',')===_d.join(',')&&(window._budFocus.closeQPfx||null)===_pfx&&(window._budFocus.closeQExact||null)===_ex;window._budFocus=_same?null:_nf;window._pipeDtlExp=true;renderBud();";
+  var _cvgCellC=function(val,extra,key,bfVal,drmsArr,closeQPfx,closeQExact){var c=cvgColor(val);var act=_bFoc&&_bFoc.drms&&_bFoc.key===key&&_bFoc.val===bfVal&&_bFoc.drms.join(',')===drmsArr.join(',')&&(_bFoc.closeQPfx||null)===(closeQPfx||null)&&(_bFoc.closeQExact||null)===(closeQExact||null);var bg=act?'background:#ffe066;':'';var da=' data-bfk="'+key+'" data-bfv="'+bfVal.replace(/"/g,'&quot;')+'" data-drms="'+drmsArr.join(',')+'"'+(closeQPfx?' data-cqpfx="'+closeQPfx+'"':'')+(closeQExact?' data-cqex="'+closeQExact+'"':'');return'<td'+da+' onclick="'+_cvgClickHnd+'" style="'+td+';font-weight:700;cursor:pointer;'+bg+(extra||'')+c+'">'+val+'</td>';};
 
   // Pipeline metrics — by region and by region+source
   var _pipeRegNorm={"benelux":"Benelux","france":"France","italy":"Italy","mea north":"MEA North","mea south":"MEA South","nordic":"Nordic","southern europe":"Southern Europe","uki":"UKI"};
@@ -2842,7 +2678,7 @@ function renderBud(){
   });
   ["Benelux","France","MEA North","MEA South","Nordic"].forEach(function(r){delete _sprTeamByMu1[r];});
   var _sprTeams=Array.from(new Set((window.SPR_DATA||[]).filter(function(r){var _si=String(r.iac||"").trim();return _si==="Digital"||_si==="Field"||_si==="PLT";}).map(function(r){return String(r.team||"").trim();}).filter(Boolean))).sort();
-  html+='<div class="cc" style="flex:0 0 65%;min-width:0"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><span>RQ4 Budget by Region (kEUR)</span><div style="display:flex;align-items:center;gap:6px;font-weight:400"><label style="font-size:11px;color:var(--mu)">Team:</label><select onchange="window._sprTeamFilter=this.value||null;renderBud()" style="font-size:11px;padding:2px 4px;border:1px solid #ccc;border-radius:3px;max-width:220px"><option value="">All Teams</option>'+_sprTeams.map(function(t){return'<option value="'+t.replace(/"/g,'&quot;')+'"'+((window._sprTeamFilter===t)?' selected':'')+'>'+ t+'</option>';}).join('')+'</select></div></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<div class="cc" style="flex:0 0 65%;min-width:0"><div class="ch"><span>RQ4 Budget by Region (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
   html+='<th style="'+thL+'">Region</th>';
   html+='<th style="'+thS+'">Budget</th>';
   html+='<th style="'+thS+'">Cloud N&amp;U Quota</th>';
@@ -2860,10 +2696,12 @@ function renderBud(){
     var bw=regBW[pipeReg]||0;
     var tcp=(filters["IAC"]&&filters["IAC"].size)?(sprByMu[rg]||0):(regTcpTgt[pipeReg]||0);
     var ytd=regPipeYTD[pipeReg]||0;
+    var _teamQ=window._sprTeamFilter?(sprByMu[rg]||0):0;
+    var _cvgBase=_teamQ>0?_teamQ:rowTot;
     var fc=regForecast[pipeReg]||0;
     var lv=regLive[pipeReg]||0;
     var cp=regCommProb[pipeReg]||0;
-    var rem=rowTot-bw;var fcstCvg=rem>0?(cp/rem).toFixed(1)+"X":"—";
+    var rem=_cvgBase-bw;var fcstCvg=rem>0?(cp/rem).toFixed(1)+"X":"—";
     var liveCvg=rem>0?(lv/rem).toFixed(1)+"X":"—";
     // 2027 coverage: live closing 2027-Q1/Q2 vs (budget Q1/Q2 2026 * 1.3)
     var q1Bud27=(regQtr[rg]["2026-Q1"]||0)*1.3;
@@ -2875,24 +2713,25 @@ function renderBud(){
     grandTot+=rowTot;grandBW+=bw;grandTcp+=tcp;grandYTD+=ytd;grandFc+=fc;grandLv+=lv;grandCP+=cp;
     var _sprRgQ=sprByMu[rg]||0;grandSpr+=_sprRgQ;
     var rgId='bud-src-'+rg.replace(/\s+/g,'_');
-    html+='<tr data-bfk="reg" data-bfv="'+rg+'" onclick="window._budFocus=window._budFocus&&window._budFocus.val===this.dataset.bfv?null:{key:this.dataset.bfk,val:this.dataset.bfv};renderBud();" style="cursor:pointer;font-weight:700;background:'+(_bFoc&&_bFoc.val===rg?'#cce5f0':'#f0f4f8')+'"><td style="'+tdL+'">';
+    html+='<tr data-bfk="reg" data-bfv="'+rg+'" onclick="window._budFocus=window._budFocus&&window._budFocus.val===this.dataset.bfv?null:{key:this.dataset.bfk,val:this.dataset.bfv};window._pipeDtlExp=true;renderBud();" style="cursor:pointer;font-weight:700;background:'+(_bFoc&&_bFoc.val===rg?'#cce5f0':'#f0f4f8')+'"><td style="'+tdL+'">';
     html+='<button onclick="event.stopPropagation();(function(el){if(!window._budRegExpanded)window._budRegExpanded=new Set();var open=el.textContent===\'-\';if(open){document.querySelectorAll(\'.\'+\''+rgId+'\').forEach(function(r){r.style.display=\'none\';});window._budRegExpanded.delete(\''+rgId+'\');}else{document.querySelectorAll(\'.bud-l3.\'+\''+rgId+'\').forEach(function(r){r.style.display=\'\';}); window._budRegExpanded.add(\''+rgId+'\');}el.textContent=open?\'+\':\'-\';})(this)" style="width:18px;height:18px;line-height:1;font-size:13px;font-weight:700;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;margin-right:5px;padding:0">'+(window._budRegExpanded&&window._budRegExpanded.has(rgId)?'-':'+')+'</button>';
     html+=rg+'</td>';
     html+='<td style="'+td+';font-weight:700">'+fmtE(rowTot)+'</td>';
     html+='<td style="'+td+';font-weight:700">'+(_sprRgQ?fmtE(_sprRgQ):"—")+'</td>';
-    html+='<td style="'+td+';font-weight:700">'+(bw?fmtE(bw):"—")+'</td>';
-    html+=cvgCell(fcstCvg);
+    var _bwFocused=_bFoc&&_bFoc.key==='reg'&&_bFoc.val===rg&&_bFoc.drm==='Booked/Won';
+    html+='<td data-reg="'+rg.replace(/"/g,'&quot;')+'" onclick="event.stopPropagation();var _r=this.dataset.reg;var _nf={key:\'reg\',val:_r,drm:\'Booked/Won\',closeQPfx:\'2026\'};window._budFocus=window._budFocus&&window._budFocus.drm===_nf.drm&&window._budFocus.val===_nf.val?null:_nf;window._pipeDtlExp=true;renderBud();" style="'+td+';font-weight:700;cursor:pointer'+(_bwFocused?';background:#ffe066':'')+'" title="Filter Pipeline Detail to Won 2026">'+(bw?fmtE(bw):"—")+'</td>';
+    html+=_cvgCellC(fcstCvg,'','reg',rg,['Committed','Probable'],'2026',null);
     // Q326 and Q426
     ["2026-Q4"].forEach(function(q){
       var qBW=regBW_q[pipeReg]?regBW_q[pipeReg][q]||0:0;
       var qLv=regLive_q[pipeReg]?regLive_q[pipeReg][q]||0:0;
       var qBudget=regQtr[rg][q]||0;
       var qRem=qBudget-qBW;
-      html+=cvgCell(qRem>0?(qLv/qRem).toFixed(1)+"X":"—");
+      html+=_cvgCellC(qRem>0?(qLv/qRem).toFixed(1)+"X":"—",'','reg',rg,['Committed','Probable','Upside'],null,q);
     });
-    html+=cvgCell(liveCvg);
-    html+=cvgCell(q1Cvg27);
-    html+=cvgCell(q2Cvg27);
+    html+=_cvgCellC(liveCvg,'','reg',rg,['Committed','Probable','Upside'],'2026',null);
+    html+=_cvgCellC(q1Cvg27,'','reg',rg,['Committed','Probable','Upside'],null,'2027-Q1');
+    html+=_cvgCellC(q2Cvg27,'','reg',rg,['Committed','Probable','Upside'],null,'2027-Q2');
     html+='</tr>';
     // L3 sub-rows — union of all L3 values with any pipeline data
     var l3Set=new Set(Object.keys(regL3Lv[pipeReg]||{}).concat(Object.keys(regL3BW[pipeReg]||{})).concat(Object.keys(regL3CP[pipeReg]||{})));
@@ -3041,7 +2880,7 @@ function renderBud(){
   html+='</tr></tbody></table></div></div>';
 
   // TCP Attainment table
-  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch" style="display:flex;align-items:center;justify-content:space-between"><span>2026 TCP Target Attainment by Region (kEUR)</span><div style="display:flex;align-items:center;gap:6px;font-weight:400"><label style="font-size:11px;color:var(--mu)">Team:</label><select onchange="window._sprTeamFilter=this.value||null;renderBud()" style="font-size:11px;padding:2px 4px;border:1px solid #ccc;border-radius:3px;max-width:220px"><option value="">All Teams</option>'+_sprTeams.map(function(t){return'<option value="'+t.replace(/"/g,'&quot;')+'"'+((window._sprTeamFilter===t)?' selected':'')+'>'+ t+'</option>';}).join('')+'</select></div></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch"><span>2026 TCP Target Attainment by Region (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
   html+='<th style="'+thL+'">Region</th>';
   html+='<th style="'+thS+'">TCP Target</th>';
   html+='<th style="'+thS+'">Pipeline Created</th>';
@@ -3051,22 +2890,22 @@ function renderBud(){
   var _iacRatioEmea=1;if(filters["IAC"]&&filters["IAC"].size){var _eTot=Object.keys(sprByMuTotal).reduce(function(s,k){return s+(sprByMuTotal[k]||0);},0);var _eIac=Object.keys(sprByMu).reduce(function(s,k){return s+(sprByMu[k]||0);},0);_iacRatioEmea=_eTot>0?_eIac/_eTot:0;}
   REGS.forEach(function(rg){
     var pipeReg=rg.replace(/^CS /,"");
-    var tcp=(window._sprTeamFilter)?(sprByMu[rg]||0):(regTcpTgt[pipeReg]||0);
+    var tcp=regTcpTgt[pipeReg]||0;
     if(filters["IAC"]&&filters["IAC"].size){tcp=(regTcpTgt[pipeReg]||0)*_iacRatioEmea;}
-    if(_sbActF&&!window._sprTeamFilter){tcp*=(_sbTcpRatio[rg]||0);}
+    if(_sbActF){tcp*=(_sbTcpRatio[rg]||0);}
     var ytd=regPipeYTD[pipeReg]||0;
     var att=tcp>0?(ytd/tcp*100).toFixed(0)+"%":"—";
     grandTcp2+=tcp;grandYTD2+=ytd;
     var rgId='bud-reg2-'+pipeReg.replace(/\W+/g,'_');
     var _iacActive=filters["IAC"]&&filters["IAC"].size;
-    var l3Map=window._sprTeamFilter?{}:(l3TcpTgt[pipeReg]||{});
+    var l3Map=l3TcpTgt[pipeReg]||{};
     var sprL3Obj=_sprMu1ForMu[rg]||{};
     var l3DisplaySet=new Set(Object.keys(l3Map));
     Object.values(sprL3Obj).forEach(function(v){if(v.orig)l3DisplaySet.add(v.orig);});
     var allL3Displays=Array.from(l3DisplaySet).sort();
     var hasL3=allL3Displays.length>0;
-    html+='<tr><td style="'+tdL+'">';
-    if(hasL3)html+='<button onclick="(function(el){var rows=document.querySelectorAll(\'.\'+\''+rgId+'\');var open=rows[0]&&rows[0].style.display!==\'none\';rows.forEach(function(r){r.style.display=open?\'none\':\'\';});el.textContent=open?\'+\':\'−\';})(this)" style="width:14px;height:14px;line-height:1;font-size:11px;font-weight:700;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;margin-right:4px;padding:0">+</button>';
+    html+='<tr data-bfk="reg" data-bfv="'+rg.replace(/"/g,'&quot;')+'" onclick="window._budFocus=window._budFocus&&window._budFocus.key===this.dataset.bfk&&window._budFocus.val===this.dataset.bfv?null:{key:this.dataset.bfk,val:this.dataset.bfv};window._pipeDtlExp=true;renderBud();" style="cursor:pointer;background:'+(_bFoc&&_bFoc.key==='reg'&&_bFoc.val===rg?'#cce5f0':'')+'"><td style="'+tdL+'">';
+    if(hasL3)html+='<button onclick="event.stopPropagation();(function(el){var rows=document.querySelectorAll(\'.\'+\''+rgId+'\');var open=rows[0]&&rows[0].style.display!==\'none\';rows.forEach(function(r){r.style.display=open?\'none\':\'\';});el.textContent=open?\'+\':\'−\';})(this)" style="width:14px;height:14px;line-height:1;font-size:11px;font-weight:700;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;margin-right:4px;padding:0">+</button>';
     html+=rg+'</td>';
     html+='<td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td>';
     html+='<td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td>';
@@ -3074,7 +2913,7 @@ function renderBud(){
     allL3Displays.forEach(function(l3Display){
       var l3Key=l3Display.toLowerCase();
       var isL3SameAsL2=l3Display.toLowerCase()===pipeReg.toLowerCase();
-      var _l3tcpBritt=l3Map[l3Display]||0;var l3tcp=(window._sprTeamFilter)?(sprL3Obj[l3Key]?sprL3Obj[l3Key].q:0):(_iacActive?(_l3tcpBritt*_iacRatioEmea):_l3tcpBritt);if(_sbActF&&!window._sprTeamFilter)l3tcp*=(_sbTcpRatio[rg]||0);
+      var _l3tcpBritt=l3Map[l3Display]||0;var l3tcp=_iacActive?(_l3tcpBritt*_iacRatioEmea):_l3tcpBritt;if(_sbActF)l3tcp*=(_sbTcpRatio[rg]||0);
       var l3ytd=(regL3YTD[pipeReg]&&regL3YTD[pipeReg][l3Display])||0;
       var l3att=l3tcp>0?(l3ytd/l3tcp*100).toFixed(0)+"%":"—";
       var teamsObj=(_sprTeamByMu1[rg]&&_sprTeamByMu1[rg][l3Key])||{};
@@ -3183,7 +3022,7 @@ function renderBud(){
     var createQ=String(p["Create Quarter"]||"");
     var closeQ=String(p["Closing Qtr"]||"");
     var solRaw=String(p["Solution Area (L1)"]||"").trim();
-    var sb=_pipeSolMap[solRaw];if(!sb)return;if(SBS.indexOf(sb)===-1)return;if(_bFoc&&_bFoc.key==='reg'&&String(p["Region Lvl 2"]||"").trim()!==_bFoc.val)return;
+    var sb=_pipeSolMap[solRaw];if(!sb)return;if(SBS.indexOf(sb)===-1)return;var _sbRegRaw=String(p["Region Lvl 2"]||"").trim();var _sbReg=_pipeRegNorm[_sbRegRaw.toLowerCase()]||_sbRegRaw;if(_bFoc&&_bFoc.key==='reg'&&_sbReg.toLowerCase()!==_bFoc.val.toLowerCase())return;
     var sol3=String(p["Sub-Solution Area (L2)"]||"").trim();
     var srcRaw2=String(p["TCP Pipeline Source Desc"]||"").trim();
     var src=_pipeSrcMap2[srcRaw2]||null;
@@ -3223,13 +3062,14 @@ function renderBud(){
     // filter by region if active
   });
   // Re-apply region filter to sbTcpTgt if needed
-  if(_brittL2F||_brittL3F){
+  if(_brittL2F||_brittL3F||(_bFoc&&_bFoc.key==='reg')){
     var _brittL3FActive=_brittL3F;
     SBS.forEach(function(s){sbTcpTgt[s]=0;sbSol3Tgt[s]={};});
     (window.TCP_TARGETS_BRITT||[]).forEach(function(t){
-      var rl2raw=String(t["Region Lvl 2"]||"").trim();
+      var rl2raw=String(t["Region Lvl 2"]||"").trim().replace(/^CS /,"");
       var rl2=_pipeRegNorm[rl2raw.toLowerCase()]||rl2raw;
       if(_brittL2F&&!_brittL2F.has(rl2))return;
+      if(_bFoc&&_bFoc.key==='reg'&&rl2.toLowerCase()!==_bFoc.val.toLowerCase())return;
       var l3raw=String(t["Region Lvl 3"]||"").trim();
       var l3=_brittL3Norm[l3raw.toLowerCase()]||l3raw;
       if(_brittL3FActive&&!_brittL3FActive.has(l3))return;
@@ -3265,20 +3105,20 @@ function renderBud(){
     var rem=bud-bw;var fcst=rem>0?(cp/rem).toFixed(1)+"X":"—";var live=rem>0?(lv/rem).toFixed(1)+"X":"—";
     gsbTot+=bud;gsbBW+=bw;gsbLv+=lv;gsbCP+=cp;
     var sbId='bud-sb-'+sb.replace(/\W+/g,'_');
-    html+='<tr data-bfk="sa" data-bfv="'+sb+'" onclick="window._budFocus=window._budFocus&&window._budFocus.val===this.dataset.bfv?null:{key:this.dataset.bfk,val:this.dataset.bfv};renderBud();" style="cursor:pointer;font-weight:700;background:'+(_bFoc&&_bFoc.key==='sa'&&_bFoc.val===sb?'#cce5f0':'#f0f4f8')+'"><td style="'+tdL+'">';
+    html+='<tr data-bfk="sa" data-bfv="'+sb+'" onclick="window._budFocus=window._budFocus&&window._budFocus.val===this.dataset.bfv?null:{key:this.dataset.bfk,val:this.dataset.bfv};window._pipeDtlExp=true;renderBud();" style="cursor:pointer;font-weight:700;background:'+(_bFoc&&_bFoc.key==='sa'&&_bFoc.val===sb?'#cce5f0':'#f0f4f8')+'"><td style="'+tdL+'">';
     html+='<button onclick="event.stopPropagation();(function(el){if(!window._budSBExpanded)window._budSBExpanded=new Set();var rows=document.querySelectorAll(\'.\'+\''+sbId+'\');var open=rows[0]&&rows[0].style.display!==\'none\';rows.forEach(function(r){r.style.display=open?\'none\':\'\';});if(open)window._budSBExpanded.delete(\''+sbId+'\');else window._budSBExpanded.add(\''+sbId+'\');el.textContent=open?\'+\':\'-\';})(this)" style="width:18px;height:18px;line-height:1;font-size:13px;font-weight:700;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;margin-right:5px;padding:0">'+(window._budSBExpanded&&window._budSBExpanded.has(sbId)?'-':'+')+' </button>';
     html+=sb+'</td>';
     html+='<td style="'+td+'">'+(bud?fmtE(bud):"—")+'</td>';
     html+='<td style="'+td+'">'+(bw?fmtE(bw):"—")+'</td>';
-    html+=cvgCell(fcst);
-    ["2026-Q4"].forEach(function(q){var qBW=sbBW_q[sb][q]||0,qLv=sbLv_q[sb][q]||0,qBudget=sbBudget_q[sb][q]||0,qRem=qBudget-qBW;html+=cvgCell(qRem>0?(qLv/qRem).toFixed(1)+"X":"—");});
-    html+=cvgCell(live);
+    html+=_cvgCellC(fcst,'','sa',sb,['Committed','Probable'],'2026',null);
+    ["2026-Q4"].forEach(function(q){var qBW=sbBW_q[sb][q]||0,qLv=sbLv_q[sb][q]||0,qBudget=sbBudget_q[sb][q]||0,qRem=qBudget-qBW;html+=_cvgCellC(qRem>0?(qLv/qRem).toFixed(1)+"X":"—",'','sa',sb,['Committed','Probable','Upside'],null,q);});
+    html+=_cvgCellC(live,'','sa',sb,['Committed','Probable','Upside'],'2026',null);
     var sbQ1Bud27=(sbBudget_q[sb]["2026-Q1"]||0)*1.3;
     var sbQ1Live27=sbLv_q[sb]["2027-Q1"]||0;
     var sbQ2Bud27=(sbBudget_q[sb]["2026-Q2"]||0)*1.3;
     var sbQ2Live27=sbLv_q[sb]["2027-Q2"]||0;
-    html+=cvgCell(sbQ1Bud27>0?(sbQ1Live27/sbQ1Bud27).toFixed(1)+"X":"—");
-    html+=cvgCell(sbQ2Bud27>0?(sbQ2Live27/sbQ2Bud27).toFixed(1)+"X":"—");
+    html+=_cvgCellC(sbQ1Bud27>0?(sbQ1Live27/sbQ1Bud27).toFixed(1)+"X":"—",'','sa',sb,['Committed','Probable','Upside'],null,'2027-Q1');
+    html+=_cvgCellC(sbQ2Bud27>0?(sbQ2Live27/sbQ2Bud27).toFixed(1)+"X":"—",'','sa',sb,['Committed','Probable','Upside'],null,'2027-Q2');
     html+='</tr>';
     // Sub-rows — either sol3 or TCP source depending on drill mode
     var drillItems=[];
@@ -3333,10 +3173,13 @@ function renderBud(){
   // TCP Target by Source (from EMEA TCP_TARGETS_DETAIL)
   var srcTgt2={},srcYTD2={},srcHO2={},srcBW2={},srcDL2={};
   var _srcOrder2=["SDE","Marketing","Sales","Partner","CSM"];
-  _srcOrder2.forEach(function(src){srcTgt2[src]=0;srcYTD2[src]=0;srcHO2[src]=0;srcBW2[src]=0;srcDL2[src]=0;});
+  var _srcDisplayNames={"SDE":"Digital hub"};
+  var srcMpsYTD2={},srcMpsBW2={},srcMpsDL2={},srcMpsHO2={};
+  _srcOrder2.forEach(function(src){srcTgt2[src]=0;srcYTD2[src]=0;srcHO2[src]=0;srcBW2[src]=0;srcDL2[src]=0;srcMpsYTD2[src]={};srcMpsBW2[src]={};srcMpsDL2[src]={};srcMpsHO2[src]={};});
   (window.TCP_TARGETS_DETAIL||[]).filter(function(t){return String(t.qtr||"").startsWith("2026");}).forEach(function(t){
     var sa=String(t.sa||"").trim();if(_sbActF&&(!sa||SBS.indexOf(sa)===-1))return;
     if(_brittL2F){var muNorm=_pipeRegNorm[String(t.mu||"").replace(/^CS /,"").toLowerCase().trim()]||String(t.mu||"").replace(/^CS /,"").trim();if(!_brittL2F.has(muNorm))return;}
+    if(_bFoc&&_bFoc.key==='reg'){var muNormBfoc=_pipeRegNorm[String(t.mu||"").replace(/^CS /,"").toLowerCase().trim()]||String(t.mu||"").replace(/^CS /,"").trim();if(muNormBfoc.toLowerCase()!==_bFoc.val.toLowerCase())return;}
     var src=String(t.src||"").trim();if(!src||_srcOrder2.indexOf(src)===-1)return;
     srcTgt2[src]=(srcTgt2[src]||0)+(parseFloat(t.target)||0);
   });
@@ -3345,17 +3188,19 @@ function renderBud(){
     if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
     if(drmFilters.size&&!drmFilters.has(String(p["DRM Category"]||"").trim()))return;
     if(mmPipeSrcFilters.size&&!mmPipeSrcFilters.has(String(p["MM Pipe Source"]||"").trim()))return;
+    if(tcpPipeSrcFilters.size&&!tcpPipeSrcFilters.has(String(p["TCP Pipeline Source Desc"]||"").trim()))return;
     if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
     if(_brittL2F){var _pr2=_pipeRegNorm[String(p["Region Lvl 2"]||"").toLowerCase().trim()]||String(p["Region Lvl 2"]||"").trim();if(!_brittL2F.has(_pr2))return;}
+    if(_bFoc&&_bFoc.key==='reg'){var _pr2bfoc=_pipeRegNorm[String(p["Region Lvl 2"]||"").toLowerCase().trim()]||String(p["Region Lvl 2"]||"").trim();if(_pr2bfoc.toLowerCase()!==_bFoc.val.toLowerCase())return;}
     if(_brittL3F){var _pr3=String(p["Region Lvl 3"]||"").trim();if(!_brittL3F.has(_pr3))return;}
     if(_sbActF){var _ps2=_pipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_sbActF.has(_ps2))return;}
     if(filters["IAC"]&&filters["IAC"].size&&!filters["IAC"].has(String(p["IAC (Engagement Model)"]||"").trim()))return;
     var src=_pipeSrcMap2[String(p["TCP Pipeline Source Desc"]||"").trim()];if(!src||_srcOrder2.indexOf(src)===-1)return;
     var _eur2=parseFloat(p["Eur"]||0)||0;
-    srcYTD2[src]=(srcYTD2[src]||0)+_eur2;
-    if(hasHod(p["SDE Handover Date"]))srcHO2[src]=(srcHO2[src]||0)+_eur2;
-    if(String(p["DRM Category"]||"").trim()==="Booked/Won")srcBW2[src]=(srcBW2[src]||0)+_eur2;
-    if(String(p["DRM Category"]||"").trim()==="Disc/Lost")srcDL2[src]=(srcDL2[src]||0)+_eur2;
+    srcYTD2[src]=(srcYTD2[src]||0)+_eur2;var _mps2=String(p["MM Pipe Source"]||"").trim()||"(blank)";srcMpsYTD2[src][_mps2]=(srcMpsYTD2[src][_mps2]||0)+_eur2;
+    if(hasHod(p["SDE Handover Date"])){srcHO2[src]=(srcHO2[src]||0)+_eur2;srcMpsHO2[src][_mps2]=(srcMpsHO2[src][_mps2]||0)+_eur2;}
+    if(String(p["DRM Category"]||"").trim()==="Booked/Won"){srcBW2[src]=(srcBW2[src]||0)+_eur2;srcMpsBW2[src][_mps2]=(srcMpsBW2[src][_mps2]||0)+_eur2;}
+    if(String(p["DRM Category"]||"").trim()==="Disc/Lost"){srcDL2[src]=(srcDL2[src]||0)+_eur2;srcMpsDL2[src][_mps2]=(srcMpsDL2[src][_mps2]||0)+_eur2;}
   });
   // If L3 filter active: calculate L3 share of L2 pipeline per source and pro-rate targets
   if(_brittL3F){
@@ -3364,6 +3209,7 @@ function renderBud(){
       if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
       if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
       if(_brittL2F){var _pr2b=_pipeRegNorm[String(p["Region Lvl 2"]||"").toLowerCase().trim()]||String(p["Region Lvl 2"]||"").trim();if(!_brittL2F.has(_pr2b))return;}
+      if(_bFoc&&_bFoc.key==='reg'){var _pr2bfoc2=_pipeRegNorm[String(p["Region Lvl 2"]||"").toLowerCase().trim()]||String(p["Region Lvl 2"]||"").trim();if(_pr2bfoc2.toLowerCase()!==_bFoc.val.toLowerCase())return;}
       if(_sbActF){var _ps2b=_pipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_sbActF.has(_ps2b))return;}
       if(filters["IAC"]&&filters["IAC"].size&&!filters["IAC"].has(String(p["IAC (Engagement Model)"]||"").trim()))return;
       var src=_pipeSrcMap2[String(p["TCP Pipeline Source Desc"]||"").trim()];if(!src||_srcOrder2.indexOf(src)===-1)return;
@@ -3392,7 +3238,10 @@ function renderBud(){
     var dl=srcDL2[src]||0;var dlPct=ytd>0?(dl/ytd*100).toFixed(0)+"%":"-";
     var bwPct=ytd>0?(bw/ytd*100).toFixed(0)+"%":"—";
     var hoPct=ytd>0?(ho/ytd*100).toFixed(0)+"%":"—";
-    html+='<tr><td style="'+tdL+'">'+src+'</td><td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td>'+(sTcpEx?'<td style="'+td+'">'+tgtPct+'</td>':'')+'<td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td>'+(sYtdEx?'<td style="'+td+'">'+ytdPct+'</td>':'')+'<td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td><td style="'+td+'">'+(bw?fmtE(bw):"—")+'</td><td style="'+td+'">'+bwPct+'</td><td style="'+td+'">'+dlPct+'</td><td style="'+td+'">'+hoPct+'</td></tr>';
+    var srcDrillId='bud-src-mps-'+src.replace(/\W+/g,'_');
+    html+='<tr data-bfk="tcp" data-bfv="'+src.replace(/"/g,'&quot;')+'" onclick="window._budFocus=window._budFocus&&window._budFocus.key===this.dataset.bfk&&window._budFocus.val===this.dataset.bfv?null:{key:this.dataset.bfk,val:this.dataset.bfv};window._pipeDtlExp=true;renderBud();" style="cursor:pointer;background:'+(_bFoc&&_bFoc.key==='tcp'&&_bFoc.val===src?'#cce5f0':'')+'"><td style="'+tdL+'"><button onclick="event.stopPropagation();(function(el){var rows=document.querySelectorAll(\'.\'+\''+srcDrillId+'\');var open=rows[0]&&rows[0].style.display!==\'none\';rows.forEach(function(r){r.style.display=open?\'none\':\'\';});el.textContent=open?\'+\':\'-\';})(this)" style="width:18px;height:18px;line-height:1;font-size:13px;font-weight:700;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;margin-right:5px;padding:0">+</button>'+(_srcDisplayNames[src]||src)+'</td><td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td>'+(sTcpEx?'<td style="'+td+'">'+tgtPct+'</td>':'')+'<td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td>'+(sYtdEx?'<td style="'+td+'">'+ytdPct+'</td>':'')+'<td style="'+td+';font-weight:700;color:'+(tcp>0&&ytd/tcp>=1?'#0a6640':ytd/tcp>=0.75?'#804000':'#8B0000')+'">'+att+'</td><td style="'+td+'">'+(bw?fmtE(bw):"—")+'</td><td style="'+td+'">'+bwPct+'</td><td style="'+td+'">'+dlPct+'</td><td style="'+td+'">'+hoPct+'</td></tr>';
+    var _mpsEntries=Object.keys(srcMpsYTD2[src]||{}).sort(function(a,b){return (srcMpsYTD2[src][b]||0)-(srcMpsYTD2[src][a]||0);});
+    _mpsEntries.forEach(function(mps){var mpsYtd=srcMpsYTD2[src][mps]||0;var mpsBW=srcMpsBW2[src][mps]||0;var mpsDL=srcMpsDL2[src][mps]||0;var mpsHO=srcMpsHO2[src][mps]||0;var mpsYtdPct=ytd>0?(mpsYtd/ytd*100).toFixed(0)+"%":"—";var mpsBWPct=mpsYtd>0?(mpsBW/mpsYtd*100).toFixed(0)+"%":"—";var mpsDLPct=mpsYtd>0?(mpsDL/mpsYtd*100).toFixed(0)+"%":"—";var mpsHOPct=mpsYtd>0?(mpsHO/mpsYtd*100).toFixed(0)+"%":"—";html+='<tr class="'+srcDrillId+'" style="display:none;background:#f5f5ff"><td style="padding:3px 6px 3px 34px;font-size:11px;color:var(--mu);border-bottom:1px solid #efefff">'+mps+'</td><td style="'+td+';font-size:11px;color:var(--mu)">—</td>'+(sTcpEx?'<td style="'+td+';font-size:11px">—</td>':'')+'<td style="'+td+';font-size:11px;color:var(--mu)">'+(mpsYtd?fmtE(mpsYtd):"—")+'</td>'+(sYtdEx?'<td style="'+td+';font-size:11px">'+mpsYtdPct+'</td>':'')+'<td style="'+td+';font-size:11px">—</td><td style="'+td+';font-size:11px">'+(mpsBW?fmtE(mpsBW):"—")+'</td><td style="'+td+';font-size:11px">'+mpsBWPct+'</td><td style="'+td+';font-size:11px">'+mpsDLPct+'</td><td style="'+td+';font-size:11px">'+mpsHOPct+'</td></tr>';});
   });
   html+='<tr style="'+totRow+'"><td style="'+tdL+'">Total</td><td style="'+td+';font-weight:700">'+fmtE(gSrcTcp)+'</td>'+(sTcpEx?'<td style="'+td+';font-weight:700">100%</td>':'')+'<td style="'+td+';font-weight:700">'+fmtE(gSrcYTD)+'</td>'+(sYtdEx?'<td style="'+td+';font-weight:700">100%</td>':'')+'<td style="'+td+';font-weight:700">'+(gSrcTcp>0?(gSrcYTD/gSrcTcp*100).toFixed(0)+"%":"—")+'</td><td style="'+td+';font-weight:700">'+fmtE(gSrcBW2)+'</td><td style="'+td+';font-weight:700">'+(gSrcYTD>0?(gSrcBW2/gSrcYTD*100).toFixed(0)+"%":"—")+'</td><td style="'+td+';font-weight:700">'+(gSrcYTD>0?(gSrcDL2/gSrcYTD*100).toFixed(0)+"%":"—")+'</td><td style="'+td+';font-weight:700">'+(gSrcYTD>0?(gSrcHO2/gSrcYTD*100).toFixed(0)+"%":"—")+'</td></tr>';
   html+='</tbody></table></div></div>';
@@ -3412,8 +3261,8 @@ function renderBud(){
     var att=tcp>0?(ytd/tcp*100).toFixed(0)+"%":"—";
     gsbTcp+=tcp;gsbYTD+=ytd;
     var sbId2='bud-sb2-'+sb.replace(/\W+/g,'_');
-    html+='<tr style="font-weight:700;background:#f0f4f8"><td style="'+tdL+'">';
-    html+='<button onclick="(function(el){var rows=document.querySelectorAll(\'.\'+\''+sbId2+'\');var open=rows[0]&&rows[0].style.display!==\'none\';rows.forEach(function(r){r.style.display=open?\'none\':\'\';});el.textContent=open?\'+\':\'-\';})(this)" style="width:18px;height:18px;line-height:1;font-size:13px;font-weight:700;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;margin-right:5px;padding:0">+</button>';
+    html+='<tr data-bfk="sa" data-bfv="'+sb.replace(/"/g,'&quot;')+'" onclick="window._budFocus=window._budFocus&&window._budFocus.key===this.dataset.bfk&&window._budFocus.val===this.dataset.bfv?null:{key:this.dataset.bfk,val:this.dataset.bfv};window._pipeDtlExp=true;renderBud();" style="cursor:pointer;font-weight:700;background:'+(_bFoc&&_bFoc.key==='sa'&&_bFoc.val===sb?'#cce5f0':'#f0f4f8')+'"><td style="'+tdL+'">';
+    html+='<button onclick="event.stopPropagation();(function(el){var rows=document.querySelectorAll(\'.\'+\''+sbId2+'\');var open=rows[0]&&rows[0].style.display!==\'none\';rows.forEach(function(r){r.style.display=open?\'none\':\'\';});el.textContent=open?\'+\':\'-\';})(this)" style="width:18px;height:18px;line-height:1;font-size:13px;font-weight:700;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;margin-right:5px;padding:0">+</button>';
     html+=sb+'</td>';
     html+='<td style="'+td+'">'+(tcp?fmtE(tcp):"—")+'</td>';
     html+='<td style="'+td+'">'+(ytd?fmtE(ytd):"—")+'</td>';
@@ -3458,39 +3307,52 @@ function renderBud(){
       var _dDrm=String(p['DRM Category']||'').trim();
       if(drmFilters.size&&!drmFilters.has(_dDrm))return;
       if(mmPipeSrcFilters.size&&!mmPipeSrcFilters.has(String(p["MM Pipe Source"]||"").trim()))return;
-      if(_bFoc){if(_bFoc.key==='reg'&&_dreg.toLowerCase()!==_bFoc.val.toLowerCase())return;if(_bFoc.key==='tcp'&&String(p['TCP Pipeline Source Desc']||'').trim()!==_bFoc.val)return;if(_bFoc.key==='sa'&&(_pipeSolMap[String(p['Solution Area (L1)']||'').trim()]||String(p['Solution Area (L1)']||'').trim())!==_bFoc.val)return;}
+      if(_bFoc){if(_bFoc.key==='reg'&&_dreg.toLowerCase()!==_bFoc.val.toLowerCase())return;if(_bFoc.key==='tcp'&&String(p['TCP Pipeline Source Desc']||'').trim()!==_bFoc.val)return;if(_bFoc.key==='sa'&&(_pipeSolMap[String(p['Solution Area (L1)']||'').trim()]||String(p['Solution Area (L1)']||'').trim())!==_bFoc.val)return;if(_bFoc.drm&&_dDrm!==_bFoc.drm)return;if(_bFoc.drms&&_bFoc.drms.length&&_bFoc.drms.indexOf(_dDrm)<0)return;if(_bFoc.closeQPfx&&!String(p['Closing Qtr']||'').startsWith(_bFoc.closeQPfx))return;if(_bFoc.closeQExact&&String(p['Closing Qtr']||'').trim()!==_bFoc.closeQExact)return;}
       if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p['Create Quarter']||'').trim()))return;
       if(window._pipeCloseQtrSet&&window._pipeCloseQtrSet.size&&!window._pipeCloseQtrSet.has(String(p['Closing Qtr']||'').trim()))return;
-      _dtlRows.push({oid:String(p['Opportunity ID']||''),desc:String(p['Opp Description']||''),cqtr:String(p['Create Quarter']||''),clqtr:String(p['Closing Qtr']||''),tcp:String(p['TCP Pipeline Source Desc']||''),cp:String(p['Channel Partner']||''),eur:parseFloat(p['Eur']||0)||0,drm:_dDrm,laon:String(p['Local Account Owner Name']||'')});
+      var _drSb=_pipeSolMap[String(p['Solution Area (L1)']||'').trim()]||String(p['Solution Area (L1)']||'').trim();
+      _dtlRows.push({oid:String(p['Opportunity ID']||''),desc:String(p['Opp Description']||''),cqtr:String(p['Create Quarter']||''),clqtr:String(p['Closing Qtr']||''),tcp:String(p['TCP Pipeline Source Desc']||''),cp:String(p['Channel Partner']||''),eur:parseFloat(p['Eur']||0)||0,drm:_dDrm,laon:String(p['Local Account Owner Name']||''),reg:_dreg,rl3:String(p['Region Lvl 3']||'').trim(),mps:String(p['MM Pipe Source']||''),sb:_drSb,ssb:String(p['Sub-Solution Area (L2)']||'')});
     });
     _dtlRows.sort(function(a,b){return b.eur-a.eur;});window._budDtlRows=_dtlRows;
     var _dtlShown=Math.min(_dtlRows.length,1000);
     html+='<div style="font-size:11px;color:#888;margin-bottom:4px">'+_dtlRows.length.toLocaleString()+' records'+(_dtlRows.length>1000?' &mdash; showing top 1000 by EUR':'')+' sorted by EUR desc</div>';
     html+='<div style="overflow-x:auto;max-height:500px;overflow-y:auto;border:1px solid #ddd;border-radius:4px">';
-    html+='<table style="border-collapse:collapse;font-size:12px;width:100%;min-width:900px">';
+    html+='<table style="border-collapse:collapse;font-size:12px;width:100%;min-width:1500px">';
     html+='<thead><tr style="background:#00144A;color:#fff;position:sticky;top:0;z-index:1">';
     html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Opp ID</th>';
     html+='<th style="padding:6px 8px;text-align:left;font-weight:600">Opp Description</th>';
+    html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Region L2</th>';
+    html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Region L3</th>';
     html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Create Qtr</th>';
     html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Close Qtr</th>';
-    html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">TCP Source</th><th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Channel Partner</th>';
+    html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">TCP Source</th>';
+    html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">MM Pipe Source</th>';
+    html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Sales Bag</th>';
+    html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Sub Sales Bag</th>';
+    html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Channel Partner</th>';
     html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">Local Account Owner</th>';
+    html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">DRM Category</th>';
     html+='<th style="padding:6px 8px;text-align:right;white-space:nowrap;font-weight:600">EUR</th>';
-    html+='<th style="padding:6px 8px;text-align:left;white-space:nowrap;font-weight:600">DRM Status</th>';
     html+='</tr></thead><tbody>';
     for(var _di=0;_di<_dtlShown;_di++){
       var _dr=_dtlRows[_di];
       var _bg=_di%2===0?'#fff':'#f8f9fa';
-      html+='<tr style="background:'+_bg+'">';
+      var _drAct=_bFoc&&_bFoc.key==='sa'&&_bFoc.val===_dr.sb;
+      html+='<tr data-bfk="sa" data-bfv="'+_dr.sb.replace(/"/g,'&quot;')+'" onclick="window._budFocus=window._budFocus&&window._budFocus.key===this.dataset.bfk&&window._budFocus.val===this.dataset.bfv?null:{key:this.dataset.bfk,val:this.dataset.bfv};renderBud();" style="cursor:pointer;background:'+(_drAct?'#cce5f0':_bg)+'">';
       html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap;font-size:11px">'+(_dr.oid||'&mdash;')+'</td>';
       html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+_dr.desc.replace(/"/g,'&quot;')+'">'+_dr.desc+'</td>';
+      html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_dr.reg||'')+'</td>';
+      html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_dr.rl3||'')+'</td>';
       html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+_dr.cqtr+'</td>';
       html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+_dr.clqtr+'</td>';
       html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+_dr.tcp+'</td>';
+      html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_dr.mps||'')+'</td>';
+      html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_dr.sb||'')+'</td>';
+      html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_dr.ssb||'')+'</td>';
       html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_dr.cp||'')+'</td>';
       html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+(_dr.laon||'')+'</td>';
-      html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap">'+fmtE(_dr.eur)+'</td>';
       html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;white-space:nowrap">'+_dr.drm+'</td>';
+      html+='<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap">'+fmtE(_dr.eur)+'</td>';
       html+='</tr>';
     }
     html+='</tbody></table></div>';
@@ -4538,6 +4400,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
           var tgt=_re2TgtPipe[r[0]]||_re2TgtPipe["CS "+r[0]]||_re2TgtPipeLower[r[0].toLowerCase()]||0;
           var fmtTgt=tgt>0?fmtE(tgt/1000):"—";
           var tcpTgt=(re2ViewMode==="reg"?(_brittTcpL2[r[0].toLowerCase().replace(/^cs /,"")]||0):re2ViewMode==="l3"?(_brittTcpL3[r[0].toLowerCase().replace(/^cs /,"")]||0):re2ViewMode==="dcm"?(_tcpDcm[r[0].toLowerCase()]||0):0)*0.19;
+          if(r[0].toLowerCase()==="sonali baliga"){var _sUKI=filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size&&Array.from(filters["Region Name (level 2)"]).some(function(rv){return rv.replace(/^CS /,"").trim().toLowerCase()==="uki";});var _sSCM=(filters["Sales Bag"]&&filters["Sales Bag"].has("SCM"))||(filters["Sub Sales Bag"]&&Array.from(filters["Sub Sales Bag"]).some(function(s){return s.toUpperCase().indexOf("SCM")>=0;}));if(_sUKI)tcpTgt=10000;else if(_sSCM)tcpTgt=30000;}
           _totalTcpAcc+=tcpTgt;
           var fmtTcpTgt=tcpTgt>0?'€'+fmtE(tcpTgt):"—";
           var pct=totalEur>0?(eur/totalEur*100).toFixed(0)+"%":"—";
@@ -5228,7 +5091,8 @@ function exportCalDetail(){
   a.href=URL.createObjectURL(new Blob(["﻿"+rows.join("\n")],{type:"text/csv;charset=utf-8"}));
   a.download="campaign_calendar_detail.csv";a.click();
 }
-function exportBudDtl(){var rows=[["Opp ID","Opp Description","Create Qtr","Close Qtr","TCP Source","Channel Partner","EUR","DRM Status"]];(window._budDtlRows||[]).forEach(function(r){rows.push([r.oid,r.desc,r.cqtr,r.clqtr,r.tcp,r.cp||"",r.eur.toFixed(2),r.drm].map(function(v){return '"'+String(v||"").replace(/"/g,'""')+'"';}));});var csv=rows.map(function(r){return r.join(",");}).join("\n");var blob=new Blob([csv],{type:"text/csv"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="pipeline_detail_bud.csv";a.click();}function exportPdet(){
+function exportBudDtl(){function esc(v){return'"'+String(v==null?"":v).replace(/"/g,'""')+'"';}var hdr=["Opp ID","Opp Description","Region L2","Region L3","Create Qtr","Close Qtr","TCP Source","MM Pipe Source","Sales Bag","Sub Sales Bag","Channel Partner","Local Account Owner","DRM Category","EUR"];var rows=[[hdr.map(esc).join(",")]];(window._budDtlRows||[]).forEach(function(r){rows.push([[r.oid,r.desc,r.reg,r.rl3,r.cqtr,r.clqtr,r.tcp,r.mps,r.sb,r.ssb,r.cp,r.laon,r.drm,r.eur.toFixed(2)].map(esc).join(",")]);});var csv=rows.map(function(r){return r.join("");}).join("\n");var blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="pipeline_detail.csv";a.click();}
+function exportExeDtl(){function esc(v){return'"'+String(v==null?"":v).replace(/"/g,'""')+'"';}var hdr=["Opp ID","Opp Description","Region L2","Region L3","Create Qtr","Close Qtr","TCP Source","MM Pipe Source","Sales Bag","Sub Sales Bag","Channel Partner","Local Account Owner","DRM Category","EUR"];var rows=[[hdr.map(esc).join(",")]];(window._exeDtlRows||[]).forEach(function(r){rows.push([[r.oid,r.desc,r.reg,r.rl3,r.cqtr,r.clqtr,r.tcp,r.mps,r.sb,r.ssb,r.cp,r.laon,r.drm,r.eur.toFixed(2)].map(esc).join(",")]);});var csv=rows.map(function(r){return r.join("");}).join("\n");var blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="tcp_pipeline_detail.csv";a.click();}function exportPdet(){
   var rows=[["Campaign Name","DCM","Demand Manager","Region (Calendar)","Region (Opp)","Account Name","Opp Description","Campaign/WBS Code","Sequence ID","Opportunity ID","DRM Category","TCP Source","Handover Date","Create Quarter","Closing Quarter","MM Identifier","SDE Initial Engagement Name","SDE Primary Engagement Name","SDE Secondary Engagement Name","EUR"]];
   var body=document.getElementById("pdb");
   if(!body)return;
