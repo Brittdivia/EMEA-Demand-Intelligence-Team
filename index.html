@@ -954,6 +954,7 @@ function buildMmpsDD(){
   pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(!v)return;counts[v]=(counts[v]||0)+1;});
   var opts=Object.keys(counts).sort(function(a,b){return a.localeCompare(b);});
   var el=document.getElementById("mmps-fdo");if(!el)return;
+  if(!opts.length){el.innerHTML='<div style="padding:8px 12px;font-size:12px;color:#888">No MM Pipe Source data in current pipeline week</div>';return;}
   el.innerHTML=opts.map(function(opt){
     var chk=mmPipeSrcFilters.has(opt)?"checked":"";
     var eq=opt.replace(/"/g,"&quot;");var ep=opt.replace(/'/g,"\\'");
@@ -2395,6 +2396,7 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
         if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfCL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfCL3.has(String(p["Region Lvl 3"]||"").trim().toLowerCase()))return;}
         if(_iacFilter&&!_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
         if(_exeSbActF){var _rcSol=_exePipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_exeSbActF.has(_rcSol))return;}
+        if(window._tcpCalSrc){var _tcpCSM={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};if(_tcpCSM[String(p["TCP Pipeline Source Desc"]||"").trim()]!==window._tcpCalSrc)return;}
         var reg=String(p["Region Lvl 2"]||"").trim()||"Other";
         var l3=String(p["Region Lvl 3"]||"").trim()||"Other";
         var eur=parseFloat(p["Eur"]||0)||0;
@@ -2411,8 +2413,15 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
       if(!window._rcExpL2)window._rcExpL2=new Set();
       window._rcL2Keys=[];
       window._rcTogL2=function(i){var k=window._rcL2Keys[i];window._rcExpL2.has(k)?window._rcExpL2.delete(k):window._rcExpL2.add(k);renderExe();};
-      var tbl3='<div class="cc"><div class="ch">% Pipeline Contribution from Campaign Calendar — by Region</div><div><table style="width:100%;border-collapse:collapse"><thead><tr>';
-      tbl3+='<th style="'+thT2+'">Region</th><th style="'+thTR2+'">Total Pipeline</th><th style="'+thTR2+'">Calendar-linked</th><th style="'+thTR2+'">% from Calendar</th></tr></thead><tbody>';
+      if(!window.hasOwnProperty('_tcpCalSrc'))window._tcpCalSrc=null;
+      var _tcpCalSrcBtns=["All","SDE","Marketing","Sales","Partner","CSM"].map(function(s){
+        var sel=(s==="All")?!window._tcpCalSrc:(s===window._tcpCalSrc);
+        var oc=s==="All"?'window._tcpCalSrc=null;renderExe()':'window._tcpCalSrc=\''+s+'\';renderExe()';
+        return '<span onclick="'+oc+'" style="cursor:pointer;padding:2px 10px;border-radius:10px;font-size:11px;white-space:nowrap;border:1px solid '+(sel?'#0070F2':'#ccc')+';background:'+(sel?'#0070F2':'transparent')+';color:'+(sel?'#fff':'#555')+'">'+(s==="All"?"All Sources":s)+'</span>';
+      }).join(' ');
+      var _tcpCalColLbl=window._tcpCalSrc?window._tcpCalSrc+' Pipeline':'Total Pipeline';
+      var tbl3='<div class="cc"><div class="ch" style="display:flex;align-items:center;flex-wrap:wrap;gap:8px"><span>% Pipeline Contribution from Campaign Calendar — by Region</span><span style="display:flex;gap:4px;flex-wrap:wrap;font-weight:400">'+_tcpCalSrcBtns+'</span></div><div><table style="width:100%;border-collapse:collapse"><thead><tr>';
+      tbl3+='<th style="'+thT2+'">Region</th><th style="'+thTR2+'">'+_tcpCalColLbl+'</th><th style="'+thTR2+'">Calendar-linked</th><th style="'+thTR2+'">% from Calendar</th></tr></thead><tbody>';
       _regCalOrder.forEach(function(r){
         var tot=_regAll[r]||0,cal=_regCal[r]||0;
         var pct=tot>0?(cal/tot*100).toFixed(1)+"%":"—";
