@@ -5214,6 +5214,8 @@ function renderOutInner(page){
   var _l3ToL2Out={"CS Israel":"CS MEA North","CS Portugal":"CS Southern Europe","CS Greece & Cyprus":"CS Southern Europe","CS Greece":"CS Southern Europe","CS Turkey":"CS MEA North","CS Türkiye":"CS MEA North","CS Turkiye":"CS MEA North","CS Kuwait":"CS MEA North","CS UAE":"CS MEA North","CS KSA":"CS MEA North","CS Egypt":"CS MEA North","CS EGYPT":"CS MEA North"};
   var _wbsToRegOut={};
   campSource.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var reg=String(r["Region Name (level 2)"]||"").trim();if(w&&reg)_wbsToRegOut[w]=_l3ToL2Out[reg]||reg;});
+  var _wbsToDCM={};
+  campSource.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var dcm=String(r["Demand Manager"]||"").trim();if(w&&dcm)_wbsToDCM[w]=dcm;});
 
   // Apply outFilter
   var data=allData.filter(function(r){
@@ -5245,6 +5247,7 @@ function renderOutInner(page){
       if(_wbsToTagOut[wbs]!==window.outFilter.proTagOut&&seqTags.indexOf(window.outFilter.proTagOut)<0&&pt!==window.outFilter.proTagOut)return false;
     }
     if(window.outFilter.proTagPros){var wbs2=String(r["Campaign/WBS Code"]||"").trim();if(_wbsToTagPros[wbs2]!==window.outFilter.proTagPros)return false;}
+    if(window.outFilter.dcm){var _dcmWbs=String(r["Campaign/WBS Code"]||"").trim();if((_wbsToDCM[_dcmWbs]||"")!==window.outFilter.dcm)return false;}
     return true;
   });
 
@@ -5252,7 +5255,7 @@ function renderOutInner(page){
   var filterKeys=Object.keys(window.outFilter).filter(function(k){return window.outFilter[k];});
   var anyFilter=FD.some(function(f){return filters[f.k].size>0;})||eurMinFilter!==null||eurMaxFilter!==null;
   var globalBanner=anyFilter?buildFilterBanner(filtered.length,data.length):"";
-  var filterBanner=globalBanner+(filterKeys.length?"<div style=\"background:#FEF1E6;border:1px solid #F5C6A0;border-radius:4px;padding:6px 12px;margin-bottom:8px;font-size:12px;display:flex;align-items:center;gap:8px\">Filter: "+filterKeys.map(function(k){var v=window.outFilter[k];if(k==="stage")v=v.replace(/^Stage_/,"").replace(/_+/g," ");return"<b>"+k+":</b> "+v;}).join(" | ")+"<button onclick=\"window.outFilter={};renderOut();\" style=\"margin-left:auto;font-size:11px;padding:2px 8px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Clear</button></div>":"");
+  var filterBanner=globalBanner+(filterKeys.length?"<div style=\"background:#FEF1E6;border:1px solid #F5C6A0;border-radius:4px;padding:6px 12px;margin-bottom:8px;font-size:12px;display:flex;align-items:center;gap:8px\">Filter: "+filterKeys.map(function(k){var v=window.outFilter[k];if(k==="stage")v=v.replace(/^Stage_/,"").replace(/_+/g," ");var lbl={"dcm":"DCM","reg":"Region","owner":"Owner","wbs":"Campaign","sb":"Sales Bag","iac":"IAC","sod":"SoD","proTagOut":"Outreach Tag","proTagPros":"Prospect Tag"}[k]||k;return"<b>"+lbl+":</b> "+v;}).join(" | ")+"<button onclick=\"window.outFilter={};renderOut();\" style=\"margin-left:auto;font-size:11px;padding:2px 8px;cursor:pointer;border:1px solid var(--bd);border-radius:3px\">Clear</button></div>":"");
 
   var totP=0,totD=0,totO=0,totR=0,totB=0,totFinished=0,totDelivered=0;
   var _seqsWithData=0;
@@ -5314,9 +5317,13 @@ function renderOutInner(page){
 
   var html3='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Outreach Details - ('+data.length.toLocaleString()+' Sequences in Analysis)</h2><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>'+filterBanner;
   var _selSt='font-size:12px;padding:4px 8px;border:1px solid var(--bd);border-radius:var(--r);cursor:pointer;max-width:260px';
+  var _dcmOpts=Array.from(new Set(allData.map(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();return _wbsToDCM[w]||"";}).filter(Boolean))).sort();
+  var _curDCM=window.outFilter.dcm||"";
   var _curTagOut=window.outFilter.proTagOut||"";
   var _curTagPros=window.outFilter.proTagPros||"";
   html3+='<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px;align-items:center;font-size:12px">';
+  html3+='<span style="font-weight:600;color:var(--dk)">DCM:</span>';
+  html3+='<select onchange="window.outFilter.dcm=this.value||null;renderOut()" style="'+_selSt+';width:200px"><option value="">All</option>'+_dcmOpts.map(function(d){var eq=d.replace(/"/g,'&quot;');return'<option value="'+eq+'"'+(_curDCM===d?' selected':'')+'>'+eq+'</option>';}).join('')+'</select>';
   html3+='<span style="font-weight:600;color:var(--dk)">Profiling Tag for Outreach:</span>';
   html3+='<input list="out-tagout-list" id="out-tagout-input" placeholder="Search tag..." value="'+(_curTagOut.replace(/"/g,'&quot;'))+'" oninput="var v=this.value.trim();window.outFilter.proTagOut=v||null;renderOut()" style="'+_selSt+';width:240px"><datalist id="out-tagout-list">'+_tagOutOpts.map(function(t){return'<option value="'+t.replace(/"/g,'&quot;')+'"></option>';}).join('')+'</datalist>';
   html3+='<span style="font-weight:600;color:var(--dk)">Profiling Tag for Prospect:</span>';
