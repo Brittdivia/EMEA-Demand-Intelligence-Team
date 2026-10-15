@@ -119,6 +119,7 @@ $campCols = @{
     'Sub Sales Bag'               = 'Sub Sales Bag'
     'IAC'                         = 'IAC'
     'SoD'                         = 'SoD'
+    'AI Focused?'                 = 'AI Focused?'
     'IB/NNN'                      = 'IB/NNN'
     'Industry (MC)'               = 'Industry (MC)'
     'Activity Sub-Type'           = 'Activity Sub-Type'
