@@ -82,15 +82,20 @@ foreach ($csvName in $fieldMap.Keys) {
 }
 Write-Host '  Column map built.'
 
+# Build ordered output field names from fieldMap
+$outFields = @($fieldMap.Values)
+
 $sw = [System.IO.StreamWriter]::new($outFile, $false, [System.Text.Encoding]::UTF8)
-$sw.Write('window.PIPE_DATA_W42=[')
+# Compact columnar format: {h:[headers], d:[[row],[row],...]}
+$headerJson = ($outFields | ForEach-Object { '"' + $_ + '"' }) -join ','
+$sw.Write('window.PIPE_DATA_W42={h:[' + $headerJson + '],d:[')
 $firstRecord = $true
 $rowCount = 0
 
 while (-not $parser.EndOfData) {
     $fields = $parser.ReadFields()
     $sb = New-Object System.Text.StringBuilder
-    $sb.Append('{') | Out-Null
+    $sb.Append('[') | Out-Null
     $firstField = $true
     foreach ($csvName in $fieldMap.Keys) {
         $outName = $fieldMap[$csvName]
@@ -99,17 +104,16 @@ while (-not $parser.EndOfData) {
         $raw = if ($idx -lt $fields.Count) { $fields[$idx].Trim() } else { '' }
         if (-not $firstField) { $sb.Append(',') | Out-Null }
         $firstField = $false
-        $keyJson = '"' + $outName + '":'
         if ($outName -in $numericFields) {
             $num = 0.0
             if ([double]::TryParse($raw, $numStyles, $invCulture, [ref]$num)) {
-                $sb.Append($keyJson + $num.ToString('G', $invCulture)) | Out-Null
-            } else { $sb.Append($keyJson + '0') | Out-Null }
+                $sb.Append($num.ToString('G', $invCulture)) | Out-Null
+            } else { $sb.Append('0') | Out-Null }
         } else {
-            $sb.Append($keyJson + '"' + (EscJson $raw) + '"') | Out-Null
+            $sb.Append('"' + (EscJson $raw) + '"') | Out-Null
         }
     }
-    $sb.Append('}') | Out-Null
+    $sb.Append(']') | Out-Null
     if (-not $firstRecord) { $sw.Write(',') }
     $sw.Write($sb.ToString())
     $firstRecord = $false
@@ -118,7 +122,7 @@ while (-not $parser.EndOfData) {
 }
 
 $parser.Close()
-$sw.Write('];')
+$sw.Write(']};')
 $sw.Close()
 $sz = (Get-Item $outFile).Length
 Write-Host "  Done: $rowCount rows -> $outFile ($([int]($sz/1MB)) MB)"
