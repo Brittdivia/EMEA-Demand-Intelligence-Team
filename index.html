@@ -3084,6 +3084,7 @@ function renderBud(){
     });
   });
   var _pipeSolMap={"BAIP - Data & AI":"Data & AI","BAIP - Technology Foundation":"Business Technology Platform","Business Transformation Management":"Business Transformation Management","Cloud ERP Private":"Cloud ERP Private","Finance and Spend Management":"Finance and Spend Management","Human Capital Management":"Human Capital Management","Supply Chain Management":"Supply Chain Management","Customer Experience":"Customer Experience","Other":"Other"};
+  var _ukiL3Map={"sl-uki -ie":"Ireland","sl-uki corp pd":"UK","sl-uki corp uk":"UK","sl-uki-consumer":"UK","sl-uki-ps pd":"UK","sl-uki-pub sector":"UK"};
   pipeData.forEach(function(p){
     if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
     var regRaw=String(p["Region Lvl 2"]||"").trim();if(!regRaw)return;
@@ -3102,7 +3103,7 @@ function renderBud(){
     var srcRaw=String(p["TCP Pipeline Source Desc"]||"").trim();
     var src=_pipeSrcMap2[srcRaw];
     if(_bFoc&&_bFoc.key==='tcp'&&src!==_bFoc.val)return;
-    var l3=String(p["Region Lvl 3"]||"").trim();
+    var l3=String(p["Region Lvl 3"]||"").trim();if(reg==="UKI"&&l3){var _nl3=_ukiL3Map[l3.toLowerCase()];if(_nl3)l3=_nl3;}
     if(createQ.startsWith("2026"))regPipeYTD[reg]=(regPipeYTD[reg]||0)+eur;
     if(l3&&createQ.startsWith("2026")){if(!regL3YTD[reg])regL3YTD[reg]={};regL3YTD[reg][l3]=(regL3YTD[reg][l3]||0)+eur;var _srgY=String(p["IC_ACCOUNT_SRG_TEXT"]||"").trim();if(_srgY){if(!regL3SrgYTD[reg])regL3SrgYTD[reg]={};if(!regL3SrgYTD[reg][l3])regL3SrgYTD[reg][l3]={};regL3SrgYTD[reg][l3][_srgY]=(regL3SrgYTD[reg][l3][_srgY]||0)+eur;}}
     if(closeQ.startsWith("2026")&&drm==="Booked/Won")regBW[reg]=(regBW[reg]||0)+eur;
