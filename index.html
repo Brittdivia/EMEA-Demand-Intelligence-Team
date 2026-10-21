@@ -3085,6 +3085,7 @@ function renderBud(){
   });
   var _pipeSolMap={"BAIP - Data & AI":"Data & AI","BAIP - Technology Foundation":"Business Technology Platform","Business Transformation Management":"Business Transformation Management","Cloud ERP Private":"Cloud ERP Private","Finance and Spend Management":"Finance and Spend Management","Human Capital Management":"Human Capital Management","Supply Chain Management":"Supply Chain Management","Customer Experience":"Customer Experience","Other":"Other"};
   var _ukiL3Map={"sl-uki -ie":"Ireland","sl-uki corp pd":"UK","sl-uki corp uk":"UK","sl-uki-consumer":"UK","sl-uki-ps pd":"UK","sl-uki-pub sector":"UK"};
+  var _pipeL3Norm={"francophone afric":"Francophone Africa","pakistan afghanis":"Pakistan Afghanistan Kuwait & Bahrain"};
   pipeData.forEach(function(p){
     if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
     var regRaw=String(p["Region Lvl 2"]||"").trim();if(!regRaw)return;
@@ -3103,7 +3104,7 @@ function renderBud(){
     var srcRaw=String(p["TCP Pipeline Source Desc"]||"").trim();
     var src=_pipeSrcMap2[srcRaw];
     if(_bFoc&&_bFoc.key==='tcp'&&src!==_bFoc.val)return;
-    var l3=String(p["Region Lvl 3"]||"").trim();if(reg==="UKI"&&l3){var _nl3=_ukiL3Map[l3.toLowerCase()];if(_nl3)l3=_nl3;}
+    var l3=String(p["Region Lvl 3"]||"").trim();if(reg==="UKI"&&l3){var _nl3=_ukiL3Map[l3.toLowerCase()];if(_nl3)l3=_nl3;}if(l3){var _nl3g=_pipeL3Norm[l3.toLowerCase()];if(_nl3g)l3=_nl3g;}
     if(createQ.startsWith("2026"))regPipeYTD[reg]=(regPipeYTD[reg]||0)+eur;
     if(l3&&createQ.startsWith("2026")){if(!regL3YTD[reg])regL3YTD[reg]={};regL3YTD[reg][l3]=(regL3YTD[reg][l3]||0)+eur;var _srgY=String(p["IC_ACCOUNT_SRG_TEXT"]||"").trim();if(_srgY){if(!regL3SrgYTD[reg])regL3SrgYTD[reg]={};if(!regL3SrgYTD[reg][l3])regL3SrgYTD[reg][l3]={};regL3SrgYTD[reg][l3][_srgY]=(regL3SrgYTD[reg][l3][_srgY]||0)+eur;}}
     if(closeQ.startsWith("2026")&&drm==="Booked/Won")regBW[reg]=(regBW[reg]||0)+eur;
@@ -3224,10 +3225,10 @@ function renderBud(){
   });
   var _sprDataAll=(window.SPR_DATA||[]).filter(function(r){if(!String(r.qtr||"").startsWith("2026"))return false;var _si=String(r.iac||"").trim();if(_si!=="Digital"&&_si!=="Field"&&_si!=="PLT")return false;if(window._sprTeamFilter&&window._sprTeamFilter.size&&!window._sprTeamFilter.has(String(r.team||"").trim()))return false;if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _sf2=new Set(Array.from(filters["Region Name (level 2)"]).map(function(v){var s=v.replace(/^CS /,"").trim();return(_regNorm[s.toLowerCase()])||s;}));if(!_sf2.has(String(r.mu||"").trim()))return false;}return true;});
   var sprByMuTotal={};_sprDataAll.forEach(function(r){var mu=String(r.mu||"").trim();if(mu)sprByMuTotal[mu]=(sprByMuTotal[mu]||0)+(r.quota||0)/1000;});
-  var _sprQuotaByL3Total={};(window.SPR_DATA||[]).forEach(function(r){if(!String(r.qtr||"").startsWith("2026"))return;var _si=String(r.iac||"").trim();if(_si!=="Digital"&&_si!=="Field"&&_si!=="PLT")return;if(filters["IAC"]&&filters["IAC"].size){var mi=_sprIacMap[String(r.iac||"").trim()]||r.iac;if(!filters["IAC"].has(mi))return;}var mu1=String(r.mu1||"").trim()||String(r.mu||"").trim();if(mu1){var k=mu1.toLowerCase();_sprQuotaByL3Total[k]=(_sprQuotaByL3Total[k]||0)+(r.quota||0)/1000;}});
+  var _sprQuotaByL3Total={};(window.SPR_DATA||[]).forEach(function(r){if(!String(r.qtr||"").startsWith("2026"))return;var _si=String(r.iac||"").trim();if(_si!=="Digital"&&_si!=="Field"&&_si!=="PLT")return;if(filters["IAC"]&&filters["IAC"].size){var mi=_sprIacMap[String(r.iac||"").trim()]||r.iac;if(!filters["IAC"].has(mi))return;}var mu1=String(r.mu1||"").trim()||String(r.mu||"").trim();var _mu1qn=_pipeL3Norm[mu1.toLowerCase()];if(_mu1qn)mu1=_mu1qn;if(mu1){var k=mu1.toLowerCase();_sprQuotaByL3Total[k]=(_sprQuotaByL3Total[k]||0)+(r.quota||0)/1000;}});
   var sprByMu={},sprByMu1={},_sprMu1ForMu={},_sprTeamByMu1={};
   _sprData.forEach(function(r){
-    var mu=String(r.mu||"").trim();var mu1=String(r.mu1||"").trim()||mu;var q=(r.quota||0)/1000;
+    var mu=String(r.mu||"").trim();var mu1=String(r.mu1||"").trim()||mu;var _mu1n=_pipeL3Norm[mu1.toLowerCase()];if(_mu1n)mu1=_mu1n;var q=(r.quota||0)/1000;
     if(mu)sprByMu[mu]=(sprByMu[mu]||0)+q;
     if(mu1){
       var k=mu1.toLowerCase();
@@ -3297,8 +3298,8 @@ function renderBud(){
     html+='</tr>';
     // L3 sub-rows — union of all L3 values with any pipeline data
     var l3Set=new Set(Object.keys(regL3Lv[pipeReg]||{}).concat(Object.keys(regL3BW[pipeReg]||{})).concat(Object.keys(regL3CP[pipeReg]||{})));
-    if(regPCBud[pipeReg])Object.keys(regPCBud[pipeReg]).forEach(function(k){l3Set.add(k);});
-    if(_sprMu1ForMu[rg])Object.keys(_sprMu1ForMu[rg]).forEach(function(k){l3Set.add(_sprMu1ForMu[rg][k].orig);});
+    if(regPCBud[pipeReg])Object.keys(regPCBud[pipeReg]).forEach(function(k){if(k.toLowerCase()!==pipeReg.toLowerCase())l3Set.add(k);});
+    if(_sprMu1ForMu[rg])Object.keys(_sprMu1ForMu[rg]).forEach(function(k){if(_sprMu1ForMu[rg][k].orig.toLowerCase()!==rg.toLowerCase())l3Set.add(_sprMu1ForMu[rg][k].orig);});
     var l3Items=Array.from(l3Set).sort();
     var _rgFbTeamsObj=(_sprTeamByMu1[rg]&&_sprTeamByMu1[rg][rg.toLowerCase()])||{};
     var _l2ModeRgs=new Set(["France","Italy","UKI"]);
