@@ -3220,10 +3220,10 @@ function renderBud(){
   });
   var _sprDataAll=(window.SPR_DATA||[]).filter(function(r){if(!String(r.qtr||"").startsWith("2026"))return false;var _si=String(r.iac||"").trim();if(_si!=="Digital"&&_si!=="Field"&&_si!=="PLT")return false;if(window._sprTeamFilter&&String(r.team||"").trim()!==window._sprTeamFilter)return false;if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _sf2=new Set(Array.from(filters["Region Name (level 2)"]).map(function(v){var s=v.replace(/^CS /,"").trim();return(_regNorm[s.toLowerCase()])||s;}));if(!_sf2.has(String(r.mu||"").trim()))return false;}return true;});
   var sprByMuTotal={};_sprDataAll.forEach(function(r){var mu=String(r.mu||"").trim();if(mu)sprByMuTotal[mu]=(sprByMuTotal[mu]||0)+(r.quota||0)/1000;});
-  var _sprQuotaByL3Total={};(window.SPR_DATA||[]).forEach(function(r){if(!String(r.qtr||"").startsWith("2026"))return;var _si=String(r.iac||"").trim();if(_si!=="Digital"&&_si!=="Field"&&_si!=="PLT")return;if(filters["IAC"]&&filters["IAC"].size){var mi=_sprIacMap[String(r.iac||"").trim()]||r.iac;if(!filters["IAC"].has(mi))return;}var mu1=String(r.mu1||"").trim();if(mu1){var k=mu1.toLowerCase();_sprQuotaByL3Total[k]=(_sprQuotaByL3Total[k]||0)+(r.quota||0)/1000;}});
+  var _sprQuotaByL3Total={};(window.SPR_DATA||[]).forEach(function(r){if(!String(r.qtr||"").startsWith("2026"))return;var _si=String(r.iac||"").trim();if(_si!=="Digital"&&_si!=="Field"&&_si!=="PLT")return;if(filters["IAC"]&&filters["IAC"].size){var mi=_sprIacMap[String(r.iac||"").trim()]||r.iac;if(!filters["IAC"].has(mi))return;}var mu1=String(r.mu1||"").trim()||String(r.mu||"").trim();if(mu1){var k=mu1.toLowerCase();_sprQuotaByL3Total[k]=(_sprQuotaByL3Total[k]||0)+(r.quota||0)/1000;}});
   var sprByMu={},sprByMu1={},_sprMu1ForMu={},_sprTeamByMu1={};
   _sprData.forEach(function(r){
-    var mu=String(r.mu||"").trim();var mu1=String(r.mu1||"").trim();var q=(r.quota||0)/1000;
+    var mu=String(r.mu||"").trim();var mu1=String(r.mu1||"").trim()||mu;var q=(r.quota||0)/1000;
     if(mu)sprByMu[mu]=(sprByMu[mu]||0)+q;
     if(mu1){
       var k=mu1.toLowerCase();
