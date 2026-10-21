@@ -3512,6 +3512,7 @@ function renderBud(){
         var _tfCnt={};teamKeys.forEach(function(tk){var _s=teamsObj[tk].orig.indexOf(' - ');var _sfx=(_s>-1?teamsObj[tk].orig.slice(_s+3):teamsObj[tk].orig).replace(/^[SF]LSM[-\s]*/i,'').toLowerCase().replace(/[\s\-]+/g,'');var _rk=_resolveSrgYtd(_sfx);if(_rk)_tfCnt[_rk]=(_tfCnt[_rk]||0)+1;});
         l3ytd=0;teamKeys.forEach(function(tk){var _s=teamsObj[tk].orig.indexOf(' - ');var _sfx=(_s>-1?teamsObj[tk].orig.slice(_s+3):teamsObj[tk].orig).replace(/^[SF]LSM[-\s]*/i,'').toLowerCase().replace(/[\s\-]+/g,'');var _rk=_resolveSrgYtd(_sfx);l3ytd+=_rk?(_srgYtdLower[_rk]||0)/(_tfCnt[_rk]||1):0;});
       }
+      if(!l3tcp&&!isL3SameAsL2&&tcp>0){var _totalL3Q=Object.values(_sprMu1ForMu[rg]||{}).reduce(function(s,v){return s+v.q;},0);var _thisL3Q=(_sprMu1ForMu[rg]&&_sprMu1ForMu[rg][l3Key]&&_sprMu1ForMu[rg][l3Key].q)||0;if(_totalL3Q>0)l3tcp=tcp*_thisL3Q/_totalL3Q;}
       var l3att=l3tcp>0?(l3ytd/l3tcp*100).toFixed(0)+"%":"—";
       var teamId='bud-team-'+pipeReg.replace(/\W+/g,'_')+'-'+l3Display.replace(/\W+/g,'_');
       var teamParentClass=isL3SameAsL2?rgId:teamId;
