@@ -3479,7 +3479,8 @@ function renderBud(){
     var l3Map=l3TcpTgt[pipeReg]||{};
     var sprL3Obj=_sprMu1ForMu[rg]||{};
     var l3DisplaySet=new Set(Object.keys(l3Map));
-    Object.values(sprL3Obj).forEach(function(v){if(v.orig)l3DisplaySet.add(v.orig);});
+    var _tfActive=window._sprTeamFilter&&window._sprTeamFilter.size;
+    Object.values(sprL3Obj).forEach(function(v){if(v.orig&&(_tfActive||l3Map[v.orig]))l3DisplaySet.add(v.orig);});
     var allL3Displays=Array.from(l3DisplaySet).sort();
     var hasL3=allL3Displays.length>0;
     html+='<tr data-bfk="reg" data-bfv="'+rg.replace(/"/g,'&quot;')+'" onclick="window._budFocus=window._budFocus&&window._budFocus.key===this.dataset.bfk&&window._budFocus.val===this.dataset.bfv?null:{key:this.dataset.bfk,val:this.dataset.bfv};window._pipeDtlExp=false;renderBud();" style="cursor:pointer;background:'+(_bFoc&&_bFoc.key==='reg'&&_bFoc.val===rg?'#cce5f0':'')+'"><td style="'+tdL+'">';
