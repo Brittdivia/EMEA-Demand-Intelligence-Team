@@ -3591,12 +3591,14 @@ function renderBud(){
   // TCP source drill-down per SA
   var sbSrcBW={},sbSrcLv={},sbSrcCP={},sbSrcYTD={},sbSrcBW_q={},sbSrcLv_q={};
   SBS.forEach(function(s){sbBW[s]=0;sbLv[s]=0;sbCP[s]=0;sbYTD[s]=0;sbTcpTgt[s]=0;sbBW_q[s]={};sbLv_q[s]={};sbSol3Tgt[s]={};sbSol3YTD[s]={};sbSol3Bud[s]={};sbSol3BW[s]={};sbSol3Lv[s]={};sbSol3CP[s]={};sbSol3BW_q[s]={};sbSol3Lv_q[s]={};sbSrcBW[s]={};sbSrcLv[s]={};sbSrcCP[s]={};sbSrcYTD[s]={};sbSrcBW_q[s]={};sbSrcLv_q[s]={};QTRS.forEach(function(q){sbBW_q[s][q]=0;sbLv_q[s][q]=0;});});
+  var _tfSrg=[];if(window._sprTeamFilter&&window._sprTeamFilter.size){window._sprTeamFilter.forEach(function(tm){var _ts=tm.indexOf(' - ');var _tsfx=(_ts>-1?tm.slice(_ts+3):tm).replace(/^[SF]LSM[-\s]*/i,'').toLowerCase().replace(/[\s\-]+/g,'');if(_tsfx)_tfSrg.push(_tsfx);});}
   pipeData.forEach(function(p){
     if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
     if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfSB=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){var s=r.replace(/^CS /,"").trim();return _pipeRegNorm[s.toLowerCase()]||s;}));if(!_rfSB.has(String(p["Region Lvl 2"]||"").trim()))return;}
     if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){var _rfSBL3=new Set(Array.from(filters["Region Name (level 3)"]).map(function(r){return r.replace(/^CS /,"").trim();}));if(!_rfSBL3.has(String(p["Region Lvl 3"]||"").trim()))return;}
     if(filters["IAC"]&&filters["IAC"].size&&!filters["IAC"].has(String(p["IAC (Engagement Model)"]||"").trim()))return;
     if(filters["Sales Bag"]&&filters["Sales Bag"].size){var _sbF2=filters["Sales Bag"];var _pSol2=_pipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_sbF2.has(_pSol2))return;}
+    if(_tfSrg.length){var _pSrg=String(p["IC_ACCOUNT_SRG_TEXT"]||"").trim();if(!_pSrg)return;var _pSrgN=_pSrg.toLowerCase().replace(/[\s\-]+/g,'');if(!_tfSrg.some(function(sfx){return sfx===_pSrgN||_pSrgN.startsWith(sfx)||sfx.startsWith(_pSrgN);}))return;}
     var eur=parseFloat(p["Eur"]||0)||0;
     var drm=String(p["DRM Category"]||"").trim();
     var createQ=String(p["Create Quarter"]||"");
@@ -3667,7 +3669,7 @@ function renderBud(){
   var thSW=thS.replace("white-space:nowrap","white-space:normal")+";max-width:60px;line-height:1.2";
   html+='<div style="display:flex;gap:16px;margin-bottom:20px;align-items:flex-start;margin-top:20px">';
   html+='<div style="flex:0 0 65%;min-width:0;display:flex;flex-direction:column;gap:16px">';
-  html+='<div class="cc"><div class="ch"><span>R4Q Budget by Sales Bag (kEUR)</span><span style="font-size:10px;color:#aaa;font-weight:400;margin-left:8px">— Does not adjust to team level</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:24%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr>';
+  html+='<div class="cc"><div class="ch"><span>R4Q Budget by Sales Bag (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:24%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:9%"></colgroup><thead><tr>';
   html+='<th style="'+thL+'">Sales Bag</th>';
   html+='<th style="'+thSW+'">Budget</th>';
   html+='<th style="'+thSW+'">Won 2026</th>';
@@ -3773,6 +3775,7 @@ function renderBud(){
     if(_sbActF){var _ps2=_pipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim();if(!_sbActF.has(_ps2))return;}
     if(filters["IAC"]&&filters["IAC"].size&&!filters["IAC"].has(String(p["IAC (Engagement Model)"]||"").trim()))return;
     var src=_pipeSrcMap2[String(p["TCP Pipeline Source Desc"]||"").trim()];if(!src||_srcOrder2.indexOf(src)===-1)return;
+    if(_tfSrg.length){var _pSrg2=String(p["IC_ACCOUNT_SRG_TEXT"]||"").trim();if(!_pSrg2)return;var _pSrgN2=_pSrg2.toLowerCase().replace(/[\s\-]+/g,'');if(!_tfSrg.some(function(sfx){return sfx===_pSrgN2||_pSrgN2.startsWith(sfx)||sfx.startsWith(_pSrgN2);}))return;}
     var _eur2=parseFloat(p["Eur"]||0)||0;
     srcYTD2[src]=(srcYTD2[src]||0)+_eur2;var _mps2=String(p["MM Pipe Source"]||"").trim()||"(blank)";srcMpsYTD2[src][_mps2]=(srcMpsYTD2[src][_mps2]||0)+_eur2;
     if(hasHod(p["SDE Handover Date"])){srcHO2[src]=(srcHO2[src]||0)+_eur2;srcMpsHO2[src][_mps2]=(srcMpsHO2[src][_mps2]||0)+_eur2;}
@@ -3824,7 +3827,7 @@ function renderBud(){
   html+='</tbody></table></div></div>';
   html+='</div>';  // close left column
   var _sbDrillMode2="sol3";
-  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch"><span>2026 TCP Target Attainment by Sales Bag (kEUR)</span><span style="font-size:10px;color:#aaa;font-weight:400;margin-left:8px">— Does not adjust to team level</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:40%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup><thead><tr>';
+  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch"><span>2026 TCP Target Attainment by Sales Bag (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed"><colgroup><col style="width:40%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup><thead><tr>';
   html+='<th style="'+thL+'">Sales Bag</th>';
   html+='<th style="'+thSW+'">TCP Target</th>';
   html+='<th style="'+thSW+'">YTD Pipeline Created</th>';
