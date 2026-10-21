@@ -1863,9 +1863,11 @@ function renderExe(){try{
     var btnPL2=document.getElementById("exe-pipe-btn-l2"),btnPL3=document.getElementById("exe-pipe-btn-l3");
     if(btnPL2){btnPL2.style.background=_pipeRegMode==="l2"?"#00144A":"";btnPL2.style.color=_pipeRegMode==="l2"?"#fff":"";}
     if(btnPL3){btnPL3.style.background=_pipeRegMode==="l3"?"#00144A":"";btnPL3.style.color=_pipeRegMode==="l3"?"#fff":"";}
+    var _exTfSrg=[];if(window._sprTeamFilter&&window._sprTeamFilter.size){window._sprTeamFilter.forEach(function(tm){var _ts=tm.indexOf(' - ');var _tsfx=(_ts>-1?tm.slice(_ts+3):tm).replace(/^[SF]LSM[-\s]*/i,'').toLowerCase().replace(/[\s\-]+/g,'');if(_tsfx)_exTfSrg.push(_tsfx);});}
+    var _execPipeData=_exTfSrg.length?pipeData.filter(function(p){var _s=String(p["IC_ACCOUNT_SRG_TEXT"]||"").trim();if(!_s)return false;var _sn=_s.toLowerCase().replace(/[\s\-]+/g,'');return _exTfSrg.some(function(sfx){return sfx===_sn||_sn.startsWith(sfx)||sfx.startsWith(_sn);})}):pipeData;
     var regPipe={};
     var _calWBSSetReg=window._exeCalMode?new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean)):null;
-    pipeData.forEach(function(p){
+    _execPipeData.forEach(function(p){
       if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
       if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
       if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
@@ -1948,7 +1950,7 @@ function renderExe(){try{
       var _reg2Totals={},_reg2HO={},_reg2L3Totals={},_reg2L3HO={},_reg2CalPipe={},_reg2SbHO={};
       var _teamTotals={},_teamHO={},_sbTotals={},_sbHO={},_sbSubTotals={},_sbSubHO={},_l2L3TeamPipe={},_l2L3TeamHO={},_l2L3TeamSrc={},_tmOwnerPipe={},_tmOwnerSrc={};
       var _reg3Totals={},_reg3HO={},_reg3CalPipe={},_reg2L3CalPipe={};
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
         if(tcpPipeSrcFilters.size&&!tcpPipeSrcFilters.has(String(p["TCP Pipeline Source Desc"]||"").trim()))return;
         if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
@@ -2018,7 +2020,7 @@ function renderExe(){try{
       else{Object.keys(_detailSrcRaw).forEach(function(s){if(_allowedSrcs2&&!_allowedSrcs2.has(s))return;_srcTcpTgt[s]=_detailSrcRaw[s];});}
       if(_brittL3Fs){
         var _srcTotalsL2={};
-        pipeData.forEach(function(p){
+        _execPipeData.forEach(function(p){
           if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
           if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
           if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
@@ -2335,7 +2337,7 @@ function renderExe(){try{
     var _regTbl=document.getElementById("exe-pipe-reg-tbl-wrap");
     if(_regTbl){
       var _regData={};
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
         if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
         if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
@@ -2360,7 +2362,7 @@ function renderExe(){try{
         if(team){if(!_regData[l2].l3s[l3].teams[team])_regData[l2].l3s[l3].teams[team]={pipe:0,won:0,disc:0};_regData[l2].l3s[l3].teams[team].pipe+=eur;if(isWon)_regData[l2].l3s[l3].teams[team].won+=eur;if(isDisc)_regData[l2].l3s[l3].teams[team].disc+=eur;}
       });
       var _regDataCl={};
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
         if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
         if(!String(p["Closing Qtr"]||"").startsWith("2026"))return;
@@ -2386,7 +2388,7 @@ function renderExe(){try{
         if(team){if(!_regDataCl[l2].l3s[l3].teams[team])_regDataCl[l2].l3s[l3].teams[team]={pipe:0,won:0,disc:0};_regDataCl[l2].l3s[l3].teams[team].pipe+=eur;if(isWonCl)_regDataCl[l2].l3s[l3].teams[team].won+=eur;if(isDiscCl)_regDataCl[l2].l3s[l3].teams[team].disc+=eur;}
       });
       var _regDE={};
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         var drm=String(p["DRM Category"]||"").trim();
         if(drm!=="Disc/Lost"&&drm!=="Excluded from Pipeline")return;
         if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _rfD=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));if(!_rfD.has(String(p["Region Lvl 2"]||"").trim().toLowerCase()))return;}
@@ -2408,7 +2410,7 @@ function renderExe(){try{
       });
       var _closeCategories=new Set(["Booked/Won","Committed","Probable","Upside","Disc/Lost"]);
       var _regClose={};
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         var drm=String(p["DRM Category"]||"").trim();
         if(!_closeCategories.has(drm))return;
         if(!String(p["Closing Qtr"]||"").startsWith("2026"))return;
@@ -2431,7 +2433,7 @@ function renderExe(){try{
       });
       var _liveCategories=new Set(["Upside","Probable","Committed"]);
       var _regLive={};
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         var drm=String(p["DRM Category"]||"").trim();
         if(!_liveCategories.has(drm))return;
         if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
@@ -2454,7 +2456,7 @@ function renderExe(){try{
         if(team){if(!_regLive[l2].l3s[l3].teams[team])_regLive[l2].l3s[l3].teams[team]={live:0};_regLive[l2].l3s[l3].teams[team].live+=eur;}
       });
       var _regOldLive={};
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         var drm=String(p["DRM Category"]||"").trim();
         if(!_closeCategories.has(drm))return;
         if(drm==="Disc/Lost")return;
@@ -2475,7 +2477,7 @@ function renderExe(){try{
         _regOldLive[l2].l3s[l3].pipe+=eur;if(drm==="Booked/Won")_regOldLive[l2].l3s[l3].won+=eur;
       });
       var _regNewClose={};
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         var drm=String(p["DRM Category"]||"").trim();
         if(!_closeCategories.has(drm))return;
         if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
@@ -2498,7 +2500,7 @@ function renderExe(){try{
       });
 
       var regNewQ1_27={},regL3NewQ1_27={};
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         var drm=String(p["DRM Category"]||"").trim();
         if(drm!=="Committed"&&drm!=="Probable"&&drm!=="Upside")return;
         if(String(p["Closing Qtr"]||"").trim()!=="2027-Q1")return;
@@ -2520,7 +2522,7 @@ function renderExe(){try{
         regL3NewQ1_27[l2][l3]=(regL3NewQ1_27[l2][l3]||0)+eur;
       });
       var _regOldClose26={},_regL3OldClose26={};
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         var drm=String(p["DRM Category"]||"").trim();
         if(drm!=="Committed"&&drm!=="Probable"&&drm!=="Upside")return;
         if(String(p["Create Quarter"]||"").startsWith("2026"))return;
@@ -2542,7 +2544,7 @@ function renderExe(){try{
         _regL3OldClose26[l2][l3]=(_regL3OldClose26[l2][l3]||0)+eur;
       });
       var _regExclQ4={},_regL3ExclQ4={},_gExclQ4=0;
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         if(String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline")return;
         if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
         if(String(p["Closing Qtr"]||"").trim()!=="2026-Q4")return;
@@ -2732,7 +2734,7 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
       campData.forEach(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();if(!w)return;var sbs=(r["Sales Bag"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);_wbsToSBMap[w]=sbs;var ssb=String(r["Sub Sales Bag"]||"").trim();if(ssb.indexOf(" - ")>-1)ssb=ssb.substring(ssb.indexOf(" - ")+3).trim();if(ssb)_wbsToSSBMap[w]=ssb;});
       var _tcpSrcMap3={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};
       var _sdePipeSA={};
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
         if(drmFilters.size&&!drmFilters.has(String(p["DRM Category"]||"").trim()))return;
         if(tcpPipeSrcFilters.size&&!tcpPipeSrcFilters.has(String(p["TCP Pipeline Source Desc"]||"").trim()))return;
@@ -2780,7 +2782,7 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
       // Build source × quarter data for the by-source table
       var _srcQtrMap2={"Digital Hub":"SDE","Marketing":"Marketing","Sales":"Sales","Partner":"Partner","CSM":"CSM","CS&D":"CSM"};
       var _sqData={'all':{}};['2026-Q1','2026-Q2','2026-Q3','2026-Q4'].forEach(function(q){_sqData[q]={};});
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
         if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
         if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
@@ -2807,7 +2809,7 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
     var srcPipe={},srcTgt={};
     SRC_ORDER.forEach(function(s){srcPipe[s]=0;srcTgt[s]=0;});
     var _calWBSSetSrc=window._exeCalMode?new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean)):null;
-    pipeData.forEach(function(p){
+    _execPipeData.forEach(function(p){
       if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
       if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
       if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
@@ -2838,7 +2840,7 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
     // If L3 filter active: pro-rate targets by L3/L2 pipeline ratio per source
     if(filters["Region Name (level 3)"]&&filters["Region Name (level 3)"].size){
       var _srcPipeL2={};SRC_ORDER.forEach(function(s){_srcPipeL2[s]=0;});
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
         if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
         if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
@@ -2888,7 +2890,7 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
       var _exeRegNorm={"benelux":"Benelux","france":"France","italy":"Italy","mea north":"MEA North","mea south":"MEA South","nordic":"Nordic","southern europe":"Southern Europe","uki":"UKI"};
       var _exePipeSolMap2={"BAIP - Data & AI":"Data & AI","BAIP - Business Analytics":"Business Analytics","HXM - Human Experience Management":"HXM","SCM - Supply Chain Management":"SCM","BCM - Business Critical MCA & Services":"BCM","BCM - Business Critical":"BCM","ISPM - Intelligent Spend & Business Network":"ISBN","BTP - Business Technology Platform":"BTP","RISE with SAP":"RISE","GROW with SAP":"GROW","CX - Customer Experience":"CX"};
       var _exeDtlRows=[];
-      pipeData.forEach(function(p){
+      _execPipeData.forEach(function(p){
         var _edDrm=String(p["DRM Category"]||"").trim();
         if(window._exeDtlSets&&window._exeDtlSets.drm.size){if(!window._exeDtlSets.drm.has(_edDrm))return;}else{if(_edDrm==="Excluded from Pipeline"||(drmFilters.size&&!drmFilters.has(_edDrm)))return;}
         if(tcpPipeSrcFilters.size&&!tcpPipeSrcFilters.has(String(p["TCP Pipeline Source Desc"]||"").trim()))return;
