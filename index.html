@@ -3243,7 +3243,8 @@ function renderBud(){
     }
   });
   var _sprTeams=Array.from(new Set((window.SPR_DATA||[]).filter(function(r){var _si=String(r.iac||"").trim();return _si==="Digital"||_si==="Field"||_si==="PLT";}).map(function(r){return String(r.team||"").trim();}).filter(Boolean))).sort();
-  html+='<div class="cc" style="flex:0 0 65%;min-width:0"><div class="ch"><span>RQ4 Budget by Region (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  var _budAllExp=window._budRegExpanded&&window._budRegExpanded.size>0&&REGS.every(function(rg){return window._budRegExpanded.has('bud-src-'+rg.replace(/\s+/g,'_'));});
+  html+='<div class="cc" style="flex:0 0 65%;min-width:0"><div class="ch"><span>RQ4 Budget by Region (kEUR)</span><button onclick="(function(btn){var exp=btn.textContent===\'Expand All\';var tbl=btn.closest(\'.cc\').querySelector(\'table\');if(!tbl)return;tbl.querySelectorAll(\'td > button\').forEach(function(b){var isOpen=b.textContent!==\'+\';if(exp&&!isOpen)b.click();else if(!exp&&isOpen)b.click();});btn.textContent=exp?\'Collapse All\':\'Expand All\';})(this)" style="float:right;font-size:11px;padding:2px 7px;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">'+(_budAllExp?'Collapse All':'Expand All')+'</button></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
   html+='<th style="'+thL+'">Region</th>';
   html+='<th style="'+thS+'">Budget</th>';
   html+='<th style="'+thS+'">Cloud N&amp;U Quota</th>';
@@ -3447,7 +3448,7 @@ function renderBud(){
   html+='</tr></tbody></table></div></div>';
 
   // TCP Attainment table
-  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch"><span>2026 TCP Target Attainment by Region (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
+  html+='<div class="cc" style="flex:1;min-width:0"><div class="ch"><span>2026 TCP Target Attainment by Region (kEUR)</span><button onclick="(function(btn){var exp=btn.textContent===\'Expand All\';var tbl=btn.closest(\'.cc\').querySelector(\'table\');if(!tbl)return;tbl.querySelectorAll(\'td > button\').forEach(function(b){var isOpen=b.textContent!==\'+\';if(exp&&!isOpen)b.click();else if(!exp&&isOpen)b.click();});btn.textContent=exp?\'Collapse All\':\'Expand All\';})(this)" style="float:right;font-size:11px;padding:2px 7px;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">Expand All</button></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
   html+='<th style="'+thL+'">Region</th>';
   html+='<th style="'+thS+'">TCP Target</th>';
   html+='<th style="'+thS+'">Pipeline Created</th>';
