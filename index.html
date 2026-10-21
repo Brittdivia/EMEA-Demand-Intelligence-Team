@@ -3237,7 +3237,6 @@ function renderBud(){
       }
     }
   });
-  if(!window._sprTeamFilter){["Benelux","France"].forEach(function(r){delete _sprTeamByMu1[r];});}
   var _sprTeams=Array.from(new Set((window.SPR_DATA||[]).filter(function(r){var _si=String(r.iac||"").trim();return _si==="Digital"||_si==="Field"||_si==="PLT";}).map(function(r){return String(r.team||"").trim();}).filter(Boolean))).sort();
   html+='<div class="cc" style="flex:0 0 65%;min-width:0"><div class="ch"><span>RQ4 Budget by Region (kEUR)</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>';
   html+='<th style="'+thL+'">Region</th>';
