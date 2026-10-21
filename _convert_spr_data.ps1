@@ -35,7 +35,7 @@ $excel.Visible = $false
 $excel.DisplayAlerts = $false
 $wb = $excel.Workbooks.Open($xlsxPath, 0, $true)
 $ws = $wb.Sheets.Item(1)
-$lastRow = [Math]::Min($ws.Cells.Item(2,1).End(-4121).Row, 10000)
+$lastRow = $ws.UsedRange.Row + $ws.UsedRange.Rows.Count - 1
 Write-Host "Rows: $($lastRow - 1)"
 
 $range = $ws.Range($ws.Cells.Item(1,1), $ws.Cells.Item($lastRow, 13))

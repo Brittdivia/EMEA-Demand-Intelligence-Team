@@ -3299,7 +3299,8 @@ function renderBud(){
     if(_sprMu1ForMu[rg])Object.keys(_sprMu1ForMu[rg]).forEach(function(k){l3Set.add(_sprMu1ForMu[rg][k].orig);});
     var l3Items=Array.from(l3Set).sort();
     var _rgFbTeamsObj=(_sprTeamByMu1[rg]&&_sprTeamByMu1[rg][rg.toLowerCase()])||{};
-    var _isL2Mode=Object.keys(_rgFbTeamsObj).length>0&&!Object.keys(_sprTeamByMu1[rg]||{}).some(function(k){return k!==rg.toLowerCase()&&Object.keys(_sprTeamByMu1[rg][k]).length>0;});
+    var _l2ModeRgs=new Set(["France","Italy","UKI"]);
+    var _isL2Mode=Object.keys(_rgFbTeamsObj).length>0&&(_l2ModeRgs.has(rg)||!Object.keys(_sprTeamByMu1[rg]||{}).some(function(k){return k!==rg.toLowerCase()&&Object.keys(_sprTeamByMu1[rg][k]).length>0;}));
     if(_isL2Mode){
       var _allSrgBwM={},_allSrgLvM={},_allSrgCpM={},_allSrgQM={},_allSrgBqM={};
       l3Items.forEach(function(l3){
