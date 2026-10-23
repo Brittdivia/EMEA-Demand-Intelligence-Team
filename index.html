@@ -3305,6 +3305,53 @@ function renderSde3(){try{
   html+='<td style="'+totS+';border-left:2px solid #dde5f5">'+fK(_grand)+'</td>';
   html+='<td style="'+totS+';border-left:4px solid #07838F">'+fK(_actTot)+'</td>';
   html+='<td style="'+totS+';color:'+attClr(_actTot,_grand)+'">'+pct(_actTot,_grand)+'</td>';
+  html+='</tr></tbody></table></div></div>';
+  // Second table: HO Target by Quarter / FLM (static from FLM target data)
+  var _flm=[
+    {n:'Clarisse Chassé',    q1:9937,   q2:15899.2, q3:12421.3,  q4:11427.6,  t:49685},
+    {n:'Deniz Urulbay',      q1:10260,  q2:16416,   q3:12825,    q4:11799,    t:51300},
+    {n:'Eleonora Michelin',  q1:7980,   q2:12768,   q3:9975,     q4:9177,     t:39900},
+    {n:'Elizabeth Malmberg', q1:5130,   q2:8208,    q3:6412.5,   q4:5899.5,   t:25650},
+    {n:'Helga Elshout',      q1:10830,  q2:17328,   q3:13537.5,  q4:12454.5,  t:54150},
+    {n:'Julien Furnari',     q1:7790,   q2:12464,   q3:9737.5,   q4:8958.5,   t:38950},
+    {n:'Julien Gregoir',     q1:7400.5, q2:11840.8, q3:9250.63,  q4:8510.58,  t:37002.5},
+    {n:'Safinaz Salah',      q1:9348,   q2:14956.8, q3:11685,    q4:10750.2,  t:46740},
+    {n:'Sandra Cortes',      q1:11172,  q2:17875.2, q3:13965,    q4:12847.8,  t:55860},
+    {n:'Sherihan Megahed',   q1:9215,   q2:14744,   q3:11518.8,  q4:10597.3,  t:46075},
+    {n:'Thomas Lenfant',     q1:5814,   q2:9302.4,  q3:7267.5,   q4:6686.1,   t:29070},
+    {n:'TBH FLM CX',         q1:7011,   q2:11217.6, q3:8763.75,  q4:8062.65,  t:35055},
+    {n:'TBH FLM UKI',        q1:9310,   q2:14896,   q3:11637.5,  q4:10706.5,  t:46550}
+  ];
+  var fN=function(n){if(n===undefined||n===null||isNaN(n))return'—';var r=Math.round(n*100)/100;return r.toLocaleString('en-US',{minimumFractionDigits:r%1===0?0:r%0.1<0.005?1:2,maximumFractionDigits:2});};
+  var _flmGrand={q1:111197.5,q2:177916,q3:138997,q4:127877,t:555987.5};
+  html+='<div class="cc" style="margin-top:16px"><div class="ch">SDE HO Target per Quarter / Manager (FLM Level, kEUR)</div>';
+  html+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>';
+  html+='<th style="'+thL+'">Manager</th>';
+  html+='<th style="'+thS+'">Q1 2026</th>';
+  html+='<th style="'+thS+'">Q2 2026</th>';
+  html+='<th style="'+thS+'">Q3 2026</th>';
+  html+='<th style="'+thS+';background:#003d99">Q4 2026</th>';
+  html+='<th style="'+thS+';border-left:2px solid #3a5fa8;background:#002a7a">Grand Total</th>';
+  html+='</tr></thead><tbody>';
+  _flm.forEach(function(r,i){
+    var bg=i%2===0?'#fff':'#f8f9fc';var td=tdS+';background:'+bg;var tdl=tdL+';background:'+bg;
+    var isTBH=r.n.indexOf('TBH')===0;
+    html+='<tr>';
+    html+='<td style="'+tdl+(isTBH?';color:var(--mu);font-style:italic':'')+'">'+r.n+'</td>';
+    html+='<td style="'+td+'">'+fN(r.q1)+'</td>';
+    html+='<td style="'+td+'">'+fN(r.q2)+'</td>';
+    html+='<td style="'+td+'">'+fN(r.q3)+'</td>';
+    html+='<td style="'+td+';background:'+(bg==='#fff'?'#f0f4ff':'#eaedfa')+'">'+fN(r.q4)+'</td>';
+    html+='<td style="'+td+';border-left:2px solid #dde5f5;font-weight:600;background:'+(bg==='#fff'?'#eef2ff':'#e6eaff')+'">'+fN(r.t)+'</td>';
+    html+='</tr>';
+  });
+  html+='<tr>';
+  html+='<td style="'+totL+'">Grand Total</td>';
+  html+='<td style="'+totS+'">'+fN(_flmGrand.q1)+'</td>';
+  html+='<td style="'+totS+'">'+fN(_flmGrand.q2)+'</td>';
+  html+='<td style="'+totS+'">'+fN(_flmGrand.q3)+'</td>';
+  html+='<td style="'+totS+'">'+fN(_flmGrand.q4)+'</td>';
+  html+='<td style="'+totS+';border-left:2px solid #dde5f5">'+fN(_flmGrand.t)+'</td>';
   html+='</tr></tbody></table></div></div></div>';
   p.innerHTML=html;
 }catch(e){var pg=document.getElementById("sde3Page");if(pg)pg.innerHTML='<div class="nr"><p><b>Error:</b> '+e.message+'</p></div>';console.error(e);}}
