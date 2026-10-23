@@ -1,3 +1,1 @@
-data-prospects.js filter=lfs diff=lfs merge=lfs -text
-data-seqprospect.js filter=lfs diff=lfs merge=lfs -text
 *.js text eol=lf
