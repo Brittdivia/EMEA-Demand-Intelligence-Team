@@ -184,6 +184,11 @@ tbody td.wc{white-space:normal;word-break:break-word;max-width:260px;line-height
   table{page-break-inside:auto;}
   tr{page-break-inside:avoid;}
 }
+#exe2Page .kpi{flex:1 1 0%;min-width:100px;max-width:none;height:auto;padding:10px 12px;}
+#exe2Page .krow{flex-wrap:wrap;gap:8px;margin-bottom:0;}
+#exe2Page .kl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:2px;white-space:normal;line-height:1.2;}
+#exe2Page .kv{font-size:26px;font-weight:700;color:#00144A;line-height:1;margin-bottom:4px;}
+#exe2Page .ks{font-size:11px;color:var(--mu);white-space:normal;line-height:1.4;}
 </style>
 <script>
 function scaleContent(){
@@ -235,12 +240,13 @@ window.PROFILING_ACCT_REQUESTED=306028;</script>
   <div class="hm">
     <span class="hu">Last updated: 19 Oct 2026</span>
     <span class="hc" id="hcount">2,798 campaigns</span>
-    <span id="sec-user-badge" style="font-size:11px;color:var(--mu);cursor:pointer;margin-left:12px" onclick="promptSecEmail();updateAdminTabs();if(activeTab==='bud')renderBud();if(activeTab==='exe')renderExe();" title="Click to change user"></span>
+    <span id="sec-user-badge" style="font-size:11px;color:var(--mu);cursor:pointer;margin-left:12px" onclick="promptSecEmail();updateAdminTabs();if(activeTab==='bud')renderBud();if(activeTab==='exe')renderExe();if(activeTab==='exe2')renderExe('2');" title="Click to change user"></span>
   </div>
 </header>
 <div class="tbar">
   <button class="tbtn on" onclick="switchTab(&#39;bud&#39;)">Coverage Overview</button>
   <button class="tbtn" onclick="switchTab(&#39;exe&#39;)">TCP</button>
+  <button class="tbtn" onclick="switchTab(&#39;exe2&#39;)">TCP v2</button>
   <button class="tbtn" onclick="switchTab(&#39;cal&#39;)">EMEA Campaign Calendar</button>
 </div>
 <div class="tbar-sub" id="tbar-sub">
@@ -258,6 +264,7 @@ window.PROFILING_ACCT_REQUESTED=306028;</script>
 </div>
 <div class="panel on" id="p-bud"><div class="ap" id="budPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-exe"><div class="ap" id="exePage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
+<div class="panel" id="p-exe2"><div class="ap" id="exe2Page"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="wbar" id="wbar" style="display:none"><span id="wbar-content2"></span></div>
 <div class="panel" id="p-sde" style="display:none"><div class="ap" id="sdePage"></div></div>
 <div class="panel" id="p-ana"><div class="ap" id="anaPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
@@ -397,7 +404,7 @@ var _accFiltersSaved=null;
 var DETAIL_TABS={"ana":"Campaign Insights","pip":"Pipeline Details","out":"Outreach Details","cal":"EMEA Campaign Calendar","dtr":"Profiling-Outreach Tracking"};
 function switchTab(t){
   // Security check for Coverage Overview and TCP tabs
-  if(t==="bud"||t==="exe"){
+  if(t==="bud"||t==="exe"||t==="exe2"){
     if(!secCanSeeBud()){
       activeTab=t;
       document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
@@ -407,12 +414,13 @@ function switchTab(t){
     }
   }
   activeTab=t;
-  var tabs=["bud","exe","cal"];document.querySelectorAll(".tbtn").forEach(function(b,i){b.classList.toggle("on",tabs[i]===t);});
+  var tabs=["bud","exe","exe2","cal"];document.querySelectorAll(".tbtn").forEach(function(b,i){b.classList.toggle("on",tabs[i]===t);});
   var subTabs=["ana","out","dtr"];document.querySelectorAll(".tbtn-sub").forEach(function(b,i){b.classList.toggle("on",subTabs[i]===t);});
   document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
   var pnl=document.getElementById("p-"+t);if(pnl)pnl.classList.add("on");
   buildFbar();buildWbar();
   if(t==="exe")renderExe();
+  if(t==="exe2")renderExe('2');
   if(t==="ana")renderAna();
   if(t==="out")renderOut();
   if(t==="pip")renderPip();
@@ -449,7 +457,7 @@ function promptSecEmail(){
   return false;
 }
 function showSecEmailForm(tab){
-  var page=document.getElementById(tab==="bud"?"budPage":"exePage");
+  var page=document.getElementById(tab==="bud"?"budPage":tab==="exe2"?"exe2Page":"exePage");
   if(!page)return;
   var existing=getSecUser();
   page.innerHTML='<div class="ap"><div class="nr" style="max-width:420px;margin:40px auto;padding:24px;background:var(--wh);border-radius:var(--r);box-shadow:0 2px 12px rgba(0,0,0,.1)">'
@@ -1377,8 +1385,8 @@ function buildFilterBanner(campCount,seqCount){
   if(parts.length)lines.push(parts.join(' &nbsp;|&nbsp; '));
   return '<div style="font-size:11px;color:var(--or);margin-bottom:12px;padding:8px 12px;background:#FEF1E6;border:1px solid #F5C6A0;border-radius:var(--r);line-height:1.8">'+lines.join('<br>')+'</div>';
 }
-function renderExe(){try{
-  var p=document.getElementById("exePage");if(!p)return;
+function renderExe(sfx){sfx=sfx||"";try{
+  var p=document.getElementById(sfx==="2"?"exe2Page":"exePage");if(!p)return;
   var _validWbsSet=new Set(filtered.map(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var reg=String(r["Region Name (level 2)"]||"").trim();return(w&&reg)?w:null;}).filter(Boolean));
   var pr=getPipeRows(filtered).filter(function(r){return _validWbsSet.has(String(r["Opp Campaign ID"]||"").trim());});
     var _iacFilter=filters["IAC"]&&filters["IAC"].size?filters["IAC"]:null;
@@ -1465,6 +1473,243 @@ function renderExe(){try{
   var avgOpen=_uniqEmailed.size>0?(_uniqOpened.size/_uniqEmailed.size*100).toFixed(0)+"%":"0%";
   var avgReply=_uniqOpened.size>0?(_uniqReplied.size/_uniqOpened.size*100).toFixed(0)+"%":"0%";
   var seqCount=outF.length;
+  var _iacOppsByType={};_allPipe2026.forEach(function(r){var iac=String(r["IAC (Engagement Model)"]||"").trim();var oid=String(r["Opportunity ID"]||"");if(!iac||!oid)return;if(!_iacOppsByType[iac])_iacOppsByType[iac]=new Set();_iacOppsByType[iac].add(oid);});
+  var _cFieldCt=(_iacOppsByType["C-Field"]||new Set()).size;var _cDigCt=(_iacOppsByType["C-Digital"]||new Set()).size;
+  var _cFieldPct=allPipe2026Opps>0?(_cFieldCt/allPipe2026Opps*100).toFixed(1)+"%":"—";
+  var _cDigPct=allPipe2026Opps>0?(_cDigCt/allPipe2026Opps*100).toFixed(1)+"%":"—";
+  var _campCount=new Set(filtered.filter(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean)).size;
+  if(sfx==="2"){
+    if(window._exe2ChInsts){window._exe2ChInsts.forEach(function(c){try{c.destroy();}catch(ex){}});}
+    window._exe2ChInsts=[];
+    var _k2=function(color,kv,kl,sub1,sub2){return '<div class="kpi" style="border-top:3px solid '+color+'">'+'<div class="kv">'+kv+'</div><div class="kl">'+kl+'</div>'+(sub1?'<div class="ks">'+sub1+'</div>':'')+(sub2?'<div class="ks">'+sub2+'</div>':'')+'</div>';};
+    var h2='';
+    var _e2BasePipe=_allPipe2026;
+    // Recompute KPI metrics from base pipeline
+    var _e2TotEur=_e2BasePipe.reduce(function(s,r){return s+(parseFloat(r['Eur']||0)||0)/1000;},0);
+    var _e2TotOppSet=new Set(_e2BasePipe.map(function(r){return r['Opportunity ID'];}));var _e2TotOpps=_e2TotOppSet.size;
+    var _e2WonRows=_e2BasePipe.filter(function(r){return String(r['DRM Category']||'').trim()==='Booked/Won';});
+    var _e2WonEur=_e2WonRows.reduce(function(s,r){return s+(parseFloat(r['Eur']||0)||0)/1000;},0);var _e2WonOpps=new Set(_e2WonRows.map(function(r){return r['Opportunity ID'];})).size;
+    var _e2ProbRows=_e2BasePipe.filter(function(r){return String(r['DRM Category']||'').trim()==='Probable';});
+    var _e2ProbEur=_e2ProbRows.reduce(function(s,r){return s+(parseFloat(r['Eur']||0)||0)/1000;},0);var _e2ProbOpps=new Set(_e2ProbRows.map(function(r){return r['Opportunity ID'];})).size;
+    var _e2HodRows=_e2BasePipe.filter(function(r){return hasHod(r['SDE Handover Date']);});
+    var _e2HodSet=new Set(_e2HodRows.map(function(r){return r['Opportunity ID'];}));
+    var _e2HodEur=_e2HodRows.reduce(function(s,r){return s+(parseFloat(r['Eur']||0)||0)/1000;},0);
+    var _e2HoRate=_e2TotOpps>0?(_e2HodSet.size/_e2TotOpps*100).toFixed(1)+'%':'—';
+    var _e2CampCt=_campCount;
+    var _e2CfOpps=new Set(_e2BasePipe.filter(function(r){return String(r['IAC (Engagement Model)']||'').trim()==='C-Field';}).map(function(r){return r['Opportunity ID'];})).size;
+    var _e2CdOpps=new Set(_e2BasePipe.filter(function(r){return String(r['IAC (Engagement Model)']||'').trim()==='C-Digital';}).map(function(r){return r['Opportunity ID'];})).size;
+    var _e2CfPct=_e2TotOpps>0?(_e2CfOpps/_e2TotOpps*100).toFixed(1)+'%':'—';var _e2CdPct=_e2TotOpps>0?(_e2CdOpps/_e2TotOpps*100).toFixed(1)+'%':'—';
+    // Outreach KPIs filtered by same WBS set
+    var _e2OutF=outF;
+    var _e2SeqCt=_e2OutF.length;
+    var _e2EmailsDel=_e2OutF.reduce(function(a,r){return a+(parseInt(r['Emails - Deliveries'])||0);},0);
+    var _e2EmailsOpen=_e2OutF.reduce(function(a,r){return a+(parseInt(r['Emails - Opens'])||0);},0);
+    var _e2EmailsReply=_e2OutF.reduce(function(a,r){return a+(parseInt(r['Emails - Replies'])||0);},0);
+    // Pipeline KPI row
+    h2+='<div class="krow">';
+    h2+=_k2('#07838F','&euro;'+fmtE(_e2TotEur),'Total Pipeline',_e2TotOpps.toLocaleString()+' opportunities','all sources');
+    h2+=_k2('#00144A','&euro;'+fmtE(_e2WonEur),'Booked / Won',_e2WonOpps.toLocaleString()+' opps','');
+    h2+=_k2('#F0A800','&euro;'+fmtE(_e2ProbEur),'Probable',_e2ProbOpps.toLocaleString()+' opps','');
+    h2+=_k2('#00144A',_e2HoRate,'HO Rate',_e2HodSet.size.toLocaleString()+' handed over &middot; &euro;'+fmtE(_e2HodEur),'');
+    h2+=_k2('#1B8F4B',_e2CampCt.toLocaleString(),'Campaigns','Active campaigns (MS List)','');
+    h2+=_k2('#00144A',_e2CfPct,'C-Field','C-Digital: '+_e2CdPct,'% of # opportunities');
+    h2+='</div>';
+    h2+='<div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px">'+'<span style="background:#07838F;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;letter-spacing:.5px">OUTREACH</span>'+'<span style="font-size:11px;color:var(--mu)">Outreach activity data &middot; indicative only, not fully tracked</span></div>';
+    h2+='<div class="krow">';
+    h2+=_k2('#07838F',acctTouched.toLocaleString(),'Accounts Touched','Total across all SDEs','');
+    h2+=_k2('#00144A',prospContacted.toLocaleString(),'Prospects Contacted','Via sequences','');
+    h2+=_k2('#00144A',_e2EmailsDel.toLocaleString(),'Emails Delivered','Across '+_e2SeqCt+' sequences','');
+    h2+=_k2('#F0A800',(_e2EmailsDel>0?(_e2EmailsOpen/_e2EmailsDel*100).toFixed(0):0)+'%','Avg Open Rate','Across '+_e2SeqCt+' sequences','');
+    h2+=_k2('#1B8F4B',(_e2EmailsDel>0?(_e2EmailsReply/_e2EmailsDel*100).toFixed(0):0)+'%','Avg Reply Rate','Across '+_e2SeqCt+' sequences','<span style="color:#1B8F4B;font-weight:600">= '+_e2EmailsReply.toLocaleString()+' replies</span>');
+    h2+='</div>';
+    h2+='<div style="font-size:13px;font-weight:700;color:#00144A;letter-spacing:.5px;text-transform:uppercase;margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid #e0e0e0">Pipeline</div>';
+    // Apply exe2-local pipeline filters on top of the DCM/quarter base
+    var _btpPipe=_allPipe2026;
+    // MU setup
+    var _e2MUs=['UKI','France','Benelux','Nordic','Southern Europe','Italy','MEA North','MEA South'];
+    var _e2MULbl={'UKI':'UKI','France':'France','Benelux':'BeNeLux','Nordic':'Nordic','Southern Europe':'S.Europe','Italy':'Italy','MEA North':'MEA North','MEA South':'MEA South'};
+    var _muNorm={'uki':'UKI','france':'France','benelux':'Benelux','nordic':'Nordic','southern europe':'Southern Europe','italy':'Italy','mea north':'MEA North','mea south':'MEA South'};
+    var _muPal={'UKI':'#FF6B35','France':'#F0A800','Benelux':'#07838F','Nordic':'#1B8F4B','Southern Europe':'#5BC8F5','Italy':'#E53935','MEA North':'#FF7043','MEA South':'#9C27B0'};
+    var _e2XL=_e2MUs.map(function(m){return _e2MULbl[m]||m;});
+    // Product/salesbag data (all families via _exePipeSolMap)
+    var _prdD={};_e2MUs.forEach(function(m){_prdD[m]={};});
+    _btpPipe.forEach(function(r){var mu=_muNorm[String(r['Region Lvl 2']||'').trim().toLowerCase()]||String(r['Region Lvl 2']||'').trim();if(!_prdD[mu])return;var pr=_exePipeSolMap[String(r['Solution Area (L1)']||'').trim()]||String(r['Solution Area (L1)']||'').trim()||'Other';_prdD[mu][pr]=(_prdD[mu][pr]||0)+(parseFloat(r['Eur']||0)||0)/1000;});
+    var _prdKTot={};Object.keys(_prdD).forEach(function(m){Object.keys(_prdD[m]).forEach(function(k){_prdKTot[k]=(_prdKTot[k]||0)+_prdD[m][k];});});
+    var _prdKs=Object.keys(_prdKTot).sort(function(a,b){return _prdKTot[b]-_prdKTot[a];});
+    var _prdPal=['#00144A','#5BC8F5','#F0A800','#1B8F4B','#E91E63','#9C27B0','#FF7043','#795548','#26C6DA','#FF9800','#8BC34A','#607D8B'];
+    // IAC data
+    var _iacSegs=['C-Field','C-Digital','Partner-Driven'];var _iacClrs=['#00144A','#5BC8F5','#F0A800'];
+    var _iacD={};_e2MUs.forEach(function(m){_iacD[m]={};_iacSegs.forEach(function(s){_iacD[m][s]=0;});});
+    _btpPipe.forEach(function(r){var mu=_muNorm[String(r['Region Lvl 2']||'').trim().toLowerCase()]||String(r['Region Lvl 2']||'').trim();if(!_iacD[mu])return;var ia=String(r['IAC (Engagement Model)']||'').trim();if(_iacD[mu][ia]!==undefined)_iacD[mu][ia]+=(parseFloat(r['Eur']||0)||0)/1000;});
+    // Handovers (EUR) by MU
+    var _hoD={};_e2MUs.forEach(function(m){_hoD[m]={hod:0,pend:0};});
+    _btpPipe.forEach(function(r){var mu=_muNorm[String(r['Region Lvl 2']||'').trim().toLowerCase()]||String(r['Region Lvl 2']||'').trim();if(!_hoD[mu])return;var eu=(parseFloat(r['Eur']||0)||0)/1000;if(hasHod(r['SDE Handover Date'])){_hoD[mu].hod+=eu;}else{_hoD[mu].pend+=eu;}});
+    // HO Rate (unique opps) by MU
+    var _horD={};_e2MUs.forEach(function(m){_horD[m]={tot:new Set(),hod:new Set()};});
+    _btpPipe.forEach(function(r){var mu=_muNorm[String(r['Region Lvl 2']||'').trim().toLowerCase()]||String(r['Region Lvl 2']||'').trim();if(!_horD[mu])return;var oid=String(r['Opportunity ID']||'').trim();if(!oid)return;_horD[mu].tot.add(oid);if(hasHod(r['SDE Handover Date']))_horD[mu].hod.add(oid);});
+    // SDE Engagement Type
+    var _srcDspMap={'Digital Hub':'SDE Sourced','Marketing':'Mkt Nurtured','Partner':'Partner Nurtured','Sales':'Sales Nurtured','CSM':'CSM','CS&D':'CSM'};
+    var _engD={};
+    _btpPipe.forEach(function(r){var src=_srcDspMap[String(r['TCP Pipeline Source Desc']||'').trim()]||String(r['TCP Pipeline Source Desc']||'').trim()||'Other';_engD[src]=(_engD[src]||0)+(parseFloat(r['Eur']||0)||0)/1000;});
+    // DRM by MU
+    var _drmSegs=['Booked/Won','Probable','Upside','Disc/Lost'];var _drmClrs=['#1B8F4B','#5BC8F5','#BFE7F5','#E53935'];
+    var _drmD={};_e2MUs.forEach(function(m){_drmD[m]={};_drmSegs.forEach(function(s){_drmD[m][s]=0;});});
+    _btpPipe.forEach(function(r){var mu=_muNorm[String(r['Region Lvl 2']||'').trim().toLowerCase()]||String(r['Region Lvl 2']||'').trim();if(!_drmD[mu])return;var drm=String(r['DRM Category']||'').trim();if(_drmD[mu][drm]!==undefined)_drmD[mu][drm]+=(parseFloat(r['Eur']||0)||0)/1000;});
+    // Pipeline by Closing Quarter
+    var _cqSegs=['Booked/Won','Probable','Upside'];var _cqClrs=['#1B8F4B','#5BC8F5','#BFE7F5'];
+    var _cqD={};
+    _btpPipe.forEach(function(r){var cq=String(r['Closing Qtr']||'').trim();if(!cq)return;var drm=String(r['DRM Category']||'').trim();if(_cqSegs.indexOf(drm)<0)return;if(!_cqD[cq])_cqD[cq]={};_cqD[cq][drm]=(_cqD[cq][drm]||0)+(parseFloat(r['Eur']||0)||0)/1000;});
+    var _cqKeys=Object.keys(_cqD).sort();
+    // Top Campaigns by Pipeline Value
+    var _wbsNameMap={};
+    filtered.forEach(function(r){var wbs=String(r['Campaign/WBS Code']||'').trim();var nm=String(r['Campaign Name']||'').trim();if(wbs&&nm)_wbsNameMap[wbs]=nm;});
+    var _campByWBS={};
+    _btpPipe.forEach(function(r){var wbs=String(r['Opp Campaign ID']||'').trim();if(!wbs)return;var mu=_muNorm[String(r['Region Lvl 2']||'').trim().toLowerCase()]||String(r['Region Lvl 2']||'').trim();var eu=(parseFloat(r['Eur']||0)||0)/1000;if(!_campByWBS[wbs])_campByWBS[wbs]={total:0,byMU:{}};_campByWBS[wbs].total+=eu;_campByWBS[wbs].byMU[mu]=(_campByWBS[wbs].byMU[mu]||0)+eu;});
+    var _campWBSKeys=Object.keys(_campByWBS).sort(function(a,b){return _campByWBS[b].total-_campByWBS[a].total;}).slice(0,20);
+    var _campLabels=_campWBSKeys.map(function(wbs){return _wbsNameMap[wbs]||wbs;});
+    var _campTotal=_campWBSKeys.reduce(function(s,wbs){return s+_campByWBS[wbs].total;},0);
+    var _campTotalFmt=_campTotal>=1000?(_campTotal/1000).toFixed(1)+'M':Math.round(_campTotal)+'k';
+    // Outreach metrics aggregated per WBS code
+    var _wbsOut={};
+    outData.forEach(function(r){var w=String(r['Campaign/WBS Code']||'').trim();if(!w)return;if(!_wbsOut[w])_wbsOut[w]={del:0,op:0,rp:0,pdel:0,pop:0};_wbsOut[w].del+=(parseInt(r['Emails - Deliveries'])||0);_wbsOut[w].op+=(parseInt(r['Emails - Opens'])||0);_wbsOut[w].rp+=(parseInt(r['Emails - Replies'])||0);_wbsOut[w].pdel+=(parseInt(r['Prospects - Delivered'])||0);_wbsOut[w].pop+=(parseInt(r['Prospects - Opened'])||0);});
+    var _fmtPct2=function(n,d){if(!d)return'—';var v=n/d*100;return(v<10?v.toFixed(1):Math.round(v))+'%';};
+    var _escH=function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+    var _muAbbrCC={'CS UKI':'UKI','CS France':'France','CS BeNeLux':'BeNeLux','CS Nordics':'Nordic','CS Northern Europe':'Nordic','CS Southern Europe':'S.Europe','CS Italy':'Italy','CS MEA North':'MEA North','CS MEA South':'MEA South','UKI':'UKI','France':'France','BeNeLux':'BeNeLux','Nordic':'Nordic','Northern Europe':'Nordic','Southern Europe':'S.Europe','Italy':'Italy','MEA North':'MEA North','MEA South':'MEA South'};
+    var _statClr={'Executed':'#1B8F4B','Planned':'#888','In Progress':'#F0A800','Active':'#07838F','Cancelled':'#E53935'};
+    var _srcAbbrMap={'Digital Hub':'SDE Src','Marketing':'Mkt Nur','Partner':'Prt Nur','Sales':'Sales Nur','CSM':'CSM','CS&D':'CSM'};
+    var _drmClrMap={'Booked/Won':'#1B8F4B','Probable':'#07838F','Upside':'#5BC8F5','Disc/Lost':'#E53935','Excluded from Pipeline':'#aaa'};
+    var _iacClrMap={'C-Field':'#00144A','C-Digital':'#07838F','Partner-Driven':'#F0A800'};
+    // Chart cards HTML
+    var _cc=function(id,ttl,sub){return '<div style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:16px"><div style="font-size:13px;font-weight:700;color:#00144A;margin-bottom:2px">'+ttl+'</div><div style="font-size:11px;color:#888;margin-bottom:10px">'+sub+'</div><canvas id="'+id+'" style="max-height:240px"></canvas></div>';};
+    h2+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
+    h2+=_cc('exe2-sb-mu','Salesbag — by Market Unit','ACV (k€) by Sales Bag · all families');
+    h2+=_cc('exe2-prod-mu','Product Breakdown — by Market Unit','ACV (k€) by product family stacked');
+    h2+=_cc('exe2-iac-mu','C-Field vs C-Digital — by Market Unit','Pipeline value (k€) by IAC classification per MU');
+    h2+=_cc('exe2-ho-mu','Handovers per Market Unit','Handed over vs pending HO pipeline (k€)');
+    h2+='</div>';
+    h2+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">';
+    h2+=_cc('exe2-ho-rate','HO Rate per Market Unit','% of opportunities handed over to AEs');
+    h2+=_cc('exe2-eng-type','SDE Engagement Type','Pipeline ACV by engagement type — all stages (k€)');
+    h2+=_cc('exe2-drm-mu','DRM by Market Unit','Pipeline breakdown by DRM stage per MU');
+    h2+=_cc('exe2-pipe-cq','Pipeline by Closing Quarter','Total EMEA pipeline across closing quarters');
+    h2+='</div>';
+    h2+='<div style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:16px;margin-top:16px">';
+    h2+='<div style="font-size:13px;font-weight:700;color:#00144A;margin-bottom:2px">Top Campaigns by Pipeline Value</div>';
+    h2+='<div style="font-size:11px;color:#888;margin-bottom:4px">Pipeline k€ by campaign · use filter bar above to filter</div>';
+    h2+='<div style="font-size:11px;color:#444;margin-bottom:10px">Total: €'+_campTotalFmt+'</div>';
+    h2+='<div style="position:relative;height:'+Math.max(260,_campWBSKeys.length*26+60)+'px"><canvas id="exe2-camp-bar"></canvas></div>';
+    h2+='</div>';
+    // Campaign Overview table
+    (function(){
+      var th='<th style="padding:6px 8px;font-weight:600;font-size:10px;white-space:nowrap;background:#00144A;color:#fff;text-align:';
+      var _ct='<div style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:16px;margin-top:16px">';
+      _ct+='<div style="font-size:13px;font-weight:700;color:#00144A;margin-bottom:2px">Campaign Overview</div>';
+      _ct+='<div style="font-size:11px;color:#888;margin-bottom:8px">'+filtered.length+' campaigns · filtered by main filter bar · Open/Reply/Click % from outreach data</div>';
+      _ct+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:900px">';
+      _ct+='<thead><tr>';
+      _ct+=th+'left">Campaign</th>'+th+'left">Quarter</th>'+th+'left">Status</th>'+th+'left">MU</th>'+th+'left">SDE</th>'+th+'right"># Accts</th>'+th+'center">Seq.</th>'+th+'right">Open %</th>'+th+'right">Reply %</th>'+th+'right">Click %</th>';
+      _ct+='</tr></thead><tbody>';
+      filtered.forEach(function(r,i){
+        var wbs=String(r['Campaign/WBS Code']||'').trim();
+        var nm=_escH(String(r['Campaign Name']||'').trim());
+        var mu=_muAbbrCC[String(r['Region Name (level 2)']||'').trim()]||String(r['Region Name (level 2)']||'').trim();
+        var status=String(r['Status']||'').trim();
+        var sclr=_statClr[status]||'#888';
+        var ex=_escH(String(r['Executor1']||r['Executor']||'').trim());
+        var accts=String(r['# Accounts']||r['Number of Accounts']||'').trim()||'—';
+        var qtr=String(r['Starting Quarter']||'').trim();
+        var wo=_wbsOut[wbs];
+        var openPct=wo?_fmtPct2(wo.op,wo.del):'—';
+        var repPct=wo?_fmtPct2(wo.rp,wo.del):'—';
+        var clkPct=wo?_fmtPct2(wo.pop,wo.pdel):'—';
+        var seqClr=wo?'#07838F':'#ccc';
+        var bg=i%2===0?'#fff':'#f9fbfd';
+        _ct+='<tr style="background:'+bg+';border-bottom:1px solid #f0f0f0">';
+        _ct+='<td style="padding:5px 8px;font-weight:500;color:#00144A">'+nm+'</td>';
+        _ct+='<td style="padding:5px 8px;white-space:nowrap">'+qtr+'</td>';
+        _ct+='<td style="padding:5px 8px"><span style="color:'+sclr+';font-weight:600">'+status+'</span></td>';
+        _ct+='<td style="padding:5px 8px">'+mu+'</td>';
+        _ct+='<td style="padding:5px 8px">'+ex+'</td>';
+        _ct+='<td style="padding:5px 8px;text-align:right">'+accts+'</td>';
+        _ct+='<td style="padding:5px 8px;text-align:center;color:'+seqClr+'">&#128279;</td>';
+        _ct+='<td style="padding:5px 8px;text-align:right;color:'+(openPct!=='—'?'#07838F':'#bbb')+'">'+openPct+'</td>';
+        _ct+='<td style="padding:5px 8px;text-align:right;color:'+(repPct!=='—'?'#1B8F4B':'#bbb')+'">'+repPct+'</td>';
+        _ct+='<td style="padding:5px 8px;text-align:right;color:'+(clkPct!=='—'?'#F0A800':'#bbb')+'">'+clkPct+'</td>';
+        _ct+='</tr>';
+      });
+      _ct+='</tbody></table></div></div>';
+      h2+=_ct;
+    })();
+    // Top EMEA Opportunities table
+    (function(){
+      var _sortedOpps=_btpPipe.slice().sort(function(a,b){return(parseFloat(b['Eur']||0))-(parseFloat(a['Eur']||0));});
+      var _topN=Math.min(100,_sortedOpps.length);
+      var th2='<th style="padding:6px 8px;font-weight:600;font-size:10px;white-space:nowrap;background:#00144A;color:#fff;text-align:';
+      var _pt='<div style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:16px;margin-top:16px">';
+      _pt+='<div style="font-size:13px;font-weight:700;color:#00144A;margin-bottom:2px">Top EMEA Opportunities</div>';
+      _pt+='<div style="font-size:11px;color:#888;margin-bottom:8px">'+_btpPipe.length.toLocaleString()+' opportunities · sorted by pipeline value · showing top '+_topN+'</div>';
+      _pt+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1050px">';
+      _pt+='<thead><tr>';
+      _pt+=th2+'left">MU</th>'+th2+'left">Opp ID</th>'+th2+'left">Account</th>'+th2+'left">Opportunity</th>'+th2+'left">Partner</th>'+th2+'left">Campaign</th>'+th2+'left">DRM</th>'+th2+'left">Close Q</th>'+th2+'left">IAC</th>'+th2+'left">SDE Eng.</th>'+th2+'right">k€</th>'+th2+'left">Created</th>';
+      _pt+='</tr></thead><tbody>';
+      _sortedOpps.slice(0,_topN).forEach(function(r,i){
+        var mu=_muNorm[String(r['Region Lvl 2']||'').trim().toLowerCase()]||String(r['Region Lvl 2']||'').trim();
+        var muLbl=_e2MULbl[mu]||mu;
+        var dot='<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+(_muPal[mu]||'#ccc')+';margin-right:4px;vertical-align:middle"></span>';
+        var oid=String(r['Opportunity ID']||'').trim();
+        var acct=_escH(String(r['Account Name']||'').trim());
+        var opp=_escH(String(r['Opp Description']||'').trim());if(opp.length>35)opp=opp.substring(0,34)+'…';
+        var partner=_escH(String(r['Channel Partner']||'').trim());if(!partner)partner='—';else if(partner.length>18)partner=partner.substring(0,17)+'…';
+        var wbs=String(r['Opp Campaign ID']||'').trim();
+        var camp=_escH(_wbsNameMap[wbs]||_srcDspMap[String(r['TCP Pipeline Source Desc']||'').trim()]||String(r['TCP Pipeline Source Desc']||'').trim()||'—');
+        if(camp.length>22)camp=camp.substring(0,21)+'…';
+        var drm=String(r['DRM Category']||'').trim();var drmClr=_drmClrMap[drm]||'#333';
+        var clsQ=String(r['Closing Qtr']||'').trim();
+        var iac=String(r['IAC (Engagement Model)']||'').trim();var iacClr=_iacClrMap[iac]||'#333';
+        var sdeEng=String(r['SDE Engagement Type']||'').trim()||_srcAbbrMap[String(r['TCP Pipeline Source Desc']||'').trim()]||'—';
+        var eur=Math.round((parseFloat(r['Eur']||0)||0)/1000);
+        var crtDt=String(r['Create Date']||'').trim();if(crtDt.length>=10)crtDt=crtDt.substring(0,10);
+        var bg=i%2===0?'#fff':'#f9fbfd';
+        _pt+='<tr style="background:'+bg+';border-bottom:1px solid #f0f0f0">';
+        _pt+='<td style="padding:5px 6px;white-space:nowrap">'+dot+muLbl+'</td>';
+        _pt+='<td style="padding:5px 6px;font-size:10px;color:#888">'+oid+'</td>';
+        _pt+='<td style="padding:5px 6px;font-weight:500">'+acct+'</td>';
+        _pt+='<td style="padding:5px 6px;color:#444">'+opp+'</td>';
+        _pt+='<td style="padding:5px 6px;color:#666">'+partner+'</td>';
+        _pt+='<td style="padding:5px 6px;color:#555">'+camp+'</td>';
+        _pt+='<td style="padding:5px 6px;color:'+drmClr+';font-weight:600">'+drm+'</td>';
+        _pt+='<td style="padding:5px 6px;white-space:nowrap">'+clsQ+'</td>';
+        _pt+='<td style="padding:5px 6px;color:'+iacClr+';font-weight:600">'+iac+'</td>';
+        _pt+='<td style="padding:5px 6px;color:#555">'+sdeEng+'</td>';
+        _pt+='<td style="padding:5px 6px;text-align:right;font-weight:700;color:#00144A">€'+eur.toLocaleString()+'k</td>';
+        _pt+='<td style="padding:5px 6px;font-size:10px;color:#888">'+crtDt+'</td>';
+        _pt+='</tr>';
+      });
+      _pt+='</tbody></table></div></div>';
+      h2+=_pt;
+    })();
+    p.innerHTML=h2;
+    // Chart.js — shared stacked bar options
+    var _sOpts={responsive:true,maintainAspectRatio:true,plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:9},padding:5}},tooltip:{mode:'index',intersect:false}},scales:{x:{stacked:true,ticks:{font:{size:9}},grid:{display:false}},y:{stacked:true,ticks:{font:{size:9},callback:function(v){return'€'+Math.round(v)+'k';}},grid:{color:'rgba(0,0,0,0.05)'}}}};
+    var _e2Bar=function(id,lbs,ds){var ctx=p.querySelector('#'+id);if(!ctx)return;window._exe2ChInsts.push(new Chart(ctx,{type:'bar',data:{labels:lbs,datasets:ds},options:_sOpts}));};
+    // Grid 1
+    _e2Bar('exe2-sb-mu',_e2XL,_prdKs.map(function(s,i){return{label:s,data:_e2MUs.map(function(m){return Math.round(_prdD[m][s]||0);}),backgroundColor:_prdPal[i%_prdPal.length]};}));
+    _e2Bar('exe2-prod-mu',_e2XL,_prdKs.map(function(s,i){return{label:s,data:_e2MUs.map(function(m){return Math.round(_prdD[m][s]||0);}),backgroundColor:_prdPal[i%_prdPal.length]};}));
+    _e2Bar('exe2-iac-mu',_e2XL,_iacSegs.map(function(s,i){return{label:s,data:_e2MUs.map(function(m){return Math.round(_iacD[m][s]||0);}),backgroundColor:_iacClrs[i]};}));
+    _e2Bar('exe2-ho-mu',_e2XL,[{label:'Handed Over',data:_e2MUs.map(function(m){return Math.round(_hoD[m].hod||0);}),backgroundColor:'#1B8F4B'},{label:'Pending HO',data:_e2MUs.map(function(m){return Math.round(_hoD[m].pend||0);}),backgroundColor:'#D0D0D0'}]);
+    // Grid 2 — HO Rate (horizontal bar)
+    (function(){var ctx=p.querySelector('#exe2-ho-rate');if(!ctx)return;var _hp=['#FF6B35','#F0A800','#07838F','#1B8F4B','#5BC8F5','#E53935','#FF7043','#9C27B0'];var ds=[{label:'HO Rate %',data:_e2MUs.map(function(m){var t=_horD[m].tot.size;return t?Math.round(_horD[m].hod.size/t*1000)/10:0;}),backgroundColor:_e2MUs.map(function(m,i){return _hp[i%_hp.length];}),borderRadius:2}];window._exe2ChInsts.push(new Chart(ctx,{type:'bar',data:{labels:_e2XL,datasets:ds},options:{responsive:true,maintainAspectRatio:true,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+c.raw+'%';}}}},scales:{x:{min:0,max:100,ticks:{callback:function(v){return v+'%';},font:{size:9}},grid:{color:'rgba(0,0,0,0.05)'}},y:{ticks:{font:{size:9}},grid:{display:false}}}}}));})();
+    // Grid 2 — SDE Engagement Type (doughnut)
+    (function(){var ctx=p.querySelector('#exe2-eng-type');if(!ctx)return;var _eo=['SDE Sourced','Mkt Nurtured','Partner Nurtured','Sales Nurtured','CSM','Other'];var _ec=['#00144A','#07838F','#5BC8F5','#BFE7F5','#F0A800','#D0D0D0'];var _el=[],_ev=[],_eclr=[];_eo.forEach(function(k,i){if(_engD[k]>0){_el.push(k);_ev.push(Math.round(_engD[k]));_eclr.push(_ec[i]);}});var _etot=_ev.reduce(function(a,b){return a+b;},0);window._exe2ChInsts.push(new Chart(ctx,{type:'doughnut',data:{labels:_el,datasets:[{data:_ev,backgroundColor:_eclr,borderWidth:1}]},options:{responsive:true,maintainAspectRatio:true,cutout:'55%',plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:9},padding:5}},tooltip:{callbacks:{label:function(c){return' '+c.label+': €'+c.raw+'k ('+(_etot?Math.round(c.raw/_etot*100):0)+'%)';}}}}}}));})();
+    // Grid 2 — DRM by MU
+    _e2Bar('exe2-drm-mu',_e2XL,_drmSegs.map(function(s,i){return{label:s,data:_e2MUs.map(function(m){return Math.round(_drmD[m][s]||0);}),backgroundColor:_drmClrs[i]};}));
+    // Grid 2 — Pipeline by Closing Quarter
+    _e2Bar('exe2-pipe-cq',_cqKeys,_cqSegs.map(function(s,i){return{label:s,data:_cqKeys.map(function(q){return Math.round((_cqD[q]&&_cqD[q][s])||0);}),backgroundColor:_cqClrs[i]};}));
+    // Top Campaigns (horizontal stacked bar, MU colours)
+    (function(){var ctx=p.querySelector('#exe2-camp-bar');if(!ctx)return;var ds=_e2MUs.map(function(m){return{label:_e2MULbl[m]||m,data:_campWBSKeys.map(function(wbs){return Math.round(_campByWBS[wbs].byMU[m]||0);}),backgroundColor:_muPal[m]||'#ccc'};});window._exe2ChInsts.push(new Chart(ctx,{type:'bar',data:{labels:_campLabels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:9},padding:5}},tooltip:{mode:'index',intersect:false,callbacks:{footer:function(its){var t=its.reduce(function(s,i){return s+i.raw;},0);return'Total: €'+Math.round(t)+'k';}}}},scales:{x:{stacked:true,ticks:{font:{size:9},callback:function(v){return'€'+Math.round(v)+'k';}},grid:{color:'rgba(0,0,0,0.05)'}},y:{stacked:true,ticks:{font:{size:9}},grid:{display:false}}}}}));})();
+    return;
+  }
+
   var _calMode=window._exeCalMode;
   var _dispPipeEur=_calMode?totEur:allPipe2026Eur;
   var _dispPipeOpps=_calMode?totOpps:allPipe2026Opps;
