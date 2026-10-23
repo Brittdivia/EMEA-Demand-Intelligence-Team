@@ -244,16 +244,16 @@ window.PROFILING_ACCT_REQUESTED=306028;</script>
   </div>
 </header>
 <div class="tbar">
-  <button class="tbtn on" onclick="switchTab(&#39;bud&#39;)">Coverage Overview</button>
-  <button class="tbtn" onclick="switchTab(&#39;exe&#39;)">TCP</button>
-  <button class="tbtn" onclick="switchTab(&#39;exe2&#39;)">TCP v2</button>
-  <button class="tbtn" onclick="switchTab(&#39;sde3&#39;)">SDE View</button>
-  <button class="tbtn" onclick="switchTab(&#39;cal&#39;)">EMEA Campaign Calendar</button>
+  <button class="tbtn on" data-tab="bud" onclick="switchTab(&#39;bud&#39;)">Coverage Overview</button>
+  <button class="tbtn" id="tab-btn-exe" data-tab="exe" onclick="switchTab(&#39;exe&#39;)" style="display:none">TCP</button>
+  <button class="tbtn" data-tab="exe2" onclick="switchTab(&#39;exe2&#39;)">TCP v2</button>
+  <button class="tbtn" data-tab="sde3" onclick="switchTab(&#39;sde3&#39;)">SDE View</button>
+  <button class="tbtn" data-tab="ana" onclick="switchTab(&#39;ana&#39;)">Campaign Insights</button>
 </div>
 <div class="tbar-sub" id="tbar-sub">
-  <button class="tbtn-sub" onclick="switchTab(&#39;ana&#39;)">Campaign Insights</button>
-  <button id="tab-btn-out" class="tbtn-sub" onclick="switchTab('out')">Outreach Details</button>
-  <button id="tab-btn-dtr" class="tbtn-sub" onclick="switchTab('dtr')">Profiling-Outreach Tracking</button>
+  <button class="tbtn-sub" data-tab="cal" onclick="switchTab(&#39;cal&#39;)">EMEA Campaign Calendar</button>
+  <button id="tab-btn-out" class="tbtn-sub" data-tab="out" onclick="switchTab('out')" style="display:none">Outreach Details</button>
+  <button id="tab-btn-dtr" class="tbtn-sub" data-tab="dtr" onclick="switchTab('dtr')" style="display:none">Profiling-Outreach Tracking</button>
 </div>
 <div class="fbar" id="fbar">
   <span class="flbl">Filter by:</span>
@@ -416,8 +416,7 @@ function switchTab(t){
     }
   }
   activeTab=t;
-  var tabs=["bud","exe","exe2","sde3","cal"];document.querySelectorAll(".tbtn").forEach(function(b,i){b.classList.toggle("on",tabs[i]===t);});
-  var subTabs=["ana","out","dtr"];document.querySelectorAll(".tbtn-sub").forEach(function(b,i){b.classList.toggle("on",subTabs[i]===t);});
+  var tabs=["bud","exe","exe2","sde3","ana"];document.querySelectorAll(".tbtn,.tbtn-sub").forEach(function(b){var dt=b.getAttribute("data-tab");if(dt)b.classList.toggle("on",dt===t);});
   document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
   var pnl=document.getElementById("p-"+t);if(pnl)pnl.classList.add("on");
   buildFbar();buildWbar();
@@ -439,7 +438,7 @@ function sk(k){return k.replace(/[^a-zA-Z0-9]/g,"_");}
 function getSecUser(){return(localStorage.getItem("sec_user_email")||"").toLowerCase().trim();}
 function setSecUser(email){localStorage.setItem("sec_user_email",email.toLowerCase().trim());updateAdminTabs();}
 function isAdminUser(){var u=getSecUser();return u.indexOf("i572929")!==-1||u.indexOf("brittany.di.via")!==-1;}
-function updateAdminTabs(){}
+function updateAdminTabs(){var adm=isAdminUser();["tab-btn-exe","tab-btn-out","tab-btn-dtr"].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display=adm?"":"none";});}
 function getSecEntry(){
   var email=getSecUser();if(!email)return null;
   var lookup=window.SECURITY_LOOKUP||[];
