@@ -3352,6 +3352,92 @@ function renderSde3(){try{
   html+='<td style="'+totS+'">'+fN(_flmGrand.q3)+'</td>';
   html+='<td style="'+totS+'">'+fN(_flmGrand.q4)+'</td>';
   html+='<td style="'+totS+';border-left:2px solid #dde5f5">'+fN(_flmGrand.t)+'</td>';
+  html+='</tr></tbody></table></div></div>';
+  // Third table: HO Target per Quarter / MU + sub-region
+  var _muQ=[
+    {n:'UKI',q1:14934,q2:23894.4,q3:18667.5,q4:17174.1,t:74670,sub:[
+      {n:'Ireland',q1:1900,q2:3040,q3:2375,q4:2185,t:9500},
+      {n:'UK',q1:7410,q2:11856,q3:9262.5,q4:8521.5,t:37050},
+      {n:'(blank)',q1:5624,q2:8998.4,q3:7030,q4:6467.6,t:28120}
+    ]},
+    {n:'France',q1:15418.5,q2:24669.6,q3:19273.1,q4:17731.3,t:77092.5,sub:[
+      {n:'(blank)',q1:15418.5,q2:24669.6,q3:19273.1,q4:17731.3,t:77092.5}
+    ]},
+    {n:'BeNeLux',q1:15722.5,q2:25156,q3:19653.1,q4:18080.9,t:78612.5,sub:[
+      {n:'Belux',q1:5225,q2:8360,q3:6531.25,q4:6008.75,t:26125},
+      {n:'BeNeLux',q1:1028.85,q2:1646.16,q3:1286.06,q4:1183.18,t:5144.25},
+      {n:'Netherlands',q1:6305.15,q2:10088.2,q3:7881.44,q4:7250.92,t:31525.75},
+      {n:'(blank)',q1:3163.5,q2:5061.6,q3:3954.38,q4:3638.03,t:15817.5}
+    ]},
+    {n:'Italy',q1:11856,q2:18969.6,q3:14820,q4:13634.4,t:59280,sub:[
+      {n:'(blank)',q1:11856,q2:18969.6,q3:14820,q4:13634.4,t:59280}
+    ]},
+    {n:'MEA North',q1:13214.5,q2:21143.2,q3:16518.1,q4:15196.7,t:66072.5,sub:[
+      {n:'Egypt',q1:2584,q2:4134.4,q3:3230,q4:2971.6,t:12920},
+      {n:'KSA',q1:5719,q2:9150.4,q3:7148.75,q4:6576.85,t:28595},
+      {n:'KSA, Iraq',q1:912,q2:1459.2,q3:1140,q4:1048.8,t:4560},
+      {n:'(blank)',q1:3999.5,q2:6399.2,q3:4999.38,q4:4599.43,t:19997.5}
+    ]},
+    {n:'MEA South',q1:14031.5,q2:22450.4,q3:17539.4,q4:16136.2,t:70157.5,sub:[
+      {n:'Africa',q1:4560,q2:7296,q3:5700,q4:5244,t:22800},
+      {n:'FGM',q1:608,q2:972.8,q3:760,q4:699.2,t:3040},
+      {n:'UAE',q1:3990,q2:6384,q3:4987.5,q4:4588.5,t:19950},
+      {n:'UAE,FGM',q1:950,q2:1520,q3:1187.5,q4:1092.5,t:4750},
+      {n:'(blank)',q1:3923.5,q2:6277.6,q3:4904.38,q4:4512.03,t:19617.5}
+    ]},
+    {n:'Nordics',q1:9186.5,q2:14698.4,q3:11483.1,q4:10564.5,t:45932.5,sub:[
+      {n:'Denmark',q1:950,q2:1520,q3:1187.5,q4:1092.5,t:4750},
+      {n:'Finland',q1:883.5,q2:1413.6,q3:1104.38,q4:1016.03,t:4417.5},
+      {n:'Norway',q1:855,q2:1368,q3:1068.75,q4:983.25,t:4275},
+      {n:'Sweden',q1:1738.5,q2:2781.6,q3:2173.13,q4:1999.28,t:8692.5},
+      {n:'Sweden,Norway',q1:703,q2:1124.8,q3:878.75,q4:808.45,t:3515},
+      {n:'(blank)',q1:4056.5,q2:6490.4,q3:5070.63,q4:4664.98,t:20282.5}
+    ]},
+    {n:'Southern Europe',q1:16834,q2:26934.4,q3:21042.5,q4:19359.1,t:84170,sub:[
+      {n:'Greece',q1:969,q2:1550.4,q3:1211.25,q4:1114.35,t:4845},
+      {n:'Israel',q1:855,q2:1368,q3:1068.75,q4:983.25,t:4275},
+      {n:'Portugal',q1:969,q2:1550.4,q3:1211.25,q4:1114.35,t:4845},
+      {n:'Spain',q1:10155.5,q2:16248.8,q3:12694.4,q4:11678.8,t:50777.5},
+      {n:'Turkey',q1:3885.5,q2:6216.8,q3:4856.88,q4:4468.33,t:19427.5}
+    ]}
+  ];
+  var thMu='padding:7px 8px;font-size:10px;font-weight:700;background:#00144A;color:#fff;text-align:right;white-space:nowrap;border-right:1px solid #002060';
+  var thMuL='padding:7px 8px;font-size:10px;font-weight:700;background:#00144A;color:#fff;text-align:left;border-right:2px solid #002060;min-width:140px';
+  var tdMuHdr='padding:6px 8px;font-size:12px;font-weight:700;text-align:right;border-bottom:1px solid #3a5fa8;border-right:1px solid #3a5fa8;background:#e8eef8;color:#00144A';
+  var tdMuHdrL='padding:6px 8px;font-size:12px;font-weight:700;text-align:left;border-bottom:1px solid #3a5fa8;border-right:2px solid #3a5fa8;background:#e8eef8;color:#00144A';
+  var tdSub='padding:4px 8px 4px 20px;font-size:11px;text-align:right;border-bottom:1px solid #eee;border-right:1px solid #eee';
+  var tdSubL='padding:4px 8px 4px 20px;font-size:11px;text-align:left;border-bottom:1px solid #eee;border-right:2px solid #ddd';
+  html+='<div class="cc" style="margin-top:16px"><div class="ch">SDE HO Target per Quarter / Market Unit &amp; Sub-region (FLM Level, kEUR)</div>';
+  html+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>';
+  html+='<th style="'+thMuL+'">Market Unit / Region</th>';
+  html+='<th style="'+thMu+'">Q1 2026</th><th style="'+thMu+'">Q2 2026</th><th style="'+thMu+'">Q3 2026</th>';
+  html+='<th style="'+thMu+';background:#003d99">Q4 2026</th>';
+  html+='<th style="'+thMu+';border-left:2px solid #3a5fa8;background:#002a7a">Grand Total</th>';
+  html+='</tr></thead><tbody>';
+  _muQ.forEach(function(mu){
+    var q4bg=';background:#f0f4ff';var totbg=';border-left:2px solid #dde5f5;font-weight:600;background:#eef2ff';
+    html+='<tr>';
+    html+='<td style="'+tdMuHdrL+'">'+mu.n+'</td>';
+    html+='<td style="'+tdMuHdr+'">'+fN(mu.q1)+'</td><td style="'+tdMuHdr+'">'+fN(mu.q2)+'</td><td style="'+tdMuHdr+'">'+fN(mu.q3)+'</td>';
+    html+='<td style="'+tdMuHdr+q4bg+'">'+fN(mu.q4)+'</td>';
+    html+='<td style="'+tdMuHdr+totbg+'">'+fN(mu.t)+'</td>';
+    html+='</tr>';
+    mu.sub.forEach(function(sr,j){
+      var bg=j%2===0?'#fff':'#f8f9fc';var isBlank=sr.n==='(blank)';
+      var subtd=tdSub+';background:'+bg+(isBlank?';color:var(--mu);font-style:italic':'');
+      var subtdL=tdSubL+';background:'+bg+(isBlank?';color:var(--mu);font-style:italic':'');
+      html+='<tr>';
+      html+='<td style="'+subtdL+'">'+sr.n+'</td>';
+      html+='<td style="'+subtd+'">'+fN(sr.q1)+'</td><td style="'+subtd+'">'+fN(sr.q2)+'</td><td style="'+subtd+'">'+fN(sr.q3)+'</td>';
+      html+='<td style="'+subtd+';background:'+(bg==='#fff'?'#f8f9ff':'#f0f2fc')+'">'+fN(sr.q4)+'</td>';
+      html+='<td style="'+subtd+';border-left:2px solid #dde5f5;background:'+(bg==='#fff'?'#f5f6ff':'#eeeff8')+'">'+fN(sr.t)+'</td>';
+      html+='</tr>';
+    });
+  });
+  html+='<tr><td style="'+totL+'">Grand Total</td>';
+  html+='<td style="'+totS+'">'+fN(111197.5)+'</td><td style="'+totS+'">'+fN(177916)+'</td><td style="'+totS+'">'+fN(138997)+'</td>';
+  html+='<td style="'+totS+'">'+fN(127877)+'</td>';
+  html+='<td style="'+totS+';border-left:2px solid #dde5f5">'+fN(555987.5)+'</td>';
   html+='</tr></tbody></table></div></div></div>';
   p.innerHTML=html;
 }catch(e){var pg=document.getElementById("sde3Page");if(pg)pg.innerHTML='<div class="nr"><p><b>Error:</b> '+e.message+'</p></div>';console.error(e);}}
