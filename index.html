@@ -247,6 +247,7 @@ window.PROFILING_ACCT_REQUESTED=306028;</script>
   <button class="tbtn on" onclick="switchTab(&#39;bud&#39;)">Coverage Overview</button>
   <button class="tbtn" onclick="switchTab(&#39;exe&#39;)">TCP</button>
   <button class="tbtn" onclick="switchTab(&#39;exe2&#39;)">TCP v2</button>
+  <button class="tbtn" onclick="switchTab(&#39;sde3&#39;)">SDE View</button>
   <button class="tbtn" onclick="switchTab(&#39;cal&#39;)">EMEA Campaign Calendar</button>
 </div>
 <div class="tbar-sub" id="tbar-sub">
@@ -265,6 +266,7 @@ window.PROFILING_ACCT_REQUESTED=306028;</script>
 <div class="panel on" id="p-bud"><div class="ap" id="budPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-exe"><div class="ap" id="exePage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-exe2"><div class="ap" id="exe2Page"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
+<div class="panel" id="p-sde3"><div class="ap" id="sde3Page"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="wbar" id="wbar" style="display:none"><span id="wbar-content2"></span></div>
 <div class="panel" id="p-sde" style="display:none"><div class="ap" id="sdePage"></div></div>
 <div class="panel" id="p-ana"><div class="ap" id="anaPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
@@ -404,7 +406,7 @@ var _accFiltersSaved=null;
 var DETAIL_TABS={"ana":"Campaign Insights","pip":"Pipeline Details","out":"Outreach Details","cal":"EMEA Campaign Calendar","dtr":"Profiling-Outreach Tracking"};
 function switchTab(t){
   // Security check for Coverage Overview and TCP tabs
-  if(t==="bud"||t==="exe"||t==="exe2"){
+  if(t==="bud"||t==="exe"||t==="exe2"||t==="sde3"){
     if(!secCanSeeBud()){
       activeTab=t;
       document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
@@ -414,13 +416,14 @@ function switchTab(t){
     }
   }
   activeTab=t;
-  var tabs=["bud","exe","exe2","cal"];document.querySelectorAll(".tbtn").forEach(function(b,i){b.classList.toggle("on",tabs[i]===t);});
+  var tabs=["bud","exe","exe2","sde3","cal"];document.querySelectorAll(".tbtn").forEach(function(b,i){b.classList.toggle("on",tabs[i]===t);});
   var subTabs=["ana","out","dtr"];document.querySelectorAll(".tbtn-sub").forEach(function(b,i){b.classList.toggle("on",subTabs[i]===t);});
   document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
   var pnl=document.getElementById("p-"+t);if(pnl)pnl.classList.add("on");
   buildFbar();buildWbar();
   if(t==="exe")renderExe();
   if(t==="exe2")renderExe('2');
+  if(t==="sde3")renderSde3();
   if(t==="ana")renderAna();
   if(t==="out")renderOut();
   if(t==="pip")renderPip();
@@ -457,7 +460,7 @@ function promptSecEmail(){
   return false;
 }
 function showSecEmailForm(tab){
-  var page=document.getElementById(tab==="bud"?"budPage":tab==="exe2"?"exe2Page":"exePage");
+  var page=document.getElementById(tab==="bud"?"budPage":tab==="exe2"?"exe2Page":tab==="sde3"?"sde3Page":"exePage");
   if(!page)return;
   var existing=getSecUser();
   page.innerHTML='<div class="ap"><div class="nr" style="max-width:420px;margin:40px auto;padding:24px;background:var(--wh);border-radius:var(--r);box-shadow:0 2px 12px rgba(0,0,0,.1)">'
@@ -3235,6 +3238,76 @@ if(!window._tbl2xExpL2)window._tbl2xExpL2=new Set();window._tbl2xTogL2=function(
   })();
 }catch(e){var _ep=document.getElementById("exePage");if(_ep)_ep.innerHTML="<div class=\"nr\"><p><b>Error:</b> "+e.message+"</p></div>";console.error(e);}
 }
+function renderSde3(){try{
+  var p=document.getElementById("sde3Page");if(!p)return;
+  var regF=filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size?filters["Region Name (level 2)"]:null;
+  var _mus=['UKI','France','BeNeLux','Nordic','Southern Europe','Italy','MEA North','MEA South'];
+  var _normMu=function(s){var t=s.toLowerCase().trim();var m={'uki':'UKI','france':'France','benelux':'BeNeLux','belux':'BeNeLux','nordic':'Nordic','southern europe':'Southern Europe','italy':'Italy','mea north':'MEA North','mea south':'MEA South'};return m[t]||s;};
+  var _activeMUs=_mus.filter(function(m){if(!regF)return true;return regF.has(m)||regF.has("CS "+m)||regF.has(m.replace("BeNeLux","Benelux"));});
+  var _saGroups=[
+    {key:'btp',label:'BTP + Data & AI',color:'#07838F'},
+    {key:'hcm',label:'Human Capital Mgmt',color:'#F0A800'},
+    {key:'cx',label:'Customer Experience',color:'#E91E63'},
+    {key:'fs',label:'Finance & Spend Mgmt',color:'#1B8F4B'},
+    {key:'scm',label:'Supply Chain Mgmt',color:'#FF7043'},
+    {key:'gen',label:'Generalist',color:'#00144A'}
+  ];
+  var _teamToSA=function(t){var tl=t.toLowerCase();if(tl.indexOf('btp')>=0||tl.indexOf('data & ai')>=0)return'btp';if(tl.indexOf('hcm')>=0)return'hcm';if(tl.indexOf(' cx')>=0||tl.indexOf('cx')>=0&&tl.indexOf('scm')<0)return'cx';if(tl.indexOf('f&s')>=0)return'fs';if(tl.indexOf('scm')>=0)return'scm';return'gen';};
+  var _tgt={};_saGroups.forEach(function(sg){_tgt[sg.key]={};});
+  var _muTot={};_activeMUs.forEach(function(m){_muTot[m]=0;});
+  var _grand=0;
+  (window.SDE_HO_TARGETS||[]).forEach(function(h){
+    var mu=_normMu(h.mu||'');if(_activeMUs.indexOf(mu)<0)return;
+    var k=(h.eur||0)/1000;var sa=_teamToSA(h.team||'');
+    _tgt[sa][mu]=(_tgt[sa][mu]||0)+k;_muTot[mu]=(_muTot[mu]||0)+k;_grand+=k;
+  });
+  var _saTot=function(sa){return _activeMUs.reduce(function(s,m){return s+(_tgt[sa][m]||0);},0);};
+  var _pipe=pipeData.filter(function(r){
+    if(!String(r["Create Quarter"]||"").startsWith("2026"))return false;
+    if(String(r["DRM Category"]||"").trim()==="Excluded from Pipeline")return false;
+    if(!hasHod(r["SDE Handover Date"]))return false;
+    if(regF){var rv=String(r["Region Name (level 2)"]||"").trim().replace(/^CS /,"");if(!regF.has(rv)&&!regF.has("CS "+rv))return false;}
+    return true;
+  });
+  var _pSAmap={"BAIP - Data & AI":"btp","BAIP - Technology Foundation":"btp","Business Technology Platform":"btp","Data & AI":"btp","Human Capital Management":"hcm","Customer Experience":"cx","Finance and Spend Management":"fs","Supply Chain Management":"scm"};
+  var _actHO={};_saGroups.forEach(function(sg){_actHO[sg.key]=0;});var _actTot=0;
+  _pipe.forEach(function(r){var sa=_pSAmap[String(r["Solution Area (L1)"]||"").trim()]||'gen';var eur=(parseFloat(r["Eur"]||0)||0)/1000;_actHO[sa]+=eur;_actTot+=eur;});
+  var fK=function(n){if(!n||isNaN(n))return'—';n=Math.round(n);return n>=1000?(n/1000).toFixed(0)+'M':n+'K';};
+  var pct=function(a,b){return b>0?(a/b*100).toFixed(0)+'%':'—';};
+  var attClr=function(a,b){return(b>0&&a/b>=0.9)?'#1B8F4B':(b>0&&a/b>=0.6?'#d97706':'#c00');};
+  var thS='padding:7px 8px;font-size:10px;font-weight:700;background:#00144A;color:#fff;text-align:right;white-space:nowrap;border-right:1px solid #002060';
+  var thL='padding:7px 8px;font-size:10px;font-weight:700;background:#00144A;color:#fff;text-align:left;border-right:2px solid #002060;min-width:140px';
+  var tdS='padding:5px 8px;font-size:11px;text-align:right;border-bottom:1px solid #eee;border-right:1px solid #eee';
+  var tdL='padding:5px 8px;font-size:11px;text-align:left;border-bottom:1px solid #eee;border-right:2px solid #ddd';
+  var totS='padding:6px 8px;font-size:12px;font-weight:700;text-align:right;border-right:1px solid #ddd;border-top:2px solid #00144A;background:#eef2ff';
+  var totL='padding:6px 8px;font-size:12px;font-weight:700;text-align:left;border-right:2px solid #ddd;border-top:2px solid #00144A;background:#eef2ff';
+  var html='<div class="ap"><h2 style="color:var(--dk);margin:0 0 16px">SDE View</h2>';
+  html+='<div class="cc"><div class="ch">SDE Handover Target by Solution Area (kEUR)</div>';
+  html+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>';
+  html+='<th style="'+thL+'">Solution Area</th>';
+  _activeMUs.forEach(function(m){html+='<th style="'+thS+'">'+m+'</th>';});
+  html+='<th style="'+thS+';border-left:2px solid #3a5fa8;background:#002a7a">Total Target</th>';
+  html+='<th style="background:#012931;color:#fff;padding:7px 8px;font-size:10px;font-weight:700;text-align:right;white-space:nowrap;border-left:4px solid #07838F;border-right:1px solid #024455">Actual HO</th>';
+  html+='<th style="background:#012931;color:#fff;padding:7px 8px;font-size:10px;font-weight:700;text-align:right;white-space:nowrap;border-right:1px solid #024455">Attainment</th>';
+  html+='</tr></thead><tbody>';
+  _saGroups.forEach(function(sg,i){
+    var bg=i%2===0?'#fff':'#f8f9fc';var td=tdS+';background:'+bg;var tdl=tdL+';background:'+bg;
+    var tot=_saTot(sg.key);var act=_actHO[sg.key]||0;
+    html+='<tr><td style="'+tdl+'"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+sg.color+';margin-right:6px;vertical-align:middle"></span>'+sg.label+'</td>';
+    _activeMUs.forEach(function(m){html+='<td style="'+td+'">'+((_tgt[sg.key][m]||0)?fK(_tgt[sg.key][m]):'—')+'</td>';});
+    html+='<td style="'+tdS+';border-left:2px solid #dde5f5;font-weight:600;background:'+(bg==='#fff'?'#f0f4ff':'#eaedfa')+'">'+fK(tot)+'</td>';
+    html+='<td style="'+tdS+';border-left:4px solid #07838F;background:'+(bg==='#fff'?'#f0faf8':'#e8f5f3')+'">'+fK(act)+'</td>';
+    html+='<td style="'+tdS+';font-weight:600;color:'+attClr(act,tot)+';background:'+(bg==='#fff'?'#f0faf8':'#e8f5f3')+'">'+pct(act,tot)+'</td>';
+    html+='</tr>';
+  });
+  html+='<tr><td style="'+totL+'">Total</td>';
+  _activeMUs.forEach(function(m){html+='<td style="'+totS+'">'+fK(_muTot[m]||0)+'</td>';});
+  html+='<td style="'+totS+';border-left:2px solid #dde5f5">'+fK(_grand)+'</td>';
+  html+='<td style="'+totS+';border-left:4px solid #07838F">'+fK(_actTot)+'</td>';
+  html+='<td style="'+totS+';color:'+attClr(_actTot,_grand)+'">'+pct(_actTot,_grand)+'</td>';
+  html+='</tr></tbody></table></div></div></div>';
+  p.innerHTML=html;
+}catch(e){var pg=document.getElementById("sde3Page");if(pg)pg.innerHTML='<div class="nr"><p><b>Error:</b> '+e.message+'</p></div>';console.error(e);}}
 function renderBud(){
   var page=document.getElementById("budPage");if(!page)return;
   try{
