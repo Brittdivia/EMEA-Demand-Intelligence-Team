@@ -4,7 +4,7 @@
 #   data-profiling-tags.js -> window.CAMP_PROF_TAGS
 #   data-profiling-req.js  -> window.PROFILING_ACCT_REQUESTED
 
-$xlsxPath = "C:\Users\I572929\OneDrive - SAP SE\2026\Campaign Insights AI\Calendars\Campaign Calendars combined.xlsx"
+$xlsxPath = "C:\Users\I572929\OneDrive - SAP SE\2026\Campaign Insights AI\Calendars\Campaign Calendars combined 2.xlsx"
 $outDir   = "C:\Users\I572929\campaign-calendar-site"
 $zipPath  = "$outDir\__pbi_import_temp.zip"
 $extPath  = "$outDir\__pbi_import_extracted"
