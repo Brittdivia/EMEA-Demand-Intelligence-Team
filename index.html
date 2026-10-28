@@ -385,10 +385,10 @@ document.addEventListener("DOMContentLoaded",function(){
   pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);})
   pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});
   pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});
+  FD.forEach(function(f){filters[f.k]=new Set();});
 window._setPipeWeek=function(w){window._pipeWeek=w;var vn=w==='w37'?'PIPE_DATA_W37':w==='w38'?'PIPE_DATA_W38':w==='w39'?'PIPE_DATA_W39':w==='w40'?'PIPE_DATA_W40':w==='w41'?'PIPE_DATA_W41':w==='w42'?'PIPE_DATA_W42':'PIPE_DATA_W43';var src=w==='w37'?'data-pipe-w37.js':w==='w38'?'data-pipe-w38.js':w==='w39'?'data-pipe-w39.js':w==='w40'?'data-pipe-w40.js':w==='w41'?'data-pipe-w41.js':w==='w42'?'data-pipe-w42.js':'data-pipe-w43.js';function _apply(){pipeData=_xpd((w==='w37'?window.PIPE_DATA_W37:(w==='w38'?window.PIPE_DATA_W38:(w==='w39'?window.PIPE_DATA_W39:(w==='w40'?window.PIPE_DATA_W40:(w==='w41'?window.PIPE_DATA_W41:(w==='w42'?window.PIPE_DATA_W42:(w==='w43'?window.PIPE_DATA_W43:null)))))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});syncDrmBtn();mmPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});syncMmpsBtn();tcpPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});syncTcpSrcBtn();applyFilters();renderBud();if(activeTab==='ana')renderAna();}if(window[vn]){_apply();return;}var s=document.createElement('script');s.src=src;s.onload=function(){_apply();};s.onerror=function(){_apply();};document.head.appendChild(s);};;
   if(!window._pipeWeek){window._setPipeWeek('w43');}
   outData=window.OUT_DATA||JSON.parse(document.getElementById("d-out").textContent);
-  FD.forEach(function(f){filters[f.k]=new Set();});
   document.getElementById("hcount").textContent=campData.length.toLocaleString()+" campaigns";
 
   applyFilters();
