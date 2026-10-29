@@ -1375,6 +1375,113 @@ function buildFilterBanner(campCount,seqCount){
   if(parts.length)lines.push(parts.join(' &nbsp;|&nbsp; '));
   return '<div style="font-size:11px;color:var(--or);margin-bottom:12px;padding:8px 12px;background:#FEF1E6;border:1px solid #F5C6A0;border-radius:var(--r);line-height:1.8">'+lines.join('<br>')+'</div>';
 }
+window._buildEngTypeTbl=function(el,D){
+  if(!el)return;
+  window._etRF=D.rfn;
+  var _elId=el.id;
+  var _allEngTypes={};Object.keys(D.r2et).forEach(function(l2k){Object.keys(D.r2et[l2k]||{}).forEach(function(eng){_allEngTypes[eng]=(_allEngTypes[eng]||0)+D.r2et[l2k][eng];});});
+  var _engOrder=Object.keys(_allEngTypes).sort(function(a,b){return _allEngTypes[b]-_allEngTypes[a];});
+  if(!window._engTypeL2Exp)window._engTypeL2Exp=new Set();window._engTypeL2Keys=[];window._engTypeTogL2=function(i){var k=window._engTypeL2Keys[i];window._engTypeL2Exp.has(k)?window._engTypeL2Exp.delete(k):window._engTypeL2Exp.add(k);window._etRF();};
+  if(!window._engTypeTeamExp)window._engTypeTeamExp=new Set();window._engTypeTeamKeys=[];window._engTypeTogTeam=function(i){var k=window._engTypeTeamKeys[i];window._engTypeTeamExp.has(k)?window._engTypeTeamExp.delete(k):window._engTypeTeamExp.add(k);window._etRF();};
+  if(!window._engTypeView)window._engTypeView='region';
+  window._expEngTypeCsv=function(){var t=document.querySelector('#'+_elId+' table');if(!t)return;var rows=[];var thead=t.querySelector('thead');var hdrs=[];if(thead){var tr1=thead.rows[0],tr2=thead.rows[1];var subIdx=0;if(tr1){for(var i=0;i<tr1.cells.length;i++){var th=tr1.cells[i];var cs=parseInt(th.getAttribute('colspan')||'1');if(cs>1&&tr2){for(var j=0;j<cs;j++){var sub=tr2.cells[subIdx+j];hdrs.push(th.textContent.trim()+(sub?' - '+sub.textContent.trim():''));}subIdx+=cs;}else{hdrs.push(th.textContent.trim());}}}}rows.push(hdrs.map(function(h){return'"'+h.replace(/"/g,'""')+'"';}).join(','));var tbody=t.querySelector('tbody');if(tbody){for(var r=0;r<tbody.rows.length;r++){var tr=tbody.rows[r];if(tr.style.display==='none')continue;var cells=[];for(var c=0;c<tr.cells.length;c++){cells.push('"'+tr.cells[c].textContent.trim().replace(/"/g,'""')+'"');}rows.push(cells.join(','));}}var blob=new Blob(['﻿'+rows.join('\r\n')],{type:'text/csv;charset=utf-8;'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='sde-engagement-type.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);};
+  var thTRSub="background:#034a5e;color:#fff;padding:4px 6px;font-size:9px;font-weight:600;text-align:right;white-space:nowrap";
+  var _l2EngOrder=Object.keys(D.r2t).filter(function(k){return D.r2t[k]>0;}).sort(function(a,b){return D.r2t[b]-D.r2t[a];});var _regHoGrandPct=_l2EngOrder.reduce(function(s,k){return s+(D.r2ho[k]||0);},0);window._expAllEngType=function(){var allExp=_l2EngOrder.length>0&&_l2EngOrder.every(function(k){return window._engTypeL2Exp.has(k);});if(allExp){window._engTypeL2Exp.clear();}else{_l2EngOrder.forEach(function(k){window._engTypeL2Exp.add(k);});}window._etRF();};
+  var _fmtHoPct=function(ho,hoTotal){return hoTotal>0?(ho/hoTotal*100).toFixed(0)+'%':'—';};
+  var _tvBtn='<button onclick="window._engTypeView=(window._engTypeView===\'team\'?\'region\':\'team\');window._etRF();" style="font-size:10px;padding:2px 8px;border:1px solid #012931;border-radius:3px;cursor:pointer;background:'+(window._engTypeView==='team'?'#012931':'#fff')+';color:'+(window._engTypeView==='team'?'#fff':'#012931')+'">'+(window._engTypeView==='team'?'Region View':'Team View')+'</button>';
+  var _csvBtn='<button onclick="window._expEngTypeCsv()" style="font-size:10px;padding:2px 8px;border:1px solid #012931;border-radius:3px;cursor:pointer;background:#fff;color:#012931">&#8595; CSV</button>';
+  var _allL2Exp=_l2EngOrder.length>0&&_l2EngOrder.every(function(k){return window._engTypeL2Exp.has(k);});var _expAllBtn=window._engTypeView!=='team'?'<button onclick="window._expAllEngType()" style="font-size:10px;padding:2px 8px;border:1px solid #012931;border-radius:3px;cursor:pointer;background:#fff;color:#012931">'+(_allL2Exp?'Collapse All':'Expand All')+'</button>':'';
+  var etbl='<div class="cc"><div class="ch" style="display:flex;justify-content:space-between;align-items:center"><span>2026 Pipeline Created — by Region &amp; SDE Engagement Type</span><div style="display:flex;gap:6px;align-items:center">'+_expAllBtn+_tvBtn+_csvBtn+'</div></div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">';
+  var _sdeTeamSBMap={"sde - specialist btp + data & ai":["Business Technology Platform","Data & AI"],"sde - specialist hcm":["Human Capital Management"],"sde - specialist cx":["Customer Experience"],"sde - specialist f&s":["Finance and Spend Management"],"sde - specialist scm":["Supply Chain Management"]};
+  var _allSpecSBs=Object.keys(_sdeTeamSBMap).reduce(function(a,k){return a.concat(_sdeTeamSBMap[k]);},[]);
+  var _teamRoleKeyMap={"sde - specialist btp + data & ai":"btp","sde - specialist hcm":"hcm","sde - specialist cx":"cx","sde - specialist f&s":"fs","sde - specialist scm":"scm"};
+  if(window._engTypeView==='team'){
+    var _tvTeams={};
+    (window.SDE_HO_TARGETS||[]).forEach(function(h){
+      var muk=(h.mu||'').toLowerCase().trim()||'(unknown)';
+      if(D.hoRF&&D.hoRF.indexOf(muk)<0)return;
+      if(D.sbF&&D.sbF.size&&D.sbMatch&&!D.sbMatch(h.team,D.sbF))return;
+      var tk=h.team;
+      if(!_tvTeams[tk])_tvTeams[tk]={total:0,muSet:new Set()};
+      _tvTeams[tk].total+=(h.eur||0)/1000;
+      _tvTeams[tk].muSet.add(muk);
+    });
+    var _tvTeamOrder=Object.keys(_tvTeams).sort(function(a,b){return _tvTeams[b].total-_tvTeams[a].total;});
+    var _tvGrand=_tvTeamOrder.reduce(function(s,tk){return s+_tvTeams[tk].total;},0);
+    var _tvAllMUs=new Set();_tvTeamOrder.forEach(function(tk){_tvTeams[tk].muSet.forEach(function(muk){_tvAllMUs.add(muk);});});
+    var _tvHOYtdGrand=Array.from(_tvAllMUs).reduce(function(s,muk){return s+(D.r2ho[muk]||0);},0);
+    etbl+='<thead><tr>';
+    etbl+='<th rowspan="2" style="'+D.thT+'">SDE Team</th><th rowspan="2" style="'+D.thTR+'">SDE HO Target</th><th rowspan="2" style="'+D.thTR+'">HO YTD</th><th rowspan="2" style="'+D.thTR+'">HO YTD (excl. SN)</th><th rowspan="2" style="'+D.thTR+'">SDE HO Target (SDE Sourced)</th>';
+    _engOrder.forEach(function(eng){etbl+='<th colspan="3" style="'+D.thTR+';border-left:2px solid #fff">'+eng+'</th>';});
+    etbl+='</tr><tr>';
+    _engOrder.forEach(function(eng){etbl+='<th style="'+thTRSub+';border-left:2px solid #fff">Pipeline</th><th style="'+thTRSub+'">Handed Over</th><th style="'+thTRSub+'">HO %</th>';});
+    etbl+='</tr></thead><tbody>';
+    _tvTeamOrder.forEach(function(tk){
+      var team=_tvTeams[tk];var muArr=Array.from(team.muSet);
+      var teamSBs=_sdeTeamSBMap[tk.toLowerCase().trim()];
+      var roleKey=_teamRoleKeyMap[tk.toLowerCase().trim()];
+      var tHoYtd;
+      var tHoYtdExSales;
+      if(roleKey){
+        tHoYtd=muArr.reduce(function(s,muk){return s+((D.r2rho[muk]&&D.r2rho[muk][roleKey])||0);},0);
+        tHoYtdExSales=muArr.reduce(function(s,muk){return s+((D.r2rhox[muk]&&D.r2rhox[muk][roleKey])||0);},0);
+      }else{
+        var _gMuk=muArr[0]||'';
+        tHoYtd=(D.r2rho[_gMuk]&&D.r2rho[_gMuk]["generalist"])||0;
+        tHoYtdExSales=(D.r2rhox[_gMuk]&&D.r2rhox[_gMuk]["generalist"])||0;
+      }
+      etbl+='<tr><td style="'+D.thT.replace('background:#012931;color:#fff;','')+'padding:4px 6px;font-size:11px;border-bottom:1px solid #f0f0f0">'+tk+'</td><td style="text-align:right;padding:4px 6px;font-size:11px;border-bottom:1px solid #f0f0f0">'+D.fmtT(team.total)+'</td><td style="text-align:right;padding:4px 6px;font-size:11px;border-bottom:1px solid #f0f0f0">'+(tHoYtd?D.fmtT(tHoYtd):"—")+'</td><td style="text-align:right;padding:4px 6px;font-size:11px;border-bottom:1px solid #f0f0f0">'+(tHoYtdExSales?D.fmtT(tHoYtdExSales):"—")+'</td><td style="text-align:right;padding:4px 6px;font-size:11px;border-bottom:1px solid #f0f0f0">'+D.fmtT(team.total*0.6)+'</td>';
+      _engOrder.forEach(function(eng){
+        var v,ho;
+        if(roleKey){
+          v=muArr.reduce(function(s,muk){return s+(teamSBs?teamSBs.reduce(function(s2,sbk){return s2+((D.r2sbet[muk]&&D.r2sbet[muk][sbk]&&D.r2sbet[muk][sbk][eng])||0);},0):0);},0);
+          ho=muArr.reduce(function(s,muk){return s+((D.r2retho[muk]&&D.r2retho[muk][roleKey]&&D.r2retho[muk][roleKey][eng])||0);},0);
+        }else{
+          var _gMuk2=muArr[0]||'';
+          var _muEng=(D.r2et[_gMuk2]&&D.r2et[_gMuk2][eng])||0;var _specEng=_allSpecSBs.reduce(function(s,sbk){return s+((D.r2sbet[_gMuk2]&&D.r2sbet[_gMuk2][sbk]&&D.r2sbet[_gMuk2][sbk][eng])||0);},0);v=Math.max(0,_muEng-_specEng);
+          ho=(D.r2retho[_gMuk2]&&D.r2retho[_gMuk2]["generalist"]&&D.r2retho[_gMuk2]["generalist"][eng])||0;
+        }
+        etbl+='<td style="text-align:right;border-left:2px solid #e8f0f0;padding:4px 6px;font-size:11px;border-bottom:1px solid #f0f0f0">'+(v?D.fmtT(v):"—")+'</td><td style="text-align:right;padding:4px 6px;font-size:11px;border-bottom:1px solid #f0f0f0">'+(ho?D.fmtT(ho):"—")+'</td><td style="text-align:right;padding:4px 6px;font-size:11px;border-bottom:1px solid #f0f0f0">'+_fmtHoPct(ho,tHoYtd)+'</td>';
+      });
+      etbl+='</tr>';
+    });
+    var _tvEngColTots={},_tvEngColHOTots={};_engOrder.forEach(function(eng){_tvEngColTots[eng]=Array.from(_tvAllMUs).reduce(function(s,muk){return s+((D.r2et[muk]&&D.r2et[muk][eng])||0);},0);_tvEngColHOTots[eng]=Array.from(_tvAllMUs).reduce(function(s,muk){return s+((D.r2etho[muk]&&D.r2etho[muk][eng])||0);},0);});
+    var _tvHOExSalesGrand=Array.from(_tvAllMUs).reduce(function(s,muk){return s+(D.r2hoex[muk]||0);},0);
+    var _tdT="padding:4px 6px;font-size:11px;border-bottom:1px solid #f0f0f0";
+    etbl+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+_tdT+'">Total</td><td style="'+_tdT+';text-align:right">'+D.fmtT(_tvGrand)+'</td><td style="'+_tdT+';text-align:right">'+(_tvHOYtdGrand?D.fmtT(_tvHOYtdGrand):"—")+'</td><td style="'+_tdT+';text-align:right">'+(_tvHOExSalesGrand?D.fmtT(_tvHOExSalesGrand):"—")+'</td><td style="'+_tdT+';text-align:right">'+D.fmtT(_tvGrand*0.6)+'</td>';
+    _engOrder.forEach(function(eng){var t=_tvEngColTots[eng]||0,h=_tvEngColHOTots[eng]||0;etbl+='<td style="'+_tdT+';text-align:right;border-left:2px solid #e8f0f0">'+(t?D.fmtT(t):"—")+'</td><td style="'+_tdT+';text-align:right">'+(h?D.fmtT(h):"—")+'</td><td style="'+_tdT+';text-align:right">'+_fmtHoPct(h,_tvHOYtdGrand)+'</td>';});
+    etbl+='</tr></tbody></table></div></div>';
+  }else{
+    var _l2EngOrder2=Object.keys(D.r2t).filter(function(k){return D.r2t[k]>0;}).sort(function(a,b){return D.r2t[b]-D.r2t[a];});
+    var _tdT2="padding:4px 6px;font-size:11px;border-bottom:1px solid #f0f0f0";
+    etbl+='<thead><tr>';
+    etbl+='<th rowspan="2" style="'+D.thT+'">Region</th><th rowspan="2" style="'+D.thTR+'">SDE HO Target</th><th rowspan="2" style="'+D.thTR+'">HO YTD</th><th rowspan="2" style="'+D.thTR+'">SDE HO Target (SDE Sourced)</th>';
+    _engOrder.forEach(function(eng){etbl+='<th colspan="3" style="'+D.thTR+';border-left:2px solid #fff">'+eng+'</th>';});
+    etbl+='</tr><tr>';
+    _engOrder.forEach(function(eng){etbl+='<th style="'+thTRSub+';border-left:2px solid #fff">Pipeline</th><th style="'+thTRSub+'">Handed Over</th><th style="'+thTRSub+'">HO %</th>';});
+    etbl+='</tr></thead><tbody>';
+    _l2EngOrder2.forEach(function(l2k){
+      var total=D.r2t[l2k]||0;
+      var l2disp=D.l2Disp[l2k]||(l2k.charAt(0).toUpperCase()+l2k.slice(1));
+      var hasTeams=(D.hoByMu[l2k]||0)>0;
+      var li=window._engTypeL2Keys.push(l2k)-1;
+      var isExp=window._engTypeL2Exp.has(l2k);
+      var expBtn=hasTeams?'<span onclick="event.stopPropagation();_engTypeTogL2('+li+')" style="cursor:pointer;margin-right:4px;font-size:10px;line-height:1;user-select:none;font-weight:700">'+(isExp?'&#8722;':'&#43;')+'</span>':'<span style="display:inline-block;width:16px;margin-right:4px"></span>';
+      var sdeHoTgt=D.hoByMu[l2k]||0;
+      var hoYtd=D.r2ho[l2k]||0;
+      etbl+='<tr style="font-weight:600"><td style="'+_tdT2+'">'+expBtn+l2disp+'</td><td style="'+_tdT2+';text-align:right">'+(sdeHoTgt?D.fmtT(sdeHoTgt):"—")+'</td><td style="'+_tdT2+';text-align:right">'+(hoYtd?D.fmtT(hoYtd):"—")+'</td><td style="'+_tdT2+';text-align:right">'+(sdeHoTgt?D.fmtT(sdeHoTgt*0.6):"—")+'</td>';
+      _engOrder.forEach(function(eng){var v=(D.r2et[l2k]&&D.r2et[l2k][eng])||0;var ho=(D.r2etho[l2k]&&D.r2etho[l2k][eng])||0;etbl+='<td style="'+_tdT2+';text-align:right;border-left:2px solid #e8f0f0">'+(v?D.fmtT(v):"—")+'</td><td style="'+_tdT2+';text-align:right">'+(ho?D.fmtT(ho):"—")+'</td><td style="'+_tdT2+';text-align:right">'+_fmtHoPct(ho,hoYtd)+'</td>';});
+      etbl+='</tr>';
+      if(isExp&&hasTeams){var _l2Ts=[];(window.SDE_HO_TARGETS||[]).forEach(function(h){var muk=(h.mu||'').toLowerCase().trim();if(muk!==l2k)return;if(D.sbF&&D.sbF.size&&D.sbMatch&&!D.sbMatch(h.team,D.sbF))return;var ex=null;for(var _ti=0;_ti<_l2Ts.length;_ti++){if(_l2Ts[_ti].tk===h.team){ex=_l2Ts[_ti];break;}}if(!ex){ex={tk:h.team,total:0};_l2Ts.push(ex);}ex.total+=(h.eur||0)/1000;});_l2Ts.sort(function(a,b){return b.total-a.total;});var _tdSub=_tdT2+';background:#eef8f8';var _genSplits={"benelux":[{label:"SDE Generalist BeLux",tgt:28000,l3k:"belux"},{label:"SDE Generalist Netherlands",tgt:29000,l3k:"netherlands"}],"southern europe":[{label:"SDE Generalist Southern Europe",tgt:29400,excl:"spain"},{label:"SDE Generalist Spain",tgt:29400,l3k:"spain"}]};_l2Ts.forEach(function(teamObj){var tk=teamObj.tk;var tl=tk.toLowerCase().trim();var roleKey=_teamRoleKeyMap[tl];var teamSBs=_sdeTeamSBMap[tl];var splits=!roleKey&&_genSplits[l2k]?_genSplits[l2k]:null;if(splits){splits.forEach(function(sp){var _l3Ks=sp.excl?Object.keys(D.r3et[l2k]||{}).filter(function(k){return k!==sp.excl;}):sp.l3k?[sp.l3k]:[];var _spHoYtd=_l3Ks.reduce(function(s,k){return s+((D.r2l3ho[l2k]&&D.r2l3ho[l2k][k])||0);},0);etbl+='<tr><td style="'+_tdSub+';padding-left:22px">'+sp.label+'</td><td style="'+_tdSub+';text-align:right">'+D.fmtT(sp.tgt)+'</td><td style="'+_tdSub+';text-align:right">'+(_spHoYtd?D.fmtT(_spHoYtd):"—")+'</td><td style="'+_tdSub+';text-align:right">'+D.fmtT(sp.tgt*0.6)+'</td>';_engOrder.forEach(function(eng){var v=_l3Ks.reduce(function(s,k){return s+((D.r3et[l2k]&&D.r3et[l2k][k]&&D.r3et[l2k][k][eng])||0);},0);var ho=_l3Ks.reduce(function(s,k){return s+((D.r3etho[l2k]&&D.r3etho[l2k][k]&&D.r3etho[l2k][k][eng])||0);},0);etbl+='<td style="'+_tdSub+';text-align:right;border-left:2px solid #e8f0f0">'+(v?D.fmtT(v):"—")+'</td><td style="'+_tdSub+';text-align:right">'+(ho?D.fmtT(ho):"—")+'</td><td style="'+_tdSub+';text-align:right">'+_fmtHoPct(ho,_spHoYtd)+'</td>';});etbl+='</tr>';})}else{var tHoYtd2=roleKey?((D.r2rho[l2k]&&D.r2rho[l2k][roleKey])||0):((D.r2rho[l2k]&&D.r2rho[l2k]["generalist"])||0);etbl+='<tr><td style="'+_tdSub+';padding-left:22px">'+tk+'</td><td style="'+_tdSub+';text-align:right">'+(teamObj.total?D.fmtT(teamObj.total):"—")+'</td><td style="'+_tdSub+';text-align:right">'+(tHoYtd2?D.fmtT(tHoYtd2):"—")+'</td><td style="'+_tdSub+';text-align:right">'+(teamObj.total?D.fmtT(teamObj.total*0.6):"—")+'</td>';_engOrder.forEach(function(eng){var v2,ho2;if(roleKey){v2=teamSBs?teamSBs.reduce(function(s,sbk){return s+((D.r2sbet[l2k]&&D.r2sbet[l2k][sbk]&&D.r2sbet[l2k][sbk][eng])||0);},0):0;ho2=(D.r2retho[l2k]&&D.r2retho[l2k][roleKey]&&D.r2retho[l2k][roleKey][eng])||0;}else{var _muEng2=(D.r2et[l2k]&&D.r2et[l2k][eng])||0;var _specEng2=_allSpecSBs.reduce(function(s,sbk){return s+((D.r2sbet[l2k]&&D.r2sbet[l2k][sbk]&&D.r2sbet[l2k][sbk][eng])||0);},0);v2=Math.max(0,_muEng2-_specEng2);ho2=(D.r2retho[l2k]&&D.r2retho[l2k]["generalist"]&&D.r2retho[l2k]["generalist"][eng])||0;}etbl+='<td style="'+_tdSub+';text-align:right;border-left:2px solid #e8f0f0">'+(v2?D.fmtT(v2):"—")+'</td><td style="'+_tdSub+';text-align:right">'+(ho2?D.fmtT(ho2):"—")+'</td><td style="'+_tdSub+';text-align:right">'+_fmtHoPct(ho2,tHoYtd2)+'</td>';});etbl+='</tr>';}});}
+    });
+    var _engColTots={},_engColHOTots={};_engOrder.forEach(function(eng){_engColTots[eng]=_l2EngOrder2.reduce(function(s,l2k){return s+((D.r2et[l2k]&&D.r2et[l2k][eng])||0);},0);_engColHOTots[eng]=_l2EngOrder2.reduce(function(s,l2k){return s+((D.r2etho[l2k]&&D.r2etho[l2k][eng])||0);},0);});
+    var _reg2HOGrand=_l2EngOrder2.reduce(function(s,k){return s+(D.r2ho[k]||0);},0);
+    etbl+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+_tdT2+'">Total</td><td style="'+_tdT2+';text-align:right">'+(D.hoTgt?D.fmtT(D.hoTgt):"—")+'</td><td style="'+_tdT2+';text-align:right">'+(_reg2HOGrand?D.fmtT(_reg2HOGrand):"—")+'</td><td style="'+_tdT2+';text-align:right">'+(D.hoTgt?D.fmtT(D.hoTgt*0.6):"—")+'</td>';
+    _engOrder.forEach(function(eng){var t=_engColTots[eng]||0,h=_engColHOTots[eng]||0;etbl+='<td style="'+_tdT2+';text-align:right;border-left:2px solid #e8f0f0">'+(t?D.fmtT(t):"—")+'</td><td style="'+_tdT2+';text-align:right">'+(h?D.fmtT(h):"—")+'</td><td style="'+_tdT2+';text-align:right">'+_fmtHoPct(h,_regHoGrandPct)+'</td>';});
+    etbl+='</tr></tbody></table></div></div>';
+  }
+  el.innerHTML=etbl;
+};
 function renderExe(sfx){sfx=sfx||"";try{
   var p=document.getElementById(sfx==="2"?"exe2Page":"exePage");if(!p)return;
   var _validWbsSet=new Set(filtered.map(function(r){var w=String(r["Campaign/WBS Code"]||"").trim();var reg=String(r["Region Name (level 2)"]||"").trim();return(w&&reg)?w:null;}).filter(Boolean));
@@ -1732,7 +1839,6 @@ function renderExe(sfx){sfx=sfx||"";try{
   html+='<div id="exe-pipe-sb-tbl" style="width:50%;min-width:0"></div>';
   html+='</div>';
   html+='<div id="exe-pipe-team-tbl" style="margin-top:16px;width:100%"></div>';
-  html+='<div id="exe-pipe-engtype-tbl" style="margin-top:16px;width:100%"></div>';
   html+='<div id="exe-prod-cal-row" style="display:flex;gap:16px;margin-top:16px"></div>';
   p.innerHTML=html;
   // Charts: build canvases in html, then render after DOM update
@@ -2443,109 +2549,6 @@ function renderExe(sfx){sfx=sfx||"";try{
       _srcOrder.forEach(function(s){ttbl+='<td style="'+tdT+';text-align:right">'+_fmtSrcC(_tmSrcGrand[s]||0,_tmGrand)+'</td>';});
       ttbl+='</tr></tbody></table></div></div>';
       _teamTbl.innerHTML=ttbl;
-    }
-    var _engTypeTbl=document.getElementById("exe-pipe-engtype-tbl");
-    if(_engTypeTbl){
-      var _allEngTypes={};Object.keys(_reg2EngType).forEach(function(l2k){Object.keys(_reg2EngType[l2k]||{}).forEach(function(eng){_allEngTypes[eng]=(_allEngTypes[eng]||0)+_reg2EngType[l2k][eng];});});
-      var _engOrder=Object.keys(_allEngTypes).sort(function(a,b){return _allEngTypes[b]-_allEngTypes[a];});
-      if(!window._engTypeL2Exp)window._engTypeL2Exp=new Set();window._engTypeL2Keys=[];window._engTypeTogL2=function(i){var k=window._engTypeL2Keys[i];window._engTypeL2Exp.has(k)?window._engTypeL2Exp.delete(k):window._engTypeL2Exp.add(k);renderExe();};
-      if(!window._engTypeTeamExp)window._engTypeTeamExp=new Set();window._engTypeTeamKeys=[];window._engTypeTogTeam=function(i){var k=window._engTypeTeamKeys[i];window._engTypeTeamExp.has(k)?window._engTypeTeamExp.delete(k):window._engTypeTeamExp.add(k);renderExe();};
-      if(!window._engTypeView)window._engTypeView='region';
-      window._expEngTypeCsv=function(){var t=document.querySelector('#exe-pipe-engtype-tbl table');if(!t)return;var rows=[];var thead=t.querySelector('thead');var hdrs=[];if(thead){var tr1=thead.rows[0],tr2=thead.rows[1];var subIdx=0;if(tr1){for(var i=0;i<tr1.cells.length;i++){var th=tr1.cells[i];var cs=parseInt(th.getAttribute('colspan')||'1');if(cs>1&&tr2){for(var j=0;j<cs;j++){var sub=tr2.cells[subIdx+j];hdrs.push(th.textContent.trim()+(sub?' - '+sub.textContent.trim():''));}subIdx+=cs;}else{hdrs.push(th.textContent.trim());}}}}rows.push(hdrs.map(function(h){return'"'+h.replace(/"/g,'""')+'"';}).join(','));var tbody=t.querySelector('tbody');if(tbody){for(var r=0;r<tbody.rows.length;r++){var tr=tbody.rows[r];if(tr.style.display==='none')continue;var cells=[];for(var c=0;c<tr.cells.length;c++){cells.push('"'+tr.cells[c].textContent.trim().replace(/"/g,'""')+'"');}rows.push(cells.join(','));}}var blob=new Blob(['﻿'+rows.join('\r\n')],{type:'text/csv;charset=utf-8;'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='sde-engagement-type.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);};
-      var thTRSub="background:#034a5e;color:#fff;padding:4px 6px;font-size:9px;font-weight:600;text-align:right;white-space:nowrap";
-      var _l2EngOrder=Object.keys(_reg2Totals).filter(function(k){return _reg2Totals[k]>0;}).sort(function(a,b){return _reg2Totals[b]-_reg2Totals[a];});var _regHoGrandPct=_l2EngOrder.reduce(function(s,k){return s+(_reg2HO[k]||0);},0);window._expAllEngType=function(){var allExp=_l2EngOrder.length>0&&_l2EngOrder.every(function(k){return window._engTypeL2Exp.has(k);});if(allExp){window._engTypeL2Exp.clear();}else{_l2EngOrder.forEach(function(k){window._engTypeL2Exp.add(k);});}renderExe();};
-      var _fmtHoPct=function(ho,hoTotal){return hoTotal>0?(ho/hoTotal*100).toFixed(0)+'%':'—';};
-      var _tvBtn='<button onclick="window._engTypeView=(window._engTypeView===\'team\'?\'region\':\'team\');renderExe();" style="font-size:10px;padding:2px 8px;border:1px solid #012931;border-radius:3px;cursor:pointer;background:'+(window._engTypeView==='team'?'#012931':'#fff')+';color:'+(window._engTypeView==='team'?'#fff':'#012931')+'">'+(window._engTypeView==='team'?'Region View':'Team View')+'</button>';
-      var _csvBtn='<button onclick="window._expEngTypeCsv()" style="font-size:10px;padding:2px 8px;border:1px solid #012931;border-radius:3px;cursor:pointer;background:#fff;color:#012931">&#8595; CSV</button>';
-      var _allL2Exp=_l2EngOrder.length>0&&_l2EngOrder.every(function(k){return window._engTypeL2Exp.has(k);});var _expAllBtn=window._engTypeView!=='team'?'<button onclick="window._expAllEngType()" style="font-size:10px;padding:2px 8px;border:1px solid #012931;border-radius:3px;cursor:pointer;background:#fff;color:#012931">'+(_allL2Exp?'Collapse All':'Expand All')+'</button>':'';
-      var etbl='<div class="cc"><div class="ch" style="display:flex;justify-content:space-between;align-items:center"><span>2026 Pipeline Created — by Region &amp; SDE Engagement Type</span><div style="display:flex;gap:6px;align-items:center">'+_expAllBtn+_tvBtn+_csvBtn+'</div></div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">';
-      var _sdeTeamSBMap={"sde - specialist btp + data & ai":["Business Technology Platform","Data & AI"],"sde - specialist hcm":["Human Capital Management"],"sde - specialist cx":["Customer Experience"],"sde - specialist f&s":["Finance and Spend Management"],"sde - specialist scm":["Supply Chain Management"]};
-      var _allSpecSBs=Object.keys(_sdeTeamSBMap).reduce(function(a,k){return a.concat(_sdeTeamSBMap[k]);},[]);
-      var _teamRoleKeyMap={"sde - specialist btp + data & ai":"btp","sde - specialist hcm":"hcm","sde - specialist cx":"cx","sde - specialist f&s":"fs","sde - specialist scm":"scm"};
-      if(window._engTypeView==='team'){
-        var _tvTeams={};
-        (window.SDE_HO_TARGETS||[]).forEach(function(h){
-          var muk=(h.mu||'').toLowerCase().trim()||'(unknown)';
-          if(_sHoRF&&_sHoRF.indexOf(muk)<0)return;
-          if(_exeSbActF&&_exeSbActF.size&&!_sdeTeamSBMatch(h.team,_exeSbActF))return;
-          var tk=h.team;
-          if(!_tvTeams[tk])_tvTeams[tk]={total:0,muSet:new Set()};
-          _tvTeams[tk].total+=(h.eur||0)/1000;
-          _tvTeams[tk].muSet.add(muk);
-        });
-        var _tvTeamOrder=Object.keys(_tvTeams).sort(function(a,b){return _tvTeams[b].total-_tvTeams[a].total;});
-        var _tvGrand=_tvTeamOrder.reduce(function(s,tk){return s+_tvTeams[tk].total;},0);
-        var _tvAllMUs=new Set();_tvTeamOrder.forEach(function(tk){_tvTeams[tk].muSet.forEach(function(muk){_tvAllMUs.add(muk);});});
-        var _tvHOYtdGrand=Array.from(_tvAllMUs).reduce(function(s,muk){return s+(_reg2HO[muk]||0);},0);
-        etbl+='<thead><tr>';
-        etbl+='<th rowspan="2" style="'+thT+'">SDE Team</th><th rowspan="2" style="'+thTR+'">SDE HO Target</th><th rowspan="2" style="'+thTR+'">HO YTD</th><th rowspan="2" style="'+thTR+'">HO YTD (excl. SN)</th><th rowspan="2" style="'+thTR+'">SDE HO Target (SDE Sourced)</th>';
-        _engOrder.forEach(function(eng){etbl+='<th colspan="3" style="'+thTR+';border-left:2px solid #fff">'+eng+'</th>';});
-        etbl+='</tr><tr>';
-        _engOrder.forEach(function(eng){etbl+='<th style="'+thTRSub+';border-left:2px solid #fff">Pipeline</th><th style="'+thTRSub+'">Handed Over</th><th style="'+thTRSub+'">HO %</th>';});
-        etbl+='</tr></thead><tbody>';
-        _tvTeamOrder.forEach(function(tk){
-          var team=_tvTeams[tk];var muArr=Array.from(team.muSet);
-          var teamSBs=_sdeTeamSBMap[tk.toLowerCase().trim()];
-          var roleKey=_teamRoleKeyMap[tk.toLowerCase().trim()];
-          var tHoYtd;
-          var tHoYtdExSales;
-          if(roleKey){
-            tHoYtd=muArr.reduce(function(s,muk){return s+((_reg2RoleHO[muk]&&_reg2RoleHO[muk][roleKey])||0);},0);
-            tHoYtdExSales=muArr.reduce(function(s,muk){return s+((_reg2RoleHOExSales[muk]&&_reg2RoleHOExSales[muk][roleKey])||0);},0);
-          }else{
-            var _gMuk=muArr[0]||'';
-            tHoYtd=(_reg2RoleHO[_gMuk]&&_reg2RoleHO[_gMuk]["generalist"])||0;
-            tHoYtdExSales=(_reg2RoleHOExSales[_gMuk]&&_reg2RoleHOExSales[_gMuk]["generalist"])||0;
-          }
-          etbl+='<tr><td style="'+tdT+'">'+tk+'</td><td style="'+tdT+';text-align:right">'+fmtT(team.total)+'</td><td style="'+tdT+';text-align:right">'+(tHoYtd?fmtT(tHoYtd):"—")+'</td><td style="'+tdT+';text-align:right">'+(tHoYtdExSales?fmtT(tHoYtdExSales):"—")+'</td><td style="'+tdT+';text-align:right">'+fmtT(team.total*0.6)+'</td>';
-          _engOrder.forEach(function(eng){
-            var v,ho;
-            if(roleKey){
-              v=muArr.reduce(function(s,muk){return s+(teamSBs?teamSBs.reduce(function(s2,sbk){return s2+((_reg2SbEngType[muk]&&_reg2SbEngType[muk][sbk]&&_reg2SbEngType[muk][sbk][eng])||0);},0):0);},0);
-              ho=muArr.reduce(function(s,muk){return s+((_reg2RoleEngTypeHO[muk]&&_reg2RoleEngTypeHO[muk][roleKey]&&_reg2RoleEngTypeHO[muk][roleKey][eng])||0);},0);
-            }else{
-              var _gMuk2=muArr[0]||'';
-              var _muEng=(_reg2EngType[_gMuk2]&&_reg2EngType[_gMuk2][eng])||0;var _specEng=_allSpecSBs.reduce(function(s,sbk){return s+((_reg2SbEngType[_gMuk2]&&_reg2SbEngType[_gMuk2][sbk]&&_reg2SbEngType[_gMuk2][sbk][eng])||0);},0);v=Math.max(0,_muEng-_specEng);
-              ho=(_reg2RoleEngTypeHO[_gMuk2]&&_reg2RoleEngTypeHO[_gMuk2]["generalist"]&&_reg2RoleEngTypeHO[_gMuk2]["generalist"][eng])||0;
-            }
-            etbl+='<td style="'+tdT+';text-align:right;border-left:2px solid #e8f0f0">'+(v?fmtT(v):"—")+'</td><td style="'+tdT+';text-align:right">'+(ho?fmtT(ho):"—")+'</td><td style="'+tdT+';text-align:right">'+_fmtHoPct(ho,tHoYtd)+'</td>';
-          });
-          etbl+='</tr>';
-        });
-        var _tvEngColTots={},_tvEngColHOTots={};_engOrder.forEach(function(eng){_tvEngColTots[eng]=Array.from(_tvAllMUs).reduce(function(s,muk){return s+((_reg2EngType[muk]&&_reg2EngType[muk][eng])||0);},0);_tvEngColHOTots[eng]=Array.from(_tvAllMUs).reduce(function(s,muk){return s+((_reg2EngTypeHO[muk]&&_reg2EngTypeHO[muk][eng])||0);},0);});
-        var _tvHOExSalesGrand=Array.from(_tvAllMUs).reduce(function(s,muk){return s+(_reg2HOExSales[muk]||0);},0);
-        etbl+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT+'">Total</td><td style="'+tdT+';text-align:right">'+fmtT(_tvGrand)+'</td><td style="'+tdT+';text-align:right">'+(_tvHOYtdGrand?fmtT(_tvHOYtdGrand):"—")+'</td><td style="'+tdT+';text-align:right">'+(_tvHOExSalesGrand?fmtT(_tvHOExSalesGrand):"—")+'</td><td style="'+tdT+';text-align:right">'+fmtT(_tvGrand*0.6)+'</td>';
-        _engOrder.forEach(function(eng){var t=_tvEngColTots[eng]||0,h=_tvEngColHOTots[eng]||0;etbl+='<td style="'+tdT+';text-align:right;border-left:2px solid #e8f0f0">'+(t?fmtT(t):"—")+'</td><td style="'+tdT+';text-align:right">'+(h?fmtT(h):"—")+'</td><td style="'+tdT+';text-align:right">'+_fmtHoPct(h,_tvHOYtdGrand)+'</td>';});
-        etbl+='</tr></tbody></table></div></div>';
-      }else{
-        var _l2EngOrder=Object.keys(_reg2Totals).filter(function(k){return _reg2Totals[k]>0;}).sort(function(a,b){return _reg2Totals[b]-_reg2Totals[a];});
-        etbl+='<thead><tr>';
-        etbl+='<th rowspan="2" style="'+thT+'">Region</th><th rowspan="2" style="'+thTR+'">SDE HO Target</th><th rowspan="2" style="'+thTR+'">HO YTD</th><th rowspan="2" style="'+thTR+'">SDE HO Target (SDE Sourced)</th>';
-        _engOrder.forEach(function(eng){etbl+='<th colspan="3" style="'+thTR+';border-left:2px solid #fff">'+eng+'</th>';});
-        etbl+='</tr><tr>';
-        _engOrder.forEach(function(eng){etbl+='<th style="'+thTRSub+';border-left:2px solid #fff">Pipeline</th><th style="'+thTRSub+'">Handed Over</th><th style="'+thTRSub+'">HO %</th>';});
-        etbl+='</tr></thead><tbody>';
-        _l2EngOrder.forEach(function(l2k){
-          var total=_reg2Totals[l2k]||0;
-          var l2disp=_l2Disp[l2k]||(l2k.charAt(0).toUpperCase()+l2k.slice(1));
-          var hasTeams=(_sdeHoTgtByMu[l2k]||0)>0;
-          var li=window._engTypeL2Keys.push(l2k)-1;
-          var isExp=window._engTypeL2Exp.has(l2k);
-          var expBtn=hasTeams?'<span onclick="event.stopPropagation();_engTypeTogL2('+li+')" style="cursor:pointer;margin-right:4px;font-size:10px;line-height:1;user-select:none;font-weight:700">'+(isExp?'&#8722;':'&#43;')+'</span>':'<span style="display:inline-block;width:16px;margin-right:4px"></span>';
-          var sdeHoTgt=_sdeHoTgtByMu[l2k]||0;
-          var hoYtd=_reg2HO[l2k]||0;
-          etbl+='<tr style="font-weight:600"><td style="'+tdT+'">'+expBtn+l2disp+'</td><td style="'+tdT+';text-align:right">'+(sdeHoTgt?fmtT(sdeHoTgt):"—")+'</td><td style="'+tdT+';text-align:right">'+(hoYtd?fmtT(hoYtd):"—")+'</td><td style="'+tdT+';text-align:right">'+(sdeHoTgt?fmtT(sdeHoTgt*0.6):"—")+'</td>';
-          _engOrder.forEach(function(eng){var v=(_reg2EngType[l2k]&&_reg2EngType[l2k][eng])||0;var ho=(_reg2EngTypeHO[l2k]&&_reg2EngTypeHO[l2k][eng])||0;etbl+='<td style="'+tdT+';text-align:right;border-left:2px solid #e8f0f0">'+(v?fmtT(v):"—")+'</td><td style="'+tdT+';text-align:right">'+(ho?fmtT(ho):"—")+'</td><td style="'+tdT+';text-align:right">'+_fmtHoPct(ho,hoYtd)+'</td>';});
-          etbl+='</tr>';
-          if(isExp&&hasTeams){var _l2Ts=[];(window.SDE_HO_TARGETS||[]).forEach(function(h){var muk=(h.mu||'').toLowerCase().trim();if(muk!==l2k)return;if(_exeSbActF&&_exeSbActF.size&&!_sdeTeamSBMatch(h.team,_exeSbActF))return;var ex=null;for(var _ti=0;_ti<_l2Ts.length;_ti++){if(_l2Ts[_ti].tk===h.team){ex=_l2Ts[_ti];break;}}if(!ex){ex={tk:h.team,total:0};_l2Ts.push(ex);}ex.total+=(h.eur||0)/1000;});_l2Ts.sort(function(a,b){return b.total-a.total;});var _tdSub=tdT+';background:#eef8f8';var _genSplits={"benelux":[{label:"SDE Generalist BeLux",tgt:28000,l3k:"belux"},{label:"SDE Generalist Netherlands",tgt:29000,l3k:"netherlands"}],"southern europe":[{label:"SDE Generalist Southern Europe",tgt:29400,excl:"spain"},{label:"SDE Generalist Spain",tgt:29400,l3k:"spain"}]};_l2Ts.forEach(function(teamObj){var tk=teamObj.tk;var tl=tk.toLowerCase().trim();var roleKey=_teamRoleKeyMap[tl];var teamSBs=_sdeTeamSBMap[tl];var splits=!roleKey&&_genSplits[l2k]?_genSplits[l2k]:null;if(splits){splits.forEach(function(sp){var _l3Ks=sp.excl?Object.keys(_reg3EngType[l2k]||{}).filter(function(k){return k!==sp.excl;}):sp.l3k?[sp.l3k]:[];var _spHoYtd=_l3Ks.reduce(function(s,k){return s+((_reg2L3HO[l2k]&&_reg2L3HO[l2k][k])||0);},0);etbl+='<tr><td style="'+_tdSub+';padding-left:22px">'+sp.label+'</td><td style="'+_tdSub+';text-align:right">'+fmtT(sp.tgt)+'</td><td style="'+_tdSub+';text-align:right">'+(_spHoYtd?fmtT(_spHoYtd):"—")+'</td><td style="'+_tdSub+';text-align:right">'+fmtT(sp.tgt*0.6)+'</td>';_engOrder.forEach(function(eng){var v=_l3Ks.reduce(function(s,k){return s+((_reg3EngType[l2k]&&_reg3EngType[l2k][k]&&_reg3EngType[l2k][k][eng])||0);},0);var ho=_l3Ks.reduce(function(s,k){return s+((_reg3EngTypeHO[l2k]&&_reg3EngTypeHO[l2k][k]&&_reg3EngTypeHO[l2k][k][eng])||0);},0);etbl+='<td style="'+_tdSub+';text-align:right;border-left:2px solid #e8f0f0">'+(v?fmtT(v):"—")+'</td><td style="'+_tdSub+';text-align:right">'+(ho?fmtT(ho):"—")+'</td><td style="'+_tdSub+';text-align:right">'+_fmtHoPct(ho,_spHoYtd)+'</td>';});etbl+='</tr>';})}else{var tHoYtd=roleKey?((_reg2RoleHO[l2k]&&_reg2RoleHO[l2k][roleKey])||0):((_reg2RoleHO[l2k]&&_reg2RoleHO[l2k]["generalist"])||0);etbl+='<tr><td style="'+_tdSub+';padding-left:22px">'+tk+'</td><td style="'+_tdSub+';text-align:right">'+(teamObj.total?fmtT(teamObj.total):"—")+'</td><td style="'+_tdSub+';text-align:right">'+(tHoYtd?fmtT(tHoYtd):"—")+'</td><td style="'+_tdSub+';text-align:right">'+(teamObj.total?fmtT(teamObj.total*0.6):"—")+'</td>';_engOrder.forEach(function(eng){var v,ho;if(roleKey){v=teamSBs?teamSBs.reduce(function(s,sbk){return s+((_reg2SbEngType[l2k]&&_reg2SbEngType[l2k][sbk]&&_reg2SbEngType[l2k][sbk][eng])||0);},0):0;ho=(_reg2RoleEngTypeHO[l2k]&&_reg2RoleEngTypeHO[l2k][roleKey]&&_reg2RoleEngTypeHO[l2k][roleKey][eng])||0;}else{var _muEng=(_reg2EngType[l2k]&&_reg2EngType[l2k][eng])||0;var _specEng=_allSpecSBs.reduce(function(s,sbk){return s+((_reg2SbEngType[l2k]&&_reg2SbEngType[l2k][sbk]&&_reg2SbEngType[l2k][sbk][eng])||0);},0);v=Math.max(0,_muEng-_specEng);ho=(_reg2RoleEngTypeHO[l2k]&&_reg2RoleEngTypeHO[l2k]["generalist"]&&_reg2RoleEngTypeHO[l2k]["generalist"][eng])||0;}etbl+='<td style="'+_tdSub+';text-align:right;border-left:2px solid #e8f0f0">'+(v?fmtT(v):"—")+'</td><td style="'+_tdSub+';text-align:right">'+(ho?fmtT(ho):"—")+'</td><td style="'+_tdSub+';text-align:right">'+_fmtHoPct(ho,tHoYtd)+'</td>';});etbl+='</tr>';}});}
-        });
-        var _engColTots={},_engColHOTots={};_engOrder.forEach(function(eng){_engColTots[eng]=_l2EngOrder.reduce(function(s,l2k){return s+((_reg2EngType[l2k]&&_reg2EngType[l2k][eng])||0);},0);_engColHOTots[eng]=_l2EngOrder.reduce(function(s,l2k){return s+((_reg2EngTypeHO[l2k]&&_reg2EngTypeHO[l2k][eng])||0);},0);});
-        var _reg2HOGrand=_l2EngOrder.reduce(function(s,k){return s+(_reg2HO[k]||0);},0);
-        etbl+='<tr style="background:#f7f7f7;font-weight:700"><td style="'+tdT+'">Total</td><td style="'+tdT+';text-align:right">'+(_srcSdeHoTgt?fmtT(_srcSdeHoTgt):"—")+'</td><td style="'+tdT+';text-align:right">'+(_reg2HOGrand?fmtT(_reg2HOGrand):"—")+'</td><td style="'+tdT+';text-align:right">'+(_srcSdeHoTgt?fmtT(_srcSdeHoTgt*0.6):"—")+'</td>';
-        _engOrder.forEach(function(eng){var t=_engColTots[eng]||0,h=_engColHOTots[eng]||0;etbl+='<td style="'+tdT+';text-align:right;border-left:2px solid #e8f0f0">'+(t?fmtT(t):"—")+'</td><td style="'+tdT+';text-align:right">'+(h?fmtT(h):"—")+'</td><td style="'+tdT+';text-align:right">'+_fmtHoPct(h,_regHoGrandPct)+'</td>';});
-        etbl+='</tr></tbody></table></div></div>';
-      }
-      _engTypeTbl.innerHTML=etbl;
     }
     var _sbTbl=document.getElementById("exe-pipe-sb-tbl");
     if(_sbTbl){
@@ -4524,7 +4527,51 @@ function renderBud(){
   html+='<tr style="'+totRow2+'"><td style="'+td2+'">Total</td><td style="'+td2+';text-align:right">'+fmtE(engGrand)+'</td><td style="'+td2+';text-align:right">'+new Set(sdeRows.map(function(p){return String(p["Opportunity ID"]||"");})).size.toLocaleString()+'</td><td style="'+td2+';text-align:right">100%</td></tr>';
   html+='</tbody></table></div></div>';
   html+='</div>';
+  html+='<div id="sde-pipe-engtype-tbl" style="margin-top:16px;width:100%"></div>';
   page.innerHTML=html;
+  // 2026 Pipeline Created — by Region & SDE Engagement Type
+  var _sdeET=document.getElementById("sde-pipe-engtype-tbl");
+  if(_sdeET&&window._buildEngTypeTbl){
+    var _r2Et={},_r2EtHO={},_r2T={},_r2HO={},_r2L3HO={},_r3Et={},_r3EtHO={};
+    var _r2SbEt={},_r2SbEtHO={},_r2RHO={},_r2REtHO={},_r2RHOx={},_r2HOex={};
+    var _sdeSolMap={"BAIP - Data & AI":"Data & AI","BAIP - Technology Foundation":"Business Technology Platform","Business Transformation Management":"Business Transformation Management","Cloud ERP Private":"Cloud ERP Private","Finance and Spend Management":"Finance and Spend Management","Human Capital Management":"Human Capital Management","Supply Chain Management":"Supply Chain Management","Customer Experience":"Customer Experience","Other":"Other"};
+    pipeData.forEach(function(p){
+      if(String(p["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+      if(!String(p["Create Quarter"]||"").startsWith("2026"))return;
+      if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim()))return;
+      if(_iacF&&!_iacF.has(String(p["IAC (Engagement Model)"]||"").trim()))return;
+      if(_regF2&&!_regF2.has(String(p["Region Lvl 2"]||"").trim()))return;
+      if(eurMinFilter!==null&&(parseFloat(p["Eur"]||0)||0)<eurMinFilter)return;
+      if(eurMaxFilter!==null&&(parseFloat(p["Eur"]||0)||0)>=eurMaxFilter)return;
+      var eur=parseFloat(p["Eur"]||0)||0;if(!eur)return;
+      var hod=hasHod(p["SDE Handover Date"]);
+      var eng=String(p["SDE Engagement Type"]||"").trim();
+      var l2k=String(p["Region Lvl 2"]||"").trim().replace(/^CS /,"").toLowerCase()||"other";
+      var l3k=String(p["Region Lvl 3"]||"").trim().replace(/^CS /,"").toLowerCase()||"other";
+      var _isSales=String(p["TCP Pipeline Source Desc"]||"").trim()==="Sales";
+      _r2T[l2k]=(_r2T[l2k]||0)+eur;
+      if(hod){_r2HO[l2k]=(_r2HO[l2k]||0)+eur;if(!_isSales){_r2HOex[l2k]=(_r2HOex[l2k]||0)+eur;}}
+      if(!_r2L3HO[l2k])_r2L3HO[l2k]={};if(hod)_r2L3HO[l2k][l3k]=(_r2L3HO[l2k][l3k]||0)+eur;
+      if(eng&&eng!=="(No Value)"&&eng!=="(no value)"){
+        if(!_r2Et[l2k])_r2Et[l2k]={};_r2Et[l2k][eng]=(_r2Et[l2k][eng]||0)+eur;
+        if(hod){if(!_r2EtHO[l2k])_r2EtHO[l2k]={};_r2EtHO[l2k][eng]=(_r2EtHO[l2k][eng]||0)+eur;}
+        if(!_r3Et[l2k])_r3Et[l2k]={};if(!_r3Et[l2k][l3k])_r3Et[l2k][l3k]={};_r3Et[l2k][l3k][eng]=(_r3Et[l2k][l3k][eng]||0)+eur;
+        if(hod){if(!_r3EtHO[l2k])_r3EtHO[l2k]={};if(!_r3EtHO[l2k][l3k])_r3EtHO[l2k][l3k]={};_r3EtHO[l2k][l3k][eng]=(_r3EtHO[l2k][l3k][eng]||0)+eur;}
+        var _sbk=_sdeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim()||"Other";
+        if(!_r2SbEt[l2k])_r2SbEt[l2k]={};if(!_r2SbEt[l2k][_sbk])_r2SbEt[l2k][_sbk]={};_r2SbEt[l2k][_sbk][eng]=(_r2SbEt[l2k][_sbk][eng]||0)+eur;
+        if(hod){if(!_r2SbEtHO[l2k])_r2SbEtHO[l2k]={};if(!_r2SbEtHO[l2k][_sbk])_r2SbEtHO[l2k][_sbk]={};_r2SbEtHO[l2k][_sbk][eng]=(_r2SbEtHO[l2k][_sbk][eng]||0)+eur;}
+      }
+      if(hod){var _hrl=String(p["SDE Handover Role"]||"").trim().toLowerCase();var _hrk;if(_hrl.indexOf(' btp')>=0)_hrk='btp';else if(_hrl.indexOf(' hcm')>=0)_hrk='hcm';else if(_hrl.indexOf(' cx')>=0)_hrk='cx';else if(_hrl.indexOf(' f&s')>=0)_hrk='fs';else if(_hrl.indexOf(' scm')>=0)_hrk='scm';else _hrk='generalist';if(!_r2RHO[l2k])_r2RHO[l2k]={};_r2RHO[l2k][_hrk]=(_r2RHO[l2k][_hrk]||0)+eur;if(!_isSales){if(!_r2RHOx[l2k])_r2RHOx[l2k]={};_r2RHOx[l2k][_hrk]=(_r2RHOx[l2k][_hrk]||0)+eur;}if(eng&&eng!=="(No Value)"&&eng!=="(no value)"){if(!_r2REtHO[l2k])_r2REtHO[l2k]={};if(!_r2REtHO[l2k][_hrk])_r2REtHO[l2k][_hrk]={};_r2REtHO[l2k][_hrk][eng]=(_r2REtHO[l2k][_hrk][eng]||0)+eur;}}
+    });
+    var _sdeHoTgt2=0,_sdeHoByMu2={},_sdeHoByMuL3_2={};
+    var _sHoRF2=_regF2?Array.from(_regF2).map(function(rv){return rv.replace(/^CS /,"").trim().toLowerCase();}):null;
+    if(window.SDE_HO_TARGETS){window.SDE_HO_TARGETS.forEach(function(h){var muk=h.mu.toLowerCase().trim();if(!_sHoRF2||_sHoRF2.indexOf(muk)>=0){_sdeHoTgt2+=(h.eur||0)/1000;_sdeHoByMu2[muk]=(_sdeHoByMu2[muk]||0)+(h.eur||0)/1000;}});if(!_sHoRF2||_sHoRF2.indexOf("southern europe")>=0){var _seEgTgt2=0,_seJavTgt2=0;window.SDE_HO_TARGETS.forEach(function(h){if(h.mu.toLowerCase().trim()!=="southern europe")return;if(h.name&&h.name.toLowerCase().indexOf("egemen")>=0)_seEgTgt2+=(h.eur||0)/1000;else if(h.name&&h.name.toLowerCase().indexOf("javier")>=0)_seJavTgt2+=(h.eur||0)/1000;});var _seNoSpain2=Object.keys(_r2L3HO["southern europe"]||{}).filter(function(k){return k!=="spain";});if(!_sdeHoByMuL3_2["southern europe"])_sdeHoByMuL3_2["southern europe"]={};if(_seNoSpain2.length>0){var _sePerL3_2=_seEgTgt2/_seNoSpain2.length;_seNoSpain2.forEach(function(l3k){_sdeHoByMuL3_2["southern europe"][l3k]=_sePerL3_2;});}if(_seJavTgt2>0)_sdeHoByMuL3_2["southern europe"]["spain"]=_seJavTgt2;}if(!_sHoRF2||_sHoRF2.indexOf("benelux")>=0){var _bnSophTgt2=0,_bnCamTgt2=0;window.SDE_HO_TARGETS.forEach(function(h){if(h.mu.toLowerCase().trim()!=="benelux")return;if(h.name&&h.name.toLowerCase().indexOf("sophie")>=0)_bnSophTgt2+=(h.eur||0)/1000;else if(h.name&&h.name.toLowerCase().indexOf("camille")>=0)_bnCamTgt2+=(h.eur||0)/1000;});if(!_sdeHoByMuL3_2["benelux"])_sdeHoByMuL3_2["benelux"]={};if(_bnSophTgt2>0)_sdeHoByMuL3_2["benelux"]["belux"]=_bnSophTgt2;if(_bnCamTgt2>0)_sdeHoByMuL3_2["benelux"]["netherlands"]=_bnCamTgt2;}}
+    var _thT_sde="background:#012931;color:#fff;padding:6px 6px;font-size:10px;font-weight:700;text-align:left;white-space:normal;line-height:1.3";
+    var _thTR_sde=_thT_sde+";text-align:right";
+    var _fmtT_sde=function(n){return n>=1000?(n/1000).toFixed(0)+"M":n>=1?n.toFixed(0)+"K":n.toFixed(0);};
+    var _l2Disp_sde={"benelux":"Benelux","france":"France","italy":"Italy","mea north":"MEA North","mea south":"MEA South","nordic":"Nordic","southern europe":"Southern Europe","uki":"UKI"};
+    window._buildEngTypeTbl(_sdeET,{rfn:renderSde,r2et:_r2Et,r2etho:_r2EtHO,r2t:_r2T,r2ho:_r2HO,r2l3ho:_r2L3HO,r3et:_r3Et,r3etho:_r3EtHO,r2sbet:_r2SbEt,r2sbetho:_r2SbEtHO,r2rho:_r2RHO,r2retho:_r2REtHO,r2rhox:_r2RHOx,r2hoex:_r2HOex,hoTgt:_sdeHoTgt2,hoRF:_sHoRF2,hoByMu:_sdeHoByMu2,hoByMuL3:_sdeHoByMuL3_2,sbF:null,sbMatch:null,thT:_thT_sde,thTR:_thTR_sde,fmtT:_fmtT_sde,l2Disp:_l2Disp_sde});
+  }
   }catch(e){page.innerHTML='<div class="ap"><div class="nr"><p><b>Error:</b> '+e.message+'</p></div></div>';console.error(e);}
 }
 function renderAna(){try{renderAnaTo("anaPage",true,"a");}catch(e){var p=document.getElementById("anaPage");if(p)p.innerHTML="<div class=\"nr\"><p><b>Error:</b> "+e.message+"</p></div>";console.error(e);}setTimeout(scaleContent,100);try{buildFbar();}catch(e){console.error("buildFbar:",e);}}
