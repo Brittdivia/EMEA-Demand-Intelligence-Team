@@ -5319,8 +5319,7 @@ if(pageId!=="ovwPage"){html3+="<div class=\"cc\" style=\"margin-bottom:28px;widt
     
   }
    html3+="<details style=\"margin-bottom:28px\"><summary style=\"cursor:pointer;font-size:13px;font-weight:700;color:var(--dk);padding:6px 0;list-style:none;display:flex;align-items:center;gap:6px\"><span style=\"font-size:10px\">&#9654;</span> Pipeline Detail - Week 44<span style=\"font-size:11px;font-weight:400;color:var(--mu)\">("+pdet.length.toLocaleString()+" rows)</span></summary>";
-  html3+="<div class=\"cc\" style=\"margin-bottom:0\"><style>details[open] summary span:first-child{transform:rotate(90deg);display:inline-block;}@media print{header,.tbar,.fbar,.wbar{display:none!important;}.panel{display:block!important;position:static!important;overflow:visible!important;}.ap{overflow:visible!important;max-height:none!important;}body{margin:0;padding:0;}}
-</style>";
+  html3+="<div class=\"cc\" style=\"margin-bottom:0\"><style>details[open] summary span:first-child{transform:rotate(90deg);display:inline-block;}</style>";
   html3+="<div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between\">";
   html3+="<span>"+pdet.length.toLocaleString()+" rows &middot; "+totOpps.toLocaleString()+" distinct opps</span>";
   html3+="<input type=\"text\" id=\"pds\" placeholder=\"Search...\" oninput=\"filterPD()\" style=\"border:1px solid var(--bd);border-radius:var(--r);padding:4px 8px;font-size:12px;outline:none;width:200px\"/>"+"<button onclick=\"exportPdet()\" style=\"margin-left:8px;padding:5px 12px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:12px;cursor:pointer\">&#11015; Export CSV</button>";
