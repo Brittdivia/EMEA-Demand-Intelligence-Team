@@ -215,7 +215,7 @@ window.addEventListener('beforeprint',function(){
 window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});</script>
 <script src="data-camp.js?v=20261026"></script>
 <script src="data-pipe.js?v=20261026"></script>
-<script src="data-pipe-w43.js?v=20261026"></script>
+<script src="data-pipe-w43.js?v=20261026"></script><script src="data-pipe-w44.js?v=20261102"></script>
 <script src="data-out.js?v=20260723"></script>
 <script src="data-seqco.js?v=20260619"></script>
 <script src="data-prospects.js?v=20260623j"></script>
@@ -239,7 +239,7 @@ window.PROFILING_ACCT_REQUESTED=306028;</script>
   <div class="ht">EMEA Demand Generation</div>
   <div class="hsp"></div>
   <div class="hm">
-    <span class="hu">Last updated: 26 Oct 2026</span>
+    <span class="hu">Last updated: 02 Nov 2026</span>
     <span class="hc" id="hcount">2,798 campaigns</span>
     <span id="sec-user-badge" style="font-size:11px;color:var(--mu);cursor:pointer;margin-left:12px" onclick="promptSecEmail();updateAdminTabs();if(activeTab==='bud')renderBud();if(activeTab==='exe')renderExe();if(activeTab==='exe2')renderExe('2');" title="Click to change user"></span>
   </div>
@@ -249,6 +249,7 @@ window.PROFILING_ACCT_REQUESTED=306028;</script>
   <button class="tbtn" id="tab-btn-exe" data-tab="exe" onclick="switchTab(&#39;exe&#39;)" style="display:none">TCP</button>
   <button class="tbtn" data-tab="exe2" onclick="switchTab(&#39;exe2&#39;)">TCP v2</button>
   <button class="tbtn" data-tab="sde3" onclick="switchTab(&#39;sde3&#39;)">SDE View</button>
+  <button class="tbtn" data-tab="dcm" onclick="switchTab(&#39;dcm&#39;)">DCM View</button>
   <button class="tbtn" data-tab="ana" onclick="switchTab(&#39;ana&#39;)">Campaign Insights</button>
 </div>
 <div class="tbar-sub" id="tbar-sub">
@@ -268,6 +269,7 @@ window.PROFILING_ACCT_REQUESTED=306028;</script>
 <div class="panel" id="p-exe"><div class="ap" id="exePage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-exe2"><div class="ap" id="exe2Page"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="panel" id="p-sde3"><div class="ap" id="sde3Page"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
+<div class="panel" id="p-dcm"><div class="ap" id="dcmPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
 <div class="wbar" id="wbar" style="display:none"><span id="wbar-content2"></span></div>
 <div class="panel" id="p-sde" style="display:none"><div class="ap" id="sdePage"></div></div>
 <div class="panel" id="p-ana"><div class="ap" id="anaPage"><div class="nr"><div class="ni">&#8987;</div><p>Loading...</p></div></div></div>
@@ -381,13 +383,13 @@ document.addEventListener("DOMContentLoaded",function(){
   // Build Sales Bag → sub-SB names mapping for dropdown filtering
   campData.forEach(function(r){var sbs=String(r["Sales Bag"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);var ssbs=String(r["Sub Sales Bag"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);sbs.forEach(function(sb){if(!_sbToSubSBs[sb])_sbToSubSBs[sb]=new Set();ssbs.forEach(function(ssb){var stripped=ssb.indexOf(" - ")>-1?ssb.substring(ssb.indexOf(" - ")+3).trim():ssb;if(stripped)_sbToSubSBs[sb].add(stripped);});});});
   function _xpd(d){if(!d||Array.isArray(d))return d||[];var h=d.h,r=d.d;return r.map(function(row){var o={};for(var i=0;i<h.length;i++)o[h[i]]=row[i]==null?'':row[i];return o;});}
-  pipeData=_xpd((window._pipeWeek==='w37'?window.PIPE_DATA_W37:(window._pipeWeek==='w38'?window.PIPE_DATA_W38:(window._pipeWeek==='w39'?window.PIPE_DATA_W39:(window._pipeWeek==='w40'?window.PIPE_DATA_W40:(window._pipeWeek==='w41'?window.PIPE_DATA_W41:(window._pipeWeek==='w42'?window.PIPE_DATA_W42:(window._pipeWeek==='w43'?window.PIPE_DATA_W43:null)))))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});
+  pipeData=_xpd((window._pipeWeek==='w37'?window.PIPE_DATA_W37:(window._pipeWeek==='w38'?window.PIPE_DATA_W38:(window._pipeWeek==='w39'?window.PIPE_DATA_W39:(window._pipeWeek==='w40'?window.PIPE_DATA_W40:(window._pipeWeek==='w41'?window.PIPE_DATA_W41:(window._pipeWeek==='w42'?window.PIPE_DATA_W42:(window._pipeWeek==='w43'?window.PIPE_DATA_W43:(window._pipeWeek==='w44'?window.PIPE_DATA_W44:null))))))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});
   pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);})
   pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});
   pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});
   FD.forEach(function(f){filters[f.k]=new Set();});
-window._setPipeWeek=function(w){window._pipeWeek=w;var vn=w==='w37'?'PIPE_DATA_W37':w==='w38'?'PIPE_DATA_W38':w==='w39'?'PIPE_DATA_W39':w==='w40'?'PIPE_DATA_W40':w==='w41'?'PIPE_DATA_W41':w==='w42'?'PIPE_DATA_W42':'PIPE_DATA_W43';var src=w==='w37'?'data-pipe-w37.js':w==='w38'?'data-pipe-w38.js':w==='w39'?'data-pipe-w39.js':w==='w40'?'data-pipe-w40.js':w==='w41'?'data-pipe-w41.js':w==='w42'?'data-pipe-w42.js':'data-pipe-w43.js';function _apply(){pipeData=_xpd((w==='w37'?window.PIPE_DATA_W37:(w==='w38'?window.PIPE_DATA_W38:(w==='w39'?window.PIPE_DATA_W39:(w==='w40'?window.PIPE_DATA_W40:(w==='w41'?window.PIPE_DATA_W41:(w==='w42'?window.PIPE_DATA_W42:(w==='w43'?window.PIPE_DATA_W43:null)))))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});syncDrmBtn();mmPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});syncMmpsBtn();tcpPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});syncTcpSrcBtn();applyFilters();renderBud();if(activeTab==='ana')renderAna();}if(window[vn]){_apply();return;}var s=document.createElement('script');s.src=src;s.onload=function(){_apply();};s.onerror=function(){_apply();};document.head.appendChild(s);};;
-  if(!window._pipeWeek){window._setPipeWeek('w43');}
+window._setPipeWeek=function(w){window._pipeWeek=w;var vn=w==='w37'?'PIPE_DATA_W37':w==='w38'?'PIPE_DATA_W38':w==='w39'?'PIPE_DATA_W39':w==='w40'?'PIPE_DATA_W40':w==='w41'?'PIPE_DATA_W41':w==='w42'?'PIPE_DATA_W42':w==='w43'?'PIPE_DATA_W43':'PIPE_DATA_W44';var src=w==='w37'?'data-pipe-w37.js':w==='w38'?'data-pipe-w38.js':w==='w39'?'data-pipe-w39.js':w==='w40'?'data-pipe-w40.js':w==='w41'?'data-pipe-w41.js':w==='w42'?'data-pipe-w42.js':w==='w43'?'data-pipe-w43.js':'data-pipe-w44.js';function _apply(){pipeData=_xpd((w==='w37'?window.PIPE_DATA_W37:(w==='w38'?window.PIPE_DATA_W38:(w==='w39'?window.PIPE_DATA_W39:(w==='w40'?window.PIPE_DATA_W40:(w==='w41'?window.PIPE_DATA_W41:(w==='w42'?window.PIPE_DATA_W42:(w==='w43'?window.PIPE_DATA_W43:(w==='w44'?window.PIPE_DATA_W44:null))))))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});syncDrmBtn();mmPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});syncMmpsBtn();tcpPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});syncTcpSrcBtn();applyFilters();renderBud();if(activeTab==='ana')renderAna();}if(window[vn]){_apply();return;}var s=document.createElement('script');s.src=src;s.onload=function(){_apply();};s.onerror=function(){_apply();};document.head.appendChild(s);};;
+  if(!window._pipeWeek){window._setPipeWeek('w44');}
   outData=window.OUT_DATA||JSON.parse(document.getElementById("d-out").textContent);
   document.getElementById("hcount").textContent=campData.length.toLocaleString()+" campaigns";
 
@@ -406,7 +408,7 @@ var _accFiltersSaved=null;
 var DETAIL_TABS={"ana":"Campaign Insights","pip":"Pipeline Details","out":"Outreach Details","cal":"EMEA Campaign Calendar","dtr":"Profiling-Outreach Tracking"};
 function switchTab(t){
   // Security check for Coverage Overview and TCP tabs
-  if(t==="bud"||t==="exe"||t==="exe2"||t==="sde3"){
+  if(t==="bud"||t==="exe"||t==="exe2"||t==="sde3"||t==="dcm"){
     if(!secCanSeeBud()){
       activeTab=t;
       document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
@@ -423,6 +425,7 @@ function switchTab(t){
   if(t==="exe")renderExe();
   if(t==="exe2")renderExe('2');
   if(t==="sde3")renderSde3();
+  if(t==="dcm")renderDcm();
   if(t==="ana")renderAna();
   if(t==="out")renderOut();
   if(t==="pip")renderPip();
@@ -655,6 +658,29 @@ function buildFbar(){
     });
   }
   } // end sub-tabs only
+  if(activeTab==='exe2'||activeTab==='sde3'){
+    var _sdeRfn=activeTab==='exe2'?"renderExe('2')":"renderSde3()";
+    var _sdeEtVals=Array.from(new Set(pipeData.map(function(p){return String(p["SDE Engagement Type"]||"").trim();}).filter(function(v){return v&&v!=="(No Value)"&&v!=="(no value)"}))).sort();
+    var _sdeEtCur=window._sdeEngTypeFilter||"";
+    var _sdeEtN=_sdeEtCur?1:0;
+    var _sdeEtBtn=document.createElement("div");_sdeEtBtn.className="fbi";_sdeEtBtn.id="sdeengtype-fbi";
+    var _sdeEtOpts=_sdeEtVals.map(function(v){var eq=v.replace(/&/g,"&amp;").replace(/"/g,"&quot;");var chk=(v===_sdeEtCur)?"checked":"";return"<label class=\"dopt\"><input type=\"radio\" name=\"sdeengtype\" "+chk+" value=\""+eq+"\" onchange=\"window._sdeEngTypeFilter=this.value;"+_sdeRfn+";buildFbar();\"/><span class=\"ot\">"+eq+"</span></label>";}).join("");
+    _sdeEtBtn.innerHTML="<button class=\"fbtn"+(_sdeEtN?" on":"")+"\" id=\"sdeengtype-fbtn\" onclick=\"toggleSdeEngTypeDD()\">SDE Engagement Type <span class=\"fc\" style=\"display:"+(_sdeEtN?"inline-block":"none")+"\">1</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
+      +"<div class=\"fdd\" id=\"sdeengtype-fdd\"><div class=\"fdh\"><span class=\"fdt\">SDE Engagement Type</span><button class=\"fdc\" onclick=\"window._sdeEngTypeFilter='';"+_sdeRfn+";buildFbar();\">Clear</button></div>"
+      +"<div class=\"fds\"><input type=\"text\" placeholder=\"Search...\" oninput=\"var q=this.value.toLowerCase();document.querySelectorAll('#sdeengtype-fdo .dopt').forEach(function(o){o.style.display=o.querySelector('.ot').textContent.toLowerCase().indexOf(q)>=0?'':'none';})\"/></div>"
+      +"<div class=\"fdo\" id=\"sdeengtype-fdo\">"+_sdeEtOpts+"</div></div>";
+    div.parentNode.insertBefore(_sdeEtBtn,div);
+    var _sdeInVals=Array.from(new Set(pipeData.map(function(p){return String(p["SDE Initial Engagement Name"]||"").trim();}).filter(Boolean))).sort();
+    var _sdeInCur=window._sdeInitEngNameFilter||"";
+    var _sdeInN=_sdeInCur?1:0;
+    var _sdeInBtn=document.createElement("div");_sdeInBtn.className="fbi";_sdeInBtn.id="sdeinitengname-fbi";
+    var _sdeInOpts=_sdeInVals.map(function(v){var eq=v.replace(/&/g,"&amp;").replace(/"/g,"&quot;");var chk=(v===_sdeInCur)?"checked":"";return"<label class=\"dopt\"><input type=\"radio\" name=\"sdeinitengname\" "+chk+" value=\""+eq+"\" onchange=\"window._sdeInitEngNameFilter=this.value;"+_sdeRfn+";buildFbar();\"/><span class=\"ot\">"+eq+"</span></label>";}).join("");
+    _sdeInBtn.innerHTML="<button class=\"fbtn"+(_sdeInN?" on":"")+"\" id=\"sdeinitengname-fbtn\" onclick=\"toggleSdeInitEngNameDD()\">SDE Initial Engagement Name <span class=\"fc\" style=\"display:"+(_sdeInN?"inline-block":"none")+"\">1</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
+      +"<div class=\"fdd\" id=\"sdeinitengname-fdd\"><div class=\"fdh\"><span class=\"fdt\">SDE Initial Engagement Name</span><button class=\"fdc\" onclick=\"window._sdeInitEngNameFilter='';"+_sdeRfn+";buildFbar();\">Clear</button></div>"
+      +"<div class=\"fds\"><input type=\"text\" placeholder=\"Search...\" oninput=\"var q=this.value.toLowerCase();document.querySelectorAll('#sdeinitengname-fdo .dopt').forEach(function(o){o.style.display=o.querySelector('.ot').textContent.toLowerCase().indexOf(q)>=0?'':'none';})\"/></div>"
+      +"<div class=\"fdo\" id=\"sdeinitengname-fdo\">"+_sdeInOpts+"</div></div>";
+    div.parentNode.insertBefore(_sdeInBtn,div);
+  }
 }
 
 function getBudValidSBs(){
@@ -900,6 +926,16 @@ function toggleSdeSecNameDD(){
   var was=dd.classList.contains("on");closeAllDD();
   if(!was){dd.classList.add("on");btn.classList.add("on");}
 }
+function toggleSdeEngTypeDD(){
+  var dd=document.getElementById("sdeengtype-fdd"),btn=document.getElementById("sdeengtype-fbtn");
+  var was=dd.classList.contains("on");closeAllDD();
+  if(!was){dd.classList.add("on");btn.classList.add("on");}
+}
+function toggleSdeInitEngNameDD(){
+  var dd=document.getElementById("sdeinitengname-fdd"),btn=document.getElementById("sdeinitengname-fbtn");
+  var was=dd.classList.contains("on");closeAllDD();
+  if(!was){dd.classList.add("on");btn.classList.add("on");}
+}
 function toggleExecQtrDD(){
   var dd=document.getElementById("execqtr-fdd"),btn=document.getElementById("execqtr-fbtn");
   var was=dd.classList.contains("on");closeAllDD();
@@ -970,7 +1006,7 @@ function toggleDrmF(val,checked){
 }
 function clearDrmFilter(){
   drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);})
-window._setPipeWeek=function(w){window._pipeWeek=w;var vn=w==='w37'?'PIPE_DATA_W37':w==='w38'?'PIPE_DATA_W38':w==='w39'?'PIPE_DATA_W39':w==='w40'?'PIPE_DATA_W40':w==='w41'?'PIPE_DATA_W41':w==='w42'?'PIPE_DATA_W42':'PIPE_DATA_W43';var src=w==='w37'?'data-pipe-w37.js':w==='w38'?'data-pipe-w38.js':w==='w39'?'data-pipe-w39.js':w==='w40'?'data-pipe-w40.js':w==='w41'?'data-pipe-w41.js':w==='w42'?'data-pipe-w42.js':'data-pipe-w43.js';function _apply(){pipeData=_xpd((w==='w37'?window.PIPE_DATA_W37:(w==='w38'?window.PIPE_DATA_W38:(w==='w39'?window.PIPE_DATA_W39:(w==='w40'?window.PIPE_DATA_W40:(w==='w41'?window.PIPE_DATA_W41:(w==='w42'?window.PIPE_DATA_W42:(w==='w43'?window.PIPE_DATA_W43:null)))))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});syncDrmBtn();mmPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});syncMmpsBtn();tcpPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});syncTcpSrcBtn();applyFilters();renderBud();if(activeTab==='ana')renderAna();}if(window[vn]){_apply();return;}var s=document.createElement('script');s.src=src;s.onload=function(){_apply();};s.onerror=function(){_apply();};document.head.appendChild(s);};;syncDrmBtn();eurMinFilter=null;syncEurBtn();syncCab();buildDrmDD();
+window._setPipeWeek=function(w){window._pipeWeek=w;var vn=w==='w37'?'PIPE_DATA_W37':w==='w38'?'PIPE_DATA_W38':w==='w39'?'PIPE_DATA_W39':w==='w40'?'PIPE_DATA_W40':w==='w41'?'PIPE_DATA_W41':w==='w42'?'PIPE_DATA_W42':w==='w43'?'PIPE_DATA_W43':'PIPE_DATA_W44';var src=w==='w37'?'data-pipe-w37.js':w==='w38'?'data-pipe-w38.js':w==='w39'?'data-pipe-w39.js':w==='w40'?'data-pipe-w40.js':w==='w41'?'data-pipe-w41.js':w==='w42'?'data-pipe-w42.js':w==='w43'?'data-pipe-w43.js':'data-pipe-w44.js';function _apply(){pipeData=_xpd((w==='w37'?window.PIPE_DATA_W37:(w==='w38'?window.PIPE_DATA_W38:(w==='w39'?window.PIPE_DATA_W39:(w==='w40'?window.PIPE_DATA_W40:(w==='w41'?window.PIPE_DATA_W41:(w==='w42'?window.PIPE_DATA_W42:(w==='w43'?window.PIPE_DATA_W43:(w==='w44'?window.PIPE_DATA_W44:null))))))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});syncDrmBtn();mmPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});syncMmpsBtn();tcpPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});syncTcpSrcBtn();applyFilters();renderBud();if(activeTab==='ana')renderAna();}if(window[vn]){_apply();return;}var s=document.createElement('script');s.src=src;s.onload=function(){_apply();};s.onerror=function(){_apply();};document.head.appendChild(s);};;syncDrmBtn();eurMinFilter=null;syncEurBtn();syncCab();buildDrmDD();
   if(activeTab==="ana")renderAna();if(activeTab==="exe")renderExe();if(activeTab==="bud")renderBud();
 }
 function syncDrmBtn(){
@@ -1093,6 +1129,8 @@ function applyFilters(){
   if(sCol)filtered.sort(function(a,b){return String(a[sCol]||"").localeCompare(String(b[sCol]||""))*sDir;});
   renderTable();renderPg();
   if(activeTab==='exe')renderExe();
+  if(activeTab==='exe2')renderExe('2');
+  if(activeTab==='sde3')renderSde3();
   if(activeTab==='bud')renderBud();
   // Update calendar info bar
   var _calTpSeen=new Set();var calTp=filtered.reduce(function(a,r){var wbs=String(r["Campaign/WBS Code"]||"").trim().replace(/[\r\n]/g,"");if(wbs){if(_calTpSeen.has(wbs))return a;_calTpSeen.add(wbs);}return a+(parseFloat(r["Target Pipeline - value kEUR"])||0);},0);
@@ -1491,6 +1529,9 @@ function renderExe(sfx){sfx=sfx||"";try{
   var _exePipeSolMap={"BAIP - Data & AI":"Data & AI","BAIP - Technology Foundation":"Business Technology Platform","Business Transformation Management":"Business Transformation Management","Cloud ERP Private":"Cloud ERP Private","Finance and Spend Management":"Finance and Spend Management","Human Capital Management":"Human Capital Management","Supply Chain Management":"Supply Chain Management","Customer Experience":"Customer Experience","Other":"Other"};
   var _sdeTeamSBMatch=function(team,sbSet){var tl=team.toLowerCase();if(tl.indexOf("generalist")>=0)return true;if(tl.indexOf("hcm")>=0)return sbSet.has("Human Capital Management");if(tl.indexOf("btp")>=0)return sbSet.has("Business Technology Platform")||sbSet.has("Data & AI");if(tl.indexOf("cx")>=0)return sbSet.has("Customer Experience");if(tl.indexOf("f&s")>=0)return sbSet.has("Finance and Spend Management");if(tl.indexOf("scm")>=0)return sbSet.has("Supply Chain Management");return false;};
   var _mmIdFilter=window._mmIdFilter?window._mmIdFilter.toLowerCase():null;
+  var _l2RegF=filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size?filters["Region Name (level 2)"]:null;
+  var _sdeEngTypeFilter=(sfx==="2"&&window._sdeEngTypeFilter)?window._sdeEngTypeFilter:null;
+  var _sdeInitEngNameFilter=(sfx==="2"&&window._sdeInitEngNameFilter)?window._sdeInitEngNameFilter.toLowerCase():null;
   var _exeRegFilter=window._exeRegFilter||null;
   var _exeProdFilter=window._exeProdFilter||null;
   function _passChartF(p){
@@ -1500,7 +1541,7 @@ function renderExe(sfx){sfx=sfx||"";try{
     return true;
   }
     // Total 2026 pipeline — apply IAC filter
-    var _allPipe2026=pipeData.filter(function(p){return String(p["Create Quarter"]||"").startsWith("2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"&&(!_iacFilter||_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))&&(!_mmIdFilter||String(p["MM Identifier"]||"").toLowerCase().indexOf(_mmIdFilter)>-1)&&(!_exeSbActF||_exeSbActF.has(_exePipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim()))&&(!tcpPipeSrcFilters.size||tcpPipeSrcFilters.has(String(p["TCP Pipeline Source Desc"]||"").trim()))&&_passChartF(p)});
+    var _allPipe2026=pipeData.filter(function(p){return String(p["Create Quarter"]||"").startsWith("2026")&&String(p["DRM Category"]||"").trim()!=="Excluded from Pipeline"&&(!_iacFilter||_iacFilter.has(String(p["IAC (Engagement Model)"]||"").trim()))&&(!_mmIdFilter||String(p["MM Identifier"]||"").toLowerCase().indexOf(_mmIdFilter)>-1)&&(!_exeSbActF||_exeSbActF.has(_exePipeSolMap[String(p["Solution Area (L1)"]||"").trim()]||String(p["Solution Area (L1)"]||"").trim()))&&(!tcpPipeSrcFilters.size||tcpPipeSrcFilters.has(String(p["TCP Pipeline Source Desc"]||"").trim()))&&_passChartF(p)&&(!_l2RegF||(function(){var rv=String(p["Region Lvl 2"]||"").trim();return _l2RegF.has(rv)||_l2RegF.has("CS "+rv);}()))&&(!_sdeEngTypeFilter||String(p["SDE Engagement Type"]||"").trim()===_sdeEngTypeFilter)&&(!_sdeInitEngNameFilter||String(p["SDE Initial Engagement Name"]||"").toLowerCase().indexOf(_sdeInitEngNameFilter)>-1)});
   if(window._pipeQtrSet&&window._pipeQtrSet.size)_allPipe2026=_allPipe2026.filter(function(p){return window._pipeQtrSet.has(String(p["Create Quarter"]||"").trim());});
   if(window._pipeCloseQtrSet&&window._pipeCloseQtrSet.size)_allPipe2026=_allPipe2026.filter(function(p){return window._pipeCloseQtrSet.has(String(p["Closing Qtr"]||"").trim());});
   if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size){var _regF2=new Set(Array.from(filters["Region Name (level 2)"]).map(function(r){return r.replace(/^CS /,"").trim().toLowerCase();}));_allPipe2026=_allPipe2026.filter(function(p){return _regF2.has(String(p["Region Lvl 2"]||"").trim().toLowerCase());});}
@@ -1553,7 +1594,7 @@ function renderExe(sfx){sfx=sfx||"";try{
   var _exeWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
   var outF=outData.filter(function(r){
     if(_exeWBS.size>0&&!_exeWBS.has(String(r["Campaign/WBS Code"]||"").trim()))return false;
-    if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size>0&&!filters["Region Name (level 2)"].has(String(r["Region Name (level 2)"]||"")))return false;
+    if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size>0){var _orv=String(r["Region Name (level 2)"]||"").trim();if(!filters["Region Name (level 2)"].has(_orv)&&!filters["Region Name (level 2)"].has("CS "+_orv))return false;}
     return true;
   });
   var _exeSeqIds=new Set(outF.reduce(function(a,r){getSeqIds(r).forEach(function(s){a.push(s);});return a;},[])) ;
@@ -1589,10 +1630,12 @@ function renderExe(sfx){sfx=sfx||"";try{
     var _e2WonEur=_e2WonRows.reduce(function(s,r){return s+(parseFloat(r['Eur']||0)||0)/1000;},0);var _e2WonOpps=new Set(_e2WonRows.map(function(r){return r['Opportunity ID'];})).size;
     var _e2ProbRows=_e2BasePipe.filter(function(r){return String(r['DRM Category']||'').trim()==='Probable';});
     var _e2ProbEur=_e2ProbRows.reduce(function(s,r){return s+(parseFloat(r['Eur']||0)||0)/1000;},0);var _e2ProbOpps=new Set(_e2ProbRows.map(function(r){return r['Opportunity ID'];})).size;
-    var _e2HodRows=_e2BasePipe.filter(function(r){return hasHod(r['SDE Handover Date']);});
-    var _e2HodSet=new Set(_e2HodRows.map(function(r){return r['Opportunity ID'];}));
-    var _e2HodEur=_e2HodRows.reduce(function(s,r){return s+(parseFloat(r['Eur']||0)||0)/1000;},0);
-    var _e2HoRate=_e2TotOpps>0?(_e2HodSet.size/_e2TotOpps*100).toFixed(1)+'%':'—';
+    var _e2HodOppIds=new Set(_e2BasePipe.filter(function(r){return hasHod(r['SDE Handover Date']);}).map(function(r){return r['Opportunity ID'];}));
+    var _e2NonSalesOppIds=new Set(_e2BasePipe.filter(function(r){var _et=String(r['SDE Engagement Type']||'').trim();return _et&&_et.toLowerCase().indexOf('sales')<0;}).map(function(r){return r['Opportunity ID'];}));
+    var _e2HodSet=new Set(Array.from(_e2HodOppIds).filter(function(id){return _e2NonSalesOppIds.has(id);}));
+    var _e2HodEur=_e2BasePipe.filter(function(r){return _e2HodSet.has(r['Opportunity ID']);}).reduce(function(s,r){return s+(parseFloat(r['Eur']||0)||0)/1000;},0);
+    var _e2SdeOppIds=new Set(_e2BasePipe.filter(function(r){return String(r['SDE Engagement Type']||'').trim()!=='';}).map(function(r){return r['Opportunity ID'];}));
+    var _e2HoRate=_e2SdeOppIds.size>0?(_e2HodSet.size/_e2SdeOppIds.size*100).toFixed(1)+'%':'—';
     var _e2CampActive=_campActive;
     var _e2CampExec=_campExec;
     var _e2CfOpps=new Set(_e2BasePipe.filter(function(r){return String(r['IAC (Engagement Model)']||'').trim()==='C-Field';}).map(function(r){return r['Opportunity ID'];})).size;
@@ -1609,7 +1652,7 @@ function renderExe(sfx){sfx=sfx||"";try{
     var _e2EmailsReply=_e2OutF.reduce(function(a,r){return a+(parseInt(r['Emails - Replies'])||0);},0);
     // Pipeline KPI row
     h2+='<div class="krow">';
-    h2+=_k2('#07838F','&euro;'+fmtE(allPipe2026Eur),'Total Pipeline',allPipe2026Opps.toLocaleString()+' opportunities','all sources');
+    h2+=_k2('#07838F','&euro;'+fmtE(window._exeCalMode?totEur:allPipe2026Eur),'Total Pipeline',(window._exeCalMode?totOpps:allPipe2026Opps).toLocaleString()+' opportunities','all sources');
     h2+=_k2('#00144A','&euro;'+fmtE(allWonEur),'Booked / Won',allWonOpps.toLocaleString()+' opps','');
     h2+=_k2('#F0A800','&euro;'+fmtE(allProbEur),'Probable',allProbOpps.toLocaleString()+' opps','');
     h2+=_k2('#00144A',_e2HoRate,'HO Rate',_e2HodSet.size.toLocaleString()+' handed over &middot; &euro;'+fmtE(_e2HodEur),'');
@@ -1826,7 +1869,7 @@ function renderExe(sfx){sfx=sfx||"";try{
   var SL='<div '+'style="display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px">';
   var html='<div class="ap">';
 
-  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="display:flex;align-items:center;gap:12px"><h2 style="color:var(--dk);margin:0">TCP</h2><span style="font-size:11px;color:var(--mu);font-style:italic">TCP Target at region level 3 is not provided by Rev Ops, but is calculated manually - therefore, unofficial</span></div><div style="display:flex;align-items:center;gap:6px;margin-right:8px"><button onclick="_setPipeWeek(&apos;w37&apos;)" style="'+(window._pipeWeek==='w37'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 37</button><button onclick="_setPipeWeek(&apos;w38&apos;)" style="'+(window._pipeWeek==='w38'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 38</button><button onclick="_setPipeWeek(&apos;w39&apos;)" style="'+(window._pipeWeek==='w39'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 39</button><button onclick="_setPipeWeek(&apos;w40&apos;)" style="'+(window._pipeWeek==='w40'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 40</button><button onclick="_setPipeWeek(&apos;w41&apos;)" style="'+(window._pipeWeek==='w41'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 41</button><button onclick="_setPipeWeek(&apos;w42&apos;)" style="'+(window._pipeWeek==='w42'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 42</button><button onclick="_setPipeWeek(&apos;w43&apos;)" style="'+(window._pipeWeek==='w43'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 43</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="display:flex;align-items:center;gap:12px"><h2 style="color:var(--dk);margin:0">TCP</h2><span style="font-size:11px;color:var(--mu);font-style:italic">TCP Target at region level 3 is not provided by Rev Ops, but is calculated manually - therefore, unofficial</span></div><div style="display:flex;align-items:center;gap:6px;margin-right:8px"><button onclick="_setPipeWeek(&apos;w37&apos;)" style="'+(window._pipeWeek==='w37'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 37</button><button onclick="_setPipeWeek(&apos;w38&apos;)" style="'+(window._pipeWeek==='w38'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 38</button><button onclick="_setPipeWeek(&apos;w39&apos;)" style="'+(window._pipeWeek==='w39'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 39</button><button onclick="_setPipeWeek(&apos;w40&apos;)" style="'+(window._pipeWeek==='w40'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 40</button><button onclick="_setPipeWeek(&apos;w41&apos;)" style="'+(window._pipeWeek==='w41'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 41</button><button onclick="_setPipeWeek(&apos;w42&apos;)" style="'+(window._pipeWeek==='w42'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 42</button><button onclick="_setPipeWeek(&apos;w43&apos;)" style="'+(window._pipeWeek==='w43'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 43</button><button onclick="_setPipeWeek(&apos;w44&apos;)" style="'+(window._pipeWeek==='w44'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 44</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
   html+='<p style="font-size:12px;color:var(--mu);margin-bottom:14px">Shows full ACV € Contribution</p>';
   // Pipeline row
   html+='<div class="krow">';
@@ -3262,7 +3305,9 @@ function renderSde3(){try{
     if(!String(r["Create Quarter"]||"").startsWith("2026"))return false;
     if(String(r["DRM Category"]||"").trim()==="Excluded from Pipeline")return false;
     if(!hasHod(r["SDE Handover Date"]))return false;
-    if(regF){var rv=String(r["Region Name (level 2)"]||"").trim().replace(/^CS /,"");if(!regF.has(rv)&&!regF.has("CS "+rv))return false;}
+    if(regF){var rv=String(r["Region Lvl 2"]||"").trim();if(!regF.has(rv)&&!regF.has("CS "+rv))return false;}
+    if(window._sdeEngTypeFilter&&String(r["SDE Engagement Type"]||"").trim()!==window._sdeEngTypeFilter)return false;
+    if(window._sdeInitEngNameFilter&&String(r["SDE Initial Engagement Name"]||"").toLowerCase().indexOf(window._sdeInitEngNameFilter.toLowerCase())<0)return false;
     return true;
   });
   var _pSAmap={"BAIP - Data & AI":"btp","BAIP - Technology Foundation":"btp","Business Technology Platform":"btp","Data & AI":"btp","Human Capital Management":"hcm","Customer Experience":"cx","Finance and Spend Management":"fs","Supply Chain Management":"scm"};
@@ -3302,161 +3347,323 @@ function renderSde3(){try{
   html+='<td style="'+totS+';border-left:4px solid #07838F">'+fK(_actTot)+'</td>';
   html+='<td style="'+totS+';color:'+attClr(_actTot,_grand)+'">'+pct(_actTot,_grand)+'</td>';
   html+='</tr></tbody></table></div></div>';
-  // Second table: HO Target by Quarter / FLM (static from FLM target data)
-  var _flm=[
-    {n:'Clarisse Chassé',    q1:9937,   q2:15899.2, q3:12421.3,  q4:11427.6,  t:49685},
-    {n:'Deniz Urulbay',      q1:10260,  q2:16416,   q3:12825,    q4:11799,    t:51300},
-    {n:'Eleonora Michelin',  q1:7980,   q2:12768,   q3:9975,     q4:9177,     t:39900},
-    {n:'Elizabeth Malmberg', q1:5130,   q2:8208,    q3:6412.5,   q4:5899.5,   t:25650},
-    {n:'Helga Elshout',      q1:10830,  q2:17328,   q3:13537.5,  q4:12454.5,  t:54150},
-    {n:'Julien Furnari',     q1:7790,   q2:12464,   q3:9737.5,   q4:8958.5,   t:38950},
-    {n:'Julien Gregoir',     q1:7400.5, q2:11840.8, q3:9250.63,  q4:8510.58,  t:37002.5},
-    {n:'Safinaz Salah',      q1:9348,   q2:14956.8, q3:11685,    q4:10750.2,  t:46740},
-    {n:'Sandra Cortes',      q1:11172,  q2:17875.2, q3:13965,    q4:12847.8,  t:55860},
-    {n:'Sherihan Megahed',   q1:9215,   q2:14744,   q3:11518.8,  q4:10597.3,  t:46075},
-    {n:'Thomas Lenfant',     q1:5814,   q2:9302.4,  q3:7267.5,   q4:6686.1,   t:29070},
-    {n:'TBH FLM CX',         q1:7011,   q2:11217.6, q3:8763.75,  q4:8062.65,  t:35055},
-    {n:'TBH FLM UKI',        q1:9310,   q2:14896,   q3:11637.5,  q4:10706.5,  t:46550}
-  ];
-  var fN=function(n){if(n===undefined||n===null||isNaN(n))return'—';var r=Math.round(n*100)/100;return r.toLocaleString('en-US',{minimumFractionDigits:r%1===0?0:r%0.1<0.005?1:2,maximumFractionDigits:2});};
-  var _flmGrand={q1:111197.5,q2:177916,q3:138997,q4:127877,t:555987.5};
-  html+='<div class="cc" style="margin-top:16px"><div class="ch">SDE HO Target / Manager (FLM Level, kEUR)</div>';
-  html+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>';
-  html+='<th style="'+thL+'">Manager</th>';
-  html+='<th style="'+thS+';background:#002a7a">Grand Total</th>';
-  html+='<th style="'+thS+';background:#1B8F4B">YTD HO</th>';
-  html+='</tr></thead><tbody>';
-  var _normN=function(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/['‘’‛`´]/g,"'").replace(/[-–—]/g,' ').replace(/\s+/g,' ').trim();};
-  var _empHO={};
-  pipeData.forEach(function(r){
-    if(String(r["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
-    var hd=r["SDE Handover Date"];if(!hasHod(hd))return;
-    if((new Date(hd)).getFullYear()!==2026)return;
-    var nm=_normN(r["SDE Initial Engagement Name"]);if(!nm)return;
-    _empHO[nm]=(_empHO[nm]||0)+(parseFloat(r["Eur"]||0)||0)/1000;
-  });
-  var _empHOkeys=Object.keys(_empHO);
-  var _lookupHO=function(name){
-    var n=_normN(name);
-    if(_empHO[n]!==undefined)return _empHO[n];
-    for(var i=0;i<_empHOkeys.length;i++){var k=_empHOkeys[i];if(k.indexOf(n)===0||n.indexOf(k)===0)return _empHO[k];}
-    var toks=n.split(' ');
-    if(toks.length>=2){for(var i=0;i<_empHOkeys.length;i++){var k=_empHOkeys[i];if(toks.every(function(t){return k.indexOf(t)>=0;}))return _empHO[k];}}
-    return 0;
-  };
-  if(!window._flmExpanded)window._flmExpanded=new Set();
-  var _flmTeams={
-    'Clarisse Chassé':['Baptiste Grenon','Edouard Boushira','Evan Le Roch','Lauren O\'Brien','Lea Arcamone','Paul MERIL','Salome Lack'],
-    'Deniz Urulbay':['Aly Shady','Brian De Brie','Christian Starck','Estel Castella','Lara Dhondt','Louna Etoundi','Mahmoud Eltohamy','Ozge Ulucay','Pauline Favreau','Renato Di Gangi','Yashvi Ahluwalia'],
-    'Eleonora Michelin':['Alessia Carretti','Francesco Pompei','Marco Di Russo','Matteo Costanti','Matteo D\'Arienzo','Mattia Niccolo Mazzuccato','Michele Miccolis'],
-    'Elizabeth Malmberg':['Frederik Haugan','Johanna Ek','Maren Gundersen','Mimosa Heikkilä'],
-    'Julien Gregoir':['Ahmed KORIEM','Coline Morriot','Dina Mohamed','Eveline Oudeboon','Marc Delicado','Ribul Mazzola','Sara Cevik','Sonnie Highley'],
-    'Safinaz Salah':['Safinaz SALAH'],
-    'Sherihan Megahed':['Adel Rahman MANSY','Badr Yasser','Daniel Cherbit','Mariam EZZ','Mariam Makram','Mohamed El Saadany','Muhammad Hasan','Myrna Fahim','Nada Elselehdahr','Nada Nouh'],
-    'Thomas Lenfant':['Etienne de Vaulchier','Filippo Zerbini','George Hartley','Jordy Janssen','Lara Aboulenain','Omar Radwan','Vicente Fonseca','Vili Lauri']
-  };
-  var _manHO={};
-  var _grandHO=Object.keys(_empHO).reduce(function(s,k){return s+_empHO[k];},0);
-  Object.keys(_flmTeams).forEach(function(mgr){_manHO[mgr]=_flmTeams[mgr].reduce(function(s,emp){return s+_lookupHO(emp);},0);});
-  _flm.forEach(function(r,i){
-    var bg=i%2===0?'#fff':'#f8f9fc';var tdl=tdL+';background:'+bg;
-    var isTBH=r.n.indexOf('TBH')===0;
-    var empList=_flmTeams[r.n]||[];
-    var isExp=window._flmExpanded.has(i);
-    var togBtn=empList.length?'<span onclick="if(!window._flmExpanded)window._flmExpanded=new Set();if(window._flmExpanded.has('+i+'))window._flmExpanded.delete('+i+');else window._flmExpanded.add('+i+');renderSde3();" style="cursor:pointer;font-size:10px;font-weight:900;margin-right:6px;display:inline-block;width:14px;height:14px;text-align:center;line-height:14px;background:#00144A;color:#fff;border-radius:2px">'+(isExp?'&#8722;':'+')+'</span>':'<span style="display:inline-block;width:14px;margin-right:6px"></span>';
-    var _mho=_manHO[r.n]!==undefined?_manHO[r.n]:_lookupHO(r.n);
-    html+='<tr><td style="'+tdl+(isTBH?';color:var(--mu);font-style:italic':'')+'">'+togBtn+r.n+'</td><td style="'+tdS+';border-left:2px solid #dde5f5;font-weight:600;background:'+(bg==='#fff'?'#eef2ff':'#e6eaff')+'">'+fN(r.t)+'</td><td style="'+tdS+';font-weight:600;color:'+(_mho>0?'#1B8F4B':'#aaa')+'">'+(_mho>0?fN(_mho):'—')+'</td></tr>';
-    if(isExp){empList.forEach(function(emp,j){var ebg=j%2===0?'#f0f4f8':'#e8ecf2';var _eh=_lookupHO(emp);html+='<tr><td style="padding:3px 8px 3px 34px;font-size:11px;color:#333;background:'+ebg+';border-bottom:1px solid #dce4ec">'+emp+'</td><td style="padding:3px 8px;font-size:11px;text-align:right;background:'+ebg+';border-bottom:1px solid #dce4ec;border-left:2px solid #dde5f5;color:#aaa">—</td><td style="padding:3px 8px;font-size:11px;text-align:right;background:'+ebg+';border-bottom:1px solid #dce4ec;font-weight:'+(_eh>0?'600':'400')+';color:'+(_eh>0?'#1B8F4B':'#aaa')+'">'+(_eh>0?fN(_eh):'—')+'</td></tr>';});}
-  });
-  html+='<tr>';
-  html+='<td style="'+totL+'">Grand Total</td>';
-  html+='<td style="'+totS+';border-left:2px solid #dde5f5">'+fN(_flmGrand.t)+'</td>';
-  html+='<td style="'+totS+'">'+fN(_grandHO)+'</td>';
-  html+='</tr></tbody></table></div></div>';
-  // Third table: HO Target per Quarter / MU + sub-region
-  var _muQ=[
-    {n:'UKI',q1:14934,q2:23894.4,q3:18667.5,q4:17174.1,t:74670,sub:[
-      {n:'Ireland',q1:1900,q2:3040,q3:2375,q4:2185,t:9500},
-      {n:'UK',q1:7410,q2:11856,q3:9262.5,q4:8521.5,t:37050},
-      {n:'(blank)',q1:5624,q2:8998.4,q3:7030,q4:6467.6,t:28120}
-    ]},
-    {n:'France',q1:15418.5,q2:24669.6,q3:19273.1,q4:17731.3,t:77092.5,sub:[
-      {n:'(blank)',q1:15418.5,q2:24669.6,q3:19273.1,q4:17731.3,t:77092.5}
-    ]},
-    {n:'BeNeLux',q1:15722.5,q2:25156,q3:19653.1,q4:18080.9,t:78612.5,sub:[
-      {n:'Belux',q1:5225,q2:8360,q3:6531.25,q4:6008.75,t:26125},
-      {n:'BeNeLux',q1:1028.85,q2:1646.16,q3:1286.06,q4:1183.18,t:5144.25},
-      {n:'Netherlands',q1:6305.15,q2:10088.2,q3:7881.44,q4:7250.92,t:31525.75},
-      {n:'(blank)',q1:3163.5,q2:5061.6,q3:3954.38,q4:3638.03,t:15817.5}
-    ]},
-    {n:'Italy',q1:11856,q2:18969.6,q3:14820,q4:13634.4,t:59280,sub:[
-      {n:'(blank)',q1:11856,q2:18969.6,q3:14820,q4:13634.4,t:59280}
-    ]},
-    {n:'MEA North',q1:13214.5,q2:21143.2,q3:16518.1,q4:15196.7,t:66072.5,sub:[
-      {n:'Egypt',q1:2584,q2:4134.4,q3:3230,q4:2971.6,t:12920},
-      {n:'KSA',q1:5719,q2:9150.4,q3:7148.75,q4:6576.85,t:28595},
-      {n:'KSA, Iraq',q1:912,q2:1459.2,q3:1140,q4:1048.8,t:4560},
-      {n:'(blank)',q1:3999.5,q2:6399.2,q3:4999.38,q4:4599.43,t:19997.5}
-    ]},
-    {n:'MEA South',q1:14031.5,q2:22450.4,q3:17539.4,q4:16136.2,t:70157.5,sub:[
-      {n:'Africa',q1:4560,q2:7296,q3:5700,q4:5244,t:22800},
-      {n:'FGM',q1:608,q2:972.8,q3:760,q4:699.2,t:3040},
-      {n:'UAE',q1:3990,q2:6384,q3:4987.5,q4:4588.5,t:19950},
-      {n:'UAE,FGM',q1:950,q2:1520,q3:1187.5,q4:1092.5,t:4750},
-      {n:'(blank)',q1:3923.5,q2:6277.6,q3:4904.38,q4:4512.03,t:19617.5}
-    ]},
-    {n:'Nordics',q1:9186.5,q2:14698.4,q3:11483.1,q4:10564.5,t:45932.5,sub:[
-      {n:'Denmark',q1:950,q2:1520,q3:1187.5,q4:1092.5,t:4750},
-      {n:'Finland',q1:883.5,q2:1413.6,q3:1104.38,q4:1016.03,t:4417.5},
-      {n:'Norway',q1:855,q2:1368,q3:1068.75,q4:983.25,t:4275},
-      {n:'Sweden',q1:1738.5,q2:2781.6,q3:2173.13,q4:1999.28,t:8692.5},
-      {n:'Sweden,Norway',q1:703,q2:1124.8,q3:878.75,q4:808.45,t:3515},
-      {n:'(blank)',q1:4056.5,q2:6490.4,q3:5070.63,q4:4664.98,t:20282.5}
-    ]},
-    {n:'Southern Europe',q1:16834,q2:26934.4,q3:21042.5,q4:19359.1,t:84170,sub:[
-      {n:'Greece',q1:969,q2:1550.4,q3:1211.25,q4:1114.35,t:4845},
-      {n:'Israel',q1:855,q2:1368,q3:1068.75,q4:983.25,t:4275},
-      {n:'Portugal',q1:969,q2:1550.4,q3:1211.25,q4:1114.35,t:4845},
-      {n:'Spain',q1:10155.5,q2:16248.8,q3:12694.4,q4:11678.8,t:50777.5},
-      {n:'Turkey',q1:3885.5,q2:6216.8,q3:4856.88,q4:4468.33,t:19427.5}
-    ]}
-  ];
-  var thMu='padding:7px 8px;font-size:10px;font-weight:700;background:#00144A;color:#fff;text-align:right;white-space:nowrap;border-right:1px solid #002060';
-  var thMuL='padding:7px 8px;font-size:10px;font-weight:700;background:#00144A;color:#fff;text-align:left;border-right:2px solid #002060;min-width:140px';
-  var tdMuHdr='padding:6px 8px;font-size:12px;font-weight:700;text-align:right;border-bottom:1px solid #3a5fa8;border-right:1px solid #3a5fa8;background:#e8eef8;color:#00144A';
-  var tdMuHdrL='padding:6px 8px;font-size:12px;font-weight:700;text-align:left;border-bottom:1px solid #3a5fa8;border-right:2px solid #3a5fa8;background:#e8eef8;color:#00144A';
-  var tdSub='padding:4px 8px 4px 20px;font-size:11px;text-align:right;border-bottom:1px solid #eee;border-right:1px solid #eee';
-  var tdSubL='padding:4px 8px 4px 20px;font-size:11px;text-align:left;border-bottom:1px solid #eee;border-right:2px solid #ddd';
-  html+='<div class="cc" style="margin-top:16px"><div class="ch">SDE HO Target / Market Unit &amp; Sub-region (FLM Level, kEUR)</div>';
-  html+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr>';
-  html+='<th style="'+thMuL+'">Market Unit / Region</th>';
-  html+='<th style="'+thMu+';border-left:2px solid #3a5fa8;background:#002a7a">Grand Total</th>';
-  html+='</tr></thead><tbody>';
-  _muQ.forEach(function(mu){
-    html+='<tr>';
-    html+='<td style="'+tdMuHdrL+'">'+mu.n+'</td>';
-    html+='<td style="'+tdMuHdr+';border-left:2px solid #dde5f5;font-weight:600;background:#eef2ff">'+fN(mu.t)+'</td>';
-    html+='</tr>';
-    mu.sub.forEach(function(sr,j){
-      var bg=j%2===0?'#fff':'#f8f9fc';var isBlank=sr.n==='(blank)';
-      var subtdL=tdSubL+';background:'+bg+(isBlank?';color:var(--mu);font-style:italic':'');
-      var subtdR=tdSub+';background:'+(bg==='#fff'?'#f5f6ff':'#eeeff8')+';border-left:2px solid #dde5f5'+(isBlank?';color:var(--mu);font-style:italic':'');
-      html+='<tr><td style="'+subtdL+'">'+sr.n+'</td><td style="'+subtdR+'">'+fN(sr.t)+'</td></tr>';
-    });
-  });
-  html+='<tr><td style="'+totL+'">Grand Total</td>';
-  html+='<td style="'+totS+';border-left:2px solid #dde5f5">'+fN(555987.5)+'</td>';
-  html+='</tr></tbody></table></div></div>';
-  var _ssMu=[{n:'CS BeNeLux',t:58927.94},{n:'CS France',t:64741.16},{n:'CS Italy',t:48680.74},{n:'CS MEA North',t:73092.1},{n:'CS MEA South',t:65627.57},{n:'CS Nordic',t:49436.24},{n:'CS Southern Europe',t:66408.64},{n:'CS UKI',t:85292.96}];
-  html+='<div class="cc" style="margin-top:16px"><div class="ch">SDE Sourced Target per MU</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+thL+'">Market Unit</th><th style="'+thS+';border-left:2px solid #3a5fa8;background:#002a7a">Grand Total</th></tr></thead><tbody>';
-  _ssMu.forEach(function(r,i){var bg=i%2===0?'#fff':'#f8f9fc';html+='<tr><td style="'+tdL+';background:'+bg+'">'+r.n+'</td><td style="'+tdS+';border-left:2px solid #dde5f5;font-weight:600;background:'+(bg==='#fff'?'#eef2ff':'#e6eaff')+'">'+fN(r.t)+'</td></tr>';});
-  html+='<tr><td style="'+totL+'">Grand Total</td><td style="'+totS+';border-left:2px solid #dde5f5">'+fN(512207.35)+'</td></tr></tbody></table></div></div>';
-  var _ssSA=[{n:'Business Technology (A)',t:29201.79},{n:'Business Technology (B)',t:32757.89},{n:'Cloud ERP',t:140822.5},{n:'Customer Experience',t:26201.26},{n:'Data & AI',t:86126.25},{n:'Finance & Supply Chain',t:97779.48},{n:'Human Capital Mgmt',t:42553.42},{n:'Other',t:9884.871},{n:'Supply Chain Mgmt',t:46879.91}];
-  html+='<div class="cc" style="margin-top:16px"><div class="ch">SDE Sourced Target per Solution Area</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="'+thL+'">Solution Area</th><th style="'+thS+';border-left:2px solid #3a5fa8;background:#002a7a">Grand Total</th></tr></thead><tbody>';
-  _ssSA.forEach(function(r,i){var bg=i%2===0?'#fff':'#f8f9fc';html+='<tr><td style="'+tdL+';background:'+bg+'">'+r.n+'</td><td style="'+tdS+';border-left:2px solid #dde5f5;font-weight:600;background:'+(bg==='#fff'?'#eef2ff':'#e6eaff')+'">'+fN(r.t)+'</td></tr>';});
-  html+='<tr><td style="'+totL+'">Grand Total</td><td style="'+totS+';border-left:2px solid #dde5f5">'+fN(512207.35)+'</td></tr></tbody></table></div></div></div>';
+    html+='<div id="sde3-pipe-engtype-tbl" style="margin-top:16px;width:100%"></div>';
   p.innerHTML=html;
-}catch(e){var pg=document.getElementById("sde3Page");if(pg)pg.innerHTML='<div class="nr"><p><b>Error:</b> '+e.message+'</p></div>';console.error(e);}}
+  // 2026 Pipeline Created - by Region & SDE Engagement Type
+  var _sde3ET=document.getElementById("sde3-pipe-engtype-tbl");
+  if(_sde3ET&&window._buildEngTypeTbl){
+    var _r2Et={},_r2EtHO={},_r2T={},_r2HO={},_r2L3HO={},_r3Et={},_r3EtHO={};
+    var _r2SbEt={},_r2SbEtHO={},_r2RHO={},_r2REtHO={},_r2RHOx={},_r2HOex={};
+    var _sdeSolMap={"BAIP - Data & AI":"Data & AI","BAIP - Technology Foundation":"Business Technology Platform","Business Transformation Management":"Business Transformation Management","Cloud ERP Private":"Cloud ERP Private","Finance and Spend Management":"Finance and Spend Management","Human Capital Management":"Human Capital Management","Supply Chain Management":"Supply Chain Management","Customer Experience":"Customer Experience","Other":"Other"};
+    pipeData.forEach(function(p2){
+      if(String(p2["DRM Category"]||"").trim()==="Excluded from Pipeline")return;
+      if(!String(p2["Create Quarter"]||"").startsWith("2026"))return;
+      if(window._pipeQtrSet&&window._pipeQtrSet.size&&!window._pipeQtrSet.has(String(p2["Create Quarter"]||"").trim()))return;
+      if(regF&&!regF.has(String(p2["Region Lvl 2"]||"").trim())&&!regF.has("CS "+String(p2["Region Lvl 2"]||"").trim()))return;
+      if(window._sdeInitEngNameFilter&&String(p2["SDE Initial Engagement Name"]||"").toLowerCase().indexOf(window._sdeInitEngNameFilter.toLowerCase())<0)return;
+      var eur=parseFloat(p2["Eur"]||0)||0;if(!eur)return;
+      var hod=hasHod(p2["SDE Handover Date"]);
+      var eng=String(p2["SDE Engagement Type"]||"").trim();
+      var l2k=String(p2["Region Lvl 2"]||"").trim().replace(/^CS /,"").toLowerCase()||"other";
+      var l3k=String(p2["Region Lvl 3"]||"").trim().replace(/^CS /,"").toLowerCase()||"other";
+      var _isSales=String(p2["TCP Pipeline Source Desc"]||"").trim()==="Sales";
+      _r2T[l2k]=(_r2T[l2k]||0)+eur;
+      if(hod){_r2HO[l2k]=(_r2HO[l2k]||0)+eur;if(!_isSales){_r2HOex[l2k]=(_r2HOex[l2k]||0)+eur;}}
+      if(!_r2L3HO[l2k])_r2L3HO[l2k]={};if(hod)_r2L3HO[l2k][l3k]=(_r2L3HO[l2k][l3k]||0)+eur;
+      if(eng&&eng!=="(No Value)"&&eng!=="(no value)"){
+        if(!_r2Et[l2k])_r2Et[l2k]={};_r2Et[l2k][eng]=(_r2Et[l2k][eng]||0)+eur;
+        if(hod){if(!_r2EtHO[l2k])_r2EtHO[l2k]={};_r2EtHO[l2k][eng]=(_r2EtHO[l2k][eng]||0)+eur;}
+        if(!_r3Et[l2k])_r3Et[l2k]={};if(!_r3Et[l2k][l3k])_r3Et[l2k][l3k]={};_r3Et[l2k][l3k][eng]=(_r3Et[l2k][l3k][eng]||0)+eur;
+        if(hod){if(!_r3EtHO[l2k])_r3EtHO[l2k]={};if(!_r3EtHO[l2k][l3k])_r3EtHO[l2k][l3k]={};_r3EtHO[l2k][l3k][eng]=(_r3EtHO[l2k][l3k][eng]||0)+eur;}
+        var _sbk=_sdeSolMap[String(p2["Solution Area (L1)"]||"").trim()]||String(p2["Solution Area (L1)"]||"").trim()||"Other";
+        if(!_r2SbEt[l2k])_r2SbEt[l2k]={};if(!_r2SbEt[l2k][_sbk])_r2SbEt[l2k][_sbk]={};_r2SbEt[l2k][_sbk][eng]=(_r2SbEt[l2k][_sbk][eng]||0)+eur;
+        if(hod){if(!_r2SbEtHO[l2k])_r2SbEtHO[l2k]={};if(!_r2SbEtHO[l2k][_sbk])_r2SbEtHO[l2k][_sbk]={};_r2SbEtHO[l2k][_sbk][eng]=(_r2SbEtHO[l2k][_sbk][eng]||0)+eur;}
+      }
+      if(hod){var _hrl=String(p2["SDE Handover Role"]||"").trim().toLowerCase();var _hrk;if(_hrl.indexOf(' btp')>=0)_hrk='btp';else if(_hrl.indexOf(' hcm')>=0)_hrk='hcm';else if(_hrl.indexOf(' cx')>=0)_hrk='cx';else if(_hrl.indexOf(' f&s')>=0)_hrk='fs';else if(_hrl.indexOf(' scm')>=0)_hrk='scm';else _hrk='generalist';if(!_r2RHO[l2k])_r2RHO[l2k]={};_r2RHO[l2k][_hrk]=(_r2RHO[l2k][_hrk]||0)+eur;if(!_isSales){if(!_r2RHOx[l2k])_r2RHOx[l2k]={};_r2RHOx[l2k][_hrk]=(_r2RHOx[l2k][_hrk]||0)+eur;}if(eng&&eng!=="(No Value)"&&eng!=="(no value)"){if(!_r2REtHO[l2k])_r2REtHO[l2k]={};if(!_r2REtHO[l2k][_hrk])_r2REtHO[l2k][_hrk]={};_r2REtHO[l2k][_hrk][eng]=(_r2REtHO[l2k][_hrk][eng]||0)+eur;}}
+    });
+    var _sdeHoTgt2=0,_sdeHoByMu2={},_sdeHoByMuL3_2={};
+    var _sHoRF2=regF?Array.from(regF).map(function(rv){return rv.replace(/^CS /,"").trim().toLowerCase();}):null;
+    if(window.SDE_HO_TARGETS){window.SDE_HO_TARGETS.forEach(function(h){var muk=h.mu.toLowerCase().trim();if(!_sHoRF2||_sHoRF2.indexOf(muk)>=0){_sdeHoTgt2+=(h.eur||0)/1000;_sdeHoByMu2[muk]=(_sdeHoByMu2[muk]||0)+(h.eur||0)/1000;}});if(!_sHoRF2||_sHoRF2.indexOf("southern europe")>=0){var _seEgTgt2=0,_seJavTgt2=0;window.SDE_HO_TARGETS.forEach(function(h){if(h.mu.toLowerCase().trim()!=="southern europe")return;if(h.name&&h.name.toLowerCase().indexOf("egemen")>=0)_seEgTgt2+=(h.eur||0)/1000;else if(h.name&&h.name.toLowerCase().indexOf("javier")>=0)_seJavTgt2+=(h.eur||0)/1000;});var _seNoSpain2=Object.keys(_r2L3HO["southern europe"]||{}).filter(function(k){return k!=="spain";});if(!_sdeHoByMuL3_2["southern europe"])_sdeHoByMuL3_2["southern europe"]={};if(_seNoSpain2.length>0){var _sePerL3_2=_seEgTgt2/_seNoSpain2.length;_seNoSpain2.forEach(function(l3k2){_sdeHoByMuL3_2["southern europe"][l3k2]=_sePerL3_2;});}if(_seJavTgt2>0)_sdeHoByMuL3_2["southern europe"]["spain"]=_seJavTgt2;}if(!_sHoRF2||_sHoRF2.indexOf("benelux")>=0){var _bnSophTgt2=0,_bnCamTgt2=0;window.SDE_HO_TARGETS.forEach(function(h){if(h.mu.toLowerCase().trim()!=="benelux")return;if(h.name&&h.name.toLowerCase().indexOf("sophie")>=0)_bnSophTgt2+=(h.eur||0)/1000;else if(h.name&&h.name.toLowerCase().indexOf("camille")>=0)_bnCamTgt2+=(h.eur||0)/1000;});if(!_sdeHoByMuL3_2["benelux"])_sdeHoByMuL3_2["benelux"]={};if(_bnSophTgt2>0)_sdeHoByMuL3_2["benelux"]["belux"]=_bnSophTgt2;if(_bnCamTgt2>0)_sdeHoByMuL3_2["benelux"]["netherlands"]=_bnCamTgt2;}}
+    var _thT_sde="background:#012931;color:#fff;padding:6px 6px;font-size:10px;font-weight:700;text-align:left;white-space:normal;line-height:1.3";
+    var _thTR_sde=_thT_sde+";text-align:right";
+    var _fmtT_sde=function(n){return n>=1000?(n/1000).toFixed(0)+"M":n>=1?n.toFixed(0)+"K":n.toFixed(0);};
+    var _l2Disp_sde={"benelux":"Benelux","france":"France","italy":"Italy","mea north":"MEA North","mea south":"MEA South","nordic":"Nordic","southern europe":"Southern Europe","uki":"UKI"};
+    window._buildEngTypeTbl(_sde3ET,{rfn:renderSde3,r2et:_r2Et,r2etho:_r2EtHO,r2t:_r2T,r2ho:_r2HO,r2l3ho:_r2L3HO,r3et:_r3Et,r3etho:_r3EtHO,r2sbet:_r2SbEt,r2sbetho:_r2SbEtHO,r2rho:_r2RHO,r2retho:_r2REtHO,r2rhox:_r2RHOx,r2hoex:_r2HOex,hoTgt:_sdeHoTgt2,hoRF:_sHoRF2,hoByMu:_sdeHoByMu2,hoByMuL3:_sdeHoByMuL3_2,sbF:null,sbMatch:null,thT:_thT_sde,thTR:_thTR_sde,fmtT:_fmtT_sde,l2Disp:_l2Disp_sde});
+  }}catch(e){var pg=document.getElementById("sde3Page");if(pg)pg.innerHTML='<div class="nr"><p><b>Error:</b> '+e.message+'</p></div>';console.error(e);}}
+function renderDcm(){try{
+  var p=document.getElementById("dcmPage");if(!p)return;
+  var esc=function(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'';};
+  var fmtE=function(n){if(n===null||n===undefined)return'';n=+n;if(isNaN(n))return'';return'\u20AC'+Math.round(n).toLocaleString('en-US');};
+  var thS='padding:7px 10px;font-size:10px;font-weight:700;background:#00144A;color:#fff;text-align:left;white-space:nowrap;border-right:1px solid #002060;';
+  var thR='padding:7px 10px;font-size:10px;font-weight:700;background:#00144A;color:#fff;text-align:right;white-space:nowrap;';
+
+  // ---- TABLE 1: SDE HO TARGETS ----
+  var rows1=[
+    {mu:'Benelux',team:'SDE - Generalist Benelux',dcm:'',tgt:57000000,conf:57000000,bold:true},
+    {mu:'Belux',team:'SDE - Generalist Benelux - BL',dcm:'Sophie',tgt:29000000,conf:29000000},
+    {mu:'Netherlands',team:'SDE - Generalist Benelux - NL',dcm:'Cami',tgt:28000000,conf:28000000},
+    {mu:'France',team:'SDE - Generalist France',dcm:'Cyril',tgt:52300010,conf:52300010,bold:true},
+    {mu:'Italy',team:'SDE - Generalist Italy',dcm:'Dani',tgt:35170996,conf:null,bold:true},
+    {mu:'MEA North',team:'SDE - Generalist MEA North',dcm:'Mai',tgt:48500003,conf:null,bold:true},
+    {mu:'MEA South',team:'SDE - Generalist MEA South',dcm:'Cesare',tgt:49199999,conf:null,bold:true},
+    {mu:'Nordics',team:'SDE - Generalist Nordics',dcm:'Frida',tgt:27000000,conf:27000000,bold:true},
+    {mu:'Southern Europe',team:'SDE - Generalist Southern Europe',dcm:'',tgt:58799981,conf:null,bold:true},
+    {mu:'Spain',team:'SDE - Generalist Southern Europe',dcm:'Javi',tgt:null,conf:29400000},
+    {mu:'Portugal',team:'SDE - Generalist Southern Europe',dcm:'TBC',tgt:null,conf:5100000},
+    {mu:'Greece & Cyprus',team:'SDE - Generalist Southern Europe',dcm:'Margarita',tgt:null,conf:5100000},
+    {mu:'Turkey',team:'SDE - Generalist Southern Europe',dcm:'Kivanc',tgt:null,conf:9800000},
+    {mu:'Israel',team:'SDE - Generalist Southern Europe',dcm:'TBC',tgt:null,conf:4500000},
+    {mu:'United Kingdom',team:'SDE - Generalist UKI - UKI',dcm:'',tgt:49000000,conf:49000000,bold:true},
+    {mu:'United Kingdom',team:'SDE - Generalist UKI - UKI',dcm:'Natalie',tgt:null,conf:44000008},
+    {mu:'Ireland',team:'SDE - Generalist UKI - UKI',dcm:'Sonali/TBC',tgt:null,conf:5000},
+    {mu:'EMEA',team:'SDE - Specialist BTP + Data & AI',dcm:'Valentin',tgt:41000000,conf:null},
+    {mu:'EMEA',team:'SDE - Specialist CX',dcm:'Jesi',tgt:36900000,conf:null},
+    {mu:'EMEA',team:'SDE - Specialist F&S',dcm:'Melanie',tgt:54000000,conf:null},
+    {mu:'EMEA',team:'SDE - Specialist HCM',dcm:'Jesi',tgt:38950000,conf:null},
+    {mu:'EMEA',team:'SDE - Specialist SCM',dcm:'Sonali/TBC',tgt:30600000,conf:null},
+    {mu:'EMEA Total',team:'Total',dcm:'',tgt:578420992,conf:578420992,bold:true,total:true}
+  ];
+  var html='<div style="padding:16px 20px">';
+  html+='<h2 style="font-size:15px;font-weight:700;color:#00144A;margin:0 0 14px">DCM View \u2014 SDE HO Targets</h2>';
+  html+='<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:12px">';
+  html+='<thead><tr><th style="'+thS+'">MU / Region</th><th style="'+thS+'">SDE Team</th><th style="'+thS+'">DCM</th><th style="'+thR+'">HO Target</th><th style="'+thR+'">DCM SDE HO Target (Confirmed)</th></tr></thead><tbody>';
+  rows1.forEach(function(r){
+    var bg=r.total?'#e8f0fe':r.bold?'#f5f7fa':'#fff';
+    var fw=r.total||r.bold?'600':'400';
+    var td='padding:6px 10px;font-size:11px;border-bottom:1px solid #e8e8e8;font-weight:'+fw+';background:'+bg+';';
+    html+='<tr><td style="'+td+'">'+esc(r.mu)+'</td><td style="'+td+'">'+esc(r.team)+'</td><td style="'+td+'">'+esc(r.dcm)+'</td>';
+    html+='<td style="'+td+'text-align:right;">'+(r.tgt!==null?fmtE(r.tgt):'')+'</td>';
+    html+='<td style="'+td+'text-align:right;">'+(r.conf!==null?fmtE(r.conf):'')+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+
+  // ---- TABLE 2: DCM GENERALISTS ----
+  // columns: [mu, dcm, region, tcp, conf, level]  level: 2=MU header, 1=sub-region, 0=territory
+  var rows2=[
+    ['Benelux','Sophie/Cami','Benelux','286M','',2],
+    ['Benelux','Sophie/Tjeerd','BeLux','166M','',1],
+    ['Benelux','','FL-BEL-C-Dig','31M','',0],
+    ['Benelux','','FL-BEL-C-Fie','106M','',0],
+    ['Benelux','','FL-BEL-Partn','29M','',0],
+    ['Benelux','','Other','\u2014','',0],
+    ['Benelux','Cami','Netherlands','120M','',1],
+    ['Benelux','Cami','FL-NL-C-Digi','35M','',0],
+    ['Benelux','','FL-NL-C-Field','65M','',0],
+    ['Benelux','Cami','FL-NL-Partne','20M','',0],
+    ['Benelux','','Other','\u2014','',0],
+    ['France','Cyril','France','213M','',2],
+    ['France','TBC by sales ops : Only 2 NN territories - Hendy Bendjedou & Martial Gorse','FL-FR Corp Field','81M','\u20AC 8,964',0],
+    ['France','\u2014','FL-FR Digital IB','45M','\u2014',0],
+    ['France','Cyril','FL-FR Digital NN1','17M','\u20AC 19,228',0],
+    ['France','Cyril','FL-FR Digital NN2','25M','\u20AC 21,804',0],
+    ['France','Cyril','FL-FR Part Dr','44M','\u20AC 37,848',0],
+    ['France','','Other','\u2014','',0],
+    ['Italy','Dani','Italy','343M','',2],
+    ['Italy','','AE-D - FL-ITA-C-DIGIB','71M','YES',0],
+    ['Italy','','AE-D - FL-ITA-C-DIGNN1','38M','YES',0],
+    ['Italy','','AE-F - FL-ITA-C-FIELD','131M','',0],
+    ['Italy','','FL-ITA-PD','104M','YES',0],
+    ['Italy','','Other','\u2014','',0],
+    ['MEA North','Mai','MEA North','378M','',2],
+    ['MEA North','','EGYPT & IRAQ','108M','',1],
+    ['MEA North','','AE-F - FL-EG-MM-FIELD -','18M','',0],
+    ['MEA North','','SLSM - CF + CD + PD - SL','49M','',0],
+    ['MEA North','','SLSM - CF + PD - SL-EG -','35M','',0],
+    ['MEA North','','TEM NN 2 - FL-EG-MM-FIEL','5M','',0],
+    ['MEA North','','Other','\u2014','',0],
+    ['MEA North','','Francophone Africa','53M','',1],
+    ['MEA North','','TEM NN 2 - FL-FFA-MM-Dig','53M','',0],
+    ['MEA North','','Other','\u2014','',0],
+    ['MEA North','','KSA','218M','',1],
+    ['MEA North','','AE-D - FL-SA-CorpD&PD1 -','18M','',0],
+    ['MEA North','','AE-D - FL-SA-CorpD&PD2 -','12M','',0],
+    ['MEA North','','FLSM - CD - FL-SA-CorpD&','31M','',0],
+    ['MEA North','','FLSM - CF + CD + PD - FL','134M','',0],
+    ['MEA North','','TEM NN 2 - FL-SA-PD2 - E','8M','',0],
+    ['MEA North','','TEM NN 6 - FL-SA-PD1 - M','15M','',0],
+    ['MEA North','','Other','\u2014','',0],
+    ['MEA North','','Pakistan Afghanistan Kuwait & Bahrain','47M','',1],
+    ['MEA North','','FLSM - CF + CD + PD - FL','40M','',0],
+    ['MEA North','','TEM NN 2 - FL-KW-PD - Al','7M','',0],
+    ['MEA North','','Other','\u2014','',0],
+    ['MEA South','Cesare','MEA South','419M','110M (PD)',2],
+    ['MEA South','','Emerging Africa','44M','',1],
+    ['MEA South','','FL-EA-FIELD','13M','',0],
+    ['MEA South','Cesare','FL-EA-PD','13M','16M (4M)',0],
+    ['MEA South','','FL-LA-C-Field','11M','',0],
+    ['MEA South','','FL-West-C-Field','8M','',0],
+    ['MEA South','','Other','\u2014','',0],
+    ['MEA South','','FGM','60M','',1],
+    ['MEA South','','FL-NFS-C-PD','7M','',0],
+    ['MEA South','','FL-NFS-Corp-Field','4M','',0],
+    ['MEA South','','FL-OM-C-Field','13M','',0],
+    ['MEA South','','FL-OM-C-PD','14M','13.5M (3.5M)',0],
+    ['MEA South','','FL-QA-Corp-Field','23M','',0],
+    ['MEA South','','Other','\u2014','',0],
+    ['MEA South','','Southern Africa','129M','',1],
+    ['MEA South','','FL-SA-CORP-PS','46M','',0],
+    ['MEA South','','FL-SA-Field-CORE','35M','',0],
+    ['MEA South','','FL-SA-PD-CORE','48M','40.2M (10.05M)',0],
+    ['MEA South','','Other','\u2014','',0],
+    ['MEA South','','UAE','186M','',1],
+    ['MEA South','','FL-AE-C-Field-Cor','131M','',0],
+    ['MEA South','','FL-AE-C-PD-St','55M','39.6M (9.9M)',0],
+    ['MEA South','','Other','\u2014','',0],
+    ['Nordics','Frida','Nordic','175M','',2],
+    ['Nordics','','Baltics','25M','',1],
+    ['Nordics','','FL-NO-CoF','8M','',0],
+    ['Nordics','','FL-NO-CoF Baltics','9M','',0],
+    ['Nordics','','FL-NO-PAR Bal','8M','',0],
+    ['Nordics','','Other','\u2014','',0],
+    ['Nordics','','Denmark','51M','',1],
+    ['Nordics','','FL-NO-CoD Denmark','5M','',0],
+    ['Nordics','','FL-NO-CoF Denmark','40M','',0],
+    ['Nordics','','FL-NO-PAR Den','6M','',0],
+    ['Nordics','','Other','\u2014','',0],
+    ['Nordics','','Finland','31M','',1],
+    ['Nordics','','FL-NO-CoF Finland','20M','',0],
+    ['Nordics','','FL-NO-PAR Fin','10M','',0],
+    ['Nordics','','Other','\u2014','',0],
+    ['Nordics','','Norway','24M','',1],
+    ['Nordics','','FL-NO-CoD Norway','6M','',0],
+    ['Nordics','','FL-NO-CoF Norway','15M','',0],
+    ['Nordics','','FL-NO-PAR Nor','3M','',0],
+    ['Nordics','','Other','\u2014','',0],
+    ['Nordics','','Sweden','44M','',1],
+    ['Nordics','','FL-NO-CoD Sweden','4M','',0],
+    ['Nordics','','FL-NO-CoF Sweden','27M','',0],
+    ['Nordics','','FL-NO-PAR Swe','13M','',0],
+    ['Nordics','','Other','\u2014','',0],
+    ['Southern Europe','Javi','Southern Europe','532M','',2],
+    ['Southern Europe','Margarita','Greece & Cyprus','76M','73.656',1],
+    ['Southern Europe','Margarita','FL-GR-CF1','46M','47.448',0],
+    ['Southern Europe','Margarita','FL-GR-CF2','30M','26.208',0],
+    ['Southern Europe','','Other','\u2014','',0],
+    ['Southern Europe','Margarita','Israel','27M','21.976',1],
+    ['Southern Europe','','FL-IL-GB','27M','21.976',0],
+    ['Southern Europe','','Other','\u2014','',0],
+    ['Southern Europe','','Portugal','49M','',1],
+    ['Southern Europe','','FL-PT-CORP-FIELD','27M','',0],
+    ['Southern Europe','','FL-PT-CORP-HEAD','6M','',0],
+    ['Southern Europe','','FL-PT-CORP-PARTNERD','15M','',0],
+    ['Southern Europe','','Other','\u2014','',0],
+    ['Southern Europe','','Spain','273M','',1],
+    ['Southern Europe','','AE-D - FL-SP-IB Digital','45M','',0],
+    ['Southern Europe','Javi','AE-D - FL-SP-Net New 1 -','43M','36.4M',0],
+    ['Southern Europe','','AE-D - FL-SP-Net New 2 -','50M','',0],
+    ['Southern Europe','','AE-F - FL-SP-IB Field -','78M','',0],
+    ['Southern Europe','Javi','FL-SP-PD','57M','48M',0],
+    ['Southern Europe','','Other','\u2014','',0],
+    ['Southern Europe','','T\u00FCrkiye','108M','',1],
+    ['Southern Europe','Kivanc','FL-TR-MM-DGTL','38M','39.06M',0],
+    ['Southern Europe','\u2014','FL-TR-MM-FIELD','55M','\u2014',0],
+    ['Southern Europe','Kivanc','FL-TR-MM-PARTNER DRV','15M','13.6M',0],
+    ['Southern Europe','','Other','\u2014','',0],
+    ['UKI','Natalie','UKI','344M','',2],
+    ['UKI','','Ireland','40M','',1],
+    ['UKI','Sonali/TBC','FL-UKI- IE IB','24M','16.5M',0],
+    ['UKI','Sonali/TBC','FL-UKI-IE NNN','16M','11.5M',0],
+    ['UKI','\u2014','Other','\u2014','\u2014',0],
+    ['UKI','','UK','304M','',1],
+    ['UKI','Sonali/TBC','FL-UKI-Corp Field','92M','82M',0],
+    ['UKI','Natalie','FL-UKI-Corp PD','45M','31M',0],
+    ['UKI','Natalie','FL-UKI-Digital 1','72M','70M',0],
+    ['UKI','Natalie','FL-UKI-Digital 2','69M','61M',0],
+    ['UKI','\u2014','FL-UKI-Pub Sector','26M','\u2014',0],
+    ['UKI','\u2014','Other','\u2014','\u2014',0],
+    ['EMEA','','Total','2691M','',2]
+  ];
+  html+='<h2 style="font-size:15px;font-weight:700;color:#00144A;margin:24px 0 14px">DCM Generalists</h2>';
+  html+='<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:11px">';
+  html+='<thead><tr><th style="'+thS+'">MU</th><th style="'+thS+'">DCM</th><th style="'+thS+'">Region</th><th style="'+thR+'">TCP Target</th><th style="'+thR+'">DCM TCP Target (Confirmed)</th></tr></thead><tbody>';
+  rows2.forEach(function(r){
+    var lvl=r[5];
+    var bg=lvl===2?'#e8edff':lvl===1?'#f5f7fa':'#fff';
+    var fw=lvl>=1?'600':'400';
+    var td='padding:5px 10px;font-size:10px;border-bottom:1px solid #e8e8e8;font-weight:'+fw+';background:'+bg+';';
+    var pl=lvl===0?'padding-left:34px;':lvl===1?'padding-left:20px;':'';
+    html+='<tr>';
+    html+='<td style="'+td+'">'+esc(r[0])+'</td>';
+    html+='<td style="'+td+'">'+esc(r[1])+'</td>';
+    html+='<td style="'+td+pl+'">'+esc(r[2])+'</td>';
+    html+='<td style="'+td+'text-align:right;">'+esc(r[3])+'</td>';
+    html+='<td style="'+td+'text-align:right;">'+esc(r[4])+'</td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+
+  // ---- TABLE 3: DCM SPECIALISTS ----
+  // columns: [lob, mu, country, dcm, region, tcp, conf]
+  var rows3=[
+    ['CX','BELUX','Belgium','Jesi','FL-BEL-C-Fie','',''],
+    ['CX','BELUX','Netherlands','Jesi','FL-NL-C-Field','',''],
+    ['CX','FRANCE','France','Jesi','FL-FR Digital IB','',''],
+    ['CX','ITALY','Italy','Jesi','AE-F - FL-ITA-C-FIELD','',''],
+    ['CX','MEA NORTH','EGYPT & IRAQ','Jesi','AE-F - FL-EG-MM-FIELD -','',''],
+    ['CX','MEA NORTH','Francophone Africa','Jesi','TEM NN 2 - FL-EG-MM-FIEL','',''],
+    ['CX','MEA NORTH','KSA','Jesi','','',''],
+    ['CX','MEA NORTH','Pakistan Afghanistan Kuwait & Bahrain','Jesi','','',''],
+    ['CX','MEA SOUTH','Emerging Africa','Jesi','','',''],
+    ['CX','MEA SOUTH','FGM','Jesi','','',''],
+    ['CX','MEA SOUTH','Southern Africa','Jesi','','',''],
+    ['CX','MEA SOUTH','UAE','Jesi','','',''],
+    ['CX','NORDICS','Baltics','Jesi','','',''],
+    ['CX','NORDICS','Denmark','Jesi','','',''],
+    ['CX','NORDICS','Finland','Jesi','','',''],
+    ['CX','NORDICS','Norway','Jesi','','',''],
+    ['CX','NORDICS','Sweden','Jesi','','',''],
+    ['CX','SOUTHERN EUROPE','Greece & Cyprus','Jesi','','',''],
+    ['CX','SOUTHERN EUROPE','Israel','Jesi','','',''],
+    ['CX','SOUTHERN EUROPE','Portugal','Jesi','','',''],
+    ['CX','SOUTHERN EUROPE','Spain','Jesi','','',''],
+    ['CX','SOUTHERN EUROPE','T\u00FCrkiye','Jesi','','',''],
+    ['CX','UKI','Ireland','Jesi','','',''],
+    ['CX','UKI','UK','Jesi','','',''],
+    ['BAIP','BELUX','Belgium','Valentin','','',''],
+    ['BAIP','BELUX','Netherlands','Valentin','','',''],
+    ['BAIP','FRANCE','France','Valentin','','',''],
+    ['BAIP','ITALY','Italy','Valentin','','',''],
+    ['BAIP','MEA NORTH','EGYPT & IRAQ','Valentin','','',''],
+    ['BAIP','MEA NORTH','Francophone Africa','Valentin','','',''],
+    ['BAIP','MEA NORTH','KSA','Valentin','','',''],
+    ['BAIP','MEA NORTH','Pakistan Afghanistan Kuwait & Bahrain','Valentin','','',''],
+    ['BAIP','MEA SOUTH','Emerging Africa','Valentin','','',''],
+    ['BAIP','MEA SOUTH','FGM','Valentin','','',''],
+    ['BAIP','MEA SOUTH','Southern Africa','Valentin','','',''],
+    ['BAIP','MEA SOUTH','UAE','Valentin','','',''],
+    ['BAIP','NORDICS','Denmark','Valentin','','',''],
+    ['BAIP','NORDICS','Finland','Valentin','','',''],
+    ['BAIP','NORDICS','Norway','Valentin','','',''],
+    ['BAIP','NORDICS','Sweden','Valentin','','',''],
+    ['BAIP','NORDICS','Sweden','Valentin','','',''],
+    ['BAIP','SOUTHERN EUROPE','Spain','Valentin','','',''],
+    ['BAIP','UKI','Ireland','Valentin','','',''],
+    ['BAIP','UKI','UK','Valentin','','','']
+  ];
+  html+='<h2 style="font-size:15px;font-weight:700;color:#00144A;margin:24px 0 14px">DCM Specialists</h2>';
+  html+='<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:11px">';
+  html+='<thead><tr><th style="'+thS+'">LOB</th><th style="'+thS+'">MU</th><th style="'+thS+'">Country</th><th style="'+thS+'">DCM</th><th style="'+thS+'">Region</th><th style="'+thR+'">TCP Target</th><th style="'+thR+'">DCM TCP Target (Confirmed)</th></tr></thead><tbody>';
+  var prevLob='';
+  rows3.forEach(function(r){
+    var lobChange=r[0]!==prevLob;prevLob=r[0];
+    var bg=lobChange?'#f5f7fa':'#fff';
+    var td='padding:5px 10px;font-size:10px;border-bottom:1px solid #e8e8e8;background:'+bg+';';
+    var tdB=td+'font-weight:600;';
+    html+='<tr>';
+    html+='<td style="'+(lobChange?tdB:td)+'">'+esc(r[0])+'</td>';
+    html+='<td style="'+td+'">'+esc(r[1])+'</td>';
+    html+='<td style="'+td+'">'+esc(r[2])+'</td>';
+    html+='<td style="'+td+'">'+esc(r[3])+'</td>';
+    html+='<td style="'+td+'">'+esc(r[4])+'</td>';
+    html+='<td style="'+td+'text-align:right;">'+esc(r[5])+'</td>';
+    html+='<td style="'+td+'text-align:right;">'+esc(r[6])+'</td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+
+  html+='</div>';
+  p.innerHTML=html;
+}catch(e){document.getElementById("dcmPage").innerHTML='<div style="padding:20px"><p><b>Error:</b> '+e.message+'</p></div>';console.error(e);}}
 function renderBud(){
   var page=document.getElementById("budPage");if(!page)return;
   try{
@@ -3668,7 +3875,7 @@ function renderBud(){
     if(rsYTD[reg])rsYTD[reg][src]=(rsYTD[reg][src]||0)+(parseFloat(p["Eur"]||0)||0);
   });
 
-  var html='<div class="ap"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h2 style="color:var(--dk);margin:0">Coverage Overview</h2><a href="https://launcher.value-experience-hub.for.sap/experiences/dmd/pages/pipeline-motion" target="_blank" style="padding:6px 14px;background:#00144A;color:#fff;border-radius:var(--r);font-size:12px;font-weight:600;text-decoration:none">&#128279; DMD - Pipeline Motion</a><div style="display:flex;align-items:center;gap:6px;margin-right:8px"><button onclick="_setPipeWeek(&apos;w37&apos;)" style="'+(window._pipeWeek==='w37'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 37</button><button onclick="_setPipeWeek(&apos;w38&apos;)" style="'+(window._pipeWeek==='w38'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 38</button><button onclick="_setPipeWeek(&apos;w39&apos;)" style="'+(window._pipeWeek==='w39'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 39</button><button onclick="_setPipeWeek(&apos;w40&apos;)" style="'+(window._pipeWeek==='w40'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 40</button><button onclick="_setPipeWeek(&apos;w41&apos;)" style="'+(window._pipeWeek==='w41'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 41</button><button onclick="_setPipeWeek(&apos;w42&apos;)" style="'+(window._pipeWeek==='w42'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 42</button><button onclick="_setPipeWeek(&apos;w43&apos;)" style="'+(window._pipeWeek==='w43'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 43</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
+  var html='<div class="ap"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h2 style="color:var(--dk);margin:0">Coverage Overview</h2><a href="https://launcher.value-experience-hub.for.sap/experiences/dmd/pages/pipeline-motion" target="_blank" style="padding:6px 14px;background:#00144A;color:#fff;border-radius:var(--r);font-size:12px;font-weight:600;text-decoration:none">&#128279; DMD - Pipeline Motion</a><div style="display:flex;align-items:center;gap:6px;margin-right:8px"><button onclick="_setPipeWeek(&apos;w37&apos;)" style="'+(window._pipeWeek==='w37'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 37</button><button onclick="_setPipeWeek(&apos;w38&apos;)" style="'+(window._pipeWeek==='w38'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 38</button><button onclick="_setPipeWeek(&apos;w39&apos;)" style="'+(window._pipeWeek==='w39'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 39</button><button onclick="_setPipeWeek(&apos;w40&apos;)" style="'+(window._pipeWeek==='w40'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 40</button><button onclick="_setPipeWeek(&apos;w41&apos;)" style="'+(window._pipeWeek==='w41'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 41</button><button onclick="_setPipeWeek(&apos;w42&apos;)" style="'+(window._pipeWeek==='w42'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 42</button><button onclick="_setPipeWeek(&apos;w43&apos;)" style="'+(window._pipeWeek==='w43'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 43</button><button onclick="_setPipeWeek(&apos;w44&apos;)" style="'+(window._pipeWeek==='w44'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 44</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
   if(filtered.length<campData.length)html+=buildFilterBanner(filtered.length,null);
   if(_bFoc)html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:#e8f4fb;border:1px solid #90cce8;border-radius:6px;font-size:12px;margin-bottom:8px"><span style="color:#00144A;font-weight:600">&#128270; Focused on: '+_bFoc.val+'</span><button onclick="window._budFocus=null;renderBud();" style="padding:2px 8px;font-size:11px;background:#00144A;color:#fff;border:none;border-radius:4px;cursor:pointer">&#10005; Clear</button></div>';
 
@@ -4469,7 +4676,7 @@ function renderBud(){
   var hoEur=sdeRows.filter(function(p){return hasHod(p["SDE Handover Date"]);}).reduce(function(s,p){return s+(parseFloat(p["Eur"]||0)||0);},0);
   var uniqMM=new Set(sdeRows.map(function(p){return String(p["MM Identifier"]||"").trim();}).filter(Boolean)).size;
   var hoRate=totEur>0?(hoEur/totEur*100).toFixed(0)+"%":"0%";
-  var html='<div class="ap"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h2 style="color:var(--dk);margin:0">SDE Insights</h2><div style="display:flex;align-items:center;gap:6px;margin-right:8px"><button onclick="_setPipeWeek(&apos;w37&apos;)" style="'+(window._pipeWeek==='w37'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 37</button><button onclick="_setPipeWeek(&apos;w38&apos;)" style="'+(window._pipeWeek==='w38'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 38</button><button onclick="_setPipeWeek(&apos;w39&apos;)" style="'+(window._pipeWeek==='w39'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 39</button><button onclick="_setPipeWeek(&apos;w40&apos;)" style="'+(window._pipeWeek==='w40'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 40</button><button onclick="_setPipeWeek(&apos;w41&apos;)" style="'+(window._pipeWeek==='w41'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 41</button><button onclick="_setPipeWeek(&apos;w42&apos;)" style="'+(window._pipeWeek==='w42'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 42</button><button onclick="_setPipeWeek(&apos;w43&apos;)" style="'+(window._pipeWeek==='w43'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 43</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
+  var html='<div class="ap"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h2 style="color:var(--dk);margin:0">SDE Insights</h2><div style="display:flex;align-items:center;gap:6px;margin-right:8px"><button onclick="_setPipeWeek(&apos;w37&apos;)" style="'+(window._pipeWeek==='w37'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 37</button><button onclick="_setPipeWeek(&apos;w38&apos;)" style="'+(window._pipeWeek==='w38'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 38</button><button onclick="_setPipeWeek(&apos;w39&apos;)" style="'+(window._pipeWeek==='w39'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 39</button><button onclick="_setPipeWeek(&apos;w40&apos;)" style="'+(window._pipeWeek==='w40'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 40</button><button onclick="_setPipeWeek(&apos;w41&apos;)" style="'+(window._pipeWeek==='w41'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 41</button><button onclick="_setPipeWeek(&apos;w42&apos;)" style="'+(window._pipeWeek==='w42'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 42</button><button onclick="_setPipeWeek(&apos;w43&apos;)" style="'+(window._pipeWeek==='w43'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 43</button><button onclick="_setPipeWeek(&apos;w44&apos;)" style="'+(window._pipeWeek==='w44'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 44</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
   html+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">';
   html+='<div class="kpi kb"><div class="kl">SDE Pipeline 2026</div><div class="kv">&euro;'+fmtE(totEur)+'</div></div>';
   html+='<div class="kpi kb"><div class="kl">Active MM Identifiers</div><div class="kv">'+uniqMM.toLocaleString()+'</div></div>';
@@ -4758,7 +4965,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
   if(pageId==="ovwPage"){
     var thS2="background:#012931;color:#fff;padding:5px 6px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;white-space:normal;position:sticky;top:0;border-right:1px solid #1B4F5A;max-width:70px;line-height:1.3";
     var thR2="background:#012931;color:#fff;padding:5px 6px;text-align:right;font-size:9px;font-weight:700;text-transform:uppercase;white-space:normal;position:sticky;top:0;border-right:1px solid #1B4F5A;max-width:70px;line-height:1.3";
-    html3+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Strategy Overview</h2><div style="display:flex;align-items:center;gap:6px;margin-right:8px"><button onclick="_setPipeWeek(&apos;w37&apos;)" style="'+(window._pipeWeek==='w37'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 37</button><button onclick="_setPipeWeek(&apos;w38&apos;)" style="'+(window._pipeWeek==='w38'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 38</button><button onclick="_setPipeWeek(&apos;w39&apos;)" style="'+(window._pipeWeek==='w39'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 39</button><button onclick="_setPipeWeek(&apos;w40&apos;)" style="'+(window._pipeWeek==='w40'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 40</button><button onclick="_setPipeWeek(&apos;w41&apos;)" style="'+(window._pipeWeek==='w41'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 41</button><button onclick="_setPipeWeek(&apos;w42&apos;)" style="'+(window._pipeWeek==='w42'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 42</button><button onclick="_setPipeWeek(&apos;w43&apos;)" style="'+(window._pipeWeek==='w43'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 43</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
+    html3+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Strategy Overview</h2><div style="display:flex;align-items:center;gap:6px;margin-right:8px"><button onclick="_setPipeWeek(&apos;w37&apos;)" style="'+(window._pipeWeek==='w37'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 37</button><button onclick="_setPipeWeek(&apos;w38&apos;)" style="'+(window._pipeWeek==='w38'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 38</button><button onclick="_setPipeWeek(&apos;w39&apos;)" style="'+(window._pipeWeek==='w39'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 39</button><button onclick="_setPipeWeek(&apos;w40&apos;)" style="'+(window._pipeWeek==='w40'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 40</button><button onclick="_setPipeWeek(&apos;w41&apos;)" style="'+(window._pipeWeek==='w41'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 41</button><button onclick="_setPipeWeek(&apos;w42&apos;)" style="'+(window._pipeWeek==='w42'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 42</button><button onclick="_setPipeWeek(&apos;w43&apos;)" style="'+(window._pipeWeek==='w43'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 43</button><button onclick="_setPipeWeek(&apos;w44&apos;)" style="'+(window._pipeWeek==='w44'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 44</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
     html3+='<p style="font-size:12px;color:var(--mu);margin-bottom:14px">High level view of strategies implemented to achieve targets</p>';
     html3+="<div class=\"krow\">";
     html3+="<div class=\"kpi kr\"><div class=\"kl\">Demand Managers</div><div class=\"kv\">"+uniqMgr+"</div></div>";
@@ -4803,7 +5010,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
       return{pct:(entries[0][1]/total*100).toFixed(0)+"%",name:entries[0][0]};
     }
     var trSB=topOppPct(oppSBMap),trInd=topOppPct(oppIndMap),trRBC=topOppPct(oppRBCMap),trIAC=topOppPct(oppIACMap);
-    html3='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div><h2 style="color:var(--dk);margin:0">Campaign Insights</h2><div style="font-size:13px;color:var(--mu);margin-top:2px">Results shown are those only connected with campaign calendar</div></div><div style="display:flex;align-items:center;gap:6px;margin-right:8px"><button onclick="_setPipeWeek(&apos;w37&apos;)" style="'+(window._pipeWeek==='w37'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 37</button><button onclick="_setPipeWeek(&apos;w38&apos;)" style="'+(window._pipeWeek==='w38'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 38</button><button onclick="_setPipeWeek(&apos;w39&apos;)" style="'+(window._pipeWeek==='w39'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 39</button><button onclick="_setPipeWeek(&apos;w40&apos;)" style="'+(window._pipeWeek==='w40'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 40</button><button onclick="_setPipeWeek(&apos;w41&apos;)" style="'+(window._pipeWeek==='w41'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 41</button><button onclick="_setPipeWeek(&apos;w42&apos;)" style="'+(window._pipeWeek==='w42'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 42</button><button onclick="_setPipeWeek(&apos;w43&apos;)" style="'+(window._pipeWeek==='w43'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 43</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div><hr style="border:none;border-top:1px solid #ddd;margin:6px 0 12px 0">'+html3;
+    html3='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div><h2 style="color:var(--dk);margin:0">Campaign Insights</h2><div style="font-size:13px;color:var(--mu);margin-top:2px">Results shown are those only connected with campaign calendar</div></div><div style="display:flex;align-items:center;gap:6px;margin-right:8px"><button onclick="_setPipeWeek(&apos;w37&apos;)" style="'+(window._pipeWeek==='w37'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 37</button><button onclick="_setPipeWeek(&apos;w38&apos;)" style="'+(window._pipeWeek==='w38'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 38</button><button onclick="_setPipeWeek(&apos;w39&apos;)" style="'+(window._pipeWeek==='w39'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 39</button><button onclick="_setPipeWeek(&apos;w40&apos;)" style="'+(window._pipeWeek==='w40'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 40</button><button onclick="_setPipeWeek(&apos;w41&apos;)" style="'+(window._pipeWeek==='w41'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 41</button><button onclick="_setPipeWeek(&apos;w42&apos;)" style="'+(window._pipeWeek==='w42'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 42</button><button onclick="_setPipeWeek(&apos;w43&apos;)" style="'+(window._pipeWeek==='w43'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 43</button><button onclick="_setPipeWeek(&apos;w44&apos;)" style="'+(window._pipeWeek==='w44'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 44</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div><hr style="border:none;border-top:1px solid #ddd;margin:6px 0 12px 0">'+html3;
     html3+="<div class=\"krow\"><div style=\"display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0;color:#000;padding-right:3px;border-right:2px solid #000;margin-right:3px;flex-shrink:0;width:16px\">Campaigns</div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Total Campaigns</div><div class=\"kv\">"+(new Set(data.map(function(r){return String(r["Campaign Name"]||"").trim();}).filter(Boolean))).size.toLocaleString()+"</div></div>";
     html3+="<div class=\"kpi kb\"><div class=\"kl\">Target Pipeline</div><div class=\"kv\">&euro;"+fmtE(targetPipe/1000)+"</div></div>";
@@ -5110,7 +5317,7 @@ if(pageId!=="ovwPage"){html3+="<div class=\"cc\" style=\"margin-bottom:28px;widt
   html3+="</div>";
     
   }
-   html3+="<details style=\"margin-bottom:28px\"><summary style=\"cursor:pointer;font-size:13px;font-weight:700;color:var(--dk);padding:6px 0;list-style:none;display:flex;align-items:center;gap:6px\"><span style=\"font-size:10px\">&#9654;</span> Pipeline Detail - Week 43<span style=\"font-size:11px;font-weight:400;color:var(--mu)\">("+pdet.length.toLocaleString()+" rows)</span></summary>";
+   html3+="<details style=\"margin-bottom:28px\"><summary style=\"cursor:pointer;font-size:13px;font-weight:700;color:var(--dk);padding:6px 0;list-style:none;display:flex;align-items:center;gap:6px\"><span style=\"font-size:10px\">&#9654;</span> Pipeline Detail - Week 44<span style=\"font-size:11px;font-weight:400;color:var(--mu)\">("+pdet.length.toLocaleString()+" rows)</span></summary>";
   html3+="<div class=\"cc\" style=\"margin-bottom:0\"><style>details[open] summary span:first-child{transform:rotate(90deg);display:inline-block;}</style>";
   html3+="<div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between\">";
   html3+="<span>"+pdet.length.toLocaleString()+" rows &middot; "+totOpps.toLocaleString()+" distinct opps</span>";
@@ -6857,7 +7064,7 @@ function renderOutInner(page){
 function renderPip(){
   var page=document.getElementById("pipPage");
   if(!page)return;
-  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Pipeline Details</h2><div style="display:flex;align-items:center;gap:6px;margin-right:8px"><button onclick="_setPipeWeek(&apos;w37&apos;)" style="'+(window._pipeWeek==='w37'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 37</button><button onclick="_setPipeWeek(&apos;w38&apos;)" style="'+(window._pipeWeek==='w38'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 38</button><button onclick="_setPipeWeek(&apos;w39&apos;)" style="'+(window._pipeWeek==='w39'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 39</button><button onclick="_setPipeWeek(&apos;w40&apos;)" style="'+(window._pipeWeek==='w40'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 40</button><button onclick="_setPipeWeek(&apos;w41&apos;)" style="'+(window._pipeWeek==='w41'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 41</button><button onclick="_setPipeWeek(&apos;w42&apos;)" style="'+(window._pipeWeek==='w42'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 42</button><button onclick="_setPipeWeek(&apos;w43&apos;)" style="'+(window._pipeWeek==='w43'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 43</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h2 style="color:var(--dk);margin:0">Pipeline Details</h2><div style="display:flex;align-items:center;gap:6px;margin-right:8px"><button onclick="_setPipeWeek(&apos;w37&apos;)" style="'+(window._pipeWeek==='w37'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 37</button><button onclick="_setPipeWeek(&apos;w38&apos;)" style="'+(window._pipeWeek==='w38'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 38</button><button onclick="_setPipeWeek(&apos;w39&apos;)" style="'+(window._pipeWeek==='w39'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 39</button><button onclick="_setPipeWeek(&apos;w40&apos;)" style="'+(window._pipeWeek==='w40'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 40</button><button onclick="_setPipeWeek(&apos;w41&apos;)" style="'+(window._pipeWeek==='w41'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 41</button><button onclick="_setPipeWeek(&apos;w42&apos;)" style="'+(window._pipeWeek==='w42'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 42</button><button onclick="_setPipeWeek(&apos;w43&apos;)" style="'+(window._pipeWeek==='w43'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 43</button><button onclick="_setPipeWeek(&apos;w44&apos;)" style="'+(window._pipeWeek==='w44'?'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#00144A;color:#fff':'padding:5px 12px;font-size:12px;font-weight:600;border:2px solid #00144A;border-radius:var(--r);cursor:pointer;background:#fff;color:#00144A')+'">Wk 44</button></div><button onclick="window.print()" style="padding:7px 18px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:13px;cursor:pointer;font-weight:600">&#128438; Export PDF</button></div>';
   html+='<p style="font-size:12px;color:var(--mu);margin-bottom:20px">Detailed pipeline data connected to campaign calendar.</p>';
   html+='<div class="nr"><p>Content coming soon.</p></div>';
   page.innerHTML=html;
