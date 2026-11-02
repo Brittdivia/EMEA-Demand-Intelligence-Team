@@ -243,11 +243,12 @@ window.PROFILING_ACCT_REQUESTED=306028;</script>
     <span class="hc" id="hcount">2,798 campaigns</span>
     <span id="sec-user-badge" style="font-size:11px;color:var(--mu);cursor:pointer;margin-left:12px" onclick="promptSecEmail();updateAdminTabs();if(activeTab==='bud')renderBud();if(activeTab==='exe')renderExe();if(activeTab==='exe2')renderExe('2');" title="Click to change user"></span>
   </div>
+  <button onclick="window.print()" style="margin-left:12px;padding:5px 12px;font-size:11px;font-weight:600;background:#00144A;color:#fff;border:none;border-radius:4px;cursor:pointer;" title="Export current view to PDF">&#128438; Export PDF</button>
 </header>
 <div class="tbar">
   <button class="tbtn on" data-tab="bud" onclick="switchTab(&#39;bud&#39;)">Coverage Overview</button>
   <button class="tbtn" id="tab-btn-exe" data-tab="exe" onclick="switchTab(&#39;exe&#39;)" style="display:none">TCP</button>
-  <button class="tbtn" data-tab="exe2" onclick="switchTab(&#39;exe2&#39;)">TCP v2</button>
+  <button class="tbtn" data-tab="exe2" onclick="switchTab(&#39;exe2&#39;)">Executive Summary</button>
   <button class="tbtn" data-tab="sde3" onclick="switchTab(&#39;sde3&#39;)">SDE View</button>
   <button class="tbtn" data-tab="dcm" onclick="switchTab(&#39;dcm&#39;)">DCM View</button>
   <button class="tbtn" data-tab="ana" onclick="switchTab(&#39;ana&#39;)">Campaign Insights</button>
@@ -5318,7 +5319,8 @@ if(pageId!=="ovwPage"){html3+="<div class=\"cc\" style=\"margin-bottom:28px;widt
     
   }
    html3+="<details style=\"margin-bottom:28px\"><summary style=\"cursor:pointer;font-size:13px;font-weight:700;color:var(--dk);padding:6px 0;list-style:none;display:flex;align-items:center;gap:6px\"><span style=\"font-size:10px\">&#9654;</span> Pipeline Detail - Week 44<span style=\"font-size:11px;font-weight:400;color:var(--mu)\">("+pdet.length.toLocaleString()+" rows)</span></summary>";
-  html3+="<div class=\"cc\" style=\"margin-bottom:0\"><style>details[open] summary span:first-child{transform:rotate(90deg);display:inline-block;}</style>";
+  html3+="<div class=\"cc\" style=\"margin-bottom:0\"><style>details[open] summary span:first-child{transform:rotate(90deg);display:inline-block;}@media print{header,.tbar,.fbar,.wbar{display:none!important;}.panel{display:block!important;position:static!important;overflow:visible!important;}.ap{overflow:visible!important;max-height:none!important;}body{margin:0;padding:0;}}
+</style>";
   html3+="<div class=\"ch\" style=\"display:flex;align-items:center;justify-content:space-between\">";
   html3+="<span>"+pdet.length.toLocaleString()+" rows &middot; "+totOpps.toLocaleString()+" distinct opps</span>";
   html3+="<input type=\"text\" id=\"pds\" placeholder=\"Search...\" oninput=\"filterPD()\" style=\"border:1px solid var(--bd);border-radius:var(--r);padding:4px 8px;font-size:12px;outline:none;width:200px\"/>"+"<button onclick=\"exportPdet()\" style=\"margin-left:8px;padding:5px 12px;background:var(--bl);color:#fff;border:none;border-radius:var(--r);font-size:12px;cursor:pointer\">&#11015; Export CSV</button>";
