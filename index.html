@@ -243,7 +243,7 @@ window.PROFILING_ACCT_REQUESTED=306028;</script>
     <span class="hc" id="hcount">2,798 campaigns</span>
     <span id="sec-user-badge" style="font-size:11px;color:var(--mu);cursor:pointer;margin-left:12px" onclick="promptSecEmail();updateAdminTabs();if(activeTab==='bud')renderBud();if(activeTab==='exe')renderExe();if(activeTab==='exe2')renderExe('2');" title="Click to change user"></span>
   </div>
-  <button onclick="window.print()" style="margin-left:12px;padding:5px 12px;font-size:11px;font-weight:600;background:#00144A;color:#fff;border:none;border-radius:4px;cursor:pointer;" title="Export current view to PDF">&#128438; Export PDF</button>
+  
 </header>
 <div class="tbar">
   <button class="tbtn on" data-tab="bud" onclick="switchTab(&#39;bud&#39;)">Coverage Overview</button>
@@ -1652,6 +1652,7 @@ function renderExe(sfx){sfx=sfx||"";try{
     var _e2EmailsDel=_e2OutF.reduce(function(a,r){return a+(parseInt(r['Emails - Deliveries'])||0);},0);
     var _e2EmailsOpen=_e2OutF.reduce(function(a,r){return a+(parseInt(r['Emails - Opens'])||0);},0);
     var _e2EmailsReply=_e2OutF.reduce(function(a,r){return a+(parseInt(r['Emails - Replies'])||0);},0);
+    h2+='<div style="display:flex;align-items:center;gap:16px;padding:12px 20px 8px"><h2 style="font-size:18px;font-weight:700;color:#00144A;margin:0">Digital Hub EMEA 2026</h2><button onclick="window.print()" style="margin-left:auto;padding:5px 12px;font-size:11px;font-weight:600;background:#00144A;color:#fff;border:none;border-radius:4px;cursor:pointer;" title="Export current view to PDF">&#128438; Export PDF</button></div>';
     // Pipeline KPI row
     h2+='<div class="krow">';
     h2+=_k2('#07838F','&euro;'+fmtE(window._exeCalMode?totEur:allPipe2026Eur),'Total Pipeline',(window._exeCalMode?totOpps:allPipe2026Opps).toLocaleString()+' opportunities','all sources');
