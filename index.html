@@ -1631,11 +1631,12 @@ function renderExe(sfx){sfx=sfx||"";try{
     var _e2WonEur=_e2WonRows.reduce(function(s,r){return s+(parseFloat(r['Eur']||0)||0)/1000;},0);var _e2WonOpps=new Set(_e2WonRows.map(function(r){return r['Opportunity ID'];})).size;
     var _e2ProbRows=_e2BasePipe.filter(function(r){return String(r['DRM Category']||'').trim()==='Probable';});
     var _e2ProbEur=_e2ProbRows.reduce(function(s,r){return s+(parseFloat(r['Eur']||0)||0)/1000;},0);var _e2ProbOpps=new Set(_e2ProbRows.map(function(r){return r['Opportunity ID'];})).size;
-    var _e2HodOppIds=new Set(_e2BasePipe.filter(function(r){return hasHod(r['SDE Handover Date']);}).map(function(r){return r['Opportunity ID'];}));
-    var _e2NonSalesOppIds=new Set(_e2BasePipe.filter(function(r){var _et=String(r['SDE Engagement Type']||'').trim();return _et&&_et.toLowerCase().indexOf('sales')<0;}).map(function(r){return r['Opportunity ID'];}));
+    var _e2HoBasePipe=_e2BasePipe.filter(function(r){return String(r['TCP Pipeline Source Desc']||'').trim()==='Digital hub';});
+    var _e2HodOppIds=new Set(_e2HoBasePipe.filter(function(r){return hasHod(r['SDE Handover Date']);}).map(function(r){return r['Opportunity ID'];}));
+    var _e2NonSalesOppIds=new Set(_e2HoBasePipe.filter(function(r){var _et=String(r['SDE Engagement Type']||'').trim();return _et&&_et.toLowerCase().indexOf('sales')<0;}).map(function(r){return r['Opportunity ID'];}));
     var _e2HodSet=new Set(Array.from(_e2HodOppIds).filter(function(id){return _e2NonSalesOppIds.has(id);}));
-    var _e2HodEur=_e2BasePipe.filter(function(r){return _e2HodSet.has(r['Opportunity ID']);}).reduce(function(s,r){return s+(parseFloat(r['Eur']||0)||0)/1000;},0);
-    var _e2SdeOppIds=new Set(_e2BasePipe.filter(function(r){return String(r['SDE Engagement Type']||'').trim()!=='';}).map(function(r){return r['Opportunity ID'];}));
+    var _e2HodEur=_e2HoBasePipe.filter(function(r){return _e2HodSet.has(r['Opportunity ID']);}).reduce(function(s,r){return s+(parseFloat(r['Eur']||0)||0)/1000;},0);
+    var _e2SdeOppIds=new Set(_e2HoBasePipe.filter(function(r){return String(r['SDE Engagement Type']||'').trim()!=='';}).map(function(r){return r['Opportunity ID'];}));
     var _e2HoRate=_e2SdeOppIds.size>0?(_e2HodSet.size/_e2SdeOppIds.size*100).toFixed(1)+'%':'—';
     var _e2CampActive=_campActive;
     var _e2CampExec=_campExec;
