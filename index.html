@@ -215,7 +215,7 @@ window.addEventListener('beforeprint',function(){
 window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});</script>
 <script src="data-camp.js?v=20261026"></script>
 <script src="data-pipe.js?v=20261026"></script>
-<script src="data-pipe-w43.js?v=20261026"></script><script src="data-pipe-w44.js?v=20261102"></script>
+<script src="data-pipe-w43.js?v=20261026"></script><script src="data-pipe-w45.js?v=20261109"></script>
 <script src="data-out.js?v=20260723"></script>
 <script src="data-seqco.js?v=20260619"></script>
 <script src="data-prospects.js?v=20260623j"></script>
@@ -239,7 +239,7 @@ window.PROFILING_ACCT_REQUESTED=306028;</script>
   <div class="ht">EMEA Demand Generation</div>
   <div class="hsp"></div>
   <div class="hm">
-    <span class="hu">Last updated: 02 Nov 2026</span>
+    <span class="hu">Last updated: 09 Nov 2026</span>
     <span class="hc" id="hcount">2,798 campaigns</span>
     <span id="sec-user-badge" style="font-size:11px;color:var(--mu);cursor:pointer;margin-left:12px" onclick="promptSecEmail();updateAdminTabs();if(activeTab==='bud')renderBud();if(activeTab==='exe')renderExe();if(activeTab==='exe2')renderExe('2');" title="Click to change user"></span>
   </div>
@@ -384,7 +384,7 @@ document.addEventListener("DOMContentLoaded",function(){
   // Build Sales Bag → sub-SB names mapping for dropdown filtering
   campData.forEach(function(r){var sbs=String(r["Sales Bag"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);var ssbs=String(r["Sub Sales Bag"]||"").split(",").map(function(s){return s.trim();}).filter(Boolean);sbs.forEach(function(sb){if(!_sbToSubSBs[sb])_sbToSubSBs[sb]=new Set();ssbs.forEach(function(ssb){var stripped=ssb.indexOf(" - ")>-1?ssb.substring(ssb.indexOf(" - ")+3).trim():ssb;if(stripped)_sbToSubSBs[sb].add(stripped);});});});
   function _xpd(d){if(!d||Array.isArray(d))return d||[];var h=d.h,r=d.d;return r.map(function(row){var o={};for(var i=0;i<h.length;i++)o[h[i]]=row[i]==null?'':row[i];return o;});}
-  pipeData=_xpd((window._pipeWeek==='w37'?window.PIPE_DATA_W37:(window._pipeWeek==='w38'?window.PIPE_DATA_W38:(window._pipeWeek==='w39'?window.PIPE_DATA_W39:(window._pipeWeek==='w40'?window.PIPE_DATA_W40:(window._pipeWeek==='w41'?window.PIPE_DATA_W41:(window._pipeWeek==='w42'?window.PIPE_DATA_W42:(window._pipeWeek==='w43'?window.PIPE_DATA_W43:(window._pipeWeek==='w44'?window.PIPE_DATA_W44:null))))))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});
+  pipeData=_xpd((window._pipeWeek==='w37'?window.PIPE_DATA_W37:(window._pipeWeek==='w38'?window.PIPE_DATA_W38:(window._pipeWeek==='w39'?window.PIPE_DATA_W39:(window._pipeWeek==='w40'?window.PIPE_DATA_W40:(window._pipeWeek==='w41'?window.PIPE_DATA_W41:(window._pipeWeek==='w42'?window.PIPE_DATA_W42:(window._pipeWeek==='w43'?window.PIPE_DATA_W43:(window._pipeWeek==='w44'?window.PIPE_DATA_W44:(window._pipeWeek==='w45'?window.PIPE_DATA_W45:null)))))))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});
   pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);})
   pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});
   pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});
