@@ -174,8 +174,9 @@ tbody td.wc{white-space:normal;word-break:break-word;max-width:260px;line-height
   body *{visibility:hidden;}
   .panel.on,
   .panel.on *{visibility:visible;}
+  .panel:not(.on){display:none!important;}
   .panel{display:block!important;height:auto!important;overflow:visible!important;position:static!important;}
-  .panel.on{position:absolute;left:0;top:0;width:100%;background:#fff;}
+  .panel.on{position:static!important;width:100%;background:#fff;}
   .ap{overflow:visible!important;height:auto!important;transform:none!important;width:auto!important;padding:0!important;}
   .ts,.tw{overflow:visible!important;height:auto!important;}
   .krow{flex-wrap:wrap!important;overflow:visible!important;}
@@ -183,6 +184,10 @@ tbody td.wc{white-space:normal;word-break:break-word;max-width:260px;line-height
   .fdd{display:none!important;}
   table{page-break-inside:auto;}
   tr{page-break-inside:avoid;}
+  #exe2Page table{min-width:0!important;width:100%!important;}
+  #exe2Page th,#exe2Page td{white-space:normal!important;}
+  #camp-ovw-more{display:table-row-group!important;}
+  #camp-ovw-showmore{display:none!important;}
 }
 #exe2Page .kpi{flex:1 1 0%;min-width:100px;max-width:none;height:auto;padding:10px 12px;}
 #exe2Page .krow{flex-wrap:wrap;gap:8px;margin-bottom:0;}
@@ -215,7 +220,7 @@ window.addEventListener('beforeprint',function(){
 window.addEventListener('afterprint',function(){setTimeout(scaleContent,100);});</script>
 <script src="data-camp.js?v=20261026"></script>
 <script src="data-pipe.js?v=20261026"></script>
-<script src="data-pipe-w43.js?v=20261026"></script><script src="data-pipe-w45.js?v=20261109"></script>
+<script src="data-pipe-w43.js?v=20261026"></script><script src="data-pipe-w45.js?v=20261109b"></script>
 <script src="data-out.js?v=20260723"></script>
 <script src="data-seqco.js?v=20260619"></script>
 <script src="data-prospects.js?v=20260623j"></script>
@@ -330,7 +335,6 @@ var FD=[
   {k:"Campaign/WBS Code",l:"WBS Code"},
   {k:"Campaign Name",l:"Campaign Name"},
   {k:"Executor",l:"Executor1"},
-  {k:"Digital Assets team support",l:"DAT Support"},
   {k:"DG Program",l:"DG Program"},
   {k:"Partner",l:"Partner"}
 ];
@@ -542,7 +546,7 @@ function buildFbar(){
   mmpsBtn.innerHTML="<button class=\"fbtn"+(_mmpsFiltered?" on":"")+"\" id=\"mmps-fbtn\" onclick=\"toggleMmpsDD()\">MM Pipe Source <span class=\"fc\" id=\"mmps-fc\" style=\"display:"+(_mmpsFiltered?"inline-block":"none")+"\">"+_mmpsN+"</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
     +"<div class=\"fdd\" id=\"mmps-fdd\"><div class=\"fdh\"><span class=\"fdt\">MM Pipe Source</span><button class=\"fdc\" onclick=\"clearMmpsFilter()\">Clear</button></div>"
     +"<div class=\"fdo\" id=\"mmps-fdo\"></div></div>";
-  if(activeTab!=="cal"&&activeTab!=="bud"&&activeTab!=="exe")div.parentNode.insertBefore(mmpsBtn,div);
+  // MM Pipe Source filter removed from filter bar
   var _allTcpSrc=new Set(pipeData.map(function(p){return String(p["TCP Pipeline Source Desc"]||"").trim();}).filter(Boolean));
   var _tcpSrcFiltered=_allTcpSrc.size>0&&Array.from(_allTcpSrc).some(function(v){return !tcpPipeSrcFilters.has(v);});
   var _tcpSrcN=_tcpSrcFiltered?Array.from(_allTcpSrc).filter(function(v){return !tcpPipeSrcFilters.has(v);}).length:0;
@@ -550,7 +554,7 @@ function buildFbar(){
   tcpSrcBtn.innerHTML="<button class=\"fbtn"+(_tcpSrcFiltered?" on":"")+"\" id=\"tcpsrc-fbtn\" onclick=\"toggleTcpSrcDD()\">TCP Pipe Source <span class=\"fc\" id=\"tcpsrc-fc\" style=\"display:"+(_tcpSrcFiltered?"inline-block":"none")+"\">"+_tcpSrcN+"</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
     +"<div class=\"fdd\" id=\"tcpsrc-fdd\"><div class=\"fdh\"><span class=\"fdt\">TCP Pipeline Source</span><button class=\"fdc\" onclick=\"clearTcpSrcFilter()\">Clear</button></div>"
     +"<div class=\"fdo\" id=\"tcpsrc-fdo\"></div></div>";
-  if(activeTab==="exe"||activeTab==="bud"){}// TCP Pipe Source filter removed
+  if(activeTab==="exe2") div.parentNode.insertBefore(tcpSrcBtn,div);
   if(activeTab!=="cal"){var eurBtn=document.createElement("div");eurBtn.className="fbi";eurBtn.id="eur-fbi";
   eurBtn.innerHTML="<button class=\"fbtn"+((eurMinFilter!==null||eurMaxFilter!==null)?" on":"")+"\" id=\"eur-fbtn\" onclick=\"toggleEurFilter()\">Opp &euro; <span id=\"eur-val\">"+(eurMinFilter!==null&&eurMaxFilter!==null?"&ge;"+eurMinFilter+" &lt;"+eurMaxFilter:eurMinFilter!==null?"&gt;"+eurMinFilter:eurMaxFilter!==null?"&lt;"+eurMaxFilter:"All")+"</span> <span style=\"font-size:9px;opacity:.55\">&#9660;</span></button>"
     +"<div class=\"fdd\" id=\"eur-fdd\"><div class=\"fdh\"><span class=\"fdt\">Opp Value Range</span><button class=\"fdc\" onclick=\"clearEurFilter()\">Clear</button></div>"
@@ -1079,12 +1083,12 @@ function toggleTcpSrcDD(){
 function toggleTcpSrcF(val,checked){
   if(checked)tcpPipeSrcFilters.add(val);else tcpPipeSrcFilters.delete(val);
   syncTcpSrcBtn();syncCab();
-  if(activeTab==="exe")renderExe();if(activeTab==="bud")renderBud();
+  if(activeTab==="exe")renderExe();if(activeTab==="exe2")renderExe('2');if(activeTab==="bud")renderBud();
 }
 function clearTcpSrcFilter(){
   tcpPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});
   syncTcpSrcBtn();syncCab();
-  if(activeTab==="exe")renderExe();if(activeTab==="bud")renderBud();
+  if(activeTab==="exe")renderExe();if(activeTab==="exe2")renderExe('2');if(activeTab==="bud")renderBud();
 }
 function syncTcpSrcBtn(){
   var btn=document.getElementById("tcpsrc-fbtn"),fc=document.getElementById("tcpsrc-fc");
@@ -1450,7 +1454,7 @@ window._buildEngTypeTbl=function(el,D){
     var _tvAllMUs=new Set();_tvTeamOrder.forEach(function(tk){_tvTeams[tk].muSet.forEach(function(muk){_tvAllMUs.add(muk);});});
     var _tvHOYtdGrand=Array.from(_tvAllMUs).reduce(function(s,muk){return s+(D.r2ho[muk]||0);},0);
     etbl+='<thead><tr>';
-    etbl+='<th rowspan="2" style="'+D.thT+'">SDE Team</th><th rowspan="2" style="'+D.thTR+'">SDE HO Target</th><th rowspan="2" style="'+D.thTR+'">HO YTD</th><th rowspan="2" style="'+D.thTR+'">HO YTD (excl. SN)</th><th rowspan="2" style="'+D.thTR+'">SDE HO Target (SDE Sourced)</th>';
+    etbl+='<th rowspan="2" style="'+D.thT+'">SDE Team</th><th rowspan="2" style="'+D.thTR+'">SDE HO Target</th><th rowspan="2" style="'+D.thTR+'">HO YTD</th><th rowspan="2" style="'+D.thTR+'">HO YTD (excl. SN)</th><th rowspan="2" style="'+D.thTR+'">SDE Sourced HO Target</th>';
     _engOrder.forEach(function(eng){etbl+='<th colspan="3" style="'+D.thTR+';border-left:2px solid #fff">'+eng+'</th>';});
     etbl+='</tr><tr>';
     _engOrder.forEach(function(eng){etbl+='<th style="'+thTRSub+';border-left:2px solid #fff">Pipeline</th><th style="'+thTRSub+'">Handed Over</th><th style="'+thTRSub+'">HO %</th>';});
@@ -1494,7 +1498,7 @@ window._buildEngTypeTbl=function(el,D){
     var _l2EngOrder2=Object.keys(D.r2t).filter(function(k){return D.r2t[k]>0;}).sort(function(a,b){return D.r2t[b]-D.r2t[a];});
     var _tdT2="padding:4px 6px;font-size:11px;border-bottom:1px solid #f0f0f0";
     etbl+='<thead><tr>';
-    etbl+='<th rowspan="2" style="'+D.thT+'">Region</th><th rowspan="2" style="'+D.thTR+'">SDE HO Target</th><th rowspan="2" style="'+D.thTR+'">HO YTD</th><th rowspan="2" style="'+D.thTR+'">SDE HO Target (SDE Sourced)</th>';
+    etbl+='<th rowspan="2" style="'+D.thT+'">Region</th><th rowspan="2" style="'+D.thTR+'">SDE HO Target</th><th rowspan="2" style="'+D.thTR+'">HO YTD</th><th rowspan="2" style="'+D.thTR+'">SDE Sourced HO Target</th>';
     _engOrder.forEach(function(eng){etbl+='<th colspan="3" style="'+D.thTR+';border-left:2px solid #fff">'+eng+'</th>';});
     etbl+='</tr><tr>';
     _engOrder.forEach(function(eng){etbl+='<th style="'+thTRSub+';border-left:2px solid #fff">Pipeline</th><th style="'+thTRSub+'">Handed Over</th><th style="'+thTRSub+'">HO %</th>';});
@@ -1595,7 +1599,6 @@ function renderExe(sfx){sfx=sfx||"";try{
   var _exeWBS=new Set(filtered.map(function(r){return String(r["Campaign/WBS Code"]||"").trim();}).filter(Boolean));
   var outF=outData.filter(function(r){
     if(_exeWBS.size>0&&!_exeWBS.has(String(r["Campaign/WBS Code"]||"").trim()))return false;
-    if(filters["Region Name (level 2)"]&&filters["Region Name (level 2)"].size>0){var _orv=String(r["Region Name (level 2)"]||"").trim();if(!filters["Region Name (level 2)"].has(_orv)&&!filters["Region Name (level 2)"].has("CS "+_orv))return false;}
     return true;
   });
   var _exeSeqIds=new Set(outF.reduce(function(a,r){getSeqIds(r).forEach(function(s){a.push(s);});return a;},[])) ;
@@ -1714,7 +1717,7 @@ function renderExe(sfx){sfx=sfx||"";try{
     filtered.forEach(function(r){var wbs=String(r['Campaign/WBS Code']||'').trim();var nm=String(r['Campaign Name']||'').trim();if(wbs&&nm)_wbsNameMap[wbs]=nm;});
     var _campByWBS={};
     _btpPipe.forEach(function(r){var wbs=String(r['Opp Campaign ID']||'').trim();if(!wbs)return;var mu=_muNorm[String(r['Region Lvl 2']||'').trim().toLowerCase()]||String(r['Region Lvl 2']||'').trim();var eu=(parseFloat(r['Eur']||0)||0)/1000;if(!_campByWBS[wbs])_campByWBS[wbs]={total:0,byMU:{}};_campByWBS[wbs].total+=eu;_campByWBS[wbs].byMU[mu]=(_campByWBS[wbs].byMU[mu]||0)+eu;});
-    var _campWBSKeys=Object.keys(_campByWBS).sort(function(a,b){return _campByWBS[b].total-_campByWBS[a].total;}).slice(0,20);
+    var _campWBSKeys=Object.keys(_campByWBS).filter(function(wbs){return !!_wbsNameMap[wbs];}).sort(function(a,b){return _campByWBS[b].total-_campByWBS[a].total;}).slice(0,20);
     var _campLabels=_campWBSKeys.map(function(wbs){return _wbsNameMap[wbs]||wbs;});
     var _campTotal=_campWBSKeys.reduce(function(s,wbs){return s+_campByWBS[wbs].total;},0);
     var _campTotalFmt=_campTotal>=1000?(_campTotal/1000).toFixed(1)+'M':Math.round(_campTotal)+'k';
@@ -1764,7 +1767,7 @@ function renderExe(sfx){sfx=sfx||"";try{
         var mu=_muAbbrCC[String(r['Region Name (level 2)']||'').trim()]||String(r['Region Name (level 2)']||'').trim();
         var status=String(r['Status']||'').trim();
         var sclr=_statClr[status]||'#888';
-        var ex=_escH(String(r['Executor1']||r['Executor']||'').trim());
+        var _exRawOv=String(r['Executor1']||r['Executor']||'').trim();var ex=_escH(_exRawOv==="[Table]"?"":_exRawOv);
         var accts=String(r['# Accounts']||r['Number of Accounts']||'').trim()||'—';
         var qtr=String(r['Starting Quarter']||'').trim();
         var wo=_wbsOut[wbs];
@@ -1773,6 +1776,7 @@ function renderExe(sfx){sfx=sfx||"";try{
         var clkPct=wo?_fmtPct2(wo.pop,wo.pdel):'—';
         var seqClr=wo?'#07838F':'#ccc';
         var bg=i%2===0?'#fff':'#f9fbfd';
+        if(i===10)_ct+='</tbody><tbody id="camp-ovw-more" style="display:none">';
         _ct+='<tr style="background:'+bg+';border-bottom:1px solid #f0f0f0">';
         _ct+='<td style="padding:5px 8px;font-weight:500;color:#00144A">'+nm+'</td>';
         _ct+='<td style="padding:5px 8px;white-space:nowrap">'+qtr+'</td>';
@@ -1786,7 +1790,13 @@ function renderExe(sfx){sfx=sfx||"";try{
         _ct+='<td style="padding:5px 8px;text-align:right;color:'+(clkPct!=='—'?'#F0A800':'#bbb')+'">'+clkPct+'</td>';
         _ct+='</tr>';
       });
-      _ct+='</tbody></table></div></div>';
+      _ct+='</tbody></table></div>';
+      if(filtered.length>10){
+        _ct+='<div id="camp-ovw-showmore" style="text-align:center;padding:8px 0 4px">';
+        _ct+='<button onclick="var m=document.getElementById(\'camp-ovw-more\');var b=document.getElementById(\'camp-ovw-showmore\');if(m)m.style.display=\'\';if(b)b.style.display=\'none\';" style="padding:5px 18px;font-size:11px;background:#f5f7fa;border:1px solid #ccc;border-radius:4px;cursor:pointer;color:#00144A;font-weight:600">Show '+(filtered.length-10)+' more campaigns &#9660;</button>';
+        _ct+='</div>';
+      }
+      _ct+='</div>';
       h2+=_ct;
     })();
     // Top EMEA Opportunities table
@@ -3370,9 +3380,10 @@ function renderSde3(){try{
       var l2k=String(p2["Region Lvl 2"]||"").trim().replace(/^CS /,"").toLowerCase()||"other";
       var l3k=String(p2["Region Lvl 3"]||"").trim().replace(/^CS /,"").toLowerCase()||"other";
       var _isSales=String(p2["TCP Pipeline Source Desc"]||"").trim()==="Sales";
+      var _hodSde=hod&&eng&&eng!=="(No Value)"&&eng!=="(no value)"&&eng.toLowerCase()!=="sales nurtured";
       _r2T[l2k]=(_r2T[l2k]||0)+eur;
-      if(hod){_r2HO[l2k]=(_r2HO[l2k]||0)+eur;if(!_isSales){_r2HOex[l2k]=(_r2HOex[l2k]||0)+eur;}}
-      if(!_r2L3HO[l2k])_r2L3HO[l2k]={};if(hod)_r2L3HO[l2k][l3k]=(_r2L3HO[l2k][l3k]||0)+eur;
+      if(_hodSde){_r2HO[l2k]=(_r2HO[l2k]||0)+eur;}if(hod&&!_isSales){_r2HOex[l2k]=(_r2HOex[l2k]||0)+eur;}
+      if(!_r2L3HO[l2k])_r2L3HO[l2k]={};if(_hodSde)_r2L3HO[l2k][l3k]=(_r2L3HO[l2k][l3k]||0)+eur;
       if(eng&&eng!=="(No Value)"&&eng!=="(no value)"){
         if(!_r2Et[l2k])_r2Et[l2k]={};_r2Et[l2k][eng]=(_r2Et[l2k][eng]||0)+eur;
         if(hod){if(!_r2EtHO[l2k])_r2EtHO[l2k]={};_r2EtHO[l2k][eng]=(_r2EtHO[l2k][eng]||0)+eur;}
@@ -3382,7 +3393,7 @@ function renderSde3(){try{
         if(!_r2SbEt[l2k])_r2SbEt[l2k]={};if(!_r2SbEt[l2k][_sbk])_r2SbEt[l2k][_sbk]={};_r2SbEt[l2k][_sbk][eng]=(_r2SbEt[l2k][_sbk][eng]||0)+eur;
         if(hod){if(!_r2SbEtHO[l2k])_r2SbEtHO[l2k]={};if(!_r2SbEtHO[l2k][_sbk])_r2SbEtHO[l2k][_sbk]={};_r2SbEtHO[l2k][_sbk][eng]=(_r2SbEtHO[l2k][_sbk][eng]||0)+eur;}
       }
-      if(hod){var _hrl=String(p2["SDE Handover Role"]||"").trim().toLowerCase();var _hrk;if(_hrl.indexOf(' btp')>=0)_hrk='btp';else if(_hrl.indexOf(' hcm')>=0)_hrk='hcm';else if(_hrl.indexOf(' cx')>=0)_hrk='cx';else if(_hrl.indexOf(' f&s')>=0)_hrk='fs';else if(_hrl.indexOf(' scm')>=0)_hrk='scm';else _hrk='generalist';if(!_r2RHO[l2k])_r2RHO[l2k]={};_r2RHO[l2k][_hrk]=(_r2RHO[l2k][_hrk]||0)+eur;if(!_isSales){if(!_r2RHOx[l2k])_r2RHOx[l2k]={};_r2RHOx[l2k][_hrk]=(_r2RHOx[l2k][_hrk]||0)+eur;}if(eng&&eng!=="(No Value)"&&eng!=="(no value)"){if(!_r2REtHO[l2k])_r2REtHO[l2k]={};if(!_r2REtHO[l2k][_hrk])_r2REtHO[l2k][_hrk]={};_r2REtHO[l2k][_hrk][eng]=(_r2REtHO[l2k][_hrk][eng]||0)+eur;}}
+      if(_hodSde){var _hrl=String(p2["SDE Handover Role"]||"").trim().toLowerCase();var _hrk;if(_hrl.indexOf(' btp')>=0)_hrk='btp';else if(_hrl.indexOf(' hcm')>=0)_hrk='hcm';else if(_hrl.indexOf(' cx')>=0)_hrk='cx';else if(_hrl.indexOf(' f&s')>=0)_hrk='fs';else if(_hrl.indexOf(' scm')>=0)_hrk='scm';else _hrk='generalist';if(!_r2RHO[l2k])_r2RHO[l2k]={};_r2RHO[l2k][_hrk]=(_r2RHO[l2k][_hrk]||0)+eur;if(!_isSales){if(!_r2RHOx[l2k])_r2RHOx[l2k]={};_r2RHOx[l2k][_hrk]=(_r2RHOx[l2k][_hrk]||0)+eur;}if(eng&&eng!=="(No Value)"&&eng!=="(no value)"){if(!_r2REtHO[l2k])_r2REtHO[l2k]={};if(!_r2REtHO[l2k][_hrk])_r2REtHO[l2k][_hrk]={};_r2REtHO[l2k][_hrk][eng]=(_r2REtHO[l2k][_hrk][eng]||0)+eur;}}
     });
     var _sdeHoTgt2=0,_sdeHoByMu2={},_sdeHoByMuL3_2={};
     var _sHoRF2=regF?Array.from(regF).map(function(rv){return rv.replace(/^CS /,"").trim().toLowerCase();}):null;
@@ -3408,7 +3419,7 @@ function renderDcm(){try{
     {mu:'France',team:'SDE - Generalist France',dcm:'Cyril',tgt:52300010,conf:52300010,bold:true},
     {mu:'Italy',team:'SDE - Generalist Italy',dcm:'Dani',tgt:35170996,conf:null,bold:true},
     {mu:'MEA North',team:'SDE - Generalist MEA North',dcm:'Mai',tgt:48500003,conf:null,bold:true},
-    {mu:'MEA South',team:'SDE - Generalist MEA South',dcm:'Cesare',tgt:49199999,conf:null,bold:true},
+    {mu:'MEA South',team:'SDE - Generalist MEA South',dcm:'Cesare',tgt:49199999,conf:49199999,bold:true},
     {mu:'Nordics',team:'SDE - Generalist Nordics',dcm:'Frida',tgt:27000000,conf:27000000,bold:true},
     {mu:'Southern Europe',team:'SDE - Generalist Southern Europe',dcm:'',tgt:58799981,conf:null,bold:true},
     {mu:'Spain',team:'SDE - Generalist Southern Europe',dcm:'Javi',tgt:null,conf:29400000},
@@ -3426,19 +3437,116 @@ function renderDcm(){try{
     {mu:'EMEA',team:'SDE - Specialist SCM',dcm:'Sonali/TBC',tgt:30600000,conf:null},
     {mu:'EMEA Total',team:'Total',dcm:'',tgt:578420992,conf:578420992,bold:true,total:true}
   ];
+  // ---- YTD HO (pipeline rows with SDE Handover Date, 2026 create quarter) ----
+  var _hoMu={},_hoL3={},_hoSA={},_hoTot=0;
+  (function(){
+    var _saPipeMap={"BAIP - Data & AI":"btp","BAIP - Technology Foundation":"btp","Business Technology Platform":"btp","Data & AI":"btp","Human Capital Management":"hcm","Customer Experience":"cx","Finance and Spend Management":"fs","Supply Chain Management":"scm"};
+    (pipeData||[]).forEach(function(p){
+      if(!String(p['Create Quarter']||'').startsWith('2026')) return;
+      if(String(p['DRM Category']||'').trim()==='Excluded from Pipeline') return;
+      if(!hasHod(p['SDE Handover Date'])) return;
+      var e=parseFloat(p['Eur'])||0,l2=String(p['Region Lvl 2']||'').trim(),l3=String(p['Region Lvl 3']||'').trim(),sa=_saPipeMap[String(p['Solution Area (L1)']||'').trim()]||'gen';
+      _hoMu[l2]=(_hoMu[l2]||0)+e;_hoL3[l3]=(_hoL3[l3]||0)+e;_hoSA[sa]=(_hoSA[sa]||0)+e;_hoTot+=e;
+    });
+  })();
+  function getYtdHo1(r){
+    if(r.total) return _hoTot;
+    var mu=r.mu.toLowerCase(),team=(r.team||'').toLowerCase();
+    if(mu==='emea'&&r.bold===undefined){
+      // specialist
+      if(team.indexOf('btp')>=0||team.indexOf('data & ai')>=0) return _hoSA['btp']||0;
+      if(team.indexOf('hcm')>=0) return _hoSA['hcm']||0;
+      if(team.indexOf(' cx')>=0) return _hoSA['cx']||0;
+      if(team.indexOf('f&s')>=0) return _hoSA['fs']||0;
+      if(team.indexOf('scm')>=0) return _hoSA['scm']||0;
+      return 0;
+    }
+    // MU header rows (bold) \u2014 map to pipeline Region Lvl 2
+    var muMap={'benelux':'BeNeLux','france':'France','italy':'Italy','mea north':'MEA North','mea south':'MEA South','nordics':'Nordic','southern europe':'Southern Europe','united kingdom':'UKI','emea total':'EMEA'};
+    var pipeKey=muMap[mu];
+    if(r.bold&&pipeKey) return _hoMu[pipeKey]||0;
+    // Sub-region rows \u2014 use Region Lvl 3 matching
+    var rl3=0;
+    Object.keys(_hoL3).forEach(function(k){
+      var kl=k.toLowerCase();
+      if(mu==='belux'&&kl.indexOf('bel')>=0) rl3+=_hoL3[k];
+      else if(mu==='netherlands'&&(kl==='netherlands'||kl.indexOf('-nl-')>=0||kl.endsWith('-nl'))) rl3+=_hoL3[k];
+      else if(mu==='spain'&&kl==='spain') rl3+=_hoL3[k];
+      else if(mu==='portugal'&&kl.indexOf('portu')>=0) rl3+=_hoL3[k];
+      else if(mu==='greece & cyprus'&&kl.indexOf('greec')>=0) rl3+=_hoL3[k];
+      else if(mu==='turkey'&&kl.indexOf('rkiye')>=0) rl3+=_hoL3[k];
+      else if(mu==='israel'&&kl.indexOf('israel')>=0) rl3+=_hoL3[k];
+      else if(mu==='united kingdom'&&!r.bold&&kl.startsWith('sl-uki')&&kl.indexOf('-ie')<0) rl3+=_hoL3[k];
+      else if(mu==='ireland'&&kl.indexOf('-ie')>=0) rl3+=_hoL3[k];
+    });
+    return rl3;
+  }
+  function fmtHo1(v){if(!v)return'\u2014';var m=v/1e6;return m>=10?Math.round(m)+'M':m>=1?m.toFixed(1)+'M':Math.round(v/1e3)+'K';}
   var html='<div style="padding:16px 20px">';
   html+='<h2 style="font-size:15px;font-weight:700;color:#00144A;margin:0 0 14px">DCM View \u2014 SDE HO Targets</h2>';
   html+='<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:12px">';
-  html+='<thead><tr><th style="'+thS+'">MU / Region</th><th style="'+thS+'">SDE Team</th><th style="'+thS+'">DCM</th><th style="'+thR+'">HO Target</th><th style="'+thR+'">DCM SDE HO Target (Confirmed)</th></tr></thead><tbody>';
+  html+='<thead><tr><th style="'+thS+'">MU / Region</th><th style="'+thS+'">SDE Team</th><th style="'+thS+'">DCM</th><th style="'+thR+'">HO Target (k€)</th><th style="'+thR+'">DCM SDE HO Target Confirmed (k€)</th><th style="'+thR+'">YTD HO</th><th style="'+thR+'">% Achievement</th></tr></thead><tbody>';
   rows1.forEach(function(r){
     var bg=r.total?'#e8f0fe':r.bold?'#f5f7fa':'#fff';
     var fw=r.total||r.bold?'600':'400';
     var td='padding:6px 10px;font-size:11px;border-bottom:1px solid #e8e8e8;font-weight:'+fw+';background:'+bg+';';
     html+='<tr><td style="'+td+'">'+esc(r.mu)+'</td><td style="'+td+'">'+esc(r.team)+'</td><td style="'+td+'">'+esc(r.dcm)+'</td>';
-    html+='<td style="'+td+'text-align:right;">'+(r.tgt!==null?fmtE(r.tgt):'')+'</td>';
-    html+='<td style="'+td+'text-align:right;">'+(r.conf!==null?fmtE(r.conf):'')+'</td></tr>';
+    html+='<td style="'+td+'text-align:right;">'+(r.tgt!==null?fmtHo1(r.tgt/1000):'')+'</td>';
+    html+='<td style="'+td+'text-align:right;">'+(r.conf!==null?fmtHo1(r.conf/1000):'')+'</td>';
+    var _ytd1=r.conf!==null?getYtdHo1(r):null;
+    var _confK=r.conf!==null?r.conf/1000:null;
+    var _pct1=(_ytd1!==null&&_confK)?Math.round(_ytd1/_confK*100)+'%':'—';
+    html+='<td style="'+td+'text-align:right;color:#07838F;">'+(_ytd1!==null?fmtHo1(_ytd1):'—')+'</td>';
+    html+='<td style="'+td+'text-align:right;color:#07838F;">'+_pct1+'</td></tr>';
   });
   html+='</tbody></table></div>';
+
+  // ---- Pipeline Created 2026 (via calendar campaign codes) ----
+  var p26mu={},p26sub={},p26tot=0;
+  (function(){
+    var campSet={};
+    (campData||[]).forEach(function(c){
+      var code=String(c['Campaign/WBS Code']||'').replace(/^[\r\n\s]+/,'').trim();
+      if(code) campSet[code]=1;
+    });
+    if(!pipeData||!pipeData.length) return;
+    pipeData.forEach(function(p){
+      var cq=String(p['Create Quarter']||'');
+      if(!cq.startsWith('2026')) return;
+      var code=String(p['Opp Campaign ID']||'').trim();
+      if(!code||!campSet[code]) return;
+      var e=parseFloat(p['Eur'])||0,l2=p['Region Lvl 2']||'',l3=p['Region Lvl 3']||'';
+      p26mu[l2]=(p26mu[l2]||0)+e;
+      p26sub[l3]=(p26sub[l3]||0)+e;
+      p26tot+=e;
+    });
+  })();
+  function getP26(r){
+    var lvl=r[5],mu=r[0],reg=r[2];
+    if(lvl===0) return null;
+    if(lvl===2){
+      if(mu==='EMEA') return p26tot;
+      var mn={'Benelux':'BeNeLux','Nordics':'Nordic'}[mu]||mu;
+      return p26mu[mn]||0;
+    }
+    if(p26sub[reg]!==undefined) return p26sub[reg];
+    var rl=reg.toLowerCase(),tot=0;
+    Object.keys(p26sub).forEach(function(k){
+      var kl=k.toLowerCase();
+      if(rl==='francophone africa'&&kl.startsWith('francophone')) tot+=p26sub[k];
+      else if(rl.indexOf('pakistan')>=0&&kl.startsWith('pakistan')) tot+=p26sub[k];
+      else if(rl.indexOf('rkiye')>=0&&kl.indexOf('rkiye')>=0) tot+=p26sub[k];
+      else if(rl==='ireland'&&kl.indexOf('-ie')>=0) tot+=p26sub[k];
+      else if(rl==='uk'&&kl.startsWith('sl-uki')&&kl.indexOf('-ie')<0) tot+=p26sub[k];
+    });
+    return tot;
+  }
+  function fmtP26(v){
+    if(v===null) return '—';
+    if(!v) return '0';
+    var m=v/1e6;
+    return m>=0.1?(m>=10?Math.round(m)+'M':m.toFixed(1)+'M'):Math.round(v/1e3)+'K';
+  }
 
   // ---- TABLE 2: DCM GENERALISTS ----
   // columns: [mu, dcm, region, tcp, conf, level]  level: 2=MU header, 1=sub-region, 0=territory
@@ -3514,28 +3622,28 @@ function renderDcm(){try{
     ['MEA South','','Other','\u2014','',0],
     ['Nordics','Frida','Nordic','175M','',2],
     ['Nordics','','Baltics','25M','',1],
-    ['Nordics','','FL-NO-CoF','8M','',0],
-    ['Nordics','','FL-NO-CoF Baltics','9M','',0],
-    ['Nordics','','FL-NO-PAR Bal','8M','',0],
+    ['Nordics','','FL-NO-CoF','8M','0',0],
+    ['Nordics','','FL-NO-CoF Baltics','9M','0',0],
+    ['Nordics','','FL-NO-PAR Bal','8M','0',0],
     ['Nordics','','Other','\u2014','',0],
     ['Nordics','','Denmark','51M','',1],
-    ['Nordics','','FL-NO-CoD Denmark','5M','',0],
-    ['Nordics','','FL-NO-CoF Denmark','40M','',0],
-    ['Nordics','','FL-NO-PAR Den','6M','',0],
+    ['Nordics','','FL-NO-CoD Denmark','5M','5,2M',0],
+    ['Nordics','','FL-NO-CoF Denmark','40M','0',0],
+    ['Nordics','','FL-NO-PAR Den','6M','5,2M',0],
     ['Nordics','','Other','\u2014','',0],
     ['Nordics','','Finland','31M','',1],
-    ['Nordics','','FL-NO-CoF Finland','20M','',0],
-    ['Nordics','','FL-NO-PAR Fin','10M','',0],
+    ['Nordics','','FL-NO-CoF Finland','20M','0',0],
+    ['Nordics','','FL-NO-PAR Fin','10M','14,58M (3,6*4)',0],
     ['Nordics','','Other','\u2014','',0],
     ['Nordics','','Norway','24M','',1],
-    ['Nordics','','FL-NO-CoD Norway','6M','',0],
-    ['Nordics','','FL-NO-CoF Norway','15M','',0],
-    ['Nordics','','FL-NO-PAR Nor','3M','',0],
+    ['Nordics','','FL-NO-CoD Norway','6M','10,4M',0],
+    ['Nordics','','FL-NO-CoF Norway','15M','0',0],
+    ['Nordics','','FL-NO-PAR Nor','3M','15M (3,75M*4)',0],
     ['Nordics','','Other','\u2014','',0],
     ['Nordics','','Sweden','44M','',1],
-    ['Nordics','','FL-NO-CoD Sweden','4M','',0],
-    ['Nordics','','FL-NO-CoF Sweden','27M','',0],
-    ['Nordics','','FL-NO-PAR Swe','13M','',0],
+    ['Nordics','','FL-NO-CoD Sweden','4M','5,2M',0],
+    ['Nordics','','FL-NO-CoF Sweden','27M','0',0],
+    ['Nordics','','FL-NO-PAR Swe','13M','15M (3,75M*4)',0],
     ['Nordics','','Other','\u2014','',0],
     ['Southern Europe','Javi','Southern Europe','532M','',2],
     ['Southern Europe','Margarita','Greece & Cyprus','76M','73.656',1],
@@ -3576,9 +3684,41 @@ function renderDcm(){try{
     ['UKI','\u2014','Other','\u2014','\u2014',0],
     ['EMEA','','Total','2691M','',2]
   ];
+  // Parse a confirmed string to millions EUR (handles '€ 8,964' kEUR, '16.5M', '5,2M', '73.656' M, etc.)
+  function parseC(s){
+    if(!s||typeof s!=='string') return null;
+    s=s.trim();
+    if(!s||s==='—'||s.toUpperCase()==='YES') return null;
+    var e=/€/.test(s);
+    if(s.indexOf('(')>=0) s=s.substring(0,s.indexOf('(')).trim();
+    s=s.replace(/[€\s]/g,'');
+    if(!s) return null;
+    var m=1;
+    if(/m$/i.test(s)){s=s.slice(0,-1);}
+    else if(/k$/i.test(s)){m=0.001;s=s.slice(0,-1);}
+    else if(e){m=0.001;}
+    if(e&&/,\d{3}$/.test(s)){s=s.replace(',','');}else{s=s.replace(',','.');}
+    var n=parseFloat(s);
+    return isNaN(n)?null:n*m;
+  }
+  function fmtC(v,n){if(!n)return '';if(!v)return '0';return v>=10?Math.round(v)+'M':v.toFixed(1)+'M';}
+  function getEffConf(r){return (r[4]&&r[4].toUpperCase()==='YES')?r[3]:r[4];}
+  var grpC={},_cmu=null,_csub=null;
+  rows2.forEach(function(r){
+    var lvl=r[5],mu=r[0],reg=r[2];
+    if(lvl===2){_cmu=mu;_csub=null;grpC[mu]={s:0,n:0};}
+    else if(lvl===1){_csub=mu+'|'+reg;grpC[_csub]={s:0,n:0};}
+    else if(lvl===0){
+      var v=parseC(getEffConf(r));
+      if(v!==null){
+        if(_cmu&&grpC[_cmu]){grpC[_cmu].s+=v;grpC[_cmu].n++;}
+        if(_csub&&grpC[_csub]){grpC[_csub].s+=v;grpC[_csub].n++;}
+      }
+    }
+  });
   html+='<h2 style="font-size:15px;font-weight:700;color:#00144A;margin:24px 0 14px">DCM Generalists</h2>';
   html+='<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:11px">';
-  html+='<thead><tr><th style="'+thS+'">MU</th><th style="'+thS+'">DCM</th><th style="'+thS+'">Region</th><th style="'+thR+'">TCP Target</th><th style="'+thR+'">DCM TCP Target (Confirmed)</th></tr></thead><tbody>';
+  html+='<thead><tr><th style="'+thS+'">MU</th><th style="'+thS+'">DCM</th><th style="'+thS+'">Region</th><th style="'+thR+'">TCP Target</th><th style="'+thR+'">DCM TCP Target (Confirmed)</th><th style="'+thR+'">Pipeline Created 2026</th><th style="'+thR+'">% Achievement</th></tr></thead><tbody>';
   rows2.forEach(function(r){
     var lvl=r[5];
     var bg=lvl===2?'#e8edff':lvl===1?'#f5f7fa':'#fff';
@@ -3590,7 +3730,16 @@ function renderDcm(){try{
     html+='<td style="'+td+'">'+esc(r[1])+'</td>';
     html+='<td style="'+td+pl+'">'+esc(r[2])+'</td>';
     html+='<td style="'+td+'text-align:right;">'+esc(r[3])+'</td>';
-    html+='<td style="'+td+'text-align:right;">'+esc(r[4])+'</td>';
+    var _effConf=getEffConf(r);
+    var confD=esc(_effConf);
+    var _confM2=null;
+    if(!_effConf){var _gk=lvl===2?r[0]:lvl===1?r[0]+'|'+r[2]:null;if(_gk&&grpC[_gk]&&grpC[_gk].n){confD=fmtC(grpC[_gk].s,grpC[_gk].n);_confM2=grpC[_gk].s;}}
+    else{_confM2=parseC(_effConf);}
+    html+='<td style="'+td+'text-align:right;">'+confD+'</td>';
+    var _p26v2=getP26(r);
+    html+='<td style="'+td+'text-align:right;">'+fmtP26(_p26v2)+'</td>';
+    var _pct2=(_p26v2!==null&&_p26v2>0&&_confM2&&_confM2>0)?Math.round(_p26v2/(_confM2*1e6)*100)+'%':'—';
+    html+='<td style="'+td+'text-align:right;color:#07838F;">'+_pct2+'</td>';
     html+='</tr>';
   });
   html+='</tbody></table></div>';
@@ -3645,7 +3794,7 @@ function renderDcm(){try{
   ];
   html+='<h2 style="font-size:15px;font-weight:700;color:#00144A;margin:24px 0 14px">DCM Specialists</h2>';
   html+='<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:11px">';
-  html+='<thead><tr><th style="'+thS+'">LOB</th><th style="'+thS+'">MU</th><th style="'+thS+'">Country</th><th style="'+thS+'">DCM</th><th style="'+thS+'">Region</th><th style="'+thR+'">TCP Target</th><th style="'+thR+'">DCM TCP Target (Confirmed)</th></tr></thead><tbody>';
+  html+='<thead><tr><th style="'+thS+'">LOB</th><th style="'+thS+'">MU</th><th style="'+thS+'">Country</th><th style="'+thS+'">DCM</th><th style="'+thS+'">Region</th><th style="'+thR+'">TCP Target</th><th style="'+thR+'">DCM TCP Target (Confirmed)</th><th style="'+thR+'">% Achievement</th></tr></thead><tbody>';
   var prevLob='';
   rows3.forEach(function(r){
     var lobChange=r[0]!==prevLob;prevLob=r[0];
@@ -3660,6 +3809,7 @@ function renderDcm(){try{
     html+='<td style="'+td+'">'+esc(r[4])+'</td>';
     html+='<td style="'+td+'text-align:right;">'+esc(r[5])+'</td>';
     html+='<td style="'+td+'text-align:right;">'+esc(r[6])+'</td>';
+    html+='<td style="'+td+'text-align:right;color:#07838F;">—</td>';
     html+='</tr>';
   });
   html+='</tbody></table></div>';
@@ -4759,9 +4909,10 @@ function renderBud(){
       var l2k=String(p["Region Lvl 2"]||"").trim().replace(/^CS /,"").toLowerCase()||"other";
       var l3k=String(p["Region Lvl 3"]||"").trim().replace(/^CS /,"").toLowerCase()||"other";
       var _isSales=String(p["TCP Pipeline Source Desc"]||"").trim()==="Sales";
+      var _hodSde=hod&&eng&&eng!=="(No Value)"&&eng!=="(no value)"&&eng.toLowerCase()!=="sales nurtured";
       _r2T[l2k]=(_r2T[l2k]||0)+eur;
-      if(hod){_r2HO[l2k]=(_r2HO[l2k]||0)+eur;if(!_isSales){_r2HOex[l2k]=(_r2HOex[l2k]||0)+eur;}}
-      if(!_r2L3HO[l2k])_r2L3HO[l2k]={};if(hod)_r2L3HO[l2k][l3k]=(_r2L3HO[l2k][l3k]||0)+eur;
+      if(_hodSde){_r2HO[l2k]=(_r2HO[l2k]||0)+eur;}if(hod&&!_isSales){_r2HOex[l2k]=(_r2HOex[l2k]||0)+eur;}
+      if(!_r2L3HO[l2k])_r2L3HO[l2k]={};if(_hodSde)_r2L3HO[l2k][l3k]=(_r2L3HO[l2k][l3k]||0)+eur;
       if(eng&&eng!=="(No Value)"&&eng!=="(no value)"){
         if(!_r2Et[l2k])_r2Et[l2k]={};_r2Et[l2k][eng]=(_r2Et[l2k][eng]||0)+eur;
         if(hod){if(!_r2EtHO[l2k])_r2EtHO[l2k]={};_r2EtHO[l2k][eng]=(_r2EtHO[l2k][eng]||0)+eur;}
@@ -4771,7 +4922,7 @@ function renderBud(){
         if(!_r2SbEt[l2k])_r2SbEt[l2k]={};if(!_r2SbEt[l2k][_sbk])_r2SbEt[l2k][_sbk]={};_r2SbEt[l2k][_sbk][eng]=(_r2SbEt[l2k][_sbk][eng]||0)+eur;
         if(hod){if(!_r2SbEtHO[l2k])_r2SbEtHO[l2k]={};if(!_r2SbEtHO[l2k][_sbk])_r2SbEtHO[l2k][_sbk]={};_r2SbEtHO[l2k][_sbk][eng]=(_r2SbEtHO[l2k][_sbk][eng]||0)+eur;}
       }
-      if(hod){var _hrl=String(p["SDE Handover Role"]||"").trim().toLowerCase();var _hrk;if(_hrl.indexOf(' btp')>=0)_hrk='btp';else if(_hrl.indexOf(' hcm')>=0)_hrk='hcm';else if(_hrl.indexOf(' cx')>=0)_hrk='cx';else if(_hrl.indexOf(' f&s')>=0)_hrk='fs';else if(_hrl.indexOf(' scm')>=0)_hrk='scm';else _hrk='generalist';if(!_r2RHO[l2k])_r2RHO[l2k]={};_r2RHO[l2k][_hrk]=(_r2RHO[l2k][_hrk]||0)+eur;if(!_isSales){if(!_r2RHOx[l2k])_r2RHOx[l2k]={};_r2RHOx[l2k][_hrk]=(_r2RHOx[l2k][_hrk]||0)+eur;}if(eng&&eng!=="(No Value)"&&eng!=="(no value)"){if(!_r2REtHO[l2k])_r2REtHO[l2k]={};if(!_r2REtHO[l2k][_hrk])_r2REtHO[l2k][_hrk]={};_r2REtHO[l2k][_hrk][eng]=(_r2REtHO[l2k][_hrk][eng]||0)+eur;}}
+      if(_hodSde){var _hrl=String(p["SDE Handover Role"]||"").trim().toLowerCase();var _hrk;if(_hrl.indexOf(' btp')>=0)_hrk='btp';else if(_hrl.indexOf(' hcm')>=0)_hrk='hcm';else if(_hrl.indexOf(' cx')>=0)_hrk='cx';else if(_hrl.indexOf(' f&s')>=0)_hrk='fs';else if(_hrl.indexOf(' scm')>=0)_hrk='scm';else _hrk='generalist';if(!_r2RHO[l2k])_r2RHO[l2k]={};_r2RHO[l2k][_hrk]=(_r2RHO[l2k][_hrk]||0)+eur;if(!_isSales){if(!_r2RHOx[l2k])_r2RHOx[l2k]={};_r2RHOx[l2k][_hrk]=(_r2RHOx[l2k][_hrk]||0)+eur;}if(eng&&eng!=="(No Value)"&&eng!=="(no value)"){if(!_r2REtHO[l2k])_r2REtHO[l2k]={};if(!_r2REtHO[l2k][_hrk])_r2REtHO[l2k][_hrk]={};_r2REtHO[l2k][_hrk][eng]=(_r2REtHO[l2k][_hrk][eng]||0)+eur;}}
     });
     var _sdeHoTgt2=0,_sdeHoByMu2={},_sdeHoByMuL3_2={};
     var _sHoRF2=_regF2?Array.from(_regF2).map(function(rv){return rv.replace(/^CS /,"").trim().toLowerCase();}):null;
@@ -5140,7 +5291,7 @@ function renderAnaTo(pageId,isDynamic,pfx){pfx=pfx||"o";
     data.forEach(function(r){
       var wbs=String(r["Campaign/WBS Code"]||"").trim();
       var cn=String(r["Campaign Name"]||"").trim();
-      var _exRaw=String(r["Executor1"]||r["Executor"]||"");var _exParts=_exRaw.split(",").map(function(s){return s.trim();}).filter(Boolean);var _exArr=[];for(var _i=0;_i<_exParts.length;_i+=2){_exArr.push(_exParts[_i]+(_exParts[_i+1]?", "+_exParts[_i+1]:""));}
+      var _exRaw=String(r["Executor1"]||r["Executor"]||"");var _exParts=_exRaw.split(",").map(function(s){return s.trim();}).filter(function(s){return s&&s!=="[Table]";});var _exArr=[];for(var _i=0;_i<_exParts.length;_i+=2){_exArr.push(_exParts[_i]+(_exParts[_i+1]?", "+_exParts[_i+1]:""));}
       _exArr.filter(Boolean).forEach(function(ex){
         if(!_exeMap[ex])_exeMap[ex]={camps:0,seqs:0,pipe:0,opens:0,delivered:0,replies:0,bounces:0};
         if(!_exeCampSeen[ex])_exeCampSeen[ex]=new Set();
@@ -5361,7 +5512,7 @@ if(pageId!=="ovwPage"){html3+="<div class=\"cc\" style=\"margin-bottom:28px;widt
     _calTotPipe+=_rPipe;_calTotAccts+=_rAccts;
     html3+="<tr style=\"border-bottom:1px solid #EBEBEB\">"
       +"<td style=\"padding:6px 10px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-right:1px solid #F0F0F0\" title=\""+(r["Campaign Name"]||"").replace(/"/g,"&quot;")+"\">"+(r["Campaign Name"]||"")+"</td>"
-      +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+(r["Executor1"]||r["Executor"]||"")+"</td>"
+      +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+(function(){var _ev=String(r["Executor1"]||r["Executor"]||"").trim();return _ev==="[Table]"?"":_ev;})()+"</td>"
       +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+(r["Campaign Origin"]||"")+"</td>"
       +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+(r["Sales Bag"]||"")+"</td>"
       +"<td style=\"padding:6px 10px;border-right:1px solid #F0F0F0\">"+(r["IAC"]||"")+"</td>"
@@ -5714,7 +5865,7 @@ function donut(ls,vs){var tot=vs.reduce(function(a,b){return a+b;},0);
           +'<th style="'+thT2b+';position:sticky;top:0;z-index:2;text-align:right">Pipeline Created</th>'
           +'<th style="'+thT2b+';position:sticky;top:0;z-index:2;text-align:right">Opps</th>'
           +_re2MMSrcCols.map(function(s){return'<th style="'+thT2b+';position:sticky;top:0;z-index:2;text-align:right">'+s+'</th>';}).join("")
-          +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">SDE HO Target (SDE Sourced)</th>'
+          +'<th style="'+thT2+';position:sticky;top:0;z-index:2;text-align:right">SDE Sourced HO Target</th>'
           +'<th style="'+thT2b+';position:sticky;top:0;z-index:2;text-align:right">SDE HO</th>'
           +'</tr></thead><tbody>';
         var _totalTcpAcc=0;
