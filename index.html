@@ -393,7 +393,7 @@ document.addEventListener("DOMContentLoaded",function(){
   pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});
   pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});
   pipeData.forEach(function(p){var v=String(p["SDE Engagement Type"]||"").trim();if(v&&v!=="(No Value)")sdeEngTypeFilters.add(v);});
-  campData.forEach(function(r){var v=String(r["Executor1"]||r["Executor"]||"").trim();if(v&&v!=="[Table]")exe2Exec1Filters.add(v);});
+  campData.forEach(function(r){_splitExecs(String(r["Executor1"]||r["Executor"]||"").trim()).forEach(function(n){exe2Exec1Filters.add(n);});});
   FD.forEach(function(f){filters[f.k]=new Set();});
 window._setPipeWeek=function(w){window._pipeWeek=w;var vn=w==='w37'?'PIPE_DATA_W37':w==='w38'?'PIPE_DATA_W38':w==='w39'?'PIPE_DATA_W39':w==='w40'?'PIPE_DATA_W40':w==='w41'?'PIPE_DATA_W41':w==='w42'?'PIPE_DATA_W42':w==='w43'?'PIPE_DATA_W43':'PIPE_DATA_W44';var src=w==='w37'?'data-pipe-w37.js':w==='w38'?'data-pipe-w38.js':w==='w39'?'data-pipe-w39.js':w==='w40'?'data-pipe-w40.js':w==='w41'?'data-pipe-w41.js':w==='w42'?'data-pipe-w42.js':w==='w43'?'data-pipe-w43.js':'data-pipe-w44.js';function _apply(){pipeData=_xpd((w==='w37'?window.PIPE_DATA_W37:(w==='w38'?window.PIPE_DATA_W38:(w==='w39'?window.PIPE_DATA_W39:(w==='w40'?window.PIPE_DATA_W40:(w==='w41'?window.PIPE_DATA_W41:(w==='w42'?window.PIPE_DATA_W42:(w==='w43'?window.PIPE_DATA_W43:(w==='w44'?window.PIPE_DATA_W44:null))))))))||window.PIPE_DATA||JSON.parse(document.getElementById("d-pipe").textContent)).filter(function(p){return !/^E-/i.test(String(p["IAC (Engagement Model)"]||"").trim());});drmFilters.clear();pipeData.forEach(function(p){var v=String(p["DRM Category"]||"").trim();if(v&&v!=="Excluded from Pipeline")drmFilters.add(v);});syncDrmBtn();mmPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});syncMmpsBtn();tcpPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});syncTcpSrcBtn();sdeEngTypeFilters.clear();pipeData.forEach(function(p){var v=String(p["SDE Engagement Type"]||"").trim();if(v&&v!=="(No Value)")sdeEngTypeFilters.add(v);});applyFilters();renderBud();if(activeTab==='ana')renderAna();}if(window[vn]){_apply();return;}var s=document.createElement('script');s.src=src;s.onload=function(){_apply();};s.onerror=function(){_apply();};document.head.appendChild(s);};;
   if(!window._pipeWeek){window._setPipeWeek('w45');}
@@ -570,7 +570,7 @@ function buildFbar(){
   }
   // Executor1 filter — exe2 only
   if(activeTab==="exe2"){
-    var _allExec1=new Set(campData.map(function(r){return String(r["Executor1"]||r["Executor"]||"").trim();}).filter(function(v){return v&&v!=="[Table]";}));
+    var _allExec1=new Set();campData.forEach(function(r){_splitExecs(String(r["Executor1"]||r["Executor"]||"").trim()).forEach(function(n){_allExec1.add(n);});});
     var _exec1Filtered=_allExec1.size>0&&Array.from(_allExec1).some(function(v){return !exe2Exec1Filters.has(v);});
     var _exec1N=_exec1Filtered?Array.from(_allExec1).filter(function(v){return !exe2Exec1Filters.has(v);}).length:0;
     var exec1Btn=document.createElement("div");exec1Btn.className="fbi";exec1Btn.id="exec1-fbi";
@@ -852,7 +852,7 @@ function clearAll(){
   mmPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["MM Pipe Source"]||"").trim();if(v)mmPipeSrcFilters.add(v);});syncMmpsBtn();
   tcpPipeSrcFilters.clear();pipeData.forEach(function(p){var v=String(p["TCP Pipeline Source Desc"]||"").trim();if(v)tcpPipeSrcFilters.add(v);});syncTcpSrcBtn();
   sdeEngTypeFilters.clear();pipeData.forEach(function(p){var v=String(p["SDE Engagement Type"]||"").trim();if(v&&v!=="(No Value)")sdeEngTypeFilters.add(v);});
-  exe2Exec1Filters.clear();campData.forEach(function(r){var v=String(r["Executor1"]||r["Executor"]||"").trim();if(v&&v!=="[Table]")exe2Exec1Filters.add(v);});
+  exe2Exec1Filters.clear();campData.forEach(function(r){_splitExecs(String(r["Executor1"]||r["Executor"]||"").trim()).forEach(function(n){exe2Exec1Filters.add(n);});});
   eurMinFilter=null;eurMaxFilter=null;syncEurBtn();
   window._execQtrFilter="";
   window._exeSrcFilter=null;window._exeRegFilter=null;window._exeProdFilter=null;window._exeSbClickFilter=null;
@@ -1155,10 +1155,28 @@ function syncSdeEtBtn(){
   var n=Array.from(allEt).filter(function(v){return !sdeEngTypeFilters.has(v);}).length;
   btn.classList.toggle("on",isFiltered);fc.textContent=isFiltered?n:0;fc.style.display=isFiltered?"inline-block":"none";
 }
+function _splitExecs(v){
+  if(!v||v==="[Table]")return[];
+  var parts=v.split(",").map(function(s){return s.trim();}).filter(Boolean);
+  var names=[];
+  for(var i=0;i+1<parts.length;i+=2)names.push(parts[i]+", "+parts[i+1]);
+  if(parts.length%2!==0)names.push(parts[parts.length-1]);
+  return names;
+}
 function buildExec1DD(){
   var el=document.getElementById("exec1-fdo");if(!el)return;
-  var opts=Array.from(new Set(campData.map(function(r){return String(r["Executor1"]||r["Executor"]||"").trim();}).filter(function(v){return v&&v!=="[Table]";})));opts.sort();
-  el.innerHTML=opts.map(function(opt){var chk=exe2Exec1Filters.has(opt)?"checked":"";return"<label class=\"dopt\"><input type=\"checkbox\" "+chk+" value=\""+opt.replace(/"/g,"&quot;")+"\" onchange=\"toggleExec1F(this.value,this.checked)\"/><span class=\"ot\">"+opt.replace(/&/g,"&amp;").replace(/</g,"&lt;")+"</span></label>";}).join("");
+  var _en=new Set();campData.forEach(function(r){_splitExecs(String(r["Executor1"]||r["Executor"]||"").trim()).forEach(function(n){_en.add(n);});});
+  var opts=Array.from(_en).sort();
+  var allSel=opts.length>0&&opts.every(function(o){return exe2Exec1Filters.has(o);});
+  el.innerHTML="<label class=\"dopt\" style=\"border-bottom:1px solid #e8e8e8;font-weight:600\"><input type=\"checkbox\" "+(allSel?"checked":"")+" onchange=\"toggleAllExec1(this.checked)\"/><span class=\"ot\">Select All</span></label>"
+    +opts.map(function(opt){var chk=exe2Exec1Filters.has(opt)?"checked":"";return"<label class=\"dopt\"><input type=\"checkbox\" "+chk+" value=\""+opt.replace(/"/g,"&quot;")+"\" onchange=\"toggleExec1F(this.value,this.checked)\"/><span class=\"ot\">"+opt.replace(/&/g,"&amp;").replace(/</g,"&lt;")+"</span></label>";}).join("");
+}
+function toggleAllExec1(checked){
+  var _en=new Set();campData.forEach(function(r){_splitExecs(String(r["Executor1"]||r["Executor"]||"").trim()).forEach(function(n){_en.add(n);});});
+  var opts=Array.from(_en);
+  if(checked){opts.forEach(function(o){exe2Exec1Filters.add(o);});}else{exe2Exec1Filters.clear();}
+  buildExec1DD();syncExec1Btn();
+  if(activeTab==="exe2")renderExe('2');
 }
 function toggleExec1DD(){
   var dd=document.getElementById("exec1-fdd"),btn=document.getElementById("exec1-fbtn");
@@ -1167,18 +1185,23 @@ function toggleExec1DD(){
 }
 function toggleExec1F(val,checked){
   if(checked)exe2Exec1Filters.add(val);else exe2Exec1Filters.delete(val);
+  var _en2=new Set();campData.forEach(function(r){_splitExecs(String(r["Executor1"]||r["Executor"]||"").trim()).forEach(function(n){_en2.add(n);});});
+  var opts=Array.from(_en2);
+  var allSel=opts.length>0&&opts.every(function(o){return exe2Exec1Filters.has(o);});
+  var selAllCb=document.querySelector("#exec1-fdo .dopt:first-child input");
+  if(selAllCb)selAllCb.checked=allSel;
   syncExec1Btn();
   if(activeTab==="exe2")renderExe('2');
 }
 function clearExec1Filter(){
-  exe2Exec1Filters.clear();campData.forEach(function(r){var v=String(r["Executor1"]||r["Executor"]||"").trim();if(v&&v!=="[Table]")exe2Exec1Filters.add(v);});
+  exe2Exec1Filters.clear();campData.forEach(function(r){_splitExecs(String(r["Executor1"]||r["Executor"]||"").trim()).forEach(function(n){exe2Exec1Filters.add(n);});});
   syncExec1Btn();
   if(activeTab==="exe2")renderExe('2');
 }
 function syncExec1Btn(){
   var btn=document.getElementById("exec1-fbtn"),fc=document.getElementById("exec1-fc");
   if(!btn)return;
-  var allEx=new Set(campData.map(function(r){return String(r["Executor1"]||r["Executor"]||"").trim();}).filter(function(v){return v&&v!=="[Table]";}));
+  var allEx=new Set();campData.forEach(function(r){_splitExecs(String(r["Executor1"]||r["Executor"]||"").trim()).forEach(function(n){allEx.add(n);});});
   var isFiltered=Array.from(allEx).some(function(v){return !exe2Exec1Filters.has(v);});
   var n=Array.from(allEx).filter(function(v){return !exe2Exec1Filters.has(v);}).length;
   btn.classList.toggle("on",isFiltered);fc.textContent=isFiltered?n:0;fc.style.display=isFiltered?"inline-block":"none";
@@ -1848,8 +1871,8 @@ function renderExe(sfx){sfx=sfx||"";try{
       var _e2AllEtOvw=new Set(pipeData.map(function(p){return String(p["SDE Engagement Type"]||"").trim();}).filter(function(v){return v&&v!=="(No Value)";}));
       var _sdeEtOvwActive=Array.from(_e2AllEtOvw).some(function(v){return !sdeEngTypeFilters.has(v);});
       if(_sdeInitEngNameFilter||_sdeEngTypeFilter||_sdeEtOvwActive){var _wbsWithMatch=new Set(_allPipe2026.map(function(p){return String(p['Opp Campaign ID']||'').trim();}));_ovwRows=filtered.filter(function(r){return _wbsWithMatch.has(String(r['Campaign/WBS Code']||'').trim());});}
-      var _allEx1=new Set(campData.map(function(r){return String(r["Executor1"]||r["Executor"]||"").trim();}).filter(function(v){return v&&v!=="[Table]";}));
-      if(_allEx1.size>0&&Array.from(_allEx1).some(function(v){return !exe2Exec1Filters.has(v);}))_ovwRows=_ovwRows.filter(function(r){var v=String(r["Executor1"]||r["Executor"]||"").trim();return !v||v==="[Table]"||exe2Exec1Filters.has(v);});
+      var _allEx1=new Set();campData.forEach(function(r){_splitExecs(String(r["Executor1"]||r["Executor"]||"").trim()).forEach(function(n){_allEx1.add(n);});});
+      if(_allEx1.size>0&&Array.from(_allEx1).some(function(v){return !exe2Exec1Filters.has(v);}))_ovwRows=_ovwRows.filter(function(r){var _ns=_splitExecs(String(r["Executor1"]||r["Executor"]||"").trim());return _ns.length===0||_ns.some(function(n){return exe2Exec1Filters.has(n);});});
       var _ct='<div style="background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:16px;margin-top:16px">';
       _ct+='<div style="font-size:13px;font-weight:700;color:#00144A;margin-bottom:2px">Campaign Overview</div>';
       _ct+='<div style="font-size:11px;color:#888;margin-bottom:8px">'+_ovwRows.length+' campaigns · filtered by main filter bar · Open/Reply/Click % from outreach data</div>';
